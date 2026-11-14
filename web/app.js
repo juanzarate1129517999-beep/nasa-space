@@ -7,7 +7,7 @@
   const o2pct = (x) => pct(x, Math.round(x * 1000) % 10 ? 1 : 0);
   const num = (v, d = 2) => (v == null ? "—" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d }));
   const ATM_PSI = 14.6959;
-  const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "#1c2640", line2: "#29355a", bg: "#070a14", surface: "#0d1220", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24" };
+  const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "rgba(203,213,225,0.08)", line2: "rgba(203,213,225,0.18)", bg: "#070a14", surface: "#0d1220", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24" };
   const FAMILY = {
     solido: { name: "Solid materials", symbol: "square", color: C.orange },
     gota: { name: "Fuel droplets", symbol: "circle", color: C.blue },
@@ -27,14 +27,14 @@
   function layout(extra = {}) {
     const axis = {
       gridcolor: C.line, linecolor: C.line2, zeroline: false, ticks: "", automargin: true,
-      tickfont: { family: "JetBrains Mono, monospace", size: 10.5, color: C.ink3 },
-      title: { font: { size: 12, color: C.ink2, family: "Inter, sans-serif" }, standoff: 12 },
+      tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10.5, color: C.ink3 },
+      title: { font: { size: 12, color: C.ink2, family: "Geist, Inter, sans-serif" }, standoff: 12 },
     };
     const base = {
       paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-      font: { family: "Inter, sans-serif", color: C.ink3, size: 11.5 },
+      font: { family: "Geist, Inter, sans-serif", color: C.ink3, size: 11.5 },
       margin: { l: 56, r: 18, t: 12, b: 48 }, showlegend: false, dragmode: false,
-      hoverlabel: { bgcolor: "#121a2c", bordercolor: C.line2, font: { family: "Inter, sans-serif", color: C.ink, size: 12 }, align: "left" },
+      hoverlabel: { bgcolor: "#121a2c", bordercolor: C.line2, font: { family: "Geist, Inter, sans-serif", color: C.ink, size: 12 }, align: "left" },
       xaxis: JSON.parse(JSON.stringify(axis)), yaxis: JSON.parse(JSON.stringify(axis)),
     };
     return merge(base, extra);
@@ -111,7 +111,9 @@
       [S.moon_envelope, `<small>/ ${S.ambient.toLocaleString("en-US")}</small>`, "flight tests anywhere near lunar-base air"],
       [auc.toFixed(2), "<small>AUC</small>", "self-extinction model, scored on held-out ISS test days"],
     ];
-    $("#kpis").innerHTML = k.map(([v, s, l]) => `<div class="kpi"><div class="v">${v}${s}</div><div class="l">${l}</div></div>`).join("");
+    $("#kpis").innerHTML = k.map(([v, s, l]) => `<div><dt>${l}</dt><dd>${v}${s}</dd></div>`).join("");
+    const names = [...INV].sort((a, b) => a.name.localeCompare(b.name)).map((r) => `<span>${esc(r.name)}</span>`).join("");
+    $("#marquee").innerHTML = names; $("#marquee-2").innerHTML = names;
 
     $("#habitats").innerHTML = D.habitats.map((hb) => {
       const x = featVec({ fuel: "Methanol", o2: hb.x_o2, p: hb.p_atm, co2: 0, he: 0, d0: M.d0_median });
@@ -121,11 +123,10 @@
       const warn = st.s === "extrapolating"
         ? `<div class="xtra" title="${st.beyond.length ? `The ${esc(beyondTxt(st.beyond))} is beyond every flown FLEX test` : "Far from the nearest flown FLEX tests"}">Extrapolating · ${st.beyond.length ? `${esc(beyondTxt(st.beyond))} outside flown range` : "far from flown tests"}</div>` : "";
       const body = r.ood
-        ? `<div class="ood-note"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="${C.ink}" stroke-dasharray="2 2"/></svg><span><b>Outside all flight data.</b> No microgravity fire has been flown near this atmosphere — Skylab Phoenix withholds a prediction.</span></div>`
-        : `<div class="pbar"><div class="plabel"><span>Self-extinguishes</span><b>${pct(r.p)}</b></div>
-           <div class="track"><div class="ci" style="left:${100 * r.lo}%;width:${Math.max(1, 100 * (r.hi - r.lo))}%"></div><div class="pt" style="left:${100 * r.p}%"></div></div>
-           <div class="plabel" style="margin-top:6px"><span>90% interval</span><span style="font-family:var(--mono)">${pct(r.lo)}–${pct(r.hi)}</span></div>${warn}</div>`;
-      return `<button class="hab" data-hab="${hb.id}" title="${esc(hb.source)}"><span class="go">SIMULATE →</span><div class="name">${esc(hb.name)}</div><div class="det">${esc(hb.detail)}</div>${atm}${body}</button>`;
+        ? `<div class="p muted">—</div><div class="plabel">Prediction withheld</div><div class="ood-note"><b>Outside all flight data.</b> No microgravity fire has been flown near this atmosphere.</div>`
+        : `<div class="p">${pct(r.p)}</div><div class="plabel">Self-extinguishes</div>
+           <div class="track"><div class="ci" style="left:${100 * r.lo}%;width:${Math.max(1, 100 * (r.hi - r.lo))}%"></div><div class="pt" style="left:${100 * r.p}%"></div></div><div class="ci-txt">90% interval ${pct(r.lo)}–${pct(r.hi)}</div>${warn}`;
+      return `<button class="hab" type="button" data-hab="${hb.id}" title="${esc(hb.source)}"><span class="go" aria-hidden="true">→</span><div class="name">${esc(hb.name)}</div><div class="det">${esc(hb.detail)}</div>${atm}${body}</button>`;
     }).join("");
     document.querySelectorAll(".hab").forEach((b) => b.addEventListener("click", () => {
       setPreset(b.dataset.hab);
@@ -178,7 +179,7 @@
     const offs = { cabin: [-34, -38], eva_prep: [-46, 34], moon_base: [40, -38], exploration: [64, 26], suit: [-30, -34] };
     const habNotes = D.habitats.map((x) => ({
       x: Math.log10(100 * x.x_o2), y: Math.log10(x.p_atm), text: `<b>${esc(x.name)}</b>`, showarrow: true, arrowhead: 0, arrowwidth: 1,
-      arrowcolor: C.ink3, ax: offs[x.id][0], ay: offs[x.id][1], font: { size: 12, color: C.ink, family: "Inter, sans-serif" },
+      arrowcolor: C.ink3, ax: offs[x.id][0], ay: offs[x.id][1], font: { size: 12, color: C.ink, family: "Geist, Inter, sans-serif" },
       bgcolor: "rgba(7,10,20,0.85)", borderpad: 3,
     }));
     const xt = [12, 15, 20, 25, 30, 40, 60, 85, 100];
@@ -186,7 +187,7 @@
       margin: { l: 64, r: 20, t: 10, b: 54 },
       xaxis: { type: "log", range: [Math.log10(10.5), Math.log10(108)], tickvals: xt, ticktext: xt.map((v) => v + "%"), title: { text: "Oxygen mole fraction (log scale)" } },
       yaxis: { type: "log", range: [Math.log10(0.22), Math.log10(5.6)], tickvals: [0.25, 0.5, 0.7, 1, 2, 3, 5], title: { text: "Pressure, atm (log scale)" } },
-      annotations: [{ x: Math.log10(48), y: Math.log10(0.24), text: "LUNAR-BASE ENVELOPE · ≥30% O₂ · ≤10.2 psi", showarrow: false, font: { family: "JetBrains Mono, monospace", size: 10, color: C.ink3 }, xanchor: "center" }, ...habNotes],
+      annotations: [{ x: Math.log10(48), y: Math.log10(0.24), text: "LUNAR-BASE ENVELOPE · ≥30% O₂ · ≤10.2 psi", showarrow: false, font: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, xanchor: "center" }, ...habNotes],
       hovermode: "closest",
     }));
   }
@@ -234,24 +235,24 @@
     const el = $("#inv-detail");
     if (!r) { el.innerHTML = '<p class="note">Select an investigation.</p>'; return; }
     const rel = r.relevance[invState.hab];
-    const bar = (v) => `<span class="bar" style="height:4px;background:var(--surface-3);border-radius:4px;overflow:hidden;display:block"><i style="display:block;height:100%;width:${100 * v}%;background:var(--ink)"></i></span>`;
+    const bar = (v) => `<span class="bar"><i style="width:${100 * v}%"></i></span>`;
     const cond = r.o2_min != null
       ? `${pct(r.o2_min, 1)}–${pct(r.o2_max, 1)} O₂ · ${num(r.p_min)}–${num(r.p_max)} atm${r.conditions_assumed ? " (cabin air assumed)" : ""}`
       : "Not reported per test";
     const tables = r.tables.map((t) => `
-      <div class="label-sm">${esc(t.table)} · ${t.rows} rows</div>
+      <div class="label">${esc(t.table)} · ${t.rows} rows</div>
       <div class="pair">
-        <div><div class="note" style="margin:0 0 4px"><b>What varied</b></div>${vfRows(t.varied)}</div>
-        <div><div class="note" style="margin:0 0 4px"><b>What was measured</b></div>${vfRows(t.measured)}</div>
+        <div><div class="k-head">What varied</div>${vfRows(t.varied)}</div>
+        <div><div class="k-head">What was measured</div>${vfRows(t.measured)}</div>
       </div>
-      ${t.fixed.length ? `<div class="note" style="margin-top:8px"><b>Held fixed:</b> ${t.fixed.slice(0, 6).map((x) => `${esc(x.variable)} = ${esc(x.values)}`).join(" · ")}</div>` : ""}`).join("");
-    const pubs = r.publications.length ? `<div class="label-sm">Publications · ${r.n_publications} listed in PSI</div><div class="pubs">${r.publications.slice(0, 3).map((p) => `<div>${p.doi ? `<a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}<small>${esc((p.authors || "").split(",").slice(0, 3).join(","))}${(p.authors || "").split(",").length > 3 ? " et al." : ""}</small></div>`).join("")}</div>` : "";
+      ${t.fixed.length ? `<div class="note"><b>Held fixed:</b> ${t.fixed.slice(0, 6).map((x) => `${esc(x.variable)} = ${esc(x.values)}`).join(" · ")}</div>` : ""}`).join("");
+    const pubs = r.publications.length ? `<div class="label">Publications · ${r.n_publications} listed in PSI</div><div class="pubs">${r.publications.slice(0, 3).map((p) => `<div>${p.doi ? `<a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}<small>${esc((p.authors || "").split(",").slice(0, 3).join(","))}${(p.authors || "").split(",").length > 3 ? " et al." : ""}</small></div>`).join("")}</div>` : "";
     el.innerHTML = `
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${r.layers.map((l) => `<span class="tag solid layer-${l}">${l}</span>`).join("")}<span class="tag">${r.type}</span><span class="tag">${esc(r.family)}</span></div>
-      <h3>${esc(r.name)} <span style="color:var(--ink-4);font-weight:400;font-size:15px;font-family:var(--mono)">${r.psi_id}</span></h3>
+      <div class="tags">${r.layers.map((l) => `<span class="tag solid layer-${l}">${l}</span>`).join("")}<span class="tag">${r.type}</span><span class="tag">${esc(r.family)}</span></div>
+      <h3>${esc(r.name)}<small>${r.psi_id}</small></h3>
       <div class="ttl">${esc(r.title)}</div>
       ${SI && SI.investigation[r.psi_id] ? `<div class="si-sum">${badge(SI.investigation[r.psi_id])}<p>${sentencesHtml(SI.investigation[r.psi_id], "inv")}</p>${evidenceHtml(SI.investigation[r.psi_id], "inv")}</div>` : ""}
-      <div class="label-sm">Objective · NASA PSI text</div>
+      <div class="label">Objective · NASA PSI text</div>
       <p class="obj">${esc(r.objective || "No objective text in PSI metadata.")}</p>
       <div class="meta">
         <div><span>Science team</span><b>${esc(r.pi || "—")}</b></div>
@@ -259,7 +260,7 @@
         <div><span>Hardware</span><b>${esc(r.hardware)}</b></div>
         <div><span>Conditions tested</span><b>${cond}</b></div>
       </div>
-      <div class="label-sm">Relevance for ${esc(habName(invState.hab))} · ${rel.score.toFixed(1)} / 100</div>
+      <div class="label">Relevance for ${esc(habName(invState.hab))} · ${rel.score.toFixed(1)} / 100</div>
       <div class="breakdown">
         <div class="r"><span>Condition proximity ×0.5</span>${bar(rel.proximity)}<span class="n">${rel.proximity.toFixed(2)}</span></div>
         <div class="r"><span>Labeled evidence ×0.2</span>${bar(rel.evidence)}<span class="n">${rel.evidence.toFixed(2)}</span></div>
@@ -267,12 +268,12 @@
       </div>
       <p class="note">≈${rel.n_near} test-equivalents within ~3 points of O₂ and ~30% of the pressure of this habitat.</p>
       ${tables || '<p class="note">No experimental table in PSI (ground or modeling investigation).</p>'}
-      ${r.earth_benefit ? `<div class="label-sm">Benefit on Earth · from PSI</div><p class="obj" style="font-size:13.5px">${esc(r.earth_benefit)}</p>` : ""}
+      ${r.earth_benefit ? `<div class="label">Benefit on Earth · from PSI</div><p class="obj">${esc(r.earth_benefit)}</p>` : ""}
       ${pubs}
       <div class="links">
-        <a class="btn primary" href="${r.psi_url}" target="_blank" rel="noopener">Open in NASA PSI ↗</a>
-        ${r.doi ? `<a class="btn" href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener">Dataset DOI ↗</a>` : ""}
-        <button class="btn" type="button" id="add-cmp">Add to comparison</button>
+        <a class="btn btn--fire btn--sm" href="${r.psi_url}" target="_blank" rel="noopener">Open in NASA PSI <span aria-hidden="true">↗</span></a>
+        ${r.doi ? `<a class="btn btn--line btn--sm" href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener">Dataset DOI ↗</a>` : ""}
+        <button class="btn btn--line btn--sm" type="button" id="add-cmp">Add to comparison</button>
       </div>`;
     wireCites(el);
     $("#add-cmp").addEventListener("click", () => {
@@ -288,12 +289,12 @@
     const el = plot("sim-chart", [{
       z: S.matrix, x: S.names, y: S.names, type: "heatmap", zmin: 0, zmax: 1, xgap: 1, ygap: 1,
       colorscale: [[0, "#0d1220"], [0.35, "#3b1d10"], [0.7, "#f2600f"], [1, "#fde68a"]],
-      colorbar: { thickness: 8, outlinewidth: 0, tickfont: { family: "JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.6 },
+      colorbar: { thickness: 8, outlinewidth: 0, tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.6 },
       hovertemplate: "<b>%{y}</b> ↔ <b>%{x}</b><br>similarity %{z:.2f}<extra></extra>",
     }], layout({
       margin: { l: 150, r: 10, t: 6, b: 140 },
-      xaxis: { tickangle: -50, gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Inter, sans-serif", size: 11, color: C.ink2 } },
-      yaxis: { autorange: "reversed", gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Inter, sans-serif", size: 11, color: C.ink2 } },
+      xaxis: { tickangle: -50, gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist, Inter, sans-serif", size: 11, color: C.ink2 } },
+      yaxis: { autorange: "reversed", gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist, Inter, sans-serif", size: 11, color: C.ink2 } },
     }));
     if (el) el.on("plotly_click", (ev) => {
       const name = ev.points[0].y;
@@ -313,7 +314,7 @@
   ];
   const sc = { fuel: "Methanol", o2: 0.30, p: 0.694, co2: 0, he: 0, d0: M.d0_median, preset: "moon_base" };
   function renderScenarioControls() {
-    $("#presets").innerHTML = D.habitats.map((x) => `<button data-h="${x.id}" aria-pressed="${sc.preset === x.id}">${esc(x.name)}<br><span style="font-family:var(--mono);font-size:11px;color:var(--ink-4)">${o2pct(x.x_o2)} · ${num(x.p_atm * ATM_PSI, 1)} psi</span></button>`).join("");
+    $("#presets").innerHTML = D.habitats.map((x) => `<button data-h="${x.id}" aria-pressed="${sc.preset === x.id}">${esc(x.name)}<span>${o2pct(x.x_o2)} · ${num(x.p_atm * ATM_PSI, 1)} psi</span></button>`).join("");
     document.querySelectorAll("#presets button").forEach((b) => b.addEventListener("click", () => setPreset(b.dataset.h)));
     $("#fuel-seg").innerHTML = ["Methanol", "Heptane"].map((f) => `<button aria-pressed="${sc.fuel === f}" data-f="${f}">${f}</button>`).join("");
     document.querySelectorAll("#fuel-seg button").forEach((b) => b.addEventListener("click", () => { sc.fuel = b.dataset.f; renderScenarioControls(); updateScenario(true); }));
@@ -394,7 +395,7 @@
     plot("map-chart", [
       { z, x: o2.map((v) => 100 * v), y: p, type: "heatmap", zmin: 0, zmax: 1, zsmooth: "best",
         colorscale: [[0, "#fde68a"], [0.25, "#f97316"], [0.5, "#e11d48"], [0.75, "#4c1d95"], [1, "#0d1220"]],
-        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.8, title: { text: "P(self-ext.)", side: "right", font: { size: 10.5, color: C.ink3 } } },
+        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.8, title: { text: "P(self-ext.)", side: "right", font: { size: 10.5, color: C.ink3 } } },
         hovertemplate: "O₂ %{x:.1f}% · %{y:.2f} atm<br>P(self-extinction) %{z:.0%}<extra></extra>" },
       { x: ext.map((t) => 100 * t.x_o2), y: ext.map((t) => t.p_atm), type: "scatter", mode: "markers", name: "Self-extinguished",
         marker: { symbol: "circle", size: 8, color: C.ink, line: { color: C.bg, width: 1.6 } }, hovertemplate: "Flown test: self-extinguished<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>" },
@@ -424,7 +425,7 @@
     }], layout({
       margin: { l: 10, r: 18, t: 6, b: 40 },
       xaxis: { zeroline: true, zerolinecolor: C.ink4, zerolinewidth: 1, title: { text: "← keeps burning · standardized effect · self-extinguishes →" } },
-      yaxis: { tickfont: { family: "Inter, sans-serif", size: 12, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
+      yaxis: { tickfont: { family: "Geist, Inter, sans-serif", size: 12, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
     }));
   }
 
@@ -436,8 +437,8 @@
       y: B.map((b) => `${b.band} O₂`), x: B.map((b) => b[k] / b.n), type: "bar", orientation: "h", name: l,
       marker: { color: c, line: { color: C.surface, width: 2 } }, customdata: B.map((b) => [b[k], b.n]),
       hovertemplate: `<b>%{y}</b> · ${l}<br>%{customdata[0]} of %{customdata[1]} tests (%{x:.0%})<extra></extra>`,
-    })).concat([{ y: B.map((b) => `${b.band} O₂`), x: B.map(() => 1.02), type: "scatter", mode: "text", text: B.map((b) => `n=${b.n}`), textposition: "middle right", textfont: { family: "JetBrains Mono, monospace", size: 10.5, color: C.ink3 }, hoverinfo: "skip" }]),
-    layout({ barmode: "stack", bargap: 0.35, margin: { l: 10, r: 10, t: 4, b: 36 }, xaxis: { tickformat: ".0%", range: [0, 1.16], tickvals: [0, 0.25, 0.5, 0.75, 1] }, yaxis: { gridcolor: "rgba(0,0,0,0)", tickfont: { family: "JetBrains Mono, monospace", size: 11, color: C.ink2 } } }));
+    })).concat([{ y: B.map((b) => `${b.band} O₂`), x: B.map(() => 1.02), type: "scatter", mode: "text", text: B.map((b) => `n=${b.n}`), textposition: "middle right", textfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10.5, color: C.ink3 }, hoverinfo: "skip" }]),
+    layout({ barmode: "stack", bargap: 0.35, margin: { l: 10, r: 10, t: 4, b: 36 }, xaxis: { tickformat: ".0%", range: [0, 1.16], tickvals: [0, 0.25, 0.5, 0.75, 1] }, yaxis: { gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 11, color: C.ink2 } } }));
 
     const S = D.suppression.co2;
     const cats = ["0%", "1–20%", "20–30%", ">30%"];
@@ -472,7 +473,7 @@
       margin: { l: 48, r: 12, t: 6, b: 44 }, xaxis: { title: { text: "Adiabatic flame temperature, K" } },
       yaxis: { tickformat: ".0%", range: [-0.08, 1.08], title: { text: "P(self-extinction)" } },
       shapes: n.t50 ? [{ type: "line", x0: n.t50, x1: n.t50, y0: 0, y1: 1, line: { color: C.ink3, width: 1 } }] : [],
-      annotations: n.t50 ? [{ x: n.t50, y: 0.2, text: `normal flames<br>50% ≈ ${Math.round(n.t50).toLocaleString("en-US")} K`, showarrow: false, xanchor: "right", yanchor: "middle", align: "right", xshift: -8, bgcolor: "rgba(15,15,17,0.9)", font: { family: "JetBrains Mono, monospace", size: 10.5, color: C.ink2 } }] : [],
+      annotations: n.t50 ? [{ x: n.t50, y: 0.2, text: `normal flames<br>50% ≈ ${Math.round(n.t50).toLocaleString("en-US")} K`, showarrow: false, xanchor: "right", yanchor: "middle", align: "right", xshift: -8, bgcolor: "rgba(15,15,17,0.9)", font: { family: "Geist Mono, JetBrains Mono, monospace", size: 10.5, color: C.ink2 } }] : [],
     }));
     const inv = CG.by_type.inverse;
     $("#tad-note").innerHTML = `<b>Hypothesis test.</b> Normal flames: self-extinction rises as flame temperature drops (AUC ${n.metrics.auc.toFixed(2)}); the 50% point, ≈${Math.round(n.t50).toLocaleString("en-US")} K, lies just above the hottest flame tested (${Math.round(n.tad_max).toLocaleString("en-US")} K), so it is an extrapolation. Inverse flames: no single-temperature rule (AUC ${inv.metrics.auc.toFixed(2)}, ≈ chance). Cool flames: ${CG.ignition.cool_flames} of ${CG.ignition.tests} tests.`;
@@ -488,8 +489,8 @@
       { x: G.map((g) => g.g1_estado), y: G.map((g, i) => yy(i, 0.13)), type: "scatter", mode: "markers", marker: { symbol: "square", size: 10, color: C.orange, line: { color: C.surface, width: 2 } }, customdata: G.map((g, i) => [lab[i], g.g1_texto]), hovertemplate: "<b>%{customdata[0]}</b><br>1 g: %{customdata[1]}<extra></extra>" },
     ]), layout({
       margin: { l: 10, r: 14, t: 6, b: 36 },
-      xaxis: { tickvals: [0, 1, 2], ticktext: states, range: [-0.35, 2.35], tickfont: { family: "Inter, sans-serif", size: 11.5, color: C.ink2 } },
-      yaxis: { tickvals: G.map((_, i) => i), ticktext: lab, autorange: "reversed", gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Inter, sans-serif", size: 11, color: C.ink2 } },
+      xaxis: { tickvals: [0, 1, 2], ticktext: states, range: [-0.35, 2.35], tickfont: { family: "Geist, Inter, sans-serif", size: 11.5, color: C.ink2 } },
+      yaxis: { tickvals: G.map((_, i) => i), ticktext: lab, autorange: "reversed", gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist, Inter, sans-serif", size: 11, color: C.ink2 } },
     }));
     const s1 = Object.fromEntries(D.saffire1.map((r) => [String(r.direccion).trim().toLowerCase(), r.tiempo_quemado_s]));
     const worse = G.filter((g) => g.g1_estado >= g.ug_estado).length;
@@ -503,8 +504,8 @@
     const comp = [["volume", "Volume"], ["quality", "Quality"], ["agreement", "Agreement"], ["closeness", "Lunar fit"]];
     $("#findings-list").innerHTML = D.findings.filter((f) => findLayer === "All" || f.layer === findLayer).map((f) => `
       <article class="finding l-${f.layer}">
-        <div class="sc">${Math.round(f.score)}<small>Evidence</small></div>
-        <div><span class="tag solid layer-${f.layer}" style="margin-bottom:10px;display:inline-block">${esc(f.layer)}</span><h4>${esc(f.title)}</h4><p>${esc(f.text)}</p><div class="impl">${esc(f.implication)}</div><div class="src">SOURCE · ${esc(f.source)}</div></div>
+        <div class="sc">${Math.round(f.score)}<small>Evidence score</small></div>
+        <div><span class="tag solid layer-${f.layer}">${esc(f.layer)}</span><h4>${esc(f.title)}</h4><p>${esc(f.text)}</p><div class="impl">${esc(f.implication)}</div><div class="src">Source · ${esc(f.source)}</div></div>
         <div class="mini">${comp.map(([k, l]) => `<div class="r"><span>${l}</span><span class="score"><span class="bar"><i style="width:${100 * f.components[k]}%"></i></span></span></div>`).join("")}</div>
       </article>`).join("");
   }
@@ -516,11 +517,11 @@
     plot("unc-chart", [
       { z: N.map.spread, x: N.map.o2.map((v) => 100 * v), y: N.map.p, type: "heatmap", zsmooth: "best",
         colorscale: [[0, "#0d1220"], [0.5, "#5b21b6"], [1, "#ddd6fe"]],
-        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.8, title: { text: "90% band", side: "right", font: { size: 10.5, color: C.ink3 } } },
+        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.8, title: { text: "90% band", side: "right", font: { size: 10.5, color: C.ink3 } } },
         hovertemplate: "O₂ %{x:.0f}% · %{y:.2f} atm<br>uncertainty band %{z:.0%}<extra></extra>" },
       { x: flown.map((t) => 100 * t.x_o2), y: flown.map((t) => t.p_atm), type: "scatter", mode: "markers", marker: { size: 5, color: C.bg, line: { color: C.ink3, width: 1 } }, hovertemplate: "Flown FLEX test (no diluent)<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>" },
       { x: N.picks.map((p) => 100 * p.x_o2), y: N.picks.map((p) => p.p_atm), type: "scatter", mode: "markers+text", text: N.picks.map((_, i) => String(i + 1)), textposition: "middle center",
-        textfont: { family: "JetBrains Mono, monospace", size: 10, color: "#fff" }, marker: { size: 18, color: C.orange, line: { color: C.bg, width: 2 } },
+        textfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: "#fff" }, marker: { size: 18, color: C.orange, line: { color: C.bg, width: 2 } },
         customdata: N.picks.map((p) => [p.fuel, 100 * p.x_co2]), hovertemplate: "<b>Recommended %{text}</b><br>%{customdata[0]} · O₂ %{x:.0f}% · %{y:.2f} atm · CO₂ %{customdata[1]:.0f}%<extra></extra>" },
       { x: habs.map((x) => 100 * x.x_o2), y: habs.map((x) => x.p_atm), type: "scatter", mode: "markers", marker: { symbol: "cross-thin", size: 16, color: C.ink, line: { color: C.ink, width: 2 } }, hoverinfo: "skip" },
     ], layout({
@@ -547,7 +548,7 @@
       ["Models", "Validated ML", "FLEX logistic + 200-model bootstrap, CFI-G temperature test, out-of-data detector, active-learning picks."],
       ["Dashboard", "This page", "Static site; the models run in the browser, so every slider is a live prediction."],
     ];
-    $("#pipe").innerHTML = steps.map(([k, t, d]) => `<div class="st"><div class="k">${k}</div><div class="t">${t}</div><div class="d">${d}</div></div>`).join("");
+    $("#pipe").innerHTML = steps.map(([k, t, d], i) => `<li class="st"><div class="k">${String(i + 1).padStart(2, "0")}</div><div class="t">${k} · ${t}</div><div class="d">${d}</div></li>`).join("");
     const V = M.validation;
     $("#val-sub").textContent = V.scheme;
     $("#val-table").innerHTML = `<thead><tr><th>Model</th><th class="num">AUC ↑</th><th class="num">Brier ↓</th><th class="num">Log loss ↓</th><th class="num">Accuracy</th></tr></thead><tbody>${V.models.map((m) => `
@@ -559,7 +560,7 @@
         marker: { size: R.map((r) => 7 + Math.sqrt(r.n)), color: C.amber, line: { color: C.surface, width: 2 } }, customdata: R.map((r) => r.n),
         hovertemplate: "predicted %{x:.0%} → observed %{y:.0%}<br>n = %{customdata}<extra></extra>" },
     ], layout({ margin: { l: 52, r: 14, t: 6, b: 44 }, xaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Predicted P(self-extinction)" } }, yaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Observed rate" } },
-      annotations: [{ x: 0.25, y: 0.25, ax: 30, ay: -34, text: "perfect calibration", showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink4, xanchor: "left", font: { size: 10, color: C.ink3, family: "JetBrains Mono, monospace" } }] }));
+      annotations: [{ x: 0.25, y: 0.25, ax: 30, ay: -34, text: "perfect calibration", showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink4, xanchor: "left", font: { size: 10, color: C.ink3, family: "Geist Mono, JetBrains Mono, monospace" } }] }));
     $("#qc-sub").textContent = `${D.qc.length} entries · spreadsheet auto-fill errors, impossible values, duplicate rows, inconsistent labels`;
     $("#qc-table").innerHTML = `<thead><tr><th>PSI</th><th>Experiment</th><th>Record</th><th>Field</th><th>Original</th><th>New</th><th>Rule</th></tr></thead><tbody>${D.qc.map((q) => `<tr><td class="mono">${esc(q.psi_id)}</td><td>${esc(q.experimento)}</td><td class="mono">${esc(q.registro)}</td><td>${esc(q.campo)}</td><td class="mono">${esc(q.valor_original)}</td><td class="mono">${esc(q.valor_nuevo)}</td><td>${esc(q.regla)}</td></tr>`).join("")}</tbody>`;
     $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly`;
@@ -747,7 +748,7 @@
   const cmpState = { ids: ["PSI-69", "PSI-25", "PSI-99"] };
   function renderCompare() {
     const opts = [...INV].sort((a, b) => a.name.localeCompare(b.name));
-    $("#cmp-pick").innerHTML = cmpState.ids.map((id, k) => `<label class="pick"><span class="label-sm" style="margin:0">#${k + 1}</span><select data-k="${k}" aria-label="Investigation ${k + 1}"><option value="">—</option>${opts.map((r) => `<option value="${r.psi_id}" ${r.psi_id === id ? "selected" : ""}>${esc(r.name)} · ${r.psi_id}</option>`).join("")}</select></label>`).join("");
+    $("#cmp-pick").innerHTML = cmpState.ids.map((id, k) => `<label class="pick"><span class="label" style="margin:0">#${k + 1}</span><select data-k="${k}" aria-label="Investigation ${k + 1}"><option value="">—</option>${opts.map((r) => `<option value="${r.psi_id}" ${r.psi_id === id ? "selected" : ""}>${esc(r.name)} · ${r.psi_id}</option>`).join("")}</select></label>`).join("");
     document.querySelectorAll("#cmp-pick select").forEach((s) => s.addEventListener("change", () => { cmpState.ids[+s.dataset.k] = s.value; renderCompare(); }));
     const R = cmpState.ids.map((id) => INV.find((r) => r.psi_id === id)).filter(Boolean);
     if (!R.length) { $("#cmp-table").innerHTML = ""; $("#cmp-note").textContent = "Pick an investigation."; return; }
@@ -801,11 +802,11 @@
   }
 
   function navSpy() {
-    const links = [...document.querySelectorAll(".nav a")];
+    const links = [...document.querySelectorAll(".nav__links a")];
     const map = new Map(links.map((a) => [a.getAttribute("href").slice(1), a]));
     const obs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
-        if (e.isIntersecting) { links.forEach((a) => a.classList.remove("active")); map.get(e.target.id)?.classList.add("active"); }
+        if (e.isIntersecting) { links.forEach((a) => a.classList.remove("is-on")); map.get(e.target.id)?.classList.add("is-on"); }
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
     map.forEach((_, id) => { const s = document.getElementById(id); if (s) obs.observe(s); });
@@ -830,7 +831,21 @@
   safe(renderNext, "next");
   safe(renderQuality, "quality");
   safe(navSpy, "nav");
-  const hideLoading = () => $("#loading").classList.add("done");
+  safe(() => {
+    const nav = $("#nav"), burger = $("#burger"), menu = $("#navLinks");
+    const onScroll = () => nav.classList.toggle("is-scrolled", scrollY > 8);
+    addEventListener("scroll", onScroll, { passive: true }); onScroll();
+    const close = () => { menu.classList.remove("is-open"); burger.classList.remove("is-open"); burger.setAttribute("aria-expanded", "false"); };
+    burger.addEventListener("click", () => { const open = !menu.classList.contains("is-open"); menu.classList.toggle("is-open", open); burger.classList.toggle("is-open", open); burger.setAttribute("aria-expanded", String(open)); });
+    menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", close));
+    const rv = [...document.querySelectorAll(".rv")];
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
+      rv.forEach((el) => io.observe(el));
+    } else rv.forEach((el) => el.classList.add("in"));
+    window.addEventListener("hashchange", () => rv.forEach((el) => el.classList.add("in")));
+  }, "chrome");
+  const hideLoading = () => { $("#loading").classList.add("done"); document.documentElement.classList.add("is-ready"); };
   requestAnimationFrame(hideLoading);
   setTimeout(hideLoading, 300);
   if (location.search.includes("offsets")) setTimeout(() => {

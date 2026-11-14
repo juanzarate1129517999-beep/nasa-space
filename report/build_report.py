@@ -465,7 +465,7 @@ doc = f"""<!doctype html>
 <h2>El dashboard Skylab Phoenix</h2>
 <p class="lead">Un sitio web estático con diseño propio. Los modelos corren en el navegador, así que cada control es una predicción en vivo y no hace falta un servidor que pueda fallar durante la demo.</p>
 <p>Secciones: inicio con indicadores y tarjetas por hábitat; cobertura; investigaciones (ranking, ficha y similitud); simulador de escenarios; evidencia; hallazgos; próximo experimento; y datos y validación. Funciona en escritorio y en móvil, y se publica tal cual en GitHub Pages, Vercel o Netlify.</p>
-{shot('01_inicio', 'Inicio: titular, equipo, indicadores clave y probabilidad de autoextinción por hábitat. El traje espacial aparece como «fuera de los datos».', Fn())}
+{shot('01_inicio', 'Inicio: titular, indicadores clave y probabilidad de autoextinción por hábitat. El traje espacial aparece como «fuera de los datos».', Fn())}
 {shot('02_cobertura', 'Cobertura: todos los ensayos de vuelo frente a las atmósferas de los hábitats, con filtros por familia.', Fn())}
 {shot('03_investigaciones', 'Investigaciones: ranking por hábitat y capa de seguridad, y ficha generada desde los datos (qué varió, qué se midió, desglose del puntaje).', Fn())}
 {shot('04_simulador', 'Simulador: presets de hábitat y controles de O₂, presión, CO₂, helio, diámetro y combustible. Resultado con intervalo, estado «dentro o fuera de los datos» y mapa de probabilidad en vivo.', Fn())}

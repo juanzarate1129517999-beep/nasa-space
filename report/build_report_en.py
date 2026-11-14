@@ -459,7 +459,7 @@ doc = f"""<!doctype html>
 <h2>The Skylab Phoenix dashboard</h2>
 <p class="lead">A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. Plotly is bundled, so it also works without internet once loaded.</p>
 <p>Sections: home with indicators and habitat cards; SI briefing and Ask the archive, with guided views for undergraduates, graduate students, professors, researchers and engineers; coverage; investigations (ranking, profile, side-by-side comparison and similarity); scenario simulator with shareable links; evidence; findings; next experiment; and data and validation with downloads. It works on desktop and mobile and is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.</p>
-{shot('01_inicio', 'Home: headline, team, key indicators and self-extinction probability per habitat. The spacesuit appears as “outside the data”.', Fn())}
+{shot('01_inicio', 'Home: headline, key indicators and self-extinction probability per habitat. The spacesuit appears as “outside the data”.', Fn())}
 {shot('02_cobertura', 'Coverage: every flight test against the habitat atmospheres, with filters by family.', Fn())}
 {shot('03_investigaciones', 'Investigations: ranking by habitat and safety layer, and a profile generated from the data (what varied, what was measured, score breakdown).', Fn())}
 {shot('10_comparar', 'Side-by-side comparison of up to three investigations; rows that differ are highlighted.', Fn())}
