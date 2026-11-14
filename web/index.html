@@ -24,6 +24,7 @@
       <span class="brand__word">SKYLAB PHOENIX</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Sections">
+      <a href="#/learn" data-v="learn">Learn 3D</a>
       <a href="#/flames" data-v="flames">Flames</a>
       <a href="#/lab" data-v="lab">Fire Lab</a>
       <a href="#/findings" data-v="findings">Findings</a>
@@ -53,7 +54,7 @@
           <p class="hero__lead load" style="--i:2" id="hero-lead"></p>
           <div class="hero__ctas load" style="--i:3">
             <a class="btn btn--fire" href="#/flames">Watch fire in orbit <span aria-hidden="true">→</span></a>
-            <a class="btn btn--line" href="#/lab">Run your own atmosphere</a>
+            <a class="btn btn--line" href="#/learn">Learn in 3D</a>
           </div>
         </div>
       </div>
@@ -90,6 +91,21 @@
         <div class="tiles rv" id="tiles"></div>
       </div>
     </section>
+  </section>
+
+  <section class="view" id="v-learn" data-view="learn" hidden>
+    <div class="sec sec--first">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">00 · Learn in 3D</p>
+          <h2>How fire behaves without gravity. <span class="mute">Seven steps, every number from NASA flight data.</span></h2>
+        </header>
+        <div class="learn">
+          <div class="learn__view" id="learn3d"><span class="lab3d__tag">Drag to turn · scroll to zoom</span></div>
+          <aside class="learn__panel" id="learn-panel" aria-live="polite"></aside>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="view" id="v-flames" data-view="flames" hidden>
@@ -157,7 +173,18 @@
           <p class="sec__lead">A model trained on 261 FLEX droplet fires from the ISS runs in your browser, with 200 bootstrap models for uncertainty. Leave the region NASA tested and it says so instead of guessing.</p>
         </header>
         <div class="lab3d" id="lab3d-wrap">
-          <div class="lab3d__view" id="lab3d"><span class="lab3d__tag">3D Lab · drag to turn</span></div>
+          <div class="lab3d__col">
+            <div class="lab3d__view" id="lab3d"><span class="lab3d__tag">3D Lab · drag to turn</span><button class="lab3d__lbl" id="lab3d-lbl" type="button" aria-pressed="true">Labels</button></div>
+            <div class="tl" id="lab3d-tl">
+              <div class="tl__bar"><i id="tl-fill"></i><span id="tl-out"></span></div>
+              <ol class="tl__steps">
+                <li data-ph="deploy"><b>1</b> Droplet deployed</li>
+                <li data-ph="ignite"><b>2</b> Hot wire ignites it</li>
+                <li data-ph="burn"><b>3</b> Burns and shrinks</li>
+                <li data-ph="end"><b>4</b> <span id="tl-end">Out on its own, or fuel gone</span></li>
+              </ol>
+            </div>
+          </div>
           <div class="lab3d__hud">
             <p class="label">Gravity</p>
             <div class="seg seg--wrap" id="g-seg" role="group" aria-label="Gravity"></div>
@@ -314,12 +341,17 @@
           <h2>The 24 investigations, ranked for your habitat. <span class="mute">Change the weights; see if the answer holds.</span></h2>
         </header>
         <div class="crit" id="criteria"></div>
-        <div class="toolbar card--gap" id="investigations">
+        <div class="inv-mode">
+          <div class="seg" id="inv-mode" role="group" aria-label="Investigation view"><button type="button" data-m="gallery" aria-pressed="true">Gallery</button><button type="button" data-m="list" aria-pressed="false">List and details</button></div>
+          <span class="mono-sm" id="inv-count"></span>
+        </div>
+        <div class="toolbar" id="investigations">
           <div class="seg seg--wrap" id="inv-habitat" role="group" aria-label="Rank for habitat"></div>
           <div class="seg" id="inv-layer" role="group" aria-label="Fire-safety layer"></div>
           <input class="search" type="search" id="inv-search" placeholder="Search name, keyword, PI…" aria-label="Search investigations">
         </div>
-        <div class="inv-layout">
+        <div class="inv-gallery" id="inv-gallery"></div>
+        <div class="inv-layout" id="inv-layout" hidden>
           <div class="inv-list" id="inv-list" role="listbox" aria-label="Ranked investigations"></div>
           <div class="card detail" id="inv-detail" aria-live="polite"></div>
         </div>

@@ -266,6 +266,31 @@
     }).join("") : '<p class="note" style="padding:18px">No investigation matches.</p>';
     document.querySelectorAll(".inv-row").forEach((b) => b.addEventListener("click", () => selectInv(b.dataset.id)));
     renderInvDetail();
+    renderInvGallery(rows);
+  }
+  const invMode = { m: "gallery" };
+  const POSTER = { "PSI-25": "assets/video/bass2-rod-22.jpg", "PSI-159": "assets/video/cfig-butane-39.jpg", "PSI-39": "assets/video/cfi-droplet.jpg" };
+  const ART = { "Solid materials": "solid", "Fuel droplets": "drop", "Gas flames": "gas", "Smoke & dust": "smoke" };
+  function renderInvGallery(rows) {
+    $("#inv-mode").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.m === invMode.m)));
+    $("#inv-gallery").hidden = invMode.m !== "gallery";
+    $("#inv-layout").hidden = invMode.m === "gallery";
+    $("#inv-count").textContent = `${rows.length} shown · flight video frame where NASA filmed it, illustration otherwise`;
+    if (invMode.m !== "gallery") return;
+    const hab = invState.hab;
+    $("#inv-gallery").innerHTML = rows.map((r, i) => {
+      const s = scoreOf(r, hab), rel = r.relevance[hab];
+      const vis = POSTER[r.psi_id] ? `<img src="${POSTER[r.psi_id]}" alt="" loading="lazy"><span class="ig__src">Flight video</span>` : `<span class="ig__art ig__art--${ART[r.family] || "gas"}"></span>`;
+      return `<button type="button" class="ig${i < 3 ? " is-top" : ""}${r.type === "Ground" ? " is-ground" : ""}" data-id="${r.psi_id}">
+        <span class="ig__vis">${vis}<span class="ig__top"><span>${esc(r.family)}</span><span>#${i + 1} · ${r.psi_id}</span></span></span>
+        <span class="ig__body"><b>${esc(r.name)}</b><span class="ig__t">${esc(r.title)}</span>
+          <span class="ig__rel"><span>Relevance</span><span class="ig__bar"><i style="width:${s}%"></i></span><span class="ig__n">${Math.round(s)}</span></span>
+          <span class="ig__meta"><span>${r.n_tests.toLocaleString("en-US")} records</span><span>${rel.n_near >= 1 ? `≈${Math.round(rel.n_near)} near your air` : "none near your air"}</span></span></span></button>`;
+    }).join("") || '<p class="note">No investigation matches.</p>';
+    document.querySelectorAll("#inv-gallery .ig").forEach((b) => b.addEventListener("click", () => {
+      invMode.m = "list"; invState.sel = b.dataset.id; renderInvList();
+      document.getElementById("inv-layout").scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
   }
   function selectInv(id) {
     invState.sel = id;
@@ -401,18 +426,54 @@
     renderMap(remap);
     syncLab3d(r, show, st);
   }
-  const viz = { view: "curve", clickBound: false };
+  const viz = { view: "fires", clickBound: false };
   const PSI = (atm) => atm * ATM_PSI;
   const PSI_TICKS = [4.4, 7.3, 10.2, 14.7, 22, 29.4, 44];
   function statusAt(x) { const nn = neighbors(x), thr = M.ood_threshold; return nn.dist > thr || outOfRange(x).length ? (nn.dist > 2 * thr ? "outside" : "extrapolating") : "within"; }
   function renderVizControls() {
-    $("#viz-seg").innerHTML = [["curve", "Simple · oxygen curve"], ["map", "Map · oxygen × pressure"]].map(([k, l]) => `<button type="button" aria-pressed="${viz.view === k}" data-v="${k}">${l}</button>`).join("");
+    $("#viz-seg").innerHTML = [["fires", "100 fires"], ["curve", "Oxygen curve"], ["map", "Map · oxygen × pressure"]].map(([k, l]) => `<button type="button" aria-pressed="${viz.view === k}" data-v="${k}">${l}</button>`).join("");
     document.querySelectorAll("#viz-seg button").forEach((b) => b.addEventListener("click", () => { viz.view = b.dataset.v; renderVizControls(); renderMap(true); }));
   }
   function renderMap() {
     if (!$("#viz-seg").children.length) renderVizControls();
     const dil = [sc.co2 ? `${(100 * sc.co2).toFixed(0)}% CO₂` : "", sc.he ? `${(100 * sc.he).toFixed(0)}% helium` : ""].filter(Boolean).join(" + ") || "no suppressant";
+    const el = $("#map-chart");
+    if (viz.view === "fires") { if (hasPlotly && el.classList.contains("js-plotly-plot")) Plotly.purge(el); el.classList.add("chart--html"); renderFires(dil); return; }
+    if (el.classList.contains("chart--html")) { el.classList.remove("chart--html"); el.innerHTML = ""; viz.clickBound = false; }
     if (viz.view === "curve") renderCurve(dil); else renderRiskMap(dil);
+  }
+  function renderFires(dil) {
+    const x = featVec(sc), r = predict(x), stt = statusAt(x);
+    $("#viz-label").textContent = "Out of 100 fires like this…";
+    $("#map-legend").innerHTML = [legendItem("circle", "#7dd3fc", "Goes out on its own"), legendItem("circle", C.orange, "Keeps burning"), legendItem("circle", "rgba(203,213,225,.35)", "Could go either way (90% range)")].join("");
+    const o2s = []; for (let o = 0.10; o <= 0.401; o += 0.01) o2s.push(+o.toFixed(2));
+    const ps = o2s.map((o) => { const xx = featVec({ ...sc, o2: o }); return { o, p: predict(xx).p, st: statusAt(xx) }; });
+    let cross = null; for (let i = 1; i < ps.length; i++) if (ps[i - 1].p >= 0.5 && ps[i].p < 0.5) { cross = ps[i - 1].o + 0.01 * (ps[i - 1].p - 0.5) / (ps[i - 1].p - ps[i].p); break; }
+    const pos = (o) => `${(100 * (o - 0.10)) / 0.30}%`;
+    const habs = D.habitats.filter((h) => h.x_o2 <= 0.4);
+    const ladder = `<div class="ladder">
+        <div class="ladder__bar">${ps.map((q) => `<i style="background:${q.st === "outside" ? "rgba(148,163,184,.25)" : `color-mix(in srgb, #7dd3fc ${Math.round(100 * q.p)}%, ${C.orange})`}"></i>`).join("")}
+          ${cross ? `<span class="ladder__x" style="left:${pos(cross)}"><b>50/50 at ≈${(100 * cross).toFixed(0)}% O₂</b></span>` : ""}
+          <span class="ladder__you" style="left:${pos(Math.min(0.4, sc.o2))}"></span></div>
+        <div class="ladder__ticks">${habs.map((h) => `<span style="left:${pos(h.x_o2)}">${esc(h.name)}<small>${o2pct(h.x_o2)}</small></span>`).join("")}</div>
+        <p class="note">Oxygen scale at ${PSI(sc.p).toFixed(1)} psi with ${esc(dil)}: blue where most fires go out on their own, orange where most keep burning. The white mark is your scenario.${cross ? ` Above about ${(100 * cross).toFixed(0)}% O₂, most fires like this keep burning.` : ""}</p>
+      </div>`;
+    if (stt === "outside") {
+      $("#viz-sub").textContent = `${sc.fuel} droplet, ${(100 * sc.o2).toFixed(1)}% O₂, ${PSI(sc.p).toFixed(1)} psi, ${dil}.`;
+      $("#map-chart").innerHTML = `<div class="fires fires--off"><p><b>No flight data near this air.</b> NASA never flew a droplet fire close to it, so the model does not guess.</p></div>${ladder}`;
+      $("#viz-note").textContent = "";
+      return;
+    }
+    const nOut = Math.round(100 * r.p), lo = Math.round(100 * r.lo), hi = Math.round(100 * r.hi);
+    const cells = Array.from({ length: 100 }, (_, i) => (i < lo ? "o" : i < nOut ? "ou" : i < hi ? "ku" : "k"));
+    $("#viz-sub").textContent = `${sc.fuel} droplet, ${(100 * sc.o2).toFixed(1)}% O₂, ${PSI(sc.p).toFixed(1)} psi, ${dil}. Each dot is one fire.`;
+    $("#map-chart").innerHTML = `<div class="fires">
+        <div class="fires__grid">${cells.map((c) => `<i class="${c}"></i>`).join("")}</div>
+        <div class="fires__txt"><span class="fires__k">${100 - nOut}</span><span>keep burning and must be detected and put out</span>
+          <span class="fires__o">${nOut}</span><span>go out on their own</span>
+          <span class="mono-sm">The model is ${stt === "within" ? "inside" : "near the edge of"} NASA's flight data: the real number could be anywhere from ${100 - hi} to ${100 - lo} fires that keep burning.</span></div>
+      </div>${ladder}`;
+    $("#viz-note").textContent = "";
   }
   function renderCurve(dil) {
     const xmax = Math.max(0.40, Math.min(1, sc.o2 + 0.05)), xs = [];
@@ -1072,6 +1133,7 @@
     ];
     $("#answer-list").innerHTML = items.map(([t, v, l, d, h, a], i) => `<li class="answer"><a href="${h}"><span class="answer__n">${String(i + 1).padStart(2, "0")} · ${t}</span><span class="answer__v">${v}</span><span class="answer__l">${l}</span><span class="answer__d">${esc(d)}</span><span class="answer__go">${a} →</span></a></li>`).join("");
     const tiles = [
+      ["learn", "Learn 3D", "Seven interactive steps: why a flame becomes a sphere in orbit, what oxygen and pressure do, and a quiz."],
       ["flames", "Flames", "Real ISS flight video: the same plastic at four oxygen levels, plus fabric, film, a droplet and a gas sphere."],
       ["lab", "Fire Lab", "Set oxygen, pressure and suppressant; a validated model answers with uncertainty."],
       ["findings", "Findings", "Where NASA has flown fire versus where crews will live, and what the tests show."],
@@ -1140,8 +1202,25 @@
   function initLab3D() {
     renderGravity();
     if (!window.PhoenixLab3D || !window.THREE) { $("#lab3d").classList.add("lab3d__view--off"); return; }
-    lab3d = window.PhoenixLab3D.init($("#lab3d"));
+    lab3d = window.PhoenixLab3D.init($("#lab3d"), { labels: { drop: "Fuel droplet", flame: "Flame", igniter: "Hot-wire igniter", needle: "Needles hold the droplet", gravity: "Gravity" } });
     if (!lab3d) return;
+    $("#lab3d-lbl").addEventListener("click", (e) => { const on = e.currentTarget.getAttribute("aria-pressed") !== "true"; e.currentTarget.setAttribute("aria-pressed", String(on)); lab3d.showLabels(on); });
+    const steps = [...document.querySelectorAll("#lab3d-tl li")], fill = $("#tl-fill"), outM = $("#tl-out"), endT = $("#tl-end");
+    let lastPh = "";
+    setInterval(() => {
+      if (current !== "lab") return;
+      const s = lab3d.state();
+      fill.style.width = `${Math.min(100, 100 * s.t)}%`;
+      fill.classList.toggle("is-out", s.phase === "out");
+      outM.style.left = s.outAt != null ? `${100 * s.outAt}%` : "-20px";
+      outM.style.opacity = s.outAt != null && s.t >= s.outAt ? 1 : 0;
+      const ph = s.phase === "out" ? "end" : s.phase;
+      if (ph !== lastPh) {
+        lastPh = ph;
+        steps.forEach((li) => li.classList.toggle("is-on", li.dataset.ph === ph));
+        endT.textContent = s.phase === "out" ? "Went out on its own" : s.phase === "end" ? "Burned until the fuel was gone" : "Out on its own, or fuel gone";
+      }
+    }, 100);
     lab3d.onRun((run) => {
       if (run.n > 1) { lab3dState.tally.unshift(run.out); lab3dState.tally = lab3dState.tally.slice(0, 20); }
       const t = lab3dState.tally, outN = t.filter(Boolean).length;
@@ -1211,12 +1290,84 @@
     $("#surv-note").textContent = `Groups need at least 5 flames that ran to an end (no-ignition and flash tests are left out). A droplet that broke apart is counted as not going out on its own: its fragments were still burning. Near = within 5 points of O₂ and about 35% of the pressure of ${hb.name} air.`;
   }
 
-  const VIEWS = ["home", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
+  let learn3d = null;
+  const learnState = { i: 0, o2: 0.30, answers: {} };
+  const pAt = (o2, p, extra = {}) => { const x = featVec({ fuel: "Methanol", o2, p, co2: 0, he: 0, d0: M.d0_median, ...extra }); return { ...predict(x), st: dataStatus(x).s }; };
+  function learnSteps() {
+    const SO = D.solids, k = D.next.picks[0];
+    const cab = pAt(0.21, 1), moon = pAt(0.30, 0.694), eva = pAt(0.265, 0.694);
+    return [
+      { t: "On Earth, a flame is a teardrop.", b: "Hot gas is lighter than the air around it, so it rises and pulls fresh air in from below. That draft feeds the flame and stretches it upward. This is the only kind of flame most of us have seen.", set: { g: 1, o2: 0.21, p: 1, flow: 0, co2: 0 } },
+      { t: "In orbit, nothing rises.", b: "Without buoyancy there is no draft. Oxygen reaches the fuel only by slow diffusion, so the flame becomes a dim, blue sphere around the droplet. This is what NASA films inside the station.", set: { g: 0, o2: 0.21, p: 1, flow: 0, co2: 0 }, link: ["#/flames", "Watch the real flight video →"] },
+      { t: "More oxygen, a fiercer fire.", b: "Move the oxygen up to the 30% planned for the Moon base and watch the flame grow. The number below is the validated model's answer, trained on 261 ISS droplet fires.", set: { g: 0, p: 1, flow: 0, co2: 0 }, slider: true },
+      { t: "Lower pressure, same danger.", b: "The Moon base will run at 10.2 psi to save mass and make spacewalks easier, with more oxygen to keep crews breathing normally. That trade makes fires much less likely to die on their own.", set: { g: 0, o2: 0.30, p: 0.694, flow: 0, co2: 0 },
+        stat: `<div class="lstat"><span><b>${pct(cab.p)}</b> go out on their own in cabin air (21% O₂, 14.7 psi)</span><span><b>${pct(moon.p)}</b> in lunar-base air (30% O₂, 10.2 psi)</span></div>` },
+      { t: "A gentle breeze feeds the fire.", b: `In orbit a fan does what buoyancy does on Earth. NASA's BASS-II experiment found that plastics keep burning at the lowest oxygen with a breeze of only about 2 cm/s: down to ${SO.min_o2_pct}% O₂, below the ${SO.g1_upward_limit_pct}% limit of the Earth test used to approve materials.`, set: { g: 0, o2: 0.21, p: 1, flow: 0.55, co2: 0 },
+        stat: `<div class="lstat"><span><b>${SO.min_o2_pct}%</b> lowest O₂ for a lasting flame in orbit</span><span><b>${SO.g1_upward_limit_pct}%</b> limit of the upward test on Earth</span></div>` },
+      { t: "Put it out: dilute the air.", b: `Adding CO₂ takes oxygen and heat away from the flame. But near lunar-base air NASA has almost no data: for a methanol droplet at ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi and ${(100 * k.x_co2).toFixed(0)}% CO₂ the model can only say it goes out on its own ${pct(k.interval[0])} to ${pct(k.interval[1])} of the time. That is the flight test we recommend.`, set: { g: 0, o2: k.x_o2, p: k.p_atm, flow: 0, co2: k.x_co2 }, link: ["#/next", "See the recommended flight →"] },
+      { t: "Your turn.", quiz: true, set: { g: 0, o2: 0.30, p: 0.694, flow: 0, co2: 0 },
+        qs: [
+          { q: "In which air is a droplet fire least likely to go out on its own?", opts: [["cabin", "Spacecraft cabin"], ["eva", "EVA prep"], ["moon", "Lunar base & rover"]], a: "moon",
+            why: `Model: ${pct(cab.p)} in cabin air, ${pct(eva.p)} in EVA prep, ${pct(moon.p)} in lunar-base air.` },
+          { q: "On Earth, a plastic rod needs 15.4% O₂ to keep burning in the upward test. In orbit, with a gentle breeze, the lowest NASA measured was…", opts: [["a", "18%"], ["b", "15.4%"], ["c", `${SO.min_o2_pct}%`]], a: "c",
+            why: `BASS-II: ${SO.min_o2_pct}% at about 2 cm/s of airflow. Earth screening can understate the risk in orbit.` },
+        ] },
+    ];
+  }
+  function renderLearn() {
+    const S = learnSteps(), i = learnState.i, st = S[i];
+    const set = { ...st.set };
+    if (st.slider) set.o2 = learnState.o2;
+    if (learn3d) learn3d.set({ ...set, steady: true, fuel: "Methanol" });
+    let extra = "";
+    if (st.slider) {
+      const r = pAt(learnState.o2, 1);
+      extra = `<div class="lslider"><div class="top"><label for="l-o2">Oxygen</label><output>${(100 * learnState.o2).toFixed(0)}%</output></div><input type="range" id="l-o2" min="0.15" max="0.40" step="0.01" value="${learnState.o2}"><div class="ticks"><span>15%</span><span>21% Earth</span><span>30% Moon base</span><span>40%</span></div></div>
+        <div class="lstat"><span><b>${r.st === "outside" ? "—" : pct(r.p)}</b> chance a droplet fire goes out on its own at ${(100 * learnState.o2).toFixed(0)}% O₂ and 14.7 psi${r.st === "extrapolating" ? " (extrapolating)" : ""}</span></div>`;
+    }
+    if (st.stat) extra += st.stat;
+    if (st.quiz) {
+      const score = st.qs.filter((q, n) => learnState.answers[n] === q.a).length, answered = Object.keys(learnState.answers).length;
+      extra = st.qs.map((q, n) => {
+        const got = learnState.answers[n];
+        return `<div class="quiz"><p class="quiz__q">${n + 1}. ${esc(q.q)}</p><div class="quiz__o">${q.opts.map(([v, l]) => `<button type="button" data-q="${n}" data-v="${v}" class="${got ? (v === q.a ? "ok" : v === got ? "no" : "") : ""}" ${got ? "disabled" : ""}>${esc(l)}</button>`).join("")}</div>${got ? `<p class="quiz__why">${got === q.a ? "Correct." : "Not quite."} ${esc(q.why)}</p>` : ""}</div>`;
+      }).join("") + (answered === st.qs.length ? `<p class="quiz__score">${score} of ${st.qs.length} correct. <a class="src-link" href="#/lab">Now run your own atmosphere →</a></p>` : "");
+    }
+    $("#learn-panel").innerHTML = `
+      <div class="learn__dots">${S.map((_, n) => `<button type="button" data-n="${n}" aria-label="Step ${n + 1}" class="${n === i ? "is-on" : n < i ? "is-done" : ""}"></button>`).join("")}</div>
+      <p class="label">Step ${i + 1} of ${S.length}</p>
+      <h3 class="learn__t">${esc(st.t)}</h3>
+      ${st.b ? `<p class="learn__b">${esc(st.b)}</p>` : ""}
+      ${extra}
+      ${st.link ? `<a class="src-link" href="${st.link[0]}">${esc(st.link[1])}</a>` : ""}
+      <div class="learn__nav"><button type="button" class="btn btn--line btn--sm" id="l-prev" ${i === 0 ? "disabled" : ""}>← Back</button><button type="button" class="btn btn--fire btn--sm" id="l-next" ${i === S.length - 1 ? "hidden" : ""}>Next <span aria-hidden="true">→</span></button></div>`;
+    document.querySelectorAll(".learn__dots button").forEach((b) => b.addEventListener("click", () => { learnState.i = +b.dataset.n; renderLearn(); }));
+    $("#l-prev").addEventListener("click", () => { learnState.i = Math.max(0, i - 1); renderLearn(); });
+    $("#l-next").addEventListener("click", () => { learnState.i = Math.min(S.length - 1, i + 1); renderLearn(); });
+    const sl = $("#l-o2");
+    if (sl) sl.addEventListener("input", () => {
+      learnState.o2 = +sl.value;
+      if (learn3d) learn3d.set({ o2: learnState.o2 });
+      const r = pAt(learnState.o2, 1);
+      sl.closest(".lslider").querySelector("output").textContent = `${(100 * learnState.o2).toFixed(0)}%`;
+      const box = sl.closest(".lslider").nextElementSibling;
+      box.innerHTML = `<span><b>${r.st === "outside" ? "—" : pct(r.p)}</b> chance a droplet fire goes out on its own at ${(100 * learnState.o2).toFixed(0)}% O₂ and 14.7 psi${r.st === "extrapolating" ? " (extrapolating)" : ""}</span>`;
+    });
+    document.querySelectorAll(".quiz__o button").forEach((b) => b.addEventListener("click", () => { learnState.answers[b.dataset.q] = b.dataset.v; renderLearn(); }));
+  }
+  function initLearn() {
+    if (window.PhoenixLab3D && window.THREE) learn3d = window.PhoenixLab3D.init($("#learn3d"), { labels: { drop: "Fuel droplet", flame: "Flame", igniter: "Hot-wire igniter", gravity: "Gravity", flow: "Airflow" } });
+    if (!learn3d) $("#learn3d").classList.add("lab3d__view--off");
+    renderLearn();
+  }
+
+  const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
   const ALIAS = { scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
     home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(renderDests, "destinations"); safe(initGlobe, "globe"); },
+    learn: () => { safe(initLearn, "learn"); },
     flames: () => { safe(renderStage, "stage"); safe(renderReel, "reel"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
     findings: () => { safe(() => { renderCoverageFilters(); renderCoverage(); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
@@ -1251,6 +1402,7 @@
     document.body.dataset.view = v;
     if (globe) { if (v === "home") globe.resume(); else globe.pause(); }
     if (lab3d) { if (v === "lab") lab3d.resume(); else lab3d.pause(); }
+    if (learn3d) { if (v === "learn") learn3d.resume(); else learn3d.pause(); }
     const view = document.querySelector(`.view[data-view="${v}"]`);
     view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
     requestAnimationFrame(() => {
@@ -1286,6 +1438,7 @@
   $("#brief-dl").addEventListener("click", () => download(`skylab-phoenix-briefing-${briefState.hab}.md`, briefMarkdown()));
   $("#brief-sim").addEventListener("click", () => { ensure("lab"); setPreset(briefState.hab); location.hash = "#/lab"; });
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
+  document.querySelectorAll("#inv-mode button").forEach((b) => b.addEventListener("click", () => { invMode.m = b.dataset.m; renderInvList(); }));
   $("#arch-more").addEventListener("click", () => { archState.all = !archState.all; renderArchive(); });
   $("#surv-more").addEventListener("click", () => { survState.all = !survState.all; renderSurvival(); });
   $("#share-btn").addEventListener("click", (e) => copyText(shareUrl(), e.currentTarget));
