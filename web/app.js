@@ -7,7 +7,7 @@
   const o2pct = (x) => pct(x, Math.round(x * 1000) % 10 ? 1 : 0);
   const num = (v, d = 2) => (v == null ? "—" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d }));
   const ATM_PSI = 14.6959;
-  const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "rgba(203,213,225,0.08)", line2: "rgba(203,213,225,0.18)", bg: "#070a14", surface: "#0d1220", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24" };
+  const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "rgba(203,213,225,0.08)", line2: "rgba(203,213,225,0.18)", bg: "#000000", surface: "#0b0c0f", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24" };
   const FAMILY = {
     solido: { name: "Solid materials", symbol: "square", color: C.orange },
     gota: { name: "Fuel droplets", symbol: "circle", color: C.blue },
@@ -34,7 +34,7 @@
       paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
       font: { family: "Geist, Inter, sans-serif", color: C.ink3, size: 11.5 },
       margin: { l: 56, r: 18, t: 12, b: 48 }, showlegend: false, dragmode: false,
-      hoverlabel: { bgcolor: "#121a2c", bordercolor: C.line2, font: { family: "Geist, Inter, sans-serif", color: C.ink, size: 12 }, align: "left" },
+      hoverlabel: { bgcolor: "#111317", bordercolor: C.line2, font: { family: "Geist, Inter, sans-serif", color: C.ink, size: 12 }, align: "left" },
       xaxis: JSON.parse(JSON.stringify(axis)), yaxis: JSON.parse(JSON.stringify(axis)),
     };
     return merge(base, extra);
@@ -398,6 +398,7 @@
     $("#nn-table").innerHTML = `<thead><tr><th>Date</th><th>Fuel</th><th class="num">O₂</th><th class="num">atm</th><th class="num">CO₂</th><th class="num">He</th><th class="num">d₀ mm</th><th>Outcome</th></tr></thead><tbody>${rows}</tbody>`;
     $("#nn-note").textContent = `Mean distance to the 5 nearest tests: ${nn.dist.toFixed(2)} (out-of-data limit ${thr.toFixed(2)}, the 95th percentile among flown tests).`;
     renderMap(remap);
+    syncLab3d(r, show, st);
   }
   const viz = { view: "curve", clickBound: false };
   const PSI = (atm) => atm * ATM_PSI;
@@ -474,7 +475,7 @@
     const y = p.map(PSI);
     const el = plot("map-chart", [
       { z: risk, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, zsmooth: "best",
-        colorscale: [[0, "#0d1220"], [0.3, "#3b1d6e"], [0.55, "#e11d48"], [0.78, "#f97316"], [1, "#fde68a"]],
+        colorscale: [[0, "#0b0c0f"], [0.3, "#3b1d6e"], [0.55, "#e11d48"], [0.78, "#f97316"], [1, "#fde68a"]],
         colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "keeps burning", side: "right", font: { size: 10.5, color: C.ink3 } } },
         hovertemplate: "O₂ %{x:.1f}% · %{y:.1f} psi<br>keeps burning: %{z:.0%}<br><i>click to test</i><extra></extra>" },
       { z: gap, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, showscale: false, hoverinfo: "skip", colorscale: [[0, "rgba(148,163,184,0.42)"], [1, "rgba(148,163,184,0.42)"]] },
@@ -644,7 +645,7 @@
     const habs = D.habitats.filter((x) => x.x_o2 <= 0.4 && x.p_atm <= 1.4);
     plot("unc-chart", [
       { z, x: go2.map((v) => 100 * v), y: gp.map(PSI), type: "heatmap", zsmooth: "best", zmin: 0, zmax: 0.6,
-        colorscale: [[0, "#0d1220"], [0.5, "#5b21b6"], [1, "#ddd6fe"]],
+        colorscale: [[0, "#0b0c0f"], [0.5, "#5b21b6"], [1, "#ddd6fe"]],
         colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "doubt", side: "right", font: { size: 10.5, color: C.ink3 } } },
         hovertemplate: `O₂ %{x:.0f}% · %{y:.1f} psi · ${(100 * c).toFixed(0)}% CO₂<br>doubt (90% range) %{z:.0%}<extra></extra>` },
       { x: habs.map((h) => 100 * h.x_o2), y: habs.map((h) => PSI(h.p_atm)), type: "scatter", mode: "markers+text", text: habs.map((h) => h.name), textposition: "top center", textfont: { size: 11, color: C.ink2 }, marker: { symbol: "diamond", size: 8, color: C.ink }, hoverinfo: "skip" },
@@ -1125,16 +1126,100 @@
     vids.forEach((v) => (io ? io.observe(v) : (v.src = v.dataset.src)));
   }
 
+  let lab3d = null;
+  const GRAV = [["ISS", 0, "≈ 0 g"], ["Moon", 0.17, "0.17 g"], ["Mars", 0.38, "0.38 g"], ["Earth", 1, "1 g"]];
+  const lab3dState = { g: 0, tally: [] };
+  function renderGravity() {
+    $("#g-seg").innerHTML = GRAV.map(([n, g, t]) => `<button type="button" data-g="${g}" aria-pressed="${g === lab3dState.g}">${n} <small>${t}</small></button>`).join("");
+    document.querySelectorAll("#g-seg button").forEach((b) => b.addEventListener("click", () => {
+      lab3dState.g = +b.dataset.g; renderGravity();
+      if (lab3d) lab3d.set({ g: lab3dState.g });
+    }));
+  }
+  function initLab3D() {
+    renderGravity();
+    if (!window.PhoenixLab3D || !window.THREE) { $("#lab3d").classList.add("lab3d__view--off"); return; }
+    lab3d = window.PhoenixLab3D.init($("#lab3d"));
+    if (!lab3d) return;
+    lab3d.onRun((run) => {
+      if (run.n > 1) { lab3dState.tally.unshift(run.out); lab3dState.tally = lab3dState.tally.slice(0, 20); }
+      const t = lab3dState.tally, outN = t.filter(Boolean).length;
+      $("#lab3d-runs").innerHTML = `<div class="runs__now">Replay ${run.n}: <b>${run.status}</b></div>
+        <div class="runs__dots">${t.map((o) => `<i class="${o ? "o" : "k"}" title="${o ? "went out on its own" : "burned to the end"}"></i>`).join("")}</div>
+        <div class="mono-sm">${t.length ? `${outN} of the last ${t.length} went out on its own` : "collecting replays…"}</div>`;
+    });
+  }
+  function syncLab3d(r, show, st) {
+    if (!lab3d) return;
+    lab3d.set({ o2: sc.o2, p: sc.p, fuel: sc.fuel, co2: sc.co2, he: sc.he, pOut: show ? r.p : 0.5 });
+    $("#lab3d-sc").textContent = `${sc.fuel} droplet · ${(100 * sc.o2).toFixed(1)}% O₂ · ${(sc.p * ATM_PSI).toFixed(1)} psi${sc.co2 ? ` · ${(100 * sc.co2).toFixed(0)}% CO₂` : ""}${sc.he ? ` · ${(100 * sc.he).toFixed(0)}% He` : ""}`;
+    $("#lab3d-p").innerHTML = show
+      ? `<span class="lab3d__big">${pct(r.p)}</span><span>chance it goes out on its own${st === "extrapolating" ? " · extrapolating" : ""}</span>`
+      : `<span class="lab3d__big muted">—</span><span>no flight data near this air: replays use 50/50</span>`;
+    lab3dState.tally = [];
+  }
+
+  const FAM_LABEL = { "PMMA rod": "Acrylic rods", "SIBAL fabric": "Cotton-fiberglass fabric", "PMMA thin film": "Thin films", "PMMA slab": "Slabs", "PMMA sphere": "Spheres", "Nomex fabric": "Nomex" };
+  const archState = { fam: "All", all: false };
+  function renderArchive() {
+    const CL = window.CLIPS || [];
+    const fams = ["All", ...Object.keys(FAM_LABEL).filter((f) => CL.some((c) => c.family === f))];
+    $("#arch-filter").innerHTML = fams.map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === archState.fam}">${f === "All" ? `All ${CL.length}` : FAM_LABEL[f]}</button>`).join("");
+    document.querySelectorAll("#arch-filter button").forEach((b) => b.addEventListener("click", () => { archState.fam = b.dataset.f; renderArchive(); }));
+    const list = CL.filter((c) => archState.fam === "All" || c.family === archState.fam).sort((a, b) => a.o2 - b.o2);
+    const shown = archState.all ? list : list.slice(0, 12);
+    const air = (a) => { const t = String(a).replace(/\([^)]*\)/g, "").replace(/\s*,\s*/g, ", ").replace(/,\s*$/, "").trim(); return t ? `${t} cm/s` : "—"; };
+    $("#arch").innerHTML = shown.map((c) => `<figure class="ac"><div class="ac__v"><video data-src="assets/video/bass2/${c.f}.mp4" poster="assets/video/bass2/${c.f}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span></div>
+      <figcaption><span class="ac__o2">${c.o2}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · test ${esc(c.test)}</span><span class="ac__m">Airflow ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}</span></figcaption></figure>`).join("");
+    $("#arch-more").hidden = list.length <= 12;
+    $("#arch-more").textContent = archState.all ? "Show fewer" : `Show all ${list.length}`;
+    lazyVideos("#arch video");
+  }
+  function lazyVideos(sel) {
+    const vids = [...document.querySelectorAll(sel)];
+    if (!("IntersectionObserver" in window)) { vids.forEach((v) => { v.src = v.dataset.src; }); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      const v = e.target;
+      if (e.isIntersecting) { if (!v.getAttribute("src")) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
+    }), { threshold: 0.25 });
+    vids.forEach((v) => io.observe(v));
+  }
+
+  const survState = { kind: "All", hab: "moon_base", all: false };
+  function renderSurvival() {
+    const SV = D.survival || [];
+    const kinds = ["All", "Droplet", "Gas flame", "Inverse gas flame"];
+    $("#surv-kind").innerHTML = kinds.map((k) => `<button type="button" data-k="${k}" aria-pressed="${k === survState.kind}">${k === "All" ? "All flames" : k === "Droplet" ? "Droplets" : k === "Gas flame" ? "Gas flames" : "Inverse flames"}</button>`).join("");
+    document.querySelectorAll("#surv-kind button").forEach((b) => b.addEventListener("click", () => { survState.kind = b.dataset.k; renderSurvival(); }));
+    $("#surv-hab").innerHTML = D.habitats.filter((h) => h.x_o2 < 1).map((h) => `<button type="button" data-h="${h.id}" aria-pressed="${h.id === survState.hab}">${esc(h.name)}</button>`).join("");
+    document.querySelectorAll("#surv-hab button").forEach((b) => b.addEventListener("click", () => { survState.hab = b.dataset.h; renderSurvival(); }));
+    const hb = D.habitats.find((h) => h.id === survState.hab);
+    const near = (r) => Math.abs(r.o2_mean - hb.x_o2) <= 0.05 && Math.abs(Math.log(r.p_mean / hb.p_atm)) <= Math.log(1.35);
+    const list = SV.filter((r) => survState.kind === "All" || r.kind === survState.kind);
+    const shown = survState.all ? list : list.slice(0, 10);
+    $("#surv-legend").innerHTML = [legendItem("bar", C.orange, "Kept burning until the fuel was cut or gone"), legendItem("bar", C.amber, "Droplet broke apart, still burning"), legendItem("bar", "#cbd5e1", "Went out on its own"), legendItem("bar", "rgba(242,96,15,.25)", `Near ${hb.name} air`)].join("");
+    $("#surv-list").innerHTML = `<div class="surv__h"><span></span><span>Fuel and air</span><span>How the flames ended</span><span class="num">Did not go out</span><span class="num">90% range</span></div>` + shown.map((r, i) => {
+      const w = (k) => `${(100 * k) / r.n}%`;
+      return `<div class="surv__r${near(r) ? " is-near" : ""}"><span class="surv__i">${String(i + 1).padStart(2, "0")}</span>
+        <span><b>${esc(r.kind === "Droplet" ? `${r.fuel} droplets` : `${r.fuel} ${r.kind.toLowerCase()}s`)}</b><small>${esc(r.o2)} oxygen · ${esc(r.p)} · ${esc(r.dil)} · ${r.psi.join(", ")}</small>${near(r) ? `<em>near ${esc(hb.name)} air</em>` : ""}</span>
+        <span class="surv__bar"><i class="k" style="width:${w(r.kept)}"></i><i class="b" style="width:${w(r.broke)}"></i><i class="o" style="width:${w(r.out)}"></i></span>
+        <span class="num"><b>${r.kept + r.broke}</b> of ${r.n}</span><span class="num mono-sm">${pct(r.ci[0])}–${pct(r.ci[1])}</span></div>`;
+    }).join("");
+    $("#surv-more").hidden = list.length <= 10;
+    $("#surv-more").textContent = survState.all ? "Show fewer" : `Show all ${list.length} groups`;
+    $("#surv-note").textContent = `Groups need at least 5 flames that ran to an end (no-ignition and flash tests are left out). A droplet that broke apart is counted as not going out on its own: its fragments were still burning. Near = within 5 points of O₂ and about 35% of the pressure of ${hb.name} air.`;
+  }
+
   const VIEWS = ["home", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
   const ALIAS = { scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
     home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(renderDests, "destinations"); safe(initGlobe, "globe"); },
-    flames: () => { safe(renderStage, "stage"); safe(renderReel, "reel"); safe(renderSolids, "solids"); },
-    lab: () => { safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
+    flames: () => { safe(renderStage, "stage"); safe(renderReel, "reel"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
+    lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
     findings: () => { safe(() => { renderCoverageFilters(); renderCoverage(); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
-    ranking: () => { safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
+    ranking: () => { safe(renderSurvival, "survival"); safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
     ask: () => { safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing"); },
     data: () => { safe(renderQuality, "quality"); safe(renderDownloads, "downloads"); safe(renderEarth, "resources"); },
@@ -1164,6 +1249,7 @@
     document.querySelectorAll(".nav__links a").forEach((a) => a.classList.toggle("is-on", a.dataset.v === v));
     document.body.dataset.view = v;
     if (globe) { if (v === "home") globe.resume(); else globe.pause(); }
+    if (lab3d) { if (v === "lab") lab3d.resume(); else lab3d.pause(); }
     const view = document.querySelector(`.view[data-view="${v}"]`);
     view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
     requestAnimationFrame(() => {
@@ -1199,6 +1285,8 @@
   $("#brief-dl").addEventListener("click", () => download(`skylab-phoenix-briefing-${briefState.hab}.md`, briefMarkdown()));
   $("#brief-sim").addEventListener("click", () => { ensure("lab"); setPreset(briefState.hab); location.hash = "#/lab"; });
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
+  $("#arch-more").addEventListener("click", () => { archState.all = !archState.all; renderArchive(); });
+  $("#surv-more").addEventListener("click", () => { survState.all = !survState.all; renderSurvival(); });
   $("#share-btn").addEventListener("click", (e) => copyText(shareUrl(), e.currentTarget));
   $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
   document.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) resizeIn(d); }));

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Skylab Phoenix · Fire Safety Intelligence</title>
   <meta name="description" content="Skylab Phoenix turns NASA's microgravity combustion flight data (PSI) into fire-safety insights for the Moon base, spacecraft and spacesuits: real flight video, validated models, uncertainty and the next experiment to fly.">
-  <meta name="theme-color" content="#070a14">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" href="assets/phoenix.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,7 +102,13 @@
         <div class="stage" id="stage"></div>
         <h3 class="sub-h">Solids, liquids and gases.</h3>
         <div class="reel" id="reel"></div>
-        <p class="note">Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Camera exposure changes between and within tests, so compare shape and color, not brightness.</p>
+        <div class="arch-head">
+          <h3 class="sub-h">Every BASS-II flight burn on camera, by oxygen.</h3>
+          <div class="seg seg--wrap" id="arch-filter" role="group" aria-label="Material"></div>
+        </div>
+        <div class="arch" id="arch"></div>
+        <div class="links"><button class="btn btn--line btn--sm" id="arch-more" type="button">Show all</button></div>
+        <p class="note">Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Each card shows the oxygen measured in the glovebox before ignition, the airflow steps the crew set and the carbon monoxide the burn added. Camera exposure changes between and within tests, so compare shape and color, not brightness. Eight sequences that show the camera monitor or no flame are left out.</p>
       </div>
     </div>
     <div class="sec sec--alt">
@@ -149,7 +155,20 @@
           <h2>Will this fire go out on its own? <span class="mute">Ask the flight data.</span></h2>
           <p class="sec__lead">A model trained on 261 FLEX droplet fires from the ISS runs in your browser, with 200 bootstrap models for uncertainty. Leave the region NASA tested and it says so instead of guessing.</p>
         </header>
-        <div class="habitats" id="habitats"></div>
+        <div class="lab3d" id="lab3d-wrap">
+          <div class="lab3d__view" id="lab3d"><span class="lab3d__tag">3D Lab · drag to turn</span></div>
+          <div class="lab3d__hud">
+            <p class="label">Gravity</p>
+            <div class="seg seg--wrap" id="g-seg" role="group" aria-label="Gravity"></div>
+            <p class="label">Your scenario</p>
+            <p class="lab3d__sc" id="lab3d-sc"></p>
+            <div class="lab3d__p" id="lab3d-p"></div>
+            <p class="label">Replays</p>
+            <div class="lab3d__runs" id="lab3d-runs" aria-live="polite"></div>
+            <p class="note">Every few seconds the chamber replays one fire, drawn with the model's own probability, so over many replays you see how often a fire like this goes out on its own. The model is trained on ISS flights only; the Moon, Mars and Earth shapes show how buoyancy would stretch the flame and are an illustration, not a prediction.</p>
+          </div>
+        </div>
+        <div class="habitats card--gap" id="habitats"></div>
         <div class="console card--gap" id="scenario">
           <div class="console__side" id="sim-controls">
             <p class="label">Habitat presets</p>
@@ -275,6 +294,22 @@
       <div class="wrap">
         <header class="sec__head">
           <p class="eyebrow">04 · Ranking</p>
+          <h2>Which fires refuse to go out. <span class="mute">Flight flames grouped by fuel and air.</span></h2>
+          <p class="sec__lead">FLEX droplets and ACME CFI-G gas flames from the ISS, grouped by fuel, oxygen, pressure and suppressant. Ranked by the share that did not go out on its own, using the low end of its 90% range so a group of 5 cannot outrank a group of 50 by luck.</p>
+        </header>
+        <div class="card" id="survival">
+          <div class="controls-row">
+            <div class="seg" id="surv-kind" role="group" aria-label="Fire type"></div>
+            <span class="mono-sm">Mark groups near</span>
+            <div class="seg seg--wrap" id="surv-hab" role="group" aria-label="Habitat"></div>
+          </div>
+          <div class="legend" id="surv-legend"></div>
+          <div class="surv" id="surv-list"></div>
+          <div class="links"><button class="btn btn--line btn--sm" id="surv-more" type="button">Show all groups</button></div>
+          <p class="note" id="surv-note"></p>
+        </div>
+        <header class="sec__head card--gap" style="margin-top:clamp(64px,8vw,110px)">
+          <p class="eyebrow">Which investigations matter</p>
           <h2>The 24 investigations, ranked for your habitat. <span class="mute">Change the weights; see if the answer holds.</span></h2>
         </header>
         <div class="crit" id="criteria"></div>
@@ -464,7 +499,6 @@
         <p class="mono-sm" id="built"></p>
       </div>
     </div>
-    <div class="footer__word" aria-hidden="true"><img src="assets/phoenix.svg" alt=""><span>Phoenix</span></div>
     <div class="footer__bottom"><span>Team Skylab Phoenix · Juan Sebastián Zárate · Javier Medina · Barranquilla, Colombia</span><span>NASA Space Apps Challenge 2026</span></div>
   </div>
 </footer>
@@ -472,11 +506,13 @@
 <script>document.write('<script src="data/ember.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="data/si.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="data/corpus.js?v=' + window.__V + '"><\/script>');</script>
+<script>document.write('<script src="data/clips.js?v=' + window.__V + '"><\/script>');</script>
 <script src="vendor/plotly-2.35.2.min.js"></script>
 <script src="vendor/three-0.147.0.min.js"></script>
 <script src="vendor/OrbitControls-0.147.0.js"></script>
 <script src="vendor/satellite-5.0.0.min.js"></script>
 <script>document.write('<script src="globe.js?v=' + window.__V + '"><\/script>');</script>
+<script>document.write('<script src="lab3d.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="app.js?v=' + window.__V + '"><\/script>');</script>
 </body>
 </html>

@@ -61,6 +61,31 @@ def coverage(ens):
             "n_suit_envelope": int(len(near_suit))}
 
 
+def survival(ens):
+    KEEP = {"completo": "kept", "corte_de_flujo": "kept", "disrupcion": "broke", "extincion": "out", "autoextincion": "out"}
+    e = ens[ens["experimento"].isin(["FLEX", "CFI-G normal", "CFI-G inverse"]) & ens["resultado"].isin(list(KEEP))].copy()
+    e["end"] = e["resultado"].map(KEEP)
+    o2b = pd.cut(e["x_o2"], [0, 0.18, 0.21 + 1e-9, 0.25, 0.30, 0.45], labels=["under 18%", "18 to 21%", "21 to 25%", "25 to 30%", "30 to 45%"])
+    pb = pd.cut(e["p_atm"], [0, 0.8, 1.2, 10], labels=["0.5 to 0.8 atm", "about 1 atm", "1.2 to 3 atm"])
+    dil = np.where(e["x_co2"].fillna(0) > 0, "with CO\u2082", np.where(e["x_he"].fillna(0) > 0, "with helium", "no suppressant"))
+    kind = np.where(e["familia"] == "gota", "Droplet", np.where(e["experimento"] == "CFI-G inverse", "Inverse gas flame", "Gas flame"))
+    fuel = e["combustible"].astype(str).str.replace(r"\s+", " ", regex=True).str.strip()
+    e = e.assign(o2b=o2b.astype(str), pb=pb.astype(str), dil=dil, kind=kind, fuel=fuel)
+    rows = []
+    for (k, f, ob, pp, d), g in e.groupby(["kind", "fuel", "o2b", "pb", "dil"]):
+        n = len(g)
+        if n < 5:
+            continue
+        kept, broke, out = int((g["end"] == "kept").sum()), int((g["end"] == "broke").sum()), int((g["end"] == "out").sum())
+        lo, hi = wilson(kept + broke, n)
+        rows.append({"kind": k, "fuel": f, "o2": ob, "p": pp, "dil": d, "n": n, "kept": kept, "broke": broke, "out": out,
+                     "rate": (kept + broke) / n, "ci": [lo, hi],
+                     "o2_mean": float(g["x_o2"].mean()), "p_mean": float(g["p_atm"].mean()),
+                     "psi": sorted(g["psi_id"].unique().tolist())})
+    rows.sort(key=lambda r: (-r["ci"][0], -r["rate"], -r["n"]))
+    return rows
+
+
 def _score(n, quality, agree, closeness):
     s = 0.35 * min(1.0, math.log1p(n) / math.log1p(300)) + 0.25 * quality + 0.2 * min(1.0, agree / 3) + 0.2 * closeness
     return round(100 * s, 1), {"volume": round(min(1.0, math.log1p(n) / math.log1p(300)), 3), "quality": round(quality, 3),
@@ -216,7 +241,7 @@ def write(ens, saffire2, saffire1, invs, sim, models, gas, solid):
         "investigations": invs, "similarity": sim, "coverage": cov, "o2_bands": bands, "suppression": sup,
         "saffire2": saffire2.to_dict(orient="records"), "saffire1": saffire1.to_dict(orient="records"),
         "flex": flex, "cfig": models["cfig"], "habitat_check": models["habitat_check"], "next": models["next"],
-        "solids": solid, "findings": F, "qc": qc.to_dict(orient="records"),
+        "solids": solid, "findings": F, "qc": qc.to_dict(orient="records"), "survival": survival(ens),
     }
     payload = _jsonable(payload)
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
