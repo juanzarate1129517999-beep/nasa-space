@@ -1,0 +1,136 @@
+:root {
+  --ink: #0f172a; --ink2: #334155; --muted: #64748b; --line: #e2e8f0; --soft: #f8fafc;
+  --orange: #ea580c; --amber: #f59e0b; --rose: #e11d48; --violet: #7c3aed; --blue: #0284c7; --teal: #0d9488;
+  --fire: linear-gradient(90deg, #f59e0b, #ea580c 40%, #e11d48 72%, #7c3aed);
+}
+@page {
+  size: A4; margin: 20mm 18mm 20mm 18mm;
+  @bottom-left { content: "Skylab Phoenix · Informe técnico · NASA Space Apps 2026"; font: 7.5pt "Inter", "Segoe UI", sans-serif; color: #94a3b8; }
+  @bottom-right { content: counter(page); font: 600 8pt "Inter", "Segoe UI", sans-serif; color: #ea580c; }
+}
+@page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: "Inter", "Segoe UI", Arial, sans-serif; color: var(--ink2); font-size: 9.6pt; line-height: 1.55;
+  counter-reset: h2 fig tab; }
+b, strong { color: var(--ink); font-weight: 600; }
+i { color: inherit; }
+code, .mono, pre { font-family: "JetBrains Mono", Consolas, monospace; }
+code { font-size: 8.4pt; background: #fff7ed; color: #9a3412; padding: 1px 5px; border-radius: 4px; }
+p { margin: 0 0 8pt; text-align: justify; hyphens: auto; }
+ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+.page { break-before: page; }
+
+/* ---------------- cover (mirrors the reference layout) */
+.cover { height: 297mm; padding: 26mm 22mm 18mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.cover-band { position: absolute; left: 0; right: 0; top: 0; height: 7mm; background: var(--fire); }
+.cover::after { content: ""; position: absolute; right: -60mm; top: 40mm; width: 150mm; height: 150mm; border-radius: 50%;
+  background: radial-gradient(circle, rgba(234,88,12,.10), rgba(124,58,237,.06) 45%, transparent 70%); }
+.logo { width: 21mm; height: 21mm; border-radius: 50%; background: #0b1020; display: grid; place-items: center; margin-top: 8mm; position: relative; z-index: 1; }
+.logo svg { width: 14mm; height: 14mm; }
+.title { font-size: 46pt; line-height: 1.02; letter-spacing: -0.03em; color: var(--ink); font-weight: 800; margin: 9mm 0 5mm; position: relative; z-index: 1; }
+.subtitle { font-size: 12.5pt; line-height: 1.45; color: #334155; max-width: 150mm; text-align: left; position: relative; z-index: 1; }
+.tagline { font-size: 7.6pt; letter-spacing: .12em; font-weight: 700; color: var(--orange); margin-top: 2mm; text-align: left; }
+.cover-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 12mm 0 auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.cover-kpis div { padding: 4mm 3mm; border-right: 1px solid var(--line); }
+.cover-kpis div:last-child { border-right: 0; }
+.cover-kpis b { display: block; font-size: 17pt; letter-spacing: -0.02em; background: var(--fire); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cover-kpis span { font-size: 7.6pt; color: var(--muted); line-height: 1.3; display: block; margin-top: 1mm; }
+table.meta { width: 100%; border-collapse: collapse; font-size: 8.4pt; margin-top: 10mm; }
+table.meta td { border-top: 1px solid var(--line); padding: 2.2mm 2mm 2.2mm 0; vertical-align: top; color: var(--ink2); }
+table.meta tr:last-child td { border-bottom: 1px solid var(--line); }
+table.meta td:first-child { width: 38mm; color: var(--muted); }
+.cover-date { font-size: 8pt; color: var(--muted); margin-top: 5mm; }
+
+/* ---------------- headings */
+h2 { counter-increment: h2; font-size: 19pt; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 4mm; padding-top: 1mm; font-weight: 750; }
+h2::before { content: counter(h2, decimal-leading-zero); display: block; font-size: 8pt; letter-spacing: .14em; color: var(--orange); font-weight: 700; margin-bottom: 1.5mm; }
+h2.nonum { counter-increment: none; }
+h2.nonum::before { content: ""; display: block; width: 14mm; height: 1.4mm; border-radius: 1mm; background: var(--fire); margin-bottom: 3mm; }
+h2 + .lead, .lead { font-size: 11pt; line-height: 1.5; color: var(--ink); font-weight: 500; text-align: left; }
+h3 { font-size: 11.5pt; color: var(--ink); margin: 6mm 0 2.5mm; font-weight: 650; break-after: avoid; }
+h3::before { content: ""; display: inline-block; width: 2.2mm; height: 2.2mm; border-radius: 50%; background: var(--orange); margin-right: 2mm; vertical-align: 1pt; }
+h3.nonum::before { display: none; }
+section.page h2 + h3, section.page > h2 { break-after: avoid; }
+section.page > h2:not(:first-child) { margin-top: 9mm; }
+table.keep { break-inside: avoid; }
+td.mono { white-space: nowrap; }
+
+/* ---------------- tables */
+table { width: 100%; border-collapse: collapse; font-size: 8.2pt; margin: 2mm 0 5mm; break-inside: auto; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th { text-align: left; font-weight: 600; color: #fff; background: #0f172a; padding: 1.8mm 2mm; font-size: 7.6pt; letter-spacing: .02em; }
+th:first-child { border-top-left-radius: 1.5mm; } th:last-child { border-top-right-radius: 1.5mm; }
+td { padding: 1.6mm 2mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+tbody tr:nth-child(even) td { background: var(--soft); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.hl td { background: #fff7ed !important; color: var(--ink); }
+tr.hl td:first-child { box-shadow: inset 2.5px 0 0 var(--orange); }
+table.compact td, table.compact th { padding: 1.3mm 2mm; }
+table.tiny { font-size: 6.9pt; } table.tiny td, table.tiny th { padding: 1.1mm 1.4mm; }
+.dim { color: #94a3b8; }
+.tcap, .fcap { font-size: 8pt; color: var(--muted); margin: 4mm 0 1mm; text-align: left; }
+.tcap b, .fcap b { color: var(--orange); }
+.note { font-size: 8pt; color: var(--muted); }
+
+/* ---------------- figures */
+figure { margin: 3mm 0 5mm; break-inside: avoid; text-align: center; }
+figure img { max-width: 100%; max-height: 118mm; }
+figure.wide img { width: 100%; }
+figcaption { font-size: 8pt; color: var(--muted); text-align: left; margin-top: 1.5mm; line-height: 1.45; }
+figcaption b { color: var(--orange); }
+figure.shot img { width: 100%; border-radius: 2mm; border: 1px solid #1e293b; max-height: 112mm; object-fit: cover; object-position: top; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+.two figure img { max-height: 70mm; }
+
+/* ---------------- callouts, formulas */
+.callout { border-radius: 2.5mm; padding: 4mm 5mm; margin: 4mm 0; background: linear-gradient(90deg, #fff7ed, #fdf2f8 60%, #f5f3ff); border-left: 1.2mm solid var(--orange); color: var(--ink); font-size: 9.6pt; break-inside: avoid; }
+.callout.q { font-size: 11pt; font-weight: 500; border-left-color: var(--violet); }
+.formula { font-family: "JetBrains Mono", Consolas, monospace; font-size: 8.2pt; background: #0f172a; color: #fde68a; padding: 3mm 4mm; border-radius: 2mm; margin: 3mm 0; break-inside: avoid; }
+p.en { font-style: italic; color: var(--muted); }
+pre { background: #0f172a; color: #e2e8f0; font-size: 7.8pt; padding: 4mm; border-radius: 2mm; white-space: pre-wrap; break-inside: avoid; }
+ul.defs li { margin-bottom: 2mm; }
+
+/* ---------------- architecture */
+.arch { display: grid; grid-template-columns: 1fr 5mm 1fr 5mm 1fr 5mm 1fr 5mm 1fr; align-items: stretch; margin: 4mm 0 1mm; }
+.arch .arrow { display: grid; place-items: center; color: var(--muted); font-size: 12pt; }
+.arch .st { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm; background: #fff; border-top: 1.4mm solid; }
+.arch .st span { font-size: 6.6pt; letter-spacing: .14em; font-weight: 700; }
+.arch .st b { display: block; font-size: 8.6pt; margin: 1mm 0; }
+.arch .st p { font-size: 7pt; line-height: 1.35; margin: 0; text-align: left; color: var(--muted); }
+.arch .s1 { border-top-color: var(--amber); } .arch .s1 span { color: var(--amber); }
+.arch .s2 { border-top-color: var(--orange); } .arch .s2 span { color: var(--orange); }
+.arch .s3 { border-top-color: var(--rose); } .arch .s3 span { color: var(--rose); }
+.arch .s4 { border-top-color: var(--violet); } .arch .s4 span { color: var(--violet); }
+.arch .s5 { border-top-color: var(--blue); } .arch .s5 span { color: var(--blue); }
+
+/* ---------------- findings */
+table.findings td.score { font-size: 12pt; font-weight: 750; color: var(--orange); }
+table.findings .impl { font-size: 7.8pt; color: var(--ink2); margin-top: 1mm; padding-left: 2mm; border-left: 0.6mm solid var(--amber); }
+table.findings .src { font-size: 6.8pt; color: #94a3b8; margin-top: 1mm; }
+.tag { display: inline-block; font-size: 6.8pt; font-weight: 600; color: #fff; padding: 0.6mm 2mm; border-radius: 1mm; white-space: nowrap; }
+.t-Prevention { background: var(--orange); } .t-Detection { background: var(--teal); } .t-Suppression { background: var(--blue); }
+
+/* ---------------- toc */
+.toc ol { columns: 2; column-gap: 10mm; font-size: 10.5pt; color: var(--ink); padding-left: 7mm; }
+.toc ol li { margin-bottom: 2.6mm; break-inside: avoid; }
+.toc ol li::marker { color: var(--orange); font-weight: 700; }
+.toc-extra { color: var(--muted); font-size: 9pt; margin-top: 4mm; }
+.refs ol li { font-size: 8.4pt; margin-bottom: 2mm; text-align: left; }
+.refs h2.nonum:not(:first-child) { margin-top: 8mm; }
+.tcap { break-after: avoid; page-break-after: avoid; }
+h3 { page-break-after: avoid; }
+table.tiny { table-layout: fixed; }
+table.tiny th:nth-child(1), table.tiny td:nth-child(1) { width: 12%; }
+table.tiny th:nth-child(2), table.tiny td:nth-child(2) { width: 12%; }
+table.tiny th:nth-child(3), table.tiny td:nth-child(3) { width: 11%; }
+table.tiny th:nth-child(4), table.tiny td:nth-child(4) { width: 12%; }
+table.tiny th:nth-child(5), table.tiny td:nth-child(5) { width: 12%; }
+table.tiny th:nth-child(6), table.tiny td:nth-child(6) { width: 11%; }
+table.tiny th:nth-child(7), table.tiny td:nth-child(7) { width: 30%; }
+table.tiny td { word-break: break-word; }
+table.tiny td.mono { white-space: normal; }
+h2 { break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; }
