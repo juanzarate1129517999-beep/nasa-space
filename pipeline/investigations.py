@@ -173,7 +173,7 @@ def build(ensayos):
             "p_min": float(cond["p_atm"].min()) if len(cond) else None,
             "p_max": float(cond["p_atm"].max()) if len(cond) else None,
             "conditions_assumed": bool(len(e) and (e["o2_supuesto"] | e["p_supuesta"]).mean() > 0.5),
-            "psi_url": f"https://psi.nasa.gov/physci/repo/investigations/{psi}",
+            "psi_url": f"https://psi.nasa.gov/physci/repo/data/investigations/{psi}",
             "size_mb": float(c["total_mb"]) if pd.notna(c["total_mb"]) else None,
         }
         # ---- relevance per habitat: 50% condition proximity, 20% evidence, 30% challenge directness
