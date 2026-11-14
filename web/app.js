@@ -52,7 +52,8 @@
       el.innerHTML = '<p class="note" style="padding:20px">Charts could not load (web/vendor/plotly-2.35.2.min.js is missing). All values are also available in the tables and downloads.</p>';
       return;
     }
-    Plotly.react(el, data, lay, CFG);
+    const L = window.I18N;
+    Plotly.react(el, L ? L.deep(data) : data, L ? L.deep(lay) : lay, CFG);
     return el;
   }
   const legendItem = (shape, color, label, open = false) => {
@@ -1170,7 +1171,7 @@
     const shown = archState.all ? list : list.slice(0, 12);
     const air = (a) => { const t = String(a).replace(/\([^)]*\)/g, "").replace(/\s*,\s*/g, ", ").replace(/,\s*$/, "").trim(); return t ? `${t} cm/s` : "—"; };
     $("#arch").innerHTML = shown.map((c) => `<figure class="ac"><div class="ac__v"><video data-src="assets/video/bass2/${c.f}.mp4" poster="assets/video/bass2/${c.f}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span></div>
-      <figcaption><span class="ac__o2">${c.o2}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · test ${esc(c.test)}</span><span class="ac__m">Airflow ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}</span></figcaption></figure>`).join("");
+      <figcaption><span class="ac__o2">${c.o2}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · test ${esc(c.test)}</span><span class="ac__m"><span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}</span></figcaption></figure>`).join("");
     $("#arch-more").hidden = list.length <= 12;
     $("#arch-more").textContent = archState.all ? "Show fewer" : `Show all ${list.length}`;
     lazyVideos("#arch video");
@@ -1292,6 +1293,7 @@
   document.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) resizeIn(d); }));
   $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly · three.js`;
   if (QS.has("o2") || QS.has("hab")) { if (!location.hash || location.hash === "#" || location.hash === "#scenario") history.replaceState(null, "", `${location.search}#/lab`); }
+  if (window.I18N) safe(() => window.I18N.start(), "i18n");
   route();
   addEventListener("hashchange", route);
   safe(() => {

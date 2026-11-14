@@ -746,3 +746,6 @@ input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; border-radius
 @media (max-width: 1180px) { .arch { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 1000px) { .lab3d { grid-template-columns: 1fr; } .lab3d__view { min-height: 380px; } .lab3d__hud { border-left: 0; border-top: 1px solid var(--line); } .arch { grid-template-columns: 1fr 1fr; } .surv__h { display: none; } .surv__r { grid-template-columns: 30px minmax(0, 1fr) 90px; } .surv__bar { grid-column: 2 / -1; } .surv__r > .num.mono-sm { display: none; } }
 @media (max-width: 640px) { .arch { grid-template-columns: 1fr 1fr; gap: 10px; } .ac__o2 { font-size: 1.5rem; } }
+.lang { margin-left: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line-2); font-family: var(--f-mono); font-size: .76rem; letter-spacing: .06em; color: var(--ink-2); transition: border-color .2s, color .2s; }
+.lang:hover { border-color: var(--orange); color: var(--amber); }
+@media (max-width: 1000px) { .lang { margin-left: auto; } .burger { margin-left: 8px; } }
