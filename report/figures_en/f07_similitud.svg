@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="457.810526pt" height="437.044042pt" viewBox="0 0 457.810526 437.044042" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-14T15:44:40.023178</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 437.044042 
+L 457.810526 437.044042 
+L 457.810526 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 85.947406 357.4708 
+L 419.408206 357.4708 
+L 419.408206 24.01 
+L 85.947406 24.01 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g clip-path="url(#p2829546822)">
+    <image xlink:href="data:image/png;base64,
+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" id="image383d248a52" transform="scale(1 -1) translate(0 -333.163636)" x="85.745455" y="-24.02586" width="333.818182" height="333.163636"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(80.82871 381.869372) rotate(-60)">FLEX-2</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(97.739316 376.644804) rotate(-60)">FLEX</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3"/>
+     <g id="text_3">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(114.139266 372.304717) rotate(-60)">CFI</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4"/>
+     <g id="text_4">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(119.692341 386.75197) rotate(-60)">Saffire-II</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5"/>
+     <g id="text_5">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(134.569463 385.049499) rotate(-60)">Saffire-I</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6"/>
+     <g id="text_6">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(146.497819 388.45444) rotate(-60)">Saffire-III</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_7"/>
+     <g id="text_7">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(139.304597 424.978926) rotate(-60)">BASS spread modeling</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_8"/>
+     <g id="text_8">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(180.540844 377.621112) rotate(-60)">BASS</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_9"/>
+     <g id="text_9">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(191.292497 383.064163) rotate(-60)">BASS-II</text>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_10"/>
+     <g id="text_10">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(180.108479 426.500912) rotate(-60)">SAME smoke modeling</text>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_11"/>
+     <g id="text_11">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(207.428429 403.246831) rotate(-60)">DAFT / DAFT-2</text>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_12"/>
+     <g id="text_12">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(231.522957 385.579344) rotate(-60)">SAME-R</text>
+     </g>
+    </g>
+    <g id="xtick_13">
+     <g id="line2d_13"/>
+     <g id="text_13">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(248.677313 379.932588) rotate(-60)">SAME</text>
+     </g>
+    </g>
+    <g id="xtick_14">
+     <g id="line2d_14"/>
+     <g id="text_14">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(249.818513 402.021432) rotate(-60)">SPICE analysis</text>
+     </g>
+    </g>
+    <g id="xtick_15">
+     <g id="line2d_15"/>
+     <g id="text_15">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(248.411916 428.523189) rotate(-60)">Cool-flame counterflow</text>
+     </g>
+    </g>
+    <g id="xtick_16">
+     <g id="line2d_16"/>
+     <g id="text_16">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(261.275054 430.309042) rotate(-60)">Cool-flame perturbation</text>
+     </g>
+    </g>
+    <g id="xtick_17">
+     <g id="line2d_17"/>
+     <g id="text_17">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(304.739175 379.092435) rotate(-60)">SPICE</text>
+     </g>
+    </g>
+    <g id="xtick_18">
+     <g id="line2d_18"/>
+     <g id="text_18">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(319.008141 378.443322) rotate(-60)">SLICE</text>
+     </g>
+    </g>
+    <g id="xtick_19">
+     <g id="line2d_19"/>
+     <g id="text_19">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(322.36381 396.696593) rotate(-60)">ACME CFI-G</text>
+     </g>
+    </g>
+    <g id="xtick_20">
+     <g id="line2d_20"/>
+     <g id="text_20">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(323.628104 418.572233) rotate(-60)">ACME Flame Design</text>
+     </g>
+    </g>
+    <g id="xtick_21">
+     <g id="line2d_21"/>
+     <g id="text_21">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(352.518413 392.598209) rotate(-60)">ACME BRE</text>
+     </g>
+    </g>
+    <g id="xtick_22">
+     <g id="line2d_22"/>
+     <g id="text_22">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(366.436379 392.557046) rotate(-60)">ACME CLD</text>
+     </g>
+    </g>
+    <g id="xtick_23">
+     <g id="line2d_23"/>
+     <g id="text_23">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(374.68411 402.337017) rotate(-60)">ACME E-FIELD</text>
+     </g>
+    </g>
+    <g id="xtick_24">
+     <g id="line2d_24"/>
+     <g id="text_24">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(388.013419 403.315436) rotate(-60)">ACME s-Flame</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_25"/>
+     <g id="text_25">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="33.8821" transform="rotate(-0 82.447406 33.8821)">FLEX-2</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_26"/>
+     <g id="text_26">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="47.7763" transform="rotate(-0 82.447406 47.7763)">FLEX</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_27"/>
+     <g id="text_27">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="61.6705" transform="rotate(-0 82.447406 61.6705)">CFI</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_28"/>
+     <g id="text_28">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="75.5647" transform="rotate(-0 82.447406 75.5647)">Saffire-II</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_29"/>
+     <g id="text_29">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="89.4589" transform="rotate(-0 82.447406 89.4589)">Saffire-I</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_30"/>
+     <g id="text_30">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="103.3531" transform="rotate(-0 82.447406 103.3531)">Saffire-III</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_31"/>
+     <g id="text_31">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="117.2473" transform="rotate(-0 82.447406 117.2473)">BASS spread modeling</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_32"/>
+     <g id="text_32">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="131.1415" transform="rotate(-0 82.447406 131.1415)">BASS</text>
+     </g>
+    </g>
+    <g id="ytick_9">
+     <g id="line2d_33"/>
+     <g id="text_33">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="145.0357" transform="rotate(-0 82.447406 145.0357)">BASS-II</text>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_34"/>
+     <g id="text_34">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="158.9299" transform="rotate(-0 82.447406 158.9299)">SAME smoke modeling</text>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_35"/>
+     <g id="text_35">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="172.8241" transform="rotate(-0 82.447406 172.8241)">DAFT / DAFT-2</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_36"/>
+     <g id="text_36">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="186.7183" transform="rotate(-0 82.447406 186.7183)">SAME-R</text>
+     </g>
+    </g>
+    <g id="ytick_13">
+     <g id="line2d_37"/>
+     <g id="text_37">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="200.6125" transform="rotate(-0 82.447406 200.6125)">SAME</text>
+     </g>
+    </g>
+    <g id="ytick_14">
+     <g id="line2d_38"/>
+     <g id="text_38">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="214.5067" transform="rotate(-0 82.447406 214.5067)">SPICE analysis</text>
+     </g>
+    </g>
+    <g id="ytick_15">
+     <g id="line2d_39"/>
+     <g id="text_39">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="228.4009" transform="rotate(-0 82.447406 228.4009)">Cool-flame counterflow</text>
+     </g>
+    </g>
+    <g id="ytick_16">
+     <g id="line2d_40"/>
+     <g id="text_40">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="242.2951" transform="rotate(-0 82.447406 242.2951)">Cool-flame perturbation</text>
+     </g>
+    </g>
+    <g id="ytick_17">
+     <g id="line2d_41"/>
+     <g id="text_41">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="256.1893" transform="rotate(-0 82.447406 256.1893)">SPICE</text>
+     </g>
+    </g>
+    <g id="ytick_18">
+     <g id="line2d_42"/>
+     <g id="text_42">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="270.0835" transform="rotate(-0 82.447406 270.0835)">SLICE</text>
+     </g>
+    </g>
+    <g id="ytick_19">
+     <g id="line2d_43"/>
+     <g id="text_43">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="283.9777" transform="rotate(-0 82.447406 283.9777)">ACME CFI-G</text>
+     </g>
+    </g>
+    <g id="ytick_20">
+     <g id="line2d_44"/>
+     <g id="text_44">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="297.8719" transform="rotate(-0 82.447406 297.8719)">ACME Flame Design</text>
+     </g>
+    </g>
+    <g id="ytick_21">
+     <g id="line2d_45"/>
+     <g id="text_45">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="311.7661" transform="rotate(-0 82.447406 311.7661)">ACME BRE</text>
+     </g>
+    </g>
+    <g id="ytick_22">
+     <g id="line2d_46"/>
+     <g id="text_46">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="325.6603" transform="rotate(-0 82.447406 325.6603)">ACME CLD</text>
+     </g>
+    </g>
+    <g id="ytick_23">
+     <g id="line2d_47"/>
+     <g id="text_47">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="339.5545" transform="rotate(-0 82.447406 339.5545)">ACME E-FIELD</text>
+     </g>
+    </g>
+    <g id="ytick_24">
+     <g id="line2d_48"/>
+     <g id="text_48">
+      <text style="font-size: 7.8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="82.447406" y="353.4487" transform="rotate(-0 82.447406 353.4487)">ACME s-Flame</text>
+     </g>
+    </g>
+   </g>
+   <g id="text_49">
+    <text style="font-weight: 600; font-size: 11px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="85.947406" y="14.01" transform="rotate(-0 85.947406 14.01)">Investigations cluster by hardware and fuel family</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_3">
+    <path d="M 427.443406 300.5116 
+L 438.420526 300.5116 
+L 438.420526 80.9692 
+L 427.443406 80.9692 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAABEAAAFPCAYAAACrniXJAAABrElEQVR4nO2YUQoDQQxCs2Xuf95SSrf/m/mLAw8xBxDXqGnnen++dw1n3WOIqlUCkNccomoJiGg+RyOsAkQjrEaTOYafJmYBxPjETBOO2RTbSQD7gMyWAB4C8dIkTDYgmFKSaAISFrMdjiZhsgGp+2Iw4WjCYWIWQM52QJp4XcAw6cNZsZ0mcwxQijm252zHThOMTzArttMkZnsO54mMpAnHJ3MMuwCCfPJTgAi+Z5WACSg7ImElTOYoIGE1KY7ZNkwwPsFkx62UFEWN2Q7IbKJSwgQQVEpzEJBPRBcQ4xOMJnYHXfGLOsIeAklRNxDQGzWolLx8ErM9R1PUGGFJZtP4xCuAlGZLUfchvVGDhJ2DqAJIKWq3N6W8PXYQirCkUqIUdS7gBoRUSnmjfsy6BesRCStgQvKJRlgBSAlKViWsQhPB50iYJIB9EsA+Kp9AbO/XJwngYzifkwAeYgIKYFECmIO+ZZIAnmACCiDGsaI3JcrnoA46xPbpky0TiGPdLqCiChLAPglgH79/XhAmoAAqnj4SwC0TjCYU2/sddMgFTJ/sQBLAI0w4AfwDJtv5QZxv+l8AAAAASUVORK5CYII=" id="imagecea6416221" transform="scale(1 -1) translate(0 -219.272727)" x="427.418182" y="-80.509091" width="11.127273" height="219.272727"/>
+   <g id="matplotlib.axis_3"/>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_25">
+     <g id="line2d_49"/>
+     <g id="text_50">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #64748b" x="441.920526" y="303.5116" transform="rotate(-0 441.920526 303.5116)">0.0</text>
+     </g>
+    </g>
+    <g id="ytick_26">
+     <g id="line2d_50"/>
+     <g id="text_51">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #64748b" x="441.920526" y="259.60312" transform="rotate(-0 441.920526 259.60312)">0.2</text>
+     </g>
+    </g>
+    <g id="ytick_27">
+     <g id="line2d_51"/>
+     <g id="text_52">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #64748b" x="441.920526" y="215.69464" transform="rotate(-0 441.920526 215.69464)">0.4</text>
+     </g>
+    </g>
+    <g id="ytick_28">
+     <g id="line2d_52"/>
+     <g id="text_53">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #64748b" x="441.920526" y="171.78616" transform="rotate(-0 441.920526 171.78616)">0.6</text>
+     </g>
+    </g>
+    <g id="ytick_29">
+     <g id="line2d_53"/>
+     <g id="text_54">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #64748b" x="441.920526" y="127.87768" transform="rotate(-0 441.920526 127.87768)">0.8</text>
+     </g>
+    </g>
+    <g id="ytick_30">
+     <g id="line2d_54"/>
+     <g id="text_55">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #64748b" x="441.920526" y="83.9692" transform="rotate(-0 441.920526 83.9692)">1.0</text>
+     </g>
+    </g>
+   </g>
+   <g id="LineCollection_1"/>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p2829546822">
+   <rect x="85.947406" y="24.01" width="333.4608" height="333.4608"/>
+  </clipPath>
+ </defs>
+</svg>

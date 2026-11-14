@@ -4,7 +4,7 @@
 Team **Skylab Phoenix** (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and Javier Medina · [Leer en español](README.es.md)
 
 **Live dashboard:** https://juanzarate1129517999-beep.github.io/nasa-space/ (static site; models run in your browser, no login, works offline once loaded)
-**Technical report (Spanish, 37 pages):** [report/Informe_Skylab_Phoenix.pdf](report/Informe_Skylab_Phoenix.pdf) · **English summary:** [docs/TECHNICAL_SUMMARY.md](docs/TECHNICAL_SUMMARY.md)
+**Technical report (English, 40 pages):** [report/Technical_Report_Skylab_Phoenix.pdf](report/Technical_Report_Skylab_Phoenix.pdf) · Spanish edition: [report/Informe_Skylab_Phoenix.pdf](report/Informe_Skylab_Phoenix.pdf) · Short summary: [docs/TECHNICAL_SUMMARY.md](docs/TECHNICAL_SUMMARY.md)
 **Submission texts and checklist:** [SUBMISSION.md](SUBMISSION.md) · **Use of AI/SI:** [docs/AI_USE.md](docs/AI_USE.md)
 
 > The Moon base will breathe 30% oxygen. Skylab Phoenix answers, from NASA's own flight data, what happens to fire there, and shows where that data runs out.
@@ -62,7 +62,7 @@ python -m pytest                                         # tests
 python scripts/serve.py                                  # dashboard at http://127.0.0.1:8765
 ```
 
-Optional: `pip install anthropic` and `python scripts/si_generate.py` to regenerate the SI drafts; `python report/figures.py` and `python report/build_report.py` rebuild the Spanish report (needs Chrome or Edge).
+Optional: `pip install anthropic` and `python scripts/si_generate.py` to regenerate the SI drafts. Reports (need Chrome or Edge): `python report/figures.py en` and `python report/build_report_en.py` for English; `python report/figures.py` and `python report/build_report.py` for Spanish.
 
 The dashboard is a static site in `web/` (Plotly is bundled, no CDN). It also works by opening `web/index.html` from disk. GitHub Pages serves the `gh-pages` branch; the workflow in `.github/workflows/pages.yml` publishes `web/` there on every push to `main`.
 
@@ -80,7 +80,7 @@ The dashboard is a static site in `web/` (Plotly is bundled, no CDN). It also wo
 | `data/gold/`, `data/si/` | Versioned outputs: tests, investigations, QC log, findings, evidence packs, SI drafts and verification |
 | `web/` | Dashboard (HTML/CSS/JS + bundled Plotly) |
 | `tests/` | Pytest suite: data integrity, model behaviour, out-of-data guard, SI firewall |
-| `report/` | Spanish technical report and figures |
+| `report/` | Technical report in English and Spanish, with their figures |
 | `docs/` | English summary, use of AI, comparison with other approaches |
 
 ## Data and license
