@@ -1,10 +1,3 @@
-"""Unify the BASS, BASS-II and Saffire test tables from NASA PSI into one CSV.
-
-Usage: python scripts/build_tests_table.py data/psi data/processed/psi_tests_unified.csv
-
-Outcomes are only *hints* parsed from free-text notes and flow sequences
-(e.g. "5, down to ext"); they still need expert review before modeling.
-"""
 import os, re, sys
 import pandas as pd
 
@@ -126,7 +119,7 @@ if __name__ == "__main__":
     df.loc[df["experimento"].str.startswith("Saffire"), "barrido_de_flujo"] = False
     os.makedirs(os.path.dirname(out), exist_ok=True)
     df.to_csv(out, index=False, encoding="utf-8")
-    print(f"{len(df)} ensayos -> {out}")
+    print(f"{len(df)} tests -> {out}")
     print(df.groupby("experimento").agg(ensayos=("ensayo", "size"),
                                         o2_min=("o2_inicial_pct", "min"), o2_max=("o2_inicial_pct", "max"),
                                         con_pista_resultado=("resultado_pista", lambda s: (s != "").sum()),

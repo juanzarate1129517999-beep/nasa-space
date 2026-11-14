@@ -1,20 +1,5 @@
-"""Regenerate the SI drafts (data/si/drafts.json) from the evidence packs with Claude.
-
-    pip install anthropic
-    export ANTHROPIC_API_KEY=...        # or `ant auth login`
-    python -m pipeline.run              # writes data/si/evidence_packs.json
-    python scripts/si_generate.py       # writes data/si/drafts.json (only packs whose draft is missing or stale)
-    python -m pipeline.run              # verifies every draft and publishes the ones that pass
-
-Options: --all (redo every pack), --only habitat:moon_base,investigation:PSI-69
-
-The model only writes text. Every draft goes through the same firewall as the committed drafts
-(pipeline/si.py verify): each sentence must cite evidence items, use only numbers that appear in
-them and make no safety verdict. A draft that fails gets one correction round with the list of
-problems; if it still fails it is not saved and the dashboard shows the labelled evidence brief.
-Written with AI assistance (Anthropic Claude); see docs/AI_USE.md.
-"""
 import argparse
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -22,7 +7,7 @@ from pathlib import Path
 import anthropic
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pipeline import si  # noqa: E402
+si = importlib.import_module("pipeline.si")
 
 MODEL = "claude-opus-5-5"
 
@@ -71,15 +56,17 @@ def ask(client, pack, feedback=None):
                       + "\nRewrite it so that every rule holds."}]
     response = client.beta.messages.create(
         model=MODEL,
-        max_tokens=4000,
+        max_tokens=16000,
         system=SYSTEM,
         messages=messages,
         output_config={"effort": "medium", "format": {"type": "json_schema", "schema": SCHEMA}},
         betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",  # if the model declines, the API re-runs the request on a fallback model
+        fallbacks="default",
     )
     if response.stop_reason == "refusal":
         raise RuntimeError(f"model declined ({getattr(response.stop_details, 'category', None)})")
+    if response.stop_reason == "max_tokens":
+        raise RuntimeError("response cut at max_tokens")
     text = next(b.text for b in response.content if b.type == "text")
     return json.loads(text)
 
@@ -100,7 +87,7 @@ def main():
         if only and key not in only:
             continue
         if not args.all and not only and not si.verify(store["drafts"].get(key), pack):
-            continue  # current draft already passes
+            continue
         try:
             draft = ask(client, pack)
             draft["pack_hash"] = pack["hash"]

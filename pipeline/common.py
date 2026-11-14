@@ -1,4 +1,3 @@
-"""Shared paths, constants and the data-quality log."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,8 +10,6 @@ MMHG_PER_ATM = 760.0
 BAR_TO_ATM = 0.986923
 PSI_TO_ATM = 1 / 14.6959
 
-# Habitable atmospheres. Moon base and spacesuit values come from the official
-# challenge page; ISS/EVA-prep values are standard NASA operating points.
 HABITATS = [
     {"id": "cabin", "name": "Spacecraft cabin", "detail": "ISS · Gateway · Orion", "x_o2": 0.21, "p_atm": 1.0,
      "source": "Sea-level-equivalent cabin air (14.7 psi, 21% O2)"},
@@ -29,7 +26,6 @@ HABITATS = [
 
 
 class QCLog:
-    """Every correction the pipeline makes is recorded with the original value and why."""
 
     def __init__(self):
         self.rows = []

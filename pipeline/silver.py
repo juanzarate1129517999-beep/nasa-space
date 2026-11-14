@@ -1,8 +1,4 @@
-"""Silver layer: one clean, unit-normalized table per PSI experiment.
-
-Every table is mapped to the same schema (SCHEMA). Values that had to be fixed or
-dropped are written to the QC log with the original value and the rule applied.
-"""
+import importlib
 import re
 import sys
 
@@ -12,7 +8,7 @@ import pandas as pd
 from .common import BAR_TO_ATM, MMHG_PER_ATM, QC, RAW, ROOT
 
 sys.path.insert(0, str(ROOT / "scripts"))
-import build_tests_table as btt  # noqa: E402  (solid-fuel parsers written earlier)
+btt = importlib.import_module("build_tests_table")
 
 SCHEMA = [
     "test_uid", "psi_id", "experimento", "familia", "combustible", "material_familia",
@@ -25,7 +21,7 @@ SCHEMA = [
 
 def _csv(psi, name):
     df = pd.read_csv(RAW / psi / f"{psi}_Experimental table_{name}.csv", encoding="latin-1")
-    df.columns = [str(c).replace("ï»¿", "").replace("﻿", "").strip() for c in df.columns]  # BOM + spaces
+    df.columns = [str(c).replace("ï»¿", "").replace("﻿", "").strip() for c in df.columns]
     return df
 
 
@@ -39,7 +35,6 @@ def _finish(df, psi, exp, familia):
     for c in SCHEMA:
         if c not in df.columns:
             df[c] = np.nan
-    # cast all-NaN (float) columns to object before filling with text/bool: pandas 4 will refuse the implicit upcast
     df["qc_flags"] = df["qc_flags"].astype(object).fillna("")
     df["n_eventos"] = df["n_eventos"].fillna(1)
     df["gravedad"] = df["gravedad"].astype(object).fillna("ug")
@@ -50,7 +45,6 @@ def _finish(df, psi, exp, familia):
     return df[SCHEMA]
 
 
-# ---------------------------------------------------------------- droplets
 def flex():
     psi, exp = "PSI-69", "FLEX"
     r = _csv(psi, "FLEX")
@@ -62,7 +56,7 @@ def flex():
         "resultado": r["end"].astype(str).str.strip().str.lower().map(
             {"extinction": "extincion", "disruption": "disrupcion", "completion": "completo"}),
         "fecha": pd.to_datetime(r["fecha"], format="%m/%d/%Y", errors="coerce").fillna(
-            pd.to_datetime(r["fecha"], format="%m/%d/%y", errors="coerce")),  # source mixes 4- and 2-digit years
+            pd.to_datetime(r["fecha"], format="%m/%d/%y", errors="coerce")),
         "flujo_cm_s": 0.0, "ignicion": 1.0,
     })
     df["autoextincion"] = (df["resultado"] == "extincion").astype(float)
@@ -100,7 +94,6 @@ def cfi():
     return _finish(df, psi, exp, "gota")
 
 
-# ---------------------------------------------------------------- gas flames (ACME)
 def _yesno(s, psi, exp, field):
     raw = s.astype(str).str.strip()
     norm = raw.str.lower().map({"yes": 1.0, "no": 0.0, "flash": 1.0})
@@ -195,7 +188,6 @@ def _fix_autofill(s, psi, exp, field):
 
 
 def acme_daily():
-    """ACME CLD, E-FIELD, s-Flame and SLICE report flames per test day (no per-flame outcome)."""
     rows = []
     c = _csv("PSI-21", "CLD Flame")
     fuel = _fix_autofill(c["Fuel Bottle"], "PSI-21", "ACME CLD", "Fuel Bottle")
@@ -237,7 +229,6 @@ def acme_daily():
     return pd.concat(rows, ignore_index=True)
 
 
-# ---------------------------------------------------------------- MSG duct: SPICE / SLICE
 def spice_slice():
     sp = _csv("PSI-107", "Spice")
     spice = _finish(pd.DataFrame({
@@ -250,7 +241,6 @@ def spice_slice():
     return pd.concat([spice, slice_], ignore_index=True)
 
 
-# ---------------------------------------------------------------- smoke & dust
 def smoke():
     r = _csv("PSI-101", "SAME-R")
     same_r = _finish(pd.DataFrame({
@@ -269,7 +259,6 @@ def smoke():
     return pd.concat([same_r, same, daft], ignore_index=True)
 
 
-# ---------------------------------------------------------------- solids: BASS / BASS-II / Saffire
 def _first_flow(text):
     m = re.search(r"\d+\.?\d*", str(text))
     return float(m.group()) if m else np.nan
@@ -305,27 +294,26 @@ def solids():
 
 
 def saffire_gravity():
-    """Saffire-II: the same samples burned in microgravity (Cygnus) and in 1 g on the ground."""
     r = _csv("PSI-99", "SAFFIRE-2")
     r = r[r.iloc[:, 0].astype(str).str.match(r"^2-\d")].copy()
     r.columns = [c.strip() for c in r.columns]
     r["Material"] = r["Material"].ffill()
-    flat_len = 29.0  # cm, length of the flat silicone / SIBAL samples
+    flat_len = 29.0
 
     def state(v):
         v = str(v).lower()
         if "complete" in v or v.strip().startswith("29"):
-            return 2  # burned the whole sample
+            return 2
         m = re.search(r"(\d+\.?\d*)", v.replace("~", ""))
         if m and float(m.group()) > 0:
-            return 1  # partial
-        return 0  # no propagation
+            return 1
+        return 0
 
     rows = []
     ug_col = [c for c in r.columns if c.endswith("-g Burn Length") and not c.startswith("1")][0]
     for _, x in r.iterrows():
         if "&" in str(x["Material"]):
-            continue  # composite PMMA+Nomex sample: outcome is not a single material
+            continue
         rows.append({
             "muestra": x.iloc[0], "material": x["Material"].replace("Cotton-Fiberglass (SIBAL)", "SIBAL fabric"),
             "espesor": str(x["Samle Thickness"]).replace("037", "0.37"), "flujo": x["Air Flow (cm/s)"],

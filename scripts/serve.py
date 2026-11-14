@@ -1,7 +1,3 @@
-"""Serve the Skylab Phoenix dashboard locally without browser caching.
-
-Usage: python scripts/serve.py [port]   ->  http://127.0.0.1:8765
-"""
 import functools
 import http.server
 import sys

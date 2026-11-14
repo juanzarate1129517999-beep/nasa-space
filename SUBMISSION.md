@@ -15,7 +15,7 @@ Sources: Space Apps [Project Submission Guide](https://www.spaceappschallenge.or
 | English on the submission page and in all linked material | README, dashboard, deck, full technical report and this file in English; Spanish report kept as an extra | Link the English report |
 | Say how space-agency open data made the project possible | “Use of NASA data” below | Paste it |
 | **Disclose use of AI/SI** where and how it was used | [docs/AI_USE.md](docs/AI_USE.md), dashboard footer, badges on every SI briefing | Paste the “Use of AI” text below |
-| SI-generated images/video carry a visible watermark; code and data acknowledge SI in text and metadata | Code headers, `meta.generator`, `"source": "si"`; no SI images in the dashboard | Confirm the logo and any demo footage; watermark if SI-made |
+| SI-generated images/video carry a visible watermark; code and data acknowledge SI in text and metadata | docs/AI_USE.md, README, git co-author metadata, `meta.generator`, `"source": "si"`; no SI images in the dashboard | Confirm the logo and any demo footage; watermark if SI-made |
 | No NASA logos, flags, insignia or mission identifiers in generated content; don't use NASA branding | None used | Keep it that way in the deck and video |
 | Original content freely available or open source | [MIT License](LICENSE); data CC0 | — |
 | Team of 6 or fewer, registered at the local event | 2 members, Barranquilla (CUC) | — |

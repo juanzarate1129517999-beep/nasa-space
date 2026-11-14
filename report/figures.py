@@ -1,9 +1,3 @@
-"""Report figures for Skylab Phoenix, drawn straight from the pipeline export (web/data/ember.json).
-
-Usage: python report/figures.py      ->  report/figures/*.svg      (Spanish report)
-       python report/figures.py en   ->  report/figures_en/*.svg   (English report)
-Every number in every figure comes from the gold data; nothing is typed by hand.
-"""
 import json
 import math
 import sys
@@ -12,9 +6,9 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
 
 ROOT = Path(__file__).resolve().parents[1]
 EN = len(sys.argv) > 1 and sys.argv[1] == "en"
@@ -23,22 +17,18 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 
 def L(es, en):
-    """Pick the Spanish or English text for the current report."""
     return en if EN else es
 
 
 def dec(s):
-    """Decimal comma in Spanish, decimal point in English."""
     return s if EN else s.replace(".", ",")
 
 
 def thou(s):
-    """Thousands separator: '.' in Spanish, ',' in English."""
     return s if EN else s.replace(",", ".")
 
 D = json.loads((ROOT / "web" / "data" / "ember.json").read_text(encoding="utf-8"))
 
-# ---------------------------------------------------------------- style (validated palette)
 INK, INK2, MUTED, GRID, LIGHT = "#0f172a", "#334155", "#64748b", "#e2e8f0", "#cbd5e1"
 ORANGE, BLUE, VIOLET, TEAL = "#ea580c", "#0284c7", "#7c3aed", "#0d9488"
 AMBER, ROSE = "#f59e0b", "#e11d48"
@@ -72,7 +62,6 @@ def pct(v, d=0):
     return f"{100 * v:.{d}f}%"
 
 
-# ---------------------------------------------------------------- 1 coverage
 def coverage():
     fig, ax = plt.subplots(figsize=(7.2, 4.6))
     moon = next(h for h in D["habitats"] if h["id"] == "moon_base")
@@ -110,7 +99,6 @@ def coverage():
     save(fig, "f01_cobertura")
 
 
-# ---------------------------------------------------------------- 2 QC log
 def qc():
     from collections import Counter
     labels = {
@@ -155,7 +143,6 @@ def qc():
     save(fig, "f02_calidad")
 
 
-# ---------------------------------------------------------------- 3 FLEX outcome bands
 def bands():
     B = D["o2_bands"]
     fig, ax = plt.subplots(figsize=(7.2, 2.9))
@@ -178,7 +165,6 @@ def bands():
     save(fig, "f03_flex_oxigeno")
 
 
-# ---------------------------------------------------------------- 4 suppression
 def suppression():
     S = D["suppression"]["co2"]
     cats = ["0%", "1–20%", "20–30%", ">30%"]
@@ -201,7 +187,6 @@ def suppression():
     save(fig, "f04_supresion_co2")
 
 
-# ---------------------------------------------------------------- 5 Saffire μg vs 1g
 def saffire():
     G = D["saffire2"]
     fig, ax = plt.subplots(figsize=(7.2, 3.3))
@@ -224,7 +209,6 @@ def saffire():
     save(fig, "f05_saffire_gravedad")
 
 
-# ---------------------------------------------------------------- 6 ranking heatmap
 def ranking():
     inv = sorted(D["investigations"], key=lambda r: -r["relevance"]["moon_base"]["score"])
     habs = [h["id"] for h in D["habitats"]]
@@ -244,7 +228,6 @@ def ranking():
     save(fig, "f06_ranking_habitat")
 
 
-# ---------------------------------------------------------------- 7 similarity
 def similarity():
     S = D["similarity"]
     M = np.array(S["matrix"])
@@ -261,7 +244,6 @@ def similarity():
     save(fig, "f07_similitud")
 
 
-# ---------------------------------------------------------------- 8 validation
 def validation():
     V = D["flex"]["validation"]["models"]
     names = (["Logistic\n(deployed)", "Gradient\nboosting", "Oxygen\nonly", "Base\nrate"] if EN else
@@ -282,7 +264,6 @@ def validation():
     save(fig, "f08_validacion")
 
 
-# ---------------------------------------------------------------- 9 calibration
 def calibration():
     R = D["flex"]["validation"]["reliability"]
     fig, ax = plt.subplots(figsize=(4.4, 3.6))
@@ -299,7 +280,6 @@ def calibration():
     save(fig, "f09_calibracion")
 
 
-# ---------------------------------------------------------------- 10 drivers
 def drivers():
     lab = ({"x_o2": "Oxygen fraction", "d0_mm": "Initial droplet diameter", "heptane": "Fuel: heptane (vs methanol)",
             "x_he": "Helium diluent", "x_co2": "CO₂ diluent", "log_p": "Pressure (log)"} if EN else
@@ -320,7 +300,6 @@ def drivers():
     save(fig, "f10_factores")
 
 
-# ---------------------------------------------------------------- 11 probability maps
 def _prob(fuel_hep, o2, p, co2=0.0, he=0.0, d0=None):
     F = D["flex"]
     d0 = F["d0_median"] if d0 is None else d0
@@ -355,7 +334,6 @@ def probmaps():
     save(fig, "f11_mapa_probabilidad")
 
 
-# ---------------------------------------------------------------- 12 habitat predictions
 def habitats():
     H = [h for h in D["habitat_check"] if h["habitat"] != "suit"]
     fig, ax = plt.subplots(figsize=(7.2, 2.7))
@@ -377,7 +355,6 @@ def habitats():
     save(fig, "f12_habitats")
 
 
-# ---------------------------------------------------------------- 13 CFI-G Tad
 def tad():
     CG = D["cfig"]
     fig, ax = plt.subplots(figsize=(7.2, 3.3))
@@ -404,7 +381,6 @@ def tad():
     save(fig, "f13_temperatura_limite")
 
 
-# ---------------------------------------------------------------- 14 uncertainty + picks
 def uncertainty():
     N = D["next"]
     Z = np.array(N["map"]["spread"])
@@ -430,7 +406,6 @@ def uncertainty():
     save(fig, "f14_incertidumbre")
 
 
-# ---------------------------------------------------------------- 15 findings scores
 def findings():
     F = list(reversed(D["findings"]))
     es = {"Prevention": (L("Prevención", "Prevention"), ORANGE), "Detection": (L("Detección", "Detection"), TEAL),

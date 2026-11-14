@@ -1,4 +1,3 @@
-"""Run the whole Skylab Phoenix pipeline: python -m pipeline.run"""
 import time
 
 from . import gold, investigations, models, si, silver

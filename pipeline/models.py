@@ -1,12 +1,3 @@
-"""Small, interpretable, calibrated models with honest validation.
-
-M1  FLEX droplets: P(flame self-extinguishes) from atmosphere + fuel + droplet size.
-M2  ACME CFI-G gas flames: P(self-extinction) vs adiabatic flame temperature -> limiting Tad.
-M4  Out-of-distribution flag + "next experiment" (where the model is least certain near habitat atmospheres).
-
-Exported as coefficients + bootstrap ensembles so the web dashboard can run the
-models live in the browser, with uncertainty, and no server.
-"""
 import numpy as np
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -40,7 +31,6 @@ def _reliability(y, p, bins=5):
 
 
 def _oof(make, X, y, groups, k=5):
-    """Out-of-fold predictions with whole test days held out (no same-day leakage)."""
     p = np.zeros(len(y))
     for tr, te in GroupKFold(n_splits=k).split(X, y, groups):
         if len(np.unique(y[tr])) < 2:
@@ -61,7 +51,7 @@ def _bootstrap_logit(Xs, y, C, groups=None):
     coefs = []
     idx_all = np.arange(len(y))
     for _ in range(N_BOOT):
-        if groups is not None:  # resample whole test days
+        if groups is not None:
             g = np.unique(groups)
             pick = RNG.choice(g, size=len(g), replace=True)
             idx = np.concatenate([idx_all[groups == x] for x in pick])
@@ -80,7 +70,6 @@ def _knn_dist(Xs, k=5):
     return np.sort(d, axis=1)[:, :k].mean(axis=1)
 
 
-# ------------------------------------------------------------------ M1 FLEX
 def flex_model(ens):
     d = ens[(ens["experimento"] == "FLEX") & ens["p_atm"].notna() & ens["autoextincion"].notna()].copy()
     d["heptane"] = (d["combustible"].str.lower() == "heptane").astype(float)
@@ -106,7 +95,7 @@ def flex_model(ens):
             {"name": "Gradient boosting (same inputs)", "key": "gb", **_metrics(y, oof_gb), "deployed": False},
             {"name": "Baseline: oxygen only", "key": "o2", **_metrics(y, oof_o2), "deployed": False},
             {"name": "Baseline: always predict the base rate", "key": "prior", **_metrics(y, oof_prior),
-             "auc": 0.5, "deployed": False},  # a constant score has AUC 0.5 by definition
+             "auc": 0.5, "deployed": False},
         ],
         "reliability": _reliability(y, oof_lr),
     }
@@ -124,10 +113,7 @@ def flex_model(ens):
         "features": FLEX_FEATURES, "labels": FLEX_LABELS, "mu": mu.tolist(), "sd": sd.tolist(),
         "coef": np.r_[full.intercept_, full.coef_.ravel()].tolist(), "boot": np.round(boots, 5).tolist(),
         "ood_threshold": float(np.percentile(knn, 95)), "ood_k": 5,
-        # flown range of each input: leaving it on any single axis is an extrapolation even when the
-        # multivariate nearest-neighbour distance is small (e.g. a pressure below every flown test)
         "ranges": {f: [float(X[:, i].min()), float(X[:, i].max())] for i, f in enumerate(FLEX_FEATURES)},
-        # median droplet size snapped to the dashboard slider grid (1.1 mm + k·0.05 mm) so both agree exactly
         "d0_median": float(round(1.1 + np.round((np.median(d["d0_mm"]) - 1.1) / 0.05) * 0.05, 2)),
         "train": train.round(4).to_dict(orient="records"), "train_std": np.round(Xs, 4).tolist(),
         "validation": validation, "drivers": drivers, "n": int(len(y)), "base_rate": float(y.mean()),
@@ -144,7 +130,6 @@ class _Prior:
 
 
 def flex_predict(model, rows, use_boot=True):
-    """rows: array (n, 6) in raw feature units -> (mean, p05, p95)."""
     Xs = (np.asarray(rows, float) - np.array(model["mu"])) / np.array(model["sd"])
     B = np.array(model["boot"]) if use_boot else np.array([model["coef"]])
     z = B[:, :1].T + Xs @ B[:, 1:].T
@@ -159,13 +144,12 @@ def flex_ood(model, rows):
     return np.sort(d, axis=1)[:, :model["ood_k"]].mean(axis=1)
 
 
-# ------------------------------------------------------------------ M2 CFI-G limiting flame temperature
 def cfig_model(ens):
     d = ens[ens["experimento"].str.startswith("CFI-G") & (ens["ignicion"] == 1) & ens["autoextincion"].notna()
             & ens["tad_k"].notna()].copy()
     d["inverse"] = (d["experimento"] == "CFI-G inverse").astype(float)
     y = d["autoextincion"].to_numpy(int)
-    groups = d["test_uid"].str.extract(r"[NI]-(\d{5})")[0].fillna("na").to_numpy()  # test-day code
+    groups = d["test_uid"].str.extract(r"[NI]-(\d{5})")[0].fillna("na").to_numpy()
     out = {"n": int(len(y)), "n_se": int(y.sum()), "by_type": {}}
     curves = []
     for typ, sub in (("normal", d[d["inverse"] == 0]), ("inverse", d[d["inverse"] == 1])):
@@ -206,15 +190,12 @@ def cfig_model(ens):
     return out
 
 
-# ------------------------------------------------------------------ M4 habitat check + next experiment
 def out_of_range(model, row):
-    """Inputs (raw units) that fall outside the range flown in FLEX."""
     return [f for f, v in zip(model["features"], row) if f != "heptane" and not
             (model["ranges"][f][0] - 1e-9 <= v <= model["ranges"][f][1] + 1e-9)]
 
 
 def data_status(dist, threshold, outside_range=()):
-    """Same three-way rule as the dashboard: within the flown tests, extrapolating, or outside (prediction withheld)."""
     if dist > 2 * threshold:
         return "outside"
     return "extrapolating" if dist > threshold or outside_range else "within"
@@ -257,13 +238,12 @@ def next_experiment(m1, top=6):
     dist = flex_ood(m1, rows)
     moon = next(h for h in HABITATS if h["id"] == "moon_base")
     near = np.exp(-(((rows[:, 1] - moon["x_o2"]) / 0.04) ** 2 + ((rows[:, 2] - np.log(moon["p_atm"])) / 0.35) ** 2) / 2)
-    # In-envelope of habitat interest, informative (uncertain), and not absurdly far from flown conditions
     score = spread * (0.35 + near) * np.exp(-np.maximum(0, dist - 2 * m1["ood_threshold"]))
     order = np.argsort(-score)
     picks, seen, per_combo = [], set(), {}
     for i in order:
         f, a, b, c = meta[i]
-        key = (f, round(a / 0.03), round(np.log(b) / 0.25), c)  # coarse buckets -> diverse recommendations
+        key = (f, round(a / 0.03), round(np.log(b) / 0.25), c)
         combo = (f, c)
         if key in seen or per_combo.get(combo, 0) >= 2:
             continue
@@ -275,7 +255,6 @@ def next_experiment(m1, top=6):
                       "near_moon_base": float(near[i]), "score": float(score[i])})
         if len(picks) == top:
             break
-    # uncertainty map (no diluent, both fuels averaged) for the chart
     go2 = np.round(np.arange(0.12, 0.4001, 0.01), 3)
     gp = np.round(np.exp(np.linspace(np.log(0.3), np.log(3.2), 36)), 4)
     grid = []

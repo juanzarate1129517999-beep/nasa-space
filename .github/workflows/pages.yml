@@ -1,7 +1,5 @@
 name: Publish dashboard
 
-# GitHub Pages serves the gh-pages branch. This publishes the web/ folder there on every push to main,
-# replacing the manual `git subtree push --prefix web origin gh-pages`.
 on:
   push:
     branches: [main]

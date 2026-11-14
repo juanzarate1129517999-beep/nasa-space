@@ -1,8 +1,3 @@
-"""Tests for the published outputs, the models, the out-of-data guard and the SI firewall.
-
-They run on the committed outputs (no download needed). The end-to-end test runs only when the raw
-PSI files are present (python scripts/fetch_psi.py ...). Written with AI assistance (Anthropic Claude).
-"""
 import json
 import math
 import re
@@ -20,7 +15,6 @@ SI_WEB = json.loads(re.sub(r"^window\.SI=|;$", "", (WEB_DATA / "si.js").read_tex
 HC = {h["habitat"]: h["fuels"] for h in EMBER["habitat_check"]}
 
 
-# ---------------------------------------------------------------- data
 def test_summary_counts():
     s = EMBER["summary"]
     assert s["investigations"] == 24 and s["flight"] == 19
@@ -53,7 +47,6 @@ def test_downloads_are_published():
         assert (WEB_DATA / "downloads" / name).stat().st_size > 0
 
 
-# ---------------------------------------------------------------- models
 def test_deployed_model_beats_baselines():
     m = {x["key"]: x for x in EMBER["flex"]["validation"]["models"]}
     assert m["lr"]["deployed"]
@@ -74,7 +67,6 @@ def test_more_oxygen_means_fewer_self_extinctions():
     assert round(100 * HC["cabin"]["Methanol"]["p"]) == 72 and round(100 * HC["moon_base"]["Methanol"]["p"]) == 6
 
 
-# ---------------------------------------------------------------- out-of-data guard
 def test_guard_statuses():
     assert HC["cabin"]["Methanol"]["status"] == "within"
     assert HC["moon_base"]["Methanol"]["status"] == "within"
@@ -85,17 +77,17 @@ def test_guard_statuses():
 
 def test_single_input_outside_flown_range_is_extrapolation():
     m = EMBER["flex"]
-    row = [0, 0.30, math.log(0.40), 0, 0, 3.0]  # 0.40 atm: below every flown FLEX test
+    row = [0, 0.30, math.log(0.40), 0, 0, 3.0]
     assert out_of_range(m, row) == ["log_p"]
     assert data_status(0.1, m["ood_threshold"], out_of_range(m, row)) == "extrapolating"
     assert data_status(0.1, m["ood_threshold"], []) == "within"
     assert data_status(3 * m["ood_threshold"], m["ood_threshold"], []) == "outside"
 
 
-# ---------------------------------------------------------------- SI firewall
 def test_number_extraction_ignores_formulas_and_ids():
     assert si.numbers("O2 and CO2 in PSI-69 and CFI-G") == set()
     assert si.numbers("72% (90% interval 56%–86%) of 1,647 at 0.70 atm") == {"72", "90", "56", "86", "1647", "0.7"}
+    assert si.numbers("between 8-99% and -0.42") == {"8", "99", "0.42"}
 
 
 @pytest.fixture
@@ -105,6 +97,7 @@ def moon():
 
 @pytest.mark.parametrize("draft_sentences, problem", [
     ([{"text": "Fires go out 12% of the time.", "cites": ["E2"]}], "not in the cited evidence"),
+    ([{"text": "Fires go out 6-99% of the time.", "cites": ["E2"]}], "not in the cited evidence"),
     ([{"text": "Only 6% self-extinguish.", "cites": ["E7"]}], "not in the cited evidence"),
     ([{"text": "Fires are dangerous.", "cites": []}], "no citation"),
     ([{"text": "Only 6% self-extinguish.", "cites": ["E99"]}], "unknown citation"),
@@ -148,7 +141,6 @@ def test_search_corpus_has_sources():
     assert all(d["url"].startswith("https://psi.nasa.gov/") for d in corpus if d["kind"] == "NASA PSI")
 
 
-# ---------------------------------------------------------------- end to end (needs the PSI download)
 @pytest.mark.skipif(not (ROOT / "data" / "psi" / "PSI-69").exists(), reason="raw PSI files not downloaded")
 def test_silver_layer_rebuilds_the_same_records():
     from pipeline import silver

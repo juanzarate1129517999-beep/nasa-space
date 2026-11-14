@@ -7,7 +7,6 @@
 <style>@page { @bottom-left { content: "Skylab Phoenix · Technical report · NASA Space Apps 2026"; } } @page :first { @bottom-left { content: none; } }</style>
 </head><body>
 
-<!-- =============================== COVER -->
 <section class="cover">
   <div class="cover-band"></div>
   <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Skylab Phoenix">
@@ -44,7 +43,6 @@
   <p class="cover-date">November 14, 2026 · English edition</p>
 </section>
 
-<!-- =============================== ABSTRACT -->
 <section class="page">
 <h2 class="nonum">Abstract</h2>
 <p class="lead">Artemis lunar-surface habitats and pressurized rovers will run at <b>30% oxygen or more and 10.2 psi or less</b>. Skylab Phoenix answers, from NASA's own flight data, what happens to fire in that atmosphere and where that data runs out.</p>
@@ -56,7 +54,6 @@
 </div>
 </section>
 
-<!-- =============================== CONTENTS -->
 <section class="page toc">
 <h2 class="nonum">Contents</h2>
 <ol>
@@ -75,7 +72,6 @@
 <p class="note">Use of AI: the SI briefings are written by Anthropic Claude and published only after code verification (Section 11); code and documentation were written with AI assistance. Details in docs/AI_USE.md.</p>
 </section>
 
-<!-- =============================== 1 -->
 <section class="page">
 <h2>Introduction</h2>
 <p class="lead">Fire is one of the most serious risks of crewed spaceflight, and in microgravity it behaves differently than on Earth.</p>
@@ -89,7 +85,6 @@
 </ol>
 </section>
 
-<!-- =============================== 2 -->
 <section class="page">
 <h2>The challenge and the research question</h2>
 <p class="lead">The challenge asks for an SI-powered web dashboard that <b>summarizes, ranks and interprets</b> NASA's combustion investigations. Skylab Phoenix answers each official objective with a data component.</p>
@@ -108,7 +103,6 @@
 <p>Professors, graduate and undergraduate students, researchers and, above all, aerospace engineers who design habitats and select materials. The dashboard offers a guided view for each of these audiences.</p>
 </section>
 
-<!-- =============================== 3 -->
 <section class="page">
 <h2>Conceptual framework: fire in microgravity</h2>
 <p class="lead">Without buoyancy, fire depends on transport by diffusion and ventilation. Gravity, airflow, oxygen and pressure therefore interact in ways a test on Earth does not capture.</p>
@@ -134,7 +128,6 @@
 <p>Compared with Earth's air, the lunar base will have over 40% more oxygen. Even if the O₂ partial pressure is similar, the higher mole fraction speeds combustion and reduces the ability of the inert gas to cool the flame.</p>
 </section>
 
-<!-- =============================== 4 -->
 <section class="page">
 <h2>Data: source, scope and inventory</h2>
 <p class="lead">We use a single data source, the one the challenge names: NASA's PSI repository (CC0 license). Of its 133 results for “combustion”, 24 belong to <i>Combustion Science</i>: 19 flight experiments and 5 ground investigations.</p>
@@ -144,7 +137,6 @@
 <p class="note">Hardware grouping as on the challenge page: the CIR combustion rack with ACME (gases) or MDCA (droplets), the fan-driven duct of the Microgravity Science Glovebox (MSG), and the Saffire module inside the Cygnus spacecraft.</p>
 </section>
 
-<!-- =============================== 5 -->
 <section class="page">
 <h2>Data engineering</h2>
 <p class="lead">A layered pipeline, reproducible with one command, turns 22 heterogeneous tables into one schema in SI units. Every correction is logged with the original value and the rule applied.</p>
@@ -172,7 +164,6 @@
 <p>Examples: a 0 mmHg pressure in FLEX (excluded from the models), “3400%” and “2100%” in ACME BRE (34% and 21%), 8 identical duplicate rows in CFI, a missing decimal point in Saffire-II (“037 mm” → 0.37 mm) and 19 lowercase “yes/no” labels in CFI-G. None was fixed silently: all can be audited.</p>
 </section>
 
-<!-- =============================== 6 -->
 <section class="page">
 <h2>Exploratory analysis</h2>
 <p class="lead">Before any model, the data shows three patterns: almost no tests near lunar-base air, fires stop putting themselves out as oxygen rises, and CO₂ suppresses fires at reduced pressure.</p>
@@ -189,7 +180,6 @@
 <p>Of 333 ACME CFI-G tests, 271 ignited and <b>7 produced confirmed cool flames</b>, all with 30% butane, near 40% O₂ and 2.0 atm. They are rare, but an optical detector may miss them.</p>
 </section>
 
-<!-- =============================== 7 -->
 <section class="page">
 <h2>Summaries, ranking and similarity of investigations</h2>
 <p class="lead">Each investigation has a profile generated from its data and a relevance score per habitat. The score is a visible formula, not a black box.</p>
@@ -210,7 +200,6 @@
 <figure class="wide"><img src="figures_en/f07_similitud.svg" alt="Similarity matrix ordered by hierarchical clustering (average linkage). Clear blocks emerge: droplets (FLEX, FLEX-2, CFI), Saffire, BASS, smoke (SAME, SAME-R, DAFT) and the ACME family."><figcaption><b>Figure 8.</b> Similarity matrix ordered by hierarchical clustering (average linkage). Clear blocks emerge: droplets (FLEX, FLEX-2, CFI), Saffire, BASS, smoke (SAME, SAME-R, DAFT) and the ACME family.</figcaption></figure>
 </section>
 
-<!-- =============================== 8 -->
 <section class="page">
 <h2>Machine learning</h2>
 <p class="lead">With hundreds of tests rather than millions, we chose small, interpretable, calibrated models. We compare them with baselines and validate them without letting tests from the same day leak between training and testing.</p>
@@ -254,7 +243,6 @@
 <p>For normal flames, self-extinction becomes more likely as flame temperature falls. The 50% point (≈ 2,858 K; 90% CI 2,749–3,171 K) lies <b>just above the hottest flame tested (2,730 K)</b>, so it is an extrapolation. For inverse flames, no single temperature explains extinction. Conclusion: flame temperature is not a universal criterion, and reporting this negative result is part of the project's scientific honesty.</p>
 </section>
 
-<!-- =============================== 9 -->
 <section class="page">
 <h2>Next experiment: active learning</h2>
 <p class="lead">If NASA could fly one more test, which one would teach the most? Skylab Phoenix searches near lunar-base air for the conditions where the 200 bootstrap models disagree most.</p>
@@ -266,7 +254,6 @@
 <p><b>Reading:</b> the model is most unsure about <b>how much CO₂ it takes to put out a fire at the reduced pressure and elevated O₂ of the lunar base</b>. That is exactly the suppression question a lunar habitat must answer before choosing extinguishers. Since PSI has no partial-gravity data, these conditions are also the first worth repeating in LUCI or FM2.</p>
 </section>
 
-<!-- =============================== 10 -->
 <section class="page">
 <h2>Fire-safety findings ranked by evidence</h2>
 <p class="lead">The pipeline produces 11 findings. Each has an evidence score and a design implication, and every number in them is computed from the PSI tables.</p>
@@ -277,10 +264,9 @@
 <table class='findings'><thead><tr><th class='num'>#</th><th class='num'>Score</th><th>Layer</th><th>Finding and implication</th></tr></thead><tbody><tr><td class='num'><b>F1</b></td><td class='num score'>100</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>Almost no flight data where the Moon base will live</b><div class='impl'>The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.</div><div class='src mono'>All 24 PSI investigations</div></td></tr><tr><td class='num'><b>F2</b></td><td class='num score'>85</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>Lunar-base air makes self-extinction ~11× less likely than cabin air</b><div class='impl'>Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.</div><div class='src mono'>PSI-69 FLEX · Skylab Phoenix model</div></td></tr><tr><td class='num'><b>F3</b></td><td class='num score'>76</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>Solid-material data is dominated by one plastic</b><div class='impl'>Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.</div><div class='src mono'>PSI-26 BASS · PSI-25 BASS-II</div></td></tr><tr><td class='num'><b>F4</b></td><td class='num score'>76</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>Above 30% O₂, flames stop putting themselves out</b><div class='impl'>A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.</div><div class='src mono'>PSI-69 FLEX</div></td></tr><tr><td class='num'><b>F5</b></td><td class='num score'>71</td><td><span class='tag t-Suppression'>Suppression</span></td><td><b>Helium and larger droplets push flames toward extinction</b><div class='impl'>Diluent choice matters: helium-rich atmospheres change fire behavior, not only O₂ level.</div><div class='src mono'>PSI-69 FLEX · Skylab Phoenix model</div></td></tr><tr><td class='num'><b>F6</b></td><td class='num score'>69</td><td><span class='tag t-Suppression'>Suppression</span></td><td><b>CO₂ dilution suppresses droplet fires at reduced pressure</b><div class='impl'>CO₂ works, but its effect is confounded with O₂ in FLEX: a controlled CO₂ series at lunar-base O₂ is needed.</div><div class='src mono'>PSI-69 FLEX</div></td></tr><tr><td class='num'><b>F7</b></td><td class='num score'>66</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>One limiting flame temperature? Only for normal gas flames</b><div class='impl'>Flame temperature alone is not a universal extinction criterion; geometry and flow matter.</div><div class='src mono'>PSI-159 ACME CFI-G</div></td></tr><tr><td class='num'><b>F8</b></td><td class='num score'>63</td><td><span class='tag t-Detection'>Detection</span></td><td><b>Smoke differs by material, and ages before it reaches a detector</b><div class='impl'>Detector thresholds should be set per material and per transport time, not from 1-g smoke.</div><div class='src mono'>PSI-101 SAME-R · PSI-102 SAME</div></td></tr><tr><td class='num'><b>F9</b></td><td class='num score'>51</td><td><span class='tag t-Detection'>Detection</span></td><td><b>Cool flames: invisible fire, confirmed in orbit</b><div class='impl'>Optical flame detectors can miss cool flames; chemical (CO, aldehyde) sensing is a candidate complement.</div><div class='src mono'>PSI-159 ACME CFI-G · PSI-39 CFI</div></td></tr><tr><td class='num'><b>F10</b></td><td class='num score'>45</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>At 20 cm/s, the 1-g test was the more severe one</b><div class='impl'>μg and 1-g results bound partial gravity only for the flow regime that was tested; low-flow is the open question.</div><div class='src mono'>PSI-99 Saffire-II · PSI-25 BASS-II</div></td></tr><tr><td class='num'><b>F11</b></td><td class='num score'>39</td><td><span class='tag t-Prevention'>Prevention</span></td><td><b>Concurrent airflow made a large fire burn 6× longer</b><div class='impl'>Cabin ventilation direction defines the worst case; fan layout is a fire-safety design variable.</div><div class='src mono'>PSI-98 Saffire-I</div></td></tr></tbody></table>
 </section>
 
-<!-- =============================== 11 SI -->
 <section class="page">
 <h2>The SI layer: briefings you can check</h2>
-<p class="lead">The challenge asks for an SI-powered dashboard. Skylab Phoenix uses SI (super intelligence) where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.</p>
+<p class="lead">The challenge asks for an SI-powered dashboard. Skylab Phoenix uses SI where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.</p>
 <h3>11.1 How it works</h3>
 <ol>
 <li><b>Evidence packs.</b> For each of the 5 habitats and 24 investigations, <code>pipeline/si.py</code> writes numbered evidence items (E1, E2…) computed from the gold data: model predictions with their intervals, the most relevant investigations, coverage, validation and the top findings.</li>
@@ -295,7 +281,6 @@
 <figure class="shot"><img src="screens/09_si_briefing.jpg" alt="SI briefing with citations and the evidence behind each sentence (left), and Ask the archive answering “Which suppressants did NASA test?” with NASA passages (right)."><figcaption><b>Figure 17.</b> SI briefing with citations and the evidence behind each sentence (left), and Ask the archive answering “Which suppressants did NASA test?” with NASA passages (right).</figcaption></figure>
 </section>
 
-<!-- =============================== 12 -->
 <section class="page">
 <h2>The Skylab Phoenix dashboard</h2>
 <p class="lead">A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. Plotly is bundled, so it also works without internet once loaded.</p>
@@ -310,7 +295,6 @@
 <figure class="shot"><img src="screens/08_validacion.jpg" alt="Data and validation: architecture, metrics against baselines, calibration and quality log."><figcaption><b>Figure 25.</b> Data and validation: architecture, metrics against baselines, calibration and quality log.</figcaption></figure>
 </section>
 
-<!-- =============================== 13 -->
 <section class="page">
 <h2>Discussion and limitations</h2>
 <p class="lead">Saying clearly what the data does not allow is part of the result.</p>
@@ -329,7 +313,6 @@
 <p>Validation by whole test days, comparison with baselines, bootstrap intervals, a calibration diagram, an out-of-data guard with a per-input range check, a public correction log, a verified SI layer, automated tests in continuous integration, and wording that separates what was measured from what was extrapolated.</p>
 </section>
 
-<!-- =============================== 14-17 -->
 <section class="page">
 <h2>Impact for exploration and on Earth</h2>
 <ul>
@@ -375,7 +358,6 @@ python scripts/serve.py             # dashboard at http://127.0.0.1:8765</pre>
 </tbody></table>
 </section>
 
-<!-- =============================== REFERENCES + ANNEXES -->
 <section class="page refs">
 <h2 class="nonum">References</h2>
 <ol>

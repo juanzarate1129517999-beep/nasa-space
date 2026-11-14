@@ -1,5 +1,3 @@
-// Builds the 7-slide demo PDF from docs/demo/deck.html (Space Apps allows up to 7 slides, title included).
-// Usage: node docs/demo/build_deck.js
 const path = require("path");
 const { chromium } = require("playwright");
 (async () => {

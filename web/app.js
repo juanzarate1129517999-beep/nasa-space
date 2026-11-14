@@ -1,11 +1,10 @@
-/* EMBER dashboard — renders the pipeline export (window.EMBER) and runs the models client-side. */
 (function () {
   "use strict";
   const D = window.EMBER;
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const pct = (p, d = 0) => (p == null ? "—" : (100 * p).toFixed(d) + "%");
-  const o2pct = (x) => pct(x, Math.round(x * 1000) % 10 ? 1 : 0); // 26.5% but 30%, 100%
+  const o2pct = (x) => pct(x, Math.round(x * 1000) % 10 ? 1 : 0);
   const num = (v, d = 2) => (v == null ? "—" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d }));
   const ATM_PSI = 14.6959;
   const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "#1c2640", line2: "#29355a", bg: "#070a14", surface: "#0d1220", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24" };
@@ -50,7 +49,7 @@
   function plot(id, data, lay) {
     const el = document.getElementById(id);
     if (!hasPlotly) {
-      el.innerHTML = '<p class="note" style="padding:20px">Charts need the Plotly library (internet connection). All values are also available in the tables.</p>';
+      el.innerHTML = '<p class="note" style="padding:20px">Charts could not load (web/vendor/plotly-2.35.2.min.js is missing). All values are also available in the tables and downloads.</p>';
       return;
     }
     Plotly.react(el, data, lay, CFG);
@@ -70,7 +69,6 @@
     return `<span><svg viewBox="0 0 12 12" aria-hidden="true">${s}</svg>${esc(label)}</span>`;
   };
 
-  /* =========================================================== model (runs in browser) */
   const M = D.flex;
   const BOOT = M.boot;
   const MU = M.mu, SD = M.sd;
@@ -91,8 +89,6 @@
     return { near, dist: near.reduce((s, r) => s + r.d, 0) / k };
   }
   const featVec = (s) => [s.fuel === "Heptane" ? 1 : 0, s.o2, Math.log(s.p), s.co2, s.he, s.d0];
-  // Same rule as pipeline/models.py data_status(): leaving the flown range of any single input is an
-  // extrapolation even when the multivariate nearest-neighbour distance is small.
   const FEAT_TXT = { x_o2: "oxygen", log_p: "pressure", x_co2: "CO₂", x_he: "helium", d0_mm: "droplet size" };
   function outOfRange(x) {
     const R = M.ranges || {};
@@ -105,7 +101,6 @@
   }
   const beyondTxt = (b) => b.map((f) => FEAT_TXT[f]).join(" and ");
 
-  /* =========================================================== hero */
   function renderHero() {
     const S = D.summary;
     const auc = M.validation.models.find((m) => m.key === "lr").auc;
@@ -119,13 +114,12 @@
     $("#kpis").innerHTML = k.map(([v, s, l]) => `<div class="kpi"><div class="v">${v}${s}</div><div class="l">${l}</div></div>`).join("");
 
     $("#habitats").innerHTML = D.habitats.map((hb) => {
-      // same browser-side model as the scenario simulator, so the numbers always match
       const x = featVec({ fuel: "Methanol", o2: hb.x_o2, p: hb.p_atm, co2: 0, he: 0, d0: M.d0_median });
       const st = dataStatus(x);
       const r = { ...predict(x), ood: st.s === "outside" };
       const atm = `<div class="atm"><span>${o2pct(hb.x_o2)} O₂</span><span>${num(hb.p_atm, 2)} atm</span><span>${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>`;
       const warn = st.s === "extrapolating"
-        ? `<div class="xtra" title="The ${beyondTxt(st.beyond) || "combination"} is beyond every flown FLEX test">Extrapolating · ${esc(beyondTxt(st.beyond) || "far from flown tests")} outside flown range</div>` : "";
+        ? `<div class="xtra" title="${st.beyond.length ? `The ${esc(beyondTxt(st.beyond))} is beyond every flown FLEX test` : "Far from the nearest flown FLEX tests"}">Extrapolating · ${st.beyond.length ? `${esc(beyondTxt(st.beyond))} outside flown range` : "far from flown tests"}</div>` : "";
       const body = r.ood
         ? `<div class="ood-note"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="${C.ink}" stroke-dasharray="2 2"/></svg><span><b>Outside all flight data.</b> No microgravity fire has been flown near this atmosphere — Skylab Phoenix withholds a prediction.</span></div>`
         : `<div class="pbar"><div class="plabel"><span>Self-extinguishes</span><b>${pct(r.p)}</b></div>
@@ -139,7 +133,6 @@
     }));
   }
 
-  /* =========================================================== 01 coverage */
   const covState = { solido: true, gota: true, gas: true, humo: true };
   function renderCoverageFilters() {
     const fams = [["solido", "square"], ["gota", "circle"], ["gas", "diamond"], ["humo", "tri"]];
@@ -182,7 +175,6 @@
       customdata: D.habitats.map((x) => x.source),
       hovertemplate: "<b>%{text}</b><br>O₂ %{x:.1f}% · %{y:.2f} atm<br>%{customdata}<extra></extra>",
     });
-    // habitat labels as offset annotations so they never collide with each other
     const offs = { cabin: [-34, -38], eva_prep: [-46, 34], moon_base: [40, -38], exploration: [64, 26], suit: [-30, -34] };
     const habNotes = D.habitats.map((x) => ({
       x: Math.log10(100 * x.x_o2), y: Math.log10(x.p_atm), text: `<b>${esc(x.name)}</b>`, showarrow: true, arrowhead: 0, arrowwidth: 1,
@@ -199,7 +191,6 @@
     }));
   }
 
-  /* =========================================================== 02 investigations */
   const invState = { hab: "moon_base", layer: "All", q: "", sel: null };
   const INV = D.investigations;
   const habName = (id) => D.habitats.find((x) => x.id === id).name;
@@ -313,7 +304,6 @@
     });
   }
 
-  /* =========================================================== 03 scenario */
   const SL = [
     { k: "o2", label: "Oxygen", min: 0.10, max: 1.0, step: 0.005, fmt: (v) => `${(100 * v).toFixed(1)}%`, ticks: ["10%", "40%", "70%", "100%"] },
     { k: "p", label: "Pressure", min: 0.25, max: 3.2, step: 0.005, fmt: (v) => `${v.toFixed(2)} atm<small>${(v * ATM_PSI).toFixed(1)} psi</small>`, ticks: ["0.25", "1.0", "2.0", "3.2 atm"] },
@@ -372,12 +362,11 @@
     const dil = [sc.co2 ? `${(100 * sc.co2).toFixed(0)}% CO₂` : "", sc.he ? `${(100 * sc.he).toFixed(0)}% He` : ""].filter(Boolean).join(" + ") || "no diluent";
     $("#r-cap").innerHTML = show
       ? `${sc.fuel} droplet, d₀ ${sc.d0.toFixed(2)} mm · ${(100 * sc.o2).toFixed(1)}% O₂ · ${sc.p.toFixed(2)} atm (${(sc.p * ATM_PSI).toFixed(1)} psi) · ${dil}`
-      : `No ISS test was flown near this atmosphere (distance ${nn.dist.toFixed(1)} vs. limit ${thr.toFixed(1)}). This gap is itself a finding — see “Next experiment”.`;
+      : `No ISS test was flown near this atmosphere (distance ${nn.dist.toFixed(1)}; predictions are withheld beyond ${(2 * thr).toFixed(1)}, twice the out-of-data limit). This gap is itself a finding — see “Next experiment”.`;
     $("#r-ci").style.left = `${100 * r.lo}%`; $("#r-ci").style.width = `${Math.max(1, 100 * (r.hi - r.lo))}%`;
     $("#r-pt").style.left = `${100 * r.p}%`;
     $("#r-ci").style.opacity = show ? 1 : 0.25; $("#r-pt").style.opacity = show ? 1 : 0.25;
     $("#r-int").textContent = show ? `90% interval ${pct(r.lo)}–${pct(r.hi)} · ${BOOT.length} bootstrap models` : "Interval not shown outside the data";
-    // neighbors
     const rows = nn.near.map((n) => {
       const t = M.train[n.i];
       return `<tr><td class="mono">${esc(t.fecha || "—")}</td><td>${esc(t.combustible)}</td><td class="num">${(100 * t.x_o2).toFixed(0)}%</td><td class="num">${num(t.p_atm)}</td><td class="num">${(100 * t.x_co2).toFixed(0)}%</td><td class="num">${(100 * t.x_he).toFixed(0)}%</td><td class="num">${num(t.d0_mm)}</td><td>${OUTCOME[t.resultado] || "—"}</td></tr>`;
@@ -392,7 +381,6 @@
     for (let i = 0; i <= 60; i++) o2.push(0.10 + i * 0.005);
     for (let j = 0; j <= 48; j++) p.push(Math.exp(Math.log(0.3) + (j * (Math.log(3.2) - Math.log(0.3))) / 48));
     const scen = { x: [100 * sc.o2], y: [sc.p], type: "scatter", mode: "markers", hoverinfo: "skip", marker: { symbol: "cross-thin", size: 26, color: C.ink, line: { color: C.ink, width: 3 } } };
-    // open symbols take their stroke color from marker.color (not marker.line.color)
     const scenRing = { x: [100 * sc.o2], y: [sc.p], type: "scatter", mode: "markers", hoverinfo: "skip", marker: { symbol: "circle-open", size: 30, color: C.bg, line: { width: 4 } } };
     if (mapDrawn && !remap && hasPlotly) {
       Plotly.restyle("map-chart", { x: [scenRing.x, scen.x], y: [scenRing.y, scen.y] }, [3, 4]);
@@ -440,9 +428,7 @@
     }));
   }
 
-  /* =========================================================== 04 evidence */
   function renderEvidence() {
-    // outcome bands
     const B = D.o2_bands;
     const segs = [["extincion", "Self-extinguished", C.blue], ["disrupcion", "Droplet disrupted", C.amber], ["completo", "Burned to completion", C.orange]];
     $("#band-legend").innerHTML = segs.map(([, l, c]) => legendItem("bar", c, l)).join("");
@@ -453,7 +439,6 @@
     })).concat([{ y: B.map((b) => `${b.band} O₂`), x: B.map(() => 1.02), type: "scatter", mode: "text", text: B.map((b) => `n=${b.n}`), textposition: "middle right", textfont: { family: "JetBrains Mono, monospace", size: 10.5, color: C.ink3 }, hoverinfo: "skip" }]),
     layout({ barmode: "stack", bargap: 0.35, margin: { l: 10, r: 10, t: 4, b: 36 }, xaxis: { tickformat: ".0%", range: [0, 1.16], tickvals: [0, 0.25, 0.5, 0.75, 1] }, yaxis: { gridcolor: "rgba(0,0,0,0)", tickfont: { family: "JetBrains Mono, monospace", size: 11, color: C.ink2 } } }));
 
-    // suppression
     const S = D.suppression.co2;
     const cats = ["0%", "1–20%", "20–30%", ">30%"];
     const grp = [["Reduced pressure (0.7 atm)", C.orange, "circle", -0.12], ["≈1 atm and above", C.blue, "diamond", 0.12]];
@@ -469,7 +454,6 @@
       };
     }), layout({ margin: { l: 48, r: 12, t: 6, b: 44 }, xaxis: { tickvals: [0, 1, 2, 3], ticktext: cats, range: [-0.5, 3.5], title: { text: "CO₂ in the chamber" } }, yaxis: { tickformat: ".0%", range: [0, 1.05], title: { text: "Self-extinguished" } } }));
 
-    // Tad
     const CG = D.cfig;
     const st = [["normal", "Normal flames (fuel from burner)", C.orange, "circle"], ["inverse", "Inverse flames (O₂ from burner)", C.violet, "diamond"]];
     $("#tad-legend").innerHTML = st.map(([, n, c, s]) => legendItem(s, c, n)).join("");
@@ -493,7 +477,6 @@
     const inv = CG.by_type.inverse;
     $("#tad-note").innerHTML = `<b>Hypothesis test.</b> Normal flames: self-extinction rises as flame temperature drops (AUC ${n.metrics.auc.toFixed(2)}); the 50% point, ≈${Math.round(n.t50).toLocaleString("en-US")} K, lies just above the hottest flame tested (${Math.round(n.tad_max).toLocaleString("en-US")} K), so it is an extrapolation. Inverse flames: no single-temperature rule (AUC ${inv.metrics.auc.toFixed(2)}, ≈ chance). Cool flames: ${CG.ignition.cool_flames} of ${CG.ignition.tests} tests.`;
 
-    // gravity dumbbell
     const G = D.saffire2;
     const lab = G.map((g) => `${g.material} · ${g.muestra} · ${g.direccion.toLowerCase()}`);
     const states = ["No spread", "Partial", "Whole sample"];
@@ -513,7 +496,6 @@
     $("#grav-note").innerHTML = `<b>${worse} of ${G.length}</b> samples burned as much or more in 1 g at 20 cm/s. Saffire-I, same fabric: <b>${s1.concurrent} s</b> concurrent flow vs <b>${s1.opposed} s</b> opposed. PSI has no partial-gravity data yet (LUCI, FM2); these pairs bound it only for this flow regime.`;
   }
 
-  /* =========================================================== 05 findings */
   let findLayer = "All";
   function renderFindings() {
     $("#find-layer").innerHTML = ["All", "Prevention", "Detection", "Suppression"].map((l) => `<button aria-pressed="${l === findLayer}" data-l="${l}">${l}</button>`).join("");
@@ -527,7 +509,6 @@
       </article>`).join("");
   }
 
-  /* =========================================================== 06 next experiment */
   function renderNext() {
     const N = D.next;
     const flown = M.train.filter((t) => t.x_co2 === 0 && t.x_he === 0);
@@ -557,7 +538,6 @@
     $("#next-note").innerHTML = `<b>Why these:</b> the model is least certain about how much CO₂ it takes to put out a fire at the reduced pressure and elevated O₂ planned for the Moon base — exactly the suppression question a lunar habitat must answer. Score = ${esc(N.score_formula)}.`;
   }
 
-  /* =========================================================== 07 quality */
   function renderQuality() {
     const S = D.summary;
     const steps = [
@@ -585,7 +565,6 @@
     $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly`;
   }
 
-  /* =========================================================== shareable state (?hab=…&o2=… in the URL) */
   const QS = new URLSearchParams(location.search);
   let urlReady = false, urlTimer = null;
   function scenarioParams() {
@@ -601,7 +580,7 @@
   function syncUrl() {
     if (!urlReady) return;
     clearTimeout(urlTimer);
-    urlTimer = setTimeout(() => { try { history.replaceState(null, "", `?${scenarioParams()}${location.hash}`); } catch (e) { /* file:// */ } }, 250);
+    urlTimer = setTimeout(() => { try { history.replaceState(null, "", `?${scenarioParams()}${location.hash}`); } catch (e) {} }, 250);
   }
   function applyUrlScenario() {
     const g = (k, lo, hi) => { const v = parseFloat(QS.get(k)); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null; };
@@ -611,7 +590,8 @@
     let changed = false;
     for (const [k, v] of Object.entries(vals)) if (v != null && Math.abs(v - sc[k]) > 1e-9) { sc[k] = v; changed = true; }
     if (sc.o2 + sc.co2 + sc.he > 1) { sc.co2 = 0; sc.he = 0; }
-    if (changed) sc.preset = QS.get("hab") && Math.abs(sc.o2 - D.habitats.find((x) => x.id === QS.get("hab"))?.x_o2) < 1e-6 ? QS.get("hab") : null;
+    const qh = D.habitats.find((x) => x.id === QS.get("hab"));
+    if (changed) sc.preset = qh && Math.abs(sc.o2 - qh.x_o2) < 1e-3 && Math.abs(sc.p - qh.p_atm) < 1e-3 && !sc.co2 && !sc.he ? qh.id : null;
     renderScenarioControls(); updateScenario(true);
     return QS.has("o2") || QS.has("hab");
   }
@@ -625,7 +605,6 @@
     return `${location.origin}${location.pathname}?${scenarioParams()}${hash}`;
   }
 
-  /* =========================================================== SI briefing */
   const SI = window.SI || null;
   const briefState = { hab: "moon_base" };
   const citeChip = (c, scope) => `<button class="cite" type="button" data-e="${esc(c)}" data-scope="${scope}" title="Show evidence ${esc(c)}">${esc(c)}</button>`;
@@ -675,7 +654,6 @@
     a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
 
-  /* =========================================================== Ask the archive (BM25 over NASA text, in the browser) */
   const STOP = new Set("a an and are as at be by can did do does for from has have how i in is it its of on or that the this to was were what when where which who why will with into than then there these those about after over under not no yes".split(" "));
   const SYN = { fire: ["flame", "combustion", "burn"], flame: ["fire"], suppressant: ["suppression", "extinguish", "extinguishment", "diluent", "co2", "helium"],
     suppress: ["suppression", "extinguish"], extinguish: ["extinction", "suppression"], smoke: ["aerosol", "soot", "particle"], detect: ["detection", "detector", "sensor"],
@@ -729,7 +707,6 @@
       </article>`).join("") + `<p class="note">Ranked by BM25 relevance over NASA's own text. Passages are quoted, not generated.</p>`;
   }
 
-  /* =========================================================== audience views */
   const AUD = [
     { id: "undergrad", name: "Undergraduate", intro: "New to microgravity fire? Three steps, about five minutes.", steps: [
       ["Read the lunar-base briefing", "Each sentence has a citation; click one to see the number behind it.", { brief: "moon_base", go: "#briefing" }],
@@ -767,7 +744,6 @@
     }));
   }
 
-  /* =========================================================== compare investigations */
   const cmpState = { ids: ["PSI-69", "PSI-25", "PSI-99"] };
   function renderCompare() {
     const opts = [...INV].sort((a, b) => a.name.localeCompare(b.name));
@@ -803,7 +779,6 @@
     $("#cmp-note").textContent = R.length > 1 ? (same.length ? `Shared: ${same.join(", ")}. Highlighted rows differ.` : "These investigations differ on every row.") : "Pick a second investigation to compare.";
   }
 
-  /* =========================================================== downloads + SI verification table */
   function renderDownloads() {
     const files = [
       ["ensayos.csv", "All 1,989 test records in one schema, SI units (CSV)"],
@@ -825,7 +800,6 @@
     $("#si-table").closest(".tbl-wrap").classList.add("scroll");
   }
 
-  /* =========================================================== nav highlight */
   function navSpy() {
     const links = [...document.querySelectorAll(".nav a")];
     const map = new Map(links.map((a) => [a.getAttribute("href").slice(1), a]));
@@ -837,7 +811,6 @@
     map.forEach((_, id) => { const s = document.getElementById(id); if (s) obs.observe(s); });
   }
 
-  /* =========================================================== boot */
   function safe(fn, name) { try { fn(); } catch (e) { console.error(`[Skylab Phoenix] ${name} failed`, e); } }
   safe(renderHero, "hero");
   safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing");
@@ -857,11 +830,9 @@
   safe(renderNext, "next");
   safe(renderQuality, "quality");
   safe(navSpy, "nav");
-  // rAF does not fire in background tabs, so a timer guarantees the overlay is removed
   const hideLoading = () => $("#loading").classList.add("done");
   requestAnimationFrame(hideLoading);
   setTimeout(hideLoading, 300);
-  // Dev aid for report screenshots: ?offsets writes each section's page position into the DOM
   if (location.search.includes("offsets")) setTimeout(() => {
     const o = {};
     document.querySelectorAll("main > section").forEach((sec, i) => { o[sec.id || `s${i}`] = [Math.round(sec.getBoundingClientRect().top + scrollY), sec.offsetHeight]; });

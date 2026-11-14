@@ -1,8 +1,3 @@
-"""Download the PSI search results for a query (default: combustion) and the
-per-investigation file listing, into data/catalog/.
-
-Usage: python scripts/fetch_psi_catalog.py [query]
-"""
 import csv, json, os, sys, urllib.parse, urllib.request
 
 API = "https://psi.nasa.gov/geode-py/ws"
@@ -23,7 +18,7 @@ for h in hits:
         with urllib.request.urlopen(f"{API}/repo/investigations/{acc}", timeout=120) as r:
             meta = json.load(r)
     except Exception as e:
-        print(f"{acc}: sin metadata ({e})")
+        print(f"{acc}: no metadata ({e})")
         meta = {}
     files = {}
     for key in ("experimentalTable", "added", "modified"):
@@ -32,6 +27,8 @@ for h in hits:
                 files.setdefault(f["file_name"], f)
     exp_tables = [n for n in files if "experimental table" in n.lower()]
     person = h.get("Person") or {}
+    if isinstance(person, list):
+        person = person[0] if person else {}
     rows.append({
         "accession": acc,
         "acronym": (h.get("Acronym") or "").strip(),
@@ -52,10 +49,10 @@ for h in hits:
         "experimental_tables": " | ".join(exp_tables),
         "file_names": " | ".join(sorted(files)),
     })
-    print(f"{acc}: {len(files)} archivos, {len(exp_tables)} tablas")
+    print(f"{acc}: {len(files)} files, {len(exp_tables)} experimental tables")
 
 with open(os.path.join(out_dir, f"catalog_{query}.csv"), "w", newline="", encoding="utf-8") as fh:
     w = csv.DictWriter(fh, fieldnames=list(rows[0]))
     w.writeheader()
     w.writerows(rows)
-print(f"{len(rows)} investigaciones -> {out_dir}")
+print(f"{len(rows)} investigations -> {out_dir}")
