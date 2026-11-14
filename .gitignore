@@ -21,3 +21,14 @@ desktop.ini
 .vscode/
 .idea/
 *.log
+
+# Raw NASA PSI downloads are reproducible with scripts/fetch_psi.py
+data/psi/
+
+# Internal team documents (strategy, proposal, notes) - kept locally, not published
+_interno/
+# Local tool settings
+.claude/
+# Regenerable inputs (scripts/fetch_psi_catalog.py) and legacy outputs
+data/catalog/
+data/processed/

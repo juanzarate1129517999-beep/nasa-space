@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skylab Phoenix · Fire Safety Intelligence</title>
+  <meta name="description" content="Skylab Phoenix turns NASA's microgravity combustion flight data (PSI) into fire-safety insights for the Moon base, spacecraft and spacesuits: cleaned data, validated models, uncertainty and the next experiment to fly.">
+  <link rel="icon" href="assets/phoenix.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="loading" id="loading">SKYLAB PHOENIX · LOADING NASA PSI DATA…</div>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Skylab Phoenix home">
+      <img src="assets/phoenix.svg" alt="" width="26" height="26">
+      <span class="word">SKYLAB PHOENIX</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#coverage">Coverage</a>
+      <a href="#investigations">Investigations</a>
+      <a href="#scenario">Scenario</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#findings">Findings</a>
+      <a href="#next">Next experiment</a>
+      <a href="#quality">Data &amp; validation</a>
+    </nav>
+    <span class="src">NASA PSI · CC0</span>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ======================= HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">NASA Space Apps 2026 · Flame in Freefall</div>
+      <h1>The Moon base will breathe <span class="grad">30% oxygen.</span> <span class="dim">Here is what NASA's flight data says about fire there — and where that data runs out.</span></h1>
+      <p class="lede">Skylab Phoenix cleans every combustion experiment in NASA's Physical Sciences Informatics repository, profiles and ranks the 24 investigations for each crewed habitat, and runs validated models with explicit uncertainty — so the answer always comes with its evidence.</p>
+      <div class="team"><span><b>Team</b>Skylab Phoenix</span><span><b>Lead</b>Juan Sebastián Zárate</span><span><b>Member</b>Javier Medina</span></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="label-sm" style="margin-top:40px">Chance a fire self-extinguishes, by habitat · FLEX model, methanol droplet, no suppressant</div>
+      <div class="habitats" id="habitats"></div>
+    </div>
+  </section>
+
+  <!-- ======================= 01 COVERAGE -->
+  <section class="block" id="coverage">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">01 · COVERAGE</div>
+        <div>
+          <h2>Where NASA has flown fire, and where crews will live</h2>
+          <p>Every flight test with a known oxygen level and pressure, against the atmospheres of crewed habitats. The lunar-base envelope from the challenge brief (≥30% O₂, ≤10.2 psi) is almost empty, and no solid material has ever burned there in microgravity.</p>
+          <div class="objective">CHALLENGE OBJECTIVE · IDENTIFY INVESTIGATIONS RELEVANT TO HABITABLE CREW ENVIRONMENTS</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="controls-row" id="cov-filters"></div>
+        <div class="legend" id="cov-legend"></div>
+        <div class="chart tall" id="cov-chart" role="img" aria-label="Scatter of flight tests by oxygen fraction and pressure, with habitat atmospheres"></div>
+        <p class="note">Hollow markers: O₂ or pressure not reported per test, taken as ISS cabin air. Crossed markers: inverse flames, where the O₂ value is the oxidizer stream from the burner, not the room. ACME BRE (26.5 / 34 / 40% O₂) is not plotted because its table does not report pressure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 02 INVESTIGATIONS -->
+  <section class="block" id="investigations">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">02 · INVESTIGATIONS</div>
+        <div>
+          <h2>The 24 investigations, summarized and ranked per habitat</h2>
+          <p>Each profile is generated from the data itself: what was varied, what was held fixed, what was measured, the conditions covered and the hardware. The ranking is a transparent formula, not a black box: closeness of the tested conditions to the habitat's atmosphere, volume of labeled results, and how directly the investigation targets crew fire safety.</p>
+          <div class="objective">CHALLENGE OBJECTIVES · SUMMARIZE · RANK · COMPARE INVESTIGATIONS</div>
+        </div>
+      </div>
+      <div class="controls-row">
+        <div class="seg" id="inv-habitat" role="group" aria-label="Rank for habitat"></div>
+        <div class="seg" id="inv-layer" role="group" aria-label="Fire-safety layer"></div>
+        <input type="search" id="inv-search" placeholder="Search name, keyword, PI…" aria-label="Search investigations">
+      </div>
+      <div class="inv-layout">
+        <div class="inv-list" id="inv-list" role="listbox" aria-label="Ranked investigations"></div>
+        <div class="card detail" id="inv-detail" aria-live="polite"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>How the investigations relate</h3>
+        <p class="sub" id="sim-sub"></p>
+        <div class="chart tall" id="sim-chart" role="img" aria-label="Similarity matrix between investigations"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 03 SCENARIO -->
+  <section class="block" id="scenario">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">03 · SCENARIO</div>
+        <div>
+          <h2>Ask the flight data: will this fire go out on its own?</h2>
+          <p>A logistic model trained on 261 FLEX droplet fires from the ISS, run live in your browser with a 200-model bootstrap ensemble for uncertainty. If you leave the region NASA actually tested, Skylab Phoenix says so instead of guessing.</p>
+          <div class="objective">CHALLENGE OBJECTIVE · DATA THAT SUPPORTS PREDICTIVE MODELING OF FLAMMABILITY</div>
+        </div>
+      </div>
+      <div class="grid-main">
+        <div class="card" id="sim-controls">
+          <div class="label-sm">Habitat presets</div>
+          <div class="presets" id="presets"></div>
+          <div class="label-sm">Fuel</div>
+          <div class="seg" id="fuel-seg" role="group" aria-label="Fuel"></div>
+          <div id="sliders"></div>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <div class="result">
+              <div>
+                <div class="label-sm" style="margin:0 0 12px">P(flame self-extinguishes)</div>
+                <div class="big" id="r-big">—</div>
+                <div class="cap" id="r-cap"></div>
+              </div>
+              <div>
+                <div id="r-status"></div>
+                <div class="interval">
+                  <div class="track"><div class="ci" id="r-ci"></div><div class="pt" id="r-pt"></div></div>
+                  <div class="scale"><span>0%</span><span>50%</span><span>100%</span></div>
+                  <div class="txt" id="r-int"></div>
+                </div>
+              </div>
+            </div>
+            <h3>Probability map</h3>
+            <p class="sub">Current fuel, diluents and droplet size · brighter = fire more likely to keep burning · dots are the flown FLEX tests</p>
+            <div class="legend" id="map-legend"></div>
+            <div class="chart" id="map-chart" role="img" aria-label="Probability of self-extinction over oxygen and pressure"></div>
+          </div>
+          <div class="card">
+            <h3>Closest real flight tests</h3>
+            <p class="sub">Nearest neighbors in the model's standardized input space · the evidence behind this prediction</p>
+            <div class="tbl-wrap"><table id="nn-table"></table></div>
+            <p class="note" id="nn-note"></p>
+          </div>
+          <div class="card">
+            <h3>What drives self-extinction</h3>
+            <p class="sub">Standardized coefficients with 90% bootstrap intervals · right = more likely to self-extinguish</p>
+            <div class="chart short" id="drivers-chart" role="img" aria-label="Model coefficients"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 04 EVIDENCE -->
+  <section class="block" id="evidence">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">04 · EVIDENCE</div>
+        <div>
+          <h2>The measurements behind the insights</h2>
+          <p>Raw outcomes, with their sample sizes and 90% intervals, so every claim can be checked against the tests themselves.</p>
+          <div class="objective">CHALLENGE OBJECTIVES · INTERPRET FINDINGS · PREVENTION · DETECTION · SUPPRESSION · PARTIAL GRAVITY</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Droplet fire outcome vs oxygen</h3>
+          <p class="sub">FLEX · share of tests per outcome</p>
+          <div class="legend" id="band-legend"></div>
+          <div class="chart short" id="band-chart" role="img" aria-label="Outcome share by oxygen band"></div>
+        </div>
+        <div class="card">
+          <h3>Suppression with CO₂ dilution</h3>
+          <p class="sub">FLEX · self-extinction rate by CO₂ level, with 90% Wilson intervals</p>
+          <div class="legend" id="sup-legend"></div>
+          <div class="chart short" id="sup-chart" role="img" aria-label="Self-extinction rate by CO2 level"></div>
+        </div>
+        <div class="card">
+          <h3>Is there a limiting flame temperature?</h3>
+          <p class="sub">ACME CFI-G · P(self-extinction) vs adiabatic flame temperature, ignited tests</p>
+          <div class="legend" id="tad-legend"></div>
+          <div class="chart short" id="tad-chart" role="img" aria-label="Self-extinction probability versus flame temperature"></div>
+          <p class="note" id="tad-note"></p>
+        </div>
+        <div class="card">
+          <h3>Microgravity vs Earth gravity, same samples</h3>
+          <p class="sub">Saffire-II · how much of each sample burned · bounds partial gravity for this flow regime</p>
+          <div class="legend" id="grav-legend"></div>
+          <div class="chart short" id="grav-chart" role="img" aria-label="Burn extent in microgravity and 1 g"></div>
+          <p class="note" id="grav-note"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= FINDINGS -->
+  <section class="block" id="findings">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">05 · FINDINGS</div>
+        <div>
+          <h2>Fire-safety findings, ranked by strength of evidence</h2>
+          <p>Every number in these statements is computed by the pipeline from PSI tables. The score combines test volume, validation quality, agreement across investigations and closeness to lunar-base conditions.</p>
+          <div class="objective">CHALLENGE OBJECTIVE · HIGHLIGHT RESEARCH FOR NEXT-GENERATION FIRE SAFETY</div>
+        </div>
+      </div>
+      <div class="controls-row"><div class="seg" id="find-layer" role="group" aria-label="Filter findings by layer"></div></div>
+      <div class="findings" id="findings-list"></div>
+    </div>
+  </section>
+
+  <!-- ======================= NEXT EXPERIMENT -->
+  <section class="block" id="next">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">06 · NEXT EXPERIMENT</div>
+        <div>
+          <h2>What NASA should fly next</h2>
+          <p>Active learning on the model: among conditions near the lunar-base atmosphere, Skylab Phoenix picks those where the 200 bootstrap models disagree the most — where one new test would teach the most. Partial-gravity data (LUCI, FM2) is not in PSI yet; these conditions are where it would pay off first.</p>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Model uncertainty across atmospheres</h3>
+          <p class="sub">Width of the 90% interval of P(self-extinction) without CO₂ · brighter = more uncertain · numbered dots are the recommended tests (they add CO₂, see table)</p>
+          <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
+        </div>
+        <div class="card">
+          <h3>Recommended test conditions</h3>
+          <p class="sub" id="next-sub"></p>
+          <div class="tbl-wrap"><table id="next-table"></table></div>
+          <p class="note" id="next-note"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= QUALITY -->
+  <section class="block" id="quality">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">07 · DATA &amp; VALIDATION</div>
+        <div>
+          <h2>Reproducible pipeline, honest validation</h2>
+          <p>One command rebuilds everything from NASA's public API. Every correction to NASA's tables is logged, and the model is scored only on test days it never saw.</p>
+        </div>
+      </div>
+      <div class="pipe" id="pipe"></div>
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card">
+          <h3>Model vs baselines</h3>
+          <p class="sub" id="val-sub"></p>
+          <div class="tbl-wrap"><table id="val-table"></table></div>
+          <p class="note">AUC: ranking quality (0.5 = chance). Brier and log loss: calibration of the probabilities (lower is better). The simpler logistic model beats gradient boosting on held-out days, so it is the one deployed.</p>
+        </div>
+        <div class="card">
+          <h3>Calibration</h3>
+          <p class="sub">Out-of-fold predicted probability vs observed self-extinction rate</p>
+          <div class="chart short" id="rel-chart" role="img" aria-label="Reliability diagram"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Data-quality log</h3>
+        <p class="sub" id="qc-sub"></p>
+        <div class="tbl-wrap scroll"><table id="qc-table"></table></div>
+        <p class="note">Reproduce: <code class="cmd">python scripts/fetch_psi.py data/psi PSI-…</code> then <code class="cmd">python -m pipeline.run</code></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <h5>Skylab Phoenix</h5>
+      <p>Exploration Materials Burn Envelope Reasoner. Built for the NASA Space Apps Challenge 2026, “Flame in Freefall”.</p>
+      <p>Data: NASA Physical Sciences Informatics, CC0. Models are research aids, not flight certification.</p>
+    </div>
+    <div>
+      <h5>Sources</h5>
+      <p><a href="https://psi.nasa.gov/physci/repo/search?q=combustion&amp;data_source=psi&amp;data_type=investigation" target="_blank" rel="noopener">PSI combustion repository</a></p>
+      <p><a href="https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/" target="_blank" rel="noopener">Challenge brief</a></p>
+      <p><a href="https://www.nasa.gov/missions/station/a-researchers-guide-to-combustion-science/" target="_blank" rel="noopener">Researcher's Guide to ISS Combustion Science</a></p>
+    </div>
+    <div>
+      <h5>Build</h5>
+      <p id="built"></p>
+    </div>
+  </div>
+</footer>
+
+<script src="data/ember.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

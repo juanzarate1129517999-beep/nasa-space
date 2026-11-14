@@ -1,0 +1,9 @@
+muestra,material,espesor,flujo,direccion,o2,ug_texto,g1_texto,ug_estado,g1_estado
+2-1,Silicone,0.27 mm,20 cm/s,Concurrent,~ 21.5,~ 0,Complete,0,2
+2-2,Silicone,0.61 mm,20 cm/s,Concurrent,~ 22.1,~ 0,7.6 cm,0,1
+2-3,Silicone,1.03 mm,20 cm/s,Concurrent,~ 22.1,~ 0,~ 0,0,0
+2-4,Silicone,0.37 mm,20 cm/s,Opposed,~ 22.1,~ 0,Complete,0,2
+2-5,SIBAL fabric,0.37 mm,20 cm/s,Concurrent,~ 22.1,29 cm,Complete,2,2
+2-6,SIBAL fabric,0.37 mm,20 cm/s,Concurrent,~ 22.1,29 cm,Complete,2,2
+2-8,PMMA,See Fig. 5,20 cm/s,Concurrent,22.1 to 22.0,~ 10 cm (note 3),Complete,1,2
+2-9,PMMA,1 cm,20 cm/s,Concurrent,22.0 to 21.9,~ 10 cm (note 4),Complete,1,2
