@@ -3,7 +3,7 @@
 **NASA Space Apps Challenge 2026 · "Flame in Freefall"** · Equipo **Skylab Phoenix**: Juan Sebastián Zárate (líder) y Javier Medina · [English](README.md)
 
 - **Dashboard en vivo:** https://juanzarate1129517999-beep.github.io/nasa-space/
-- **Informe técnico (37 páginas):** [report/Informe_Skylab_Phoenix.pdf](report/Informe_Skylab_Phoenix.pdf) · resumen en inglés: [docs/TECHNICAL_SUMMARY.md](docs/TECHNICAL_SUMMARY.md)
+- **Informe técnico:** en español [report/Informe_Skylab_Phoenix.pdf](report/Informe_Skylab_Phoenix.pdf) · en inglés [report/Technical_Report_Skylab_Phoenix.pdf](report/Technical_Report_Skylab_Phoenix.pdf) · resumen corto en inglés: [docs/TECHNICAL_SUMMARY.md](docs/TECHNICAL_SUMMARY.md)
 - **Textos y lista de verificación para la entrega:** [SUBMISSION.md](SUBMISSION.md) · **Uso de IA/SI:** [docs/AI_USE.md](docs/AI_USE.md) · **Comparación con otros proyectos:** [docs/COMPARISON.md](docs/COMPARISON.md)
 
 Skylab Phoenix convierte los datos de combustión de vuelo del repositorio NASA PSI en hallazgos de seguridad contra incendios para la base lunar, las naves y los trajes espaciales:

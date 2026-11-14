@@ -12,7 +12,7 @@ Sources: Space Apps [Project Submission Guide](https://www.spaceappschallenge.or
 | **Project demo**: a video of up to 30 seconds *or* a slide deck of up to 7 slides (title slide included), hosted outside the Space Apps site | 7-slide deck: [docs/demo/Skylab_Phoenix_demo.pdf](docs/demo/Skylab_Phoenix_demo.pdf); 30-second video script below | Upload the PDF (Google Drive or GitHub link) or record the video |
 | Demo in English; **videos with English subtitles** | Deck and script in English | Burn in subtitles if you record the video |
 | **Final project link**, publicly accessible with no login, permission or registration | Repository (public) + live dashboard on GitHub Pages | Open both links in a private browser window to confirm |
-| English on the submission page and in all linked material | README, dashboard, deck and this file in English; Spanish report kept as an extra | Link the English summary, not only the Spanish PDF |
+| English on the submission page and in all linked material | README, dashboard, deck, full technical report and this file in English; Spanish report kept as an extra | Link the English report |
 | Say how space-agency open data made the project possible | “Use of NASA data” below | Paste it |
 | **Disclose use of AI/SI** where and how it was used | [docs/AI_USE.md](docs/AI_USE.md), dashboard footer, badges on every SI briefing | Paste the “Use of AI” text below |
 | SI-generated images/video carry a visible watermark; code and data acknowledge SI in text and metadata | Code headers, `meta.generator`, `"source": "si"`; no SI images in the dashboard | Confirm the logo and any demo footage; watermark if SI-made |
@@ -34,6 +34,7 @@ Artemis surface habitats and pressurized rovers will run at about 30% oxygen and
 - **Final project (repository):** https://github.com/juanzarate1129517999-beep/nasa-space
 - **Live dashboard:** https://juanzarate1129517999-beep.github.io/nasa-space/
 - **Demo (7 slides):** link to `docs/demo/Skylab_Phoenix_demo.pdf` (GitHub or Google Drive, public)
+- **Technical report (English):** https://github.com/juanzarate1129517999-beep/nasa-space/blob/main/report/Technical_Report_Skylab_Phoenix.pdf
 
 ## Project details
 
