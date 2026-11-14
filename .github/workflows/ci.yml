@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      reproduce:
+        description: "Also re-download NASA PSI and rebuild everything from source"
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt pytest
+      - name: Tests (data, models, out-of-data guard, SI firewall)
+        run: python -m pytest -q
+      - name: Dashboard JavaScript parses
+        run: node -e "new Function(require('fs').readFileSync('web/app.js','utf8'))"
+
+  reproduce:
+    if: github.event_name == 'workflow_dispatch' && inputs.reproduce
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt pytest
+      - name: Download NASA PSI (public API)
+        run: |
+          python scripts/fetch_psi_catalog.py combustion
+          python scripts/fetch_psi.py data/psi PSI-10 PSI-20 PSI-21 PSI-22 PSI-23 PSI-25 PSI-26 PSI-39 PSI-47 PSI-60 PSI-62 PSI-68 PSI-69 PSI-98 PSI-99 PSI-100 PSI-101 PSI-102 PSI-106 PSI-107 PSI-115 PSI-117 PSI-142 PSI-159
+      - name: Rebuild and test
+        run: |
+          python -m pipeline.run
+          python -m pytest -q
+      - name: Committed outputs match a fresh build
+        run: git diff --stat --exit-code -- data/gold data/si web/data/downloads ':!web/data/ember.js' ':!web/data/ember.json'

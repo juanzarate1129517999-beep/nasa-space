@@ -9,6 +9,7 @@ Every number in the report is read from web/data/ember.json (the pipeline export
 """
 import html
 import json
+import os
 import shutil
 import subprocess
 from collections import Counter
@@ -57,7 +58,7 @@ HW_ES = {"MDCA droplet rig · CIR": "MDCA · CIR", "ACME · Combustion Integrate
          "MSG fan-driven flow duct": "Ducto MSG", "Saffire module · Cygnus": "Saffire · Cygnus",
          "Smoke & aerosol diagnostics": "Diagnóstico de humo", "Ground laboratory / modeling": "Tierra / modelado"}
 HAB_ES = {"cabin": "Cabina de nave (ISS, Gateway, Orion)", "eva_prep": "Preparación de EVA",
-          "moon_base": "Base lunar y rover presurizado", "suit": "Traje espacial"}
+          "moon_base": "Base lunar y rover presurizado", "exploration": "Atmósfera de exploración (8,2 psi)", "suit": "Traje espacial"}
 FIND_ES = {
     "coverage_gap": ("Casi no hay datos de vuelo donde vivirá la base lunar",
                      "Siguiente experimento de mayor valor: inflamabilidad de sólidos a ≥ 30 % de O₂ y ≤ 10,2 psi."),
@@ -141,13 +142,14 @@ def drivers_table():
 
 def habitat_table():
     body = ""
-    for hid in ("cabin", "eva_prep", "moon_base", "suit"):
+    for hid in [x["id"] for x in D["habitats"]]:
         h = HC[hid]
         hab = next(x for x in D["habitats"] if x["id"] == hid)
         cells = ""
         for fuel in ("Methanol", "Heptane"):
             r = h["fuels"][fuel]
-            cells += ("<td class='num'>fuera de los datos</td>" if r["ood"] else f"<td class='num'>{p(r['p'])} <span class='dim'>({p(r['lo'])}–{p(r['hi'])})</span></td>")
+            xt = " <span class='dim'>· extrapolación</span>" if r.get("status") == "extrapolating" else ""
+            cells += ("<td class='num'>fuera de los datos</td>" if r["ood"] else f"<td class='num'>{p(r['p'])} <span class='dim'>({p(r['lo'])}–{p(r['hi'])})</span>{xt}</td>")
         body += (f"<tr><td><b>{HAB_ES[hid]}</b></td><td class='num'>{p(hab['x_o2'], 1 if (hab['x_o2'] * 1000) % 10 else 0)}</td>"
                  f"<td class='num'>{n(hab['p_atm'], 2)} atm · {n(hab['p_atm'] * 14.6959, 1)} psi</td>{cells}</tr>")
     return ("<table class='keep'><thead><tr><th>Hábitat</th><th class='num'>O₂</th><th class='num'>Presión</th><th class='num'>Metanol P(autoext.)</th>"
@@ -324,11 +326,12 @@ doc = f"""<!doctype html>
 <li><b>Diluyentes.</b> El CO₂ y el helio diluyen el oxígeno y cambian la transferencia de calor. FLEX los ensayó como supresores.</li>
 </ul>
 <h3>Atmósferas de los hábitats</h3>
-<p class="tcap"><b>Tabla {T()}.</b> Atmósferas usadas como escenarios. Base lunar y traje: página oficial del reto.</p>
+<p class="tcap"><b>Tabla {T()}.</b> Atmósferas usadas como escenarios. Base lunar y traje: página oficial del reto. Exploración: estándar de NASA.</p>
 <table class="compact"><thead><tr><th>Hábitat</th><th class="num">O₂</th><th class="num">Presión</th><th>Fuente</th></tr></thead><tbody>
 <tr><td>Cabina de nave (ISS, Gateway, Orion)</td><td class="num">21 %</td><td class="num">1,00 atm · 14,7 psi</td><td>Aire equivalente al nivel del mar</td></tr>
-<tr><td>Preparación de EVA (ISS)</td><td class="num">26,5 %</td><td class="num">0,70 atm · 10,2 psi</td><td>Atmósfera de exploración; ensayada en ACME BRE</td></tr>
+<tr><td>Preparación de EVA (ISS)</td><td class="num">26,5 %</td><td class="num">0,69 atm · 10,2 psi</td><td>Pre-respiración por etapas (campout ISS); ensayada en ACME BRE</td></tr>
 <tr><td><b>Base lunar y rover presurizado</b></td><td class="num"><b>≥ 30 %</b></td><td class="num"><b>≤ 0,69 atm · 10,2 psi</b></td><td>Página del reto Flame in Freefall</td></tr>
+<tr><td>Atmósfera de exploración</td><td class="num">34 %</td><td class="num">0,56 atm · 8,2 psi</td><td>Estándar de hábitat de exploración de NASA (NTRS 20240007817)</td></tr>
 <tr><td>Traje espacial</td><td class="num">100 %</td><td class="num">0,29 atm · 4,3 psi</td><td>Página del reto Flame in Freefall</td></tr>
 </tbody></table>
 <p>Respecto al aire terrestre, la base lunar tendrá más de 40 % más oxígeno. Aunque la presión parcial de O₂ sea parecida, la fracción molar más alta acelera la combustión y reduce la capacidad del gas inerte para enfriar la llama.</p>
@@ -448,7 +451,7 @@ doc = f"""<!doctype html>
 {habitat_table()}
 {fig('f12_habitats', f'De la cabina a la base lunar, la probabilidad de que una gota de metanol se apague sola cae de {p(cab["p"])} a {p(moon["p"])}. El traje espacial queda fuera de los datos.', Fn())}
 <h3>8.6 Detector «fuera de los datos»</h3>
-<p>Un modelo siempre devuelve un número, aunque la pregunta esté lejos de lo ensayado. Para evitarlo, calculamos la distancia media a los 5 ensayos más cercanos en el espacio estandarizado de entrada. El umbral es el percentil 95 de esa distancia entre los propios ensayos (<b>{n(F['ood_threshold'], 2)}</b>). Hasta 1× el umbral: dentro de los datos. Entre 1× y 2×: extrapolación (se muestra con advertencia). Más de 2×: <b>no se predice</b>. La base lunar está a {n(HC['moon_base']['fuels']['Methanol']['ood_distance'], 2)} (dentro de los datos). El traje espacial está a {n(HC['suit']['fuels']['Methanol']['ood_distance'], 1)}, unas diez veces el umbral, así que Skylab Phoenix no da un número y lo señala como brecha.</p>
+<p>Un modelo siempre devuelve un número, aunque la pregunta esté lejos de lo ensayado. Para evitarlo, calculamos la distancia media a los 5 ensayos más cercanos en el espacio estandarizado de entrada. El umbral es el percentil 95 de esa distancia entre los propios ensayos (<b>{n(F['ood_threshold'], 2)}</b>). Hasta 1× el umbral: dentro de los datos. Entre 1× y 2×: extrapolación (se muestra con advertencia). Más de 2×: <b>no se predice</b>. Además, si una sola variable sale del rango volado en FLEX (por ejemplo, una presión menor a la de todos los ensayos), la predicción se marca como extrapolación aunque la distancia sea pequeña: es el caso de la atmósfera de exploración (34 % O₂, 8,2 psi). La base lunar está a {n(HC['moon_base']['fuels']['Methanol']['ood_distance'], 2)} (dentro de los datos). El traje espacial está a {n(HC['suit']['fuels']['Methanol']['ood_distance'], 1)}, unas diez veces el umbral, así que Skylab Phoenix no da un número y lo señala como brecha.</p>
 <h3>8.7 Prueba de hipótesis: ¿temperatura de llama límite? (ACME CFI-G)</h3>
 {fig('f13_temperatura_limite', f'P(autoextinción) frente a la temperatura adiabática, en los ensayos que encendieron (normales n = {nrm["n"]}, inversas n = {inv["n"]}). En llamas normales la relación existe (AUC {n(nrm["metrics"]["auc"], 2)}). En inversas no predice (AUC {n(inv["metrics"]["auc"], 2)}). Zona gris: más allá de la temperatura más alta ensayada.', Fn(), True)}
 <p>En las llamas normales, la autoextinción se vuelve más probable cuando baja la temperatura de llama. El punto del 50 % (≈ {n(nrm['t50'])} K; IC 90 %: {n(nrm['t50_lo'])}–{n(nrm['t50_hi'])} K) queda <b>justo por encima de la llama más caliente ensayada ({n(nrm['tad_max'])} K)</b>, así que es una extrapolación. En las llamas inversas, una sola temperatura no explica la extinción. Conclusión: la temperatura de llama no es un criterio universal, y reportar este resultado negativo es parte de la honestidad científica del proyecto.</p>
@@ -601,12 +604,19 @@ print("HTML ->", out_html)
 
 browsers = [Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),
             Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
-            Path(shutil.which("chromium") or "/nonexistent")]
+            Path(shutil.which("chromium") or "/nonexistent"),
+            *sorted(Path("/opt/pw-browsers").glob("chromium-*/chrome-linux64/chrome"))]  # Playwright's Chromium (Linux/CI)
 exe = next((b for b in browsers if b.exists()), None)
 if exe:
     pdf = REP / "Informe_Skylab_Phoenix.pdf"
-    subprocess.run([str(exe), "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=15000",
-                    f"--print-to-pdf={pdf}", out_html.as_uri()], check=False, capture_output=True, timeout=180)
-    print("PDF  ->", pdf, pdf.exists() and f"{pdf.stat().st_size / 1e6:.1f} MB")
+    before = pdf.stat().st_mtime if pdf.exists() else 0
+    args = [str(exe), "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=15000"]
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        args.append("--no-sandbox")  # Chromium refuses to run as root (containers, CI) without it
+    run = subprocess.run(args + [f"--print-to-pdf={pdf}", out_html.as_uri()], check=False, capture_output=True, timeout=180)
+    if pdf.exists() and pdf.stat().st_mtime > before:
+        print("PDF  ->", pdf, f"{pdf.stat().st_size / 1e6:.1f} MB")
+    else:
+        print("PDF NOT updated: the browser failed.\n", run.stderr.decode(errors="replace")[-600:])
 else:
     print("No Edge/Chrome found: open report/informe.html and print to PDF.")

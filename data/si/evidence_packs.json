@@ -1,0 +1,499 @@
+[
+ {
+  "kind": "habitat",
+  "id": "cabin",
+  "title": "Spacecraft cabin",
+  "items": {
+   "E1": "Spacecraft cabin: 21% O2 at 14.7 psi (1.00 atm). Source: Sea-level-equivalent cabin air (14.7 psi, 21% O2).",
+   "E2": "FLEX model, methanol droplet (3.00 mm, no diluent): 72% chance the flame puts itself out in spacecraft cabin air (90% interval 56%–86%); this input is inside the range of flown ISS tests.",
+   "E3": "FLEX model, heptane droplet (3.00 mm, no diluent): 44% chance the flame puts itself out in spacecraft cabin air (90% interval 30%–59%); this input is inside the range of flown ISS tests.",
+   "E4": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 99.7); BASS (PSI-26, 94.3); ACME CFI-G (PSI-159, 92.1).",
+   "E5": "FLEX has about 109.1 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
+   "E6": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E7": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
+   "E8": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+   "E9": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
+   "E10": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
+   "E11": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option."
+  },
+  "hash": "979ef04d07e33bfe"
+ },
+ {
+  "kind": "habitat",
+  "id": "eva_prep",
+  "title": "EVA prep",
+  "items": {
+   "E1": "EVA prep: 26.5% O2 at 10.2 psi (0.69 atm). Source: 10.2 psi, 26.5% O2 used before spacewalks; tested by ACME BRE.",
+   "E2": "FLEX model, methanol droplet (3.00 mm, no diluent): 21% chance the flame puts itself out in EVA-prep air (90% interval 8%–37%); this input is inside the range of flown ISS tests.",
+   "E3": "FLEX model, heptane droplet (3.00 mm, no diluent): 7% chance the flame puts itself out in EVA-prep air (90% interval 2%–14%); this input is inside the range of flown ISS tests.",
+   "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
+   "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 99.2); BASS (PSI-26, 71.1); ACME CFI-G (PSI-159, 68.4).",
+   "E6": "FLEX has about 36.8 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
+   "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+   "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
+   "E11": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
+   "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
+   "E13": "Highest-value next flight test near lunar-base air: methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model's 90% interval is 10%–51%."
+  },
+  "hash": "5a422522423bf542"
+ },
+ {
+  "kind": "habitat",
+  "id": "moon_base",
+  "title": "Lunar base & rover",
+  "items": {
+   "E1": "Lunar base & rover: 30% O2 at 10.2 psi (0.69 atm). Source: Challenge page: O2 likely 30% or greater at 10.2 psi or less.",
+   "E2": "FLEX model, methanol droplet (3.00 mm, no diluent): 6% chance the flame puts itself out in lunar-base air (90% interval 2%–14%); this input is inside the range of flown ISS tests.",
+   "E3": "FLEX model, heptane droplet (3.00 mm, no diluent): 2% chance the flame puts itself out in lunar-base air (90% interval 1%–4%); this input is inside the range of flown ISS tests.",
+   "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
+   "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 95.1); ACME CFI-G (PSI-159, 66.8); ACME BRE (PSI-20, 48.1).",
+   "E6": "FLEX has about 19.0 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
+   "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+   "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
+   "E11": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
+   "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
+   "E13": "Highest-value next flight test near lunar-base air: methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model's 90% interval is 10%–51%."
+  },
+  "hash": "cef7ff4ecfd8cc27"
+ },
+ {
+  "kind": "habitat",
+  "id": "exploration",
+  "title": "Exploration atmosphere",
+  "items": {
+   "E1": "Exploration atmosphere: 34% O2 at 8.2 psi (0.56 atm). Source: 8.2 psia, 34% O2: exploration habitat atmosphere adopted by NASA (Exploration Atmospheres Working Group; NTRS 20240007817, ICES-2024-128).",
+   "E2": "FLEX model, methanol droplet (3.00 mm, no diluent): 1% chance the flame puts itself out in the exploration atmosphere (90% interval 0%–4%); this input is beyond the flown ISS tests (extrapolation, use with caution) because its pressure lies outside every flown FLEX test.",
+   "E3": "FLEX model, heptane droplet (3.00 mm, no diluent): 0% chance the flame puts itself out in the exploration atmosphere (90% interval 0%–1%); this input is beyond the flown ISS tests (extrapolation, use with caution) because its pressure lies outside every flown FLEX test.",
+   "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
+   "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): ACME CFI-G (PSI-159, 86.0); FLEX (PSI-69, 82.3); ACME BRE (PSI-20, 52.7).",
+   "E6": "ACME CFI-G has about 16.4 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
+   "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+   "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
+   "E11": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
+   "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
+   "E13": "Highest-value next flight test near lunar-base air: methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model's 90% interval is 10%–51%."
+  },
+  "hash": "af414b95dcb003df"
+ },
+ {
+  "kind": "habitat",
+  "id": "suit",
+  "title": "Spacesuit",
+  "items": {
+   "E1": "Spacesuit: 100% O2 at 4.3 psi (0.29 atm). Source: Challenge page: 100% O2 at 4.3 psi.",
+   "E2": "FLEX model, methanol droplet: prediction withheld for the spacesuit. The atmosphere sits 14.3 units from the nearest flown tests, more than twice the out-of-data limit of 1.33.",
+   "E3": "FLEX model, heptane droplet: prediction withheld for the spacesuit. The atmosphere sits 14.4 units from the nearest flown tests, more than twice the out-of-data limit of 1.33.",
+   "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
+   "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 49.7); BASS (PSI-26, 44.3); ACME CFI-G (PSI-159, 42.5).",
+   "E6": "FLEX has about 0.0 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
+   "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+   "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
+   "E11": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
+   "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option."
+  },
+  "hash": "45cedf6b09fcb81d"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-69",
+  "title": "FLEX · PSI-69",
+  "items": {
+   "E1": "FLEX (PSI-69): Flame Extinguishment Experiment. Flight investigation, platform: International Space Station (ISS); hardware: MDCA droplet rig · CIR.",
+   "E2": "Objective, from NASA PSI: The FLEX (Flame Extinguishment Experiment) investigation aims to map the flammability limits of liquid fuels in microgravity environments, measure the effectiveness of various gaseous fire suppressants such as CO2, He, and SF6, and develop reliable predictive models for combustion limits under reduced gravity conditions. The mission seeks to validate and improve simplified models by incorporating detailed chemical reactions, heat transfer, and material movement, using both space-based data and extensive ground-based tests.",
+   "E3": "274 records in its PSI experimental tables, 274 with a labeled outcome.",
+   "E4": "Conditions tested: 12%–34% O2, 0.69–3.05 atm.",
+   "E5": "Varied: Fuel, Ambient pressure; mmHg, O2 initial ambient composition; mole fraction, N initial ambient composition; mole fraction, CO2 initial ambient composition; mole fraction, He initial ambient composition; mole fraction. Measured: Visible flame extinction diameter; mm, Burning rate; mm, Test end.",
+   "E6": "Relevance score out of 100 by habitat: cabin 99.7, EVA prep 99.2, lunar base 95.1, exploration atmosphere 82.3, spacesuit 49.7. Rank 1 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: The research impacts and Earth benefits of the FLEX mission are significant and multifaceted. By enhancing our understanding of microgravity combustion, the mission directly contributes to improved fire safety protocols for future space missions, ensuring the safety of crew members in environments where traditional fire suppression methods may be ineffective.",
+   "E8": "Most similar investigations (similarity 0 to 1): CFI (0.58) and FLEX-2 (0.44).",
+   "E9": "Layers of fire safety it informs: Suppression, Prevention. Publications listed in PSI: 51."
+  },
+  "hash": "381f9560297815e8"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-159",
+  "title": "ACME CFI-G · PSI-159",
+  "items": {
+   "E1": "ACME CFI-G (PSI-159): Advanced Combustion via Microgravity Experiments / Cool Flames Investigation with Gases. Flight investigation, platform: International Space Station (ISS); hardware: ACME · Combustion Integrated Rack.",
+   "E2": "Objective, from NASA PSI: 1. Plan and support flight testing on the International Space Station (ISS). 2. Determine the conditions for which cool diffusion flames occur for propane, n-butane, and n-pentane; normal and inverse flames; and a broad range of Zst, Tad, and fluent flow rate.",
+   "E3": "333 records in its PSI experimental tables, 333 with a labeled outcome.",
+   "E4": "Conditions tested: 12%–85% O2, 0.49–3.27 atm.",
+   "E5": "Varied: Flame Type, Fuel, Xf before test, Xf after test, approx p (bar), XO2. Measured: HC burnrate (mg/s), O2 flow rate (mg/s), Tad (K), Zst, Hot ignition.",
+   "E6": "Relevance score out of 100 by habitat: cabin 92.1, EVA prep 68.4, lunar base 66.8, exploration atmosphere 86.0, spacesuit 42.5. Rank 2 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: Combustion provides 86% of the world’s energy and an even higher fraction of the energy used for transportation. The internal combustion engines used for transportation generally have thermal efficiencies of 38% or lower because of thermal losses.",
+   "E8": "Most similar investigations (similarity 0 to 1): ACME Flame Design (0.57) and ACME s-Flame (0.42).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 2."
+  },
+  "hash": "d50d367e8e3654e0"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-20",
+  "title": "ACME BRE · PSI-20",
+  "items": {
+   "E1": "ACME BRE (PSI-20): Advanced Combustion via Microgravity Experiments - Burning Rate Emulator. Flight investigation, platform: International Space Station (ISS); hardware: ACME · Combustion Integrated Rack.",
+   "E2": "Objective, from NASA PSI: The BRE flight program seeks to establish the burning conditions in a quiescent microgravity ambient in terms of material properties. The specific flight objectives are as follows. 1. Observe burning behavior in long-duration microgravity for CH4/N2 and C2H4/N2mixtures on porous circular burners of 25 and 50 mm diameter.",
+   "E3": "43 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Varied: Fuel Bottle, Oxygen Conc (percent). Measured: Burner Size (mm), Flames Ignited.",
+   "E5": "Relevance score out of 100 by habitat: cabin 44.3, EVA prep 53.9, lunar base 48.1, exploration atmosphere 52.7, spacesuit 22.5. Rank 3 of 24 for the lunar base.",
+   "E6": "Benefit on Earth, from NASA PSI: BRE yielded important data relevant to spacecraft fire safety. Quasi-steady burning corresponding to various condensed-phase materials (such as PMMA and Nylon) was observed in microgravity despite the absence of air flow, where the cessation of ventilation is an established step in putting out spacecraft fires.",
+   "E7": "Most similar investigations (similarity 0 to 1): ACME s-Flame (0.43) and ACME Flame Design (0.42).",
+   "E8": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 16."
+  },
+  "hash": "61a01e8682533d1b"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-26",
+  "title": "BASS · PSI-26",
+  "items": {
+   "E1": "BASS (PSI-26): Burning and Suppression of Solids. Flight investigation, platform: International Space Station (ISS); hardware: MSG fan-driven flow duct.",
+   "E2": "Objective, from NASA PSI: The two main objectives for BASS are to: 1.) Begin to bridge the gap between the normal gravity NASA-STD-6001 Test#1 method, ground-based microgravity tests, and actual material flammability in microgravity. The relation between these can be investigated by observing flames burning for the longer times available in flight.",
+   "E3": "121 records in its PSI experimental tables, 59 with a labeled outcome.",
+   "E4": "Conditions tested: 15.9%–22.7% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Fuel Sample Material. Measured: none.",
+   "E6": "Relevance score out of 100 by habitat: cabin 94.3, EVA prep 71.1, lunar base 47.4, exploration atmosphere 44.4, spacesuit 44.3. Rank 4 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: Current NASA spacecraft materials selection is based on a standard test method (NASA–STD–6001 Test 1) that segregates material based on 1-g behavior without consideration of low gravity effects. A critical element of this understanding is the radiative heat emission from the flame.",
+   "E8": "Most similar investigations (similarity 0 to 1): BASS-II (0.70) and Saffire-I (0.44).",
+   "E9": "Layers of fire safety it informs: Prevention, Suppression. Publications listed in PSI: 10."
+  },
+  "hash": "d6b080548b790e6d"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-25",
+  "title": "BASS-II · PSI-25",
+  "items": {
+   "E1": "BASS-II (PSI-25): Burning and Suppression of Solids - II. Flight investigation, platform: International Space Station (ISS); hardware: MSG fan-driven flow duct.",
+   "E2": "Objective, from NASA PSI: BASS-II results contribute to the combustion computational models used in the design of fire detection and suppression systems in microgravity and on Earth. Objectives Include: 1) Study the ignition, flame growth, flame spread, and extinction limits for solid fuels burning in low-velocity forced flows in microgravity.",
+   "E3": "128 records in its PSI experimental tables, 22 with a labeled outcome.",
+   "E4": "Conditions tested: 13.6%–22.2% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Fuel Sample Material, Flow restrictor, Fan display, Air display, Initial CO2 % by vol, Initial CO (ppm). Measured: Calibrated initial O2 % by vol, Calibrated final O2 % by vol, Final CO2 % by vol, Final CO (ppm).",
+   "E6": "Relevance score out of 100 by habitat: cabin 90.9, EVA prep 54.7, lunar base 42.1, exploration atmosphere 41.0, spacesuit 41.0. Rank 5 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: A primary goal of BASS-II is improved spacecraft fire safety, improved understanding of combustion in space and how to avoid it. If you’re on a mission far from Earth, a fire can be catastrophic.",
+   "E8": "Most similar investigations (similarity 0 to 1): BASS (0.70) and BASS spread modeling (0.47).",
+   "E9": "Layers of fire safety it informs: Prevention, Suppression. Publications listed in PSI: 17."
+  },
+  "hash": "2cace32a9369bb2d"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-10",
+  "title": "ACME Flame Design · PSI-10",
+  "items": {
+   "E1": "ACME Flame Design (PSI-10): Advanced Combustion via Microgravity Experiments / Flame Design. Flight investigation, platform: International Space Station (ISS); hardware: ACME · Combustion Integrated Rack.",
+   "E2": "Objective, from NASA PSI: The primary objectives of this flight experiment are: A. Obtain soot-inception limits of quasi-steady normal and inverse spherical diffusion flames as functions of flow rate, Zst, amount of inert (N2 or CO2), and pressure for C2H4 and CH4 flames. Identify the corresponding temperatures in hot regions.",
+   "E3": "327 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 19.8%–85.0% O2, 0.43–3.02 atm.",
+   "E5": "Varied: XO2, mO2 (mg/s), mN2 (mg/s), mtot (mg/s), XC2H4 initial, pinit (atm). Measured: XC2H4 final, pfinal (atm), mean Zst, Tad (K), XO2 (final).",
+   "E6": "Relevance score out of 100 by habitat: cabin 65.0, EVA prep 43.1, lunar base 39.1, exploration atmosphere 36.3, spacesuit 15.0. Rank 6 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: This project has the potential for improving efficiency and reducing pollutant emissions in terrestrial combustors. For example, it is contributing to novel designs of future coal power plants.",
+   "E8": "Most similar investigations (similarity 0 to 1): ACME CFI-G (0.57) and ACME s-Flame (0.42).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 33."
+  },
+  "hash": "473f45d6cb3569d5"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-101",
+  "title": "SAME-R · PSI-101",
+  "items": {
+   "E1": "SAME-R (PSI-101): Smoke Aerosol Measurement Experiment-Reflight. Flight investigation, platform: International Space Station (ISS); hardware: Smoke & aerosol diagnostics.",
+   "E2": "Objective, from NASA PSI: Similar to the original SAME investigation, the primary objective of the SAME-R investigation was to quantify the sizes that the liquid smoke particulate achieves in low gravity and to relate the droplet size distribution to the smoke generation and smoke transport conditions in the experiment. One of the problems encountered during the SAME investigation was that after the thermal precipitators were returned to the ground, it was found that all the TEM grids were severely contaminated with some unidentified foreign particles, making these grids unusable although some of them showed shapes of certain types of smoke particles.",
+   "E3": "109 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Sample Type, Description, Inlet velocity (cm/s), Duration (sec). Measured: Rt/R0.",
+   "E6": "Relevance score out of 100 by habitat: cabin 80.0, EVA prep 51.9, lunar base 31.7, exploration atmosphere 30.0, spacesuit 30.0. Rank 7 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: Along with the results from the original SAME investigation, the results from SAME-R can lead to technology for an advanced fire detector for future spacecraft that will be used for long duration missions. SAME will provide quantitative data on the sensitivity of these detectors to reduced gravity smokes that will allow evaluation of the adequacy of these existing technologies using relevant data.",
+   "E8": "Most similar investigations (similarity 0 to 1): SAME (0.72) and DAFT / DAFT-2 (0.41).",
+   "E9": "Layers of fire safety it informs: Detection. Publications listed in PSI: 6."
+  },
+  "hash": "6c43cf86c14e2d89"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-99",
+  "title": "Saffire-II · PSI-99",
+  "items": {
+   "E1": "Saffire-II (PSI-99): Spacecraft Fire Experiment-II. Flight investigation, platform: Cygnus Spacecraft; hardware: Saffire module · Cygnus.",
+   "E2": "Objective, from NASA PSI: The objectives of SAFFIRE-II are to determine how rapidly a large scale fire grows in low-gravity and to investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+   "E3": "9 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21.5%–22.1% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Material, Samle Thickness, Flow Direction. Measured: Sample Length, Ignition Power (W), µg Burn Length, µg Spread Length, 1-g Burn Length.",
+   "E6": "Relevance score out of 100 by habitat: cabin 53.5, EVA prep 34.0, lunar base 30.4, exploration atmosphere 30.0, spacesuit 30.0. Rank 8 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: The Saffire-II experiment provides a new way to study a realistic fire on an exploration vehicle, which has not been possible in the past because the risks are too high. Instruments on an unmanned cargo vessel measure oxygen, carbon dioxide, heat, pressure and flame growth, and two video cameras provide views of the flame.",
+   "E8": "Most similar investigations (similarity 0 to 1): Saffire-I (0.68) and Saffire-III (0.62).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 7."
+  },
+  "hash": "6e6b6d8f349b7a28"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-98",
+  "title": "Saffire-I · PSI-98",
+  "items": {
+   "E1": "Saffire-I (PSI-98): Spacecraft Fire Safety Experiment-I. Flight investigation, platform: International Space Station (ISS); hardware: Saffire module · Cygnus.",
+   "E2": "Objective, from NASA PSI: The objectives of this investigation were to: (1) determine how rapidly a large scale fire grows in low-gravity and (2) investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+   "E3": "2 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21.5% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Material, Percent O2, Flow Direction. Measured: Sample Length (cm), Ignition Power (W).",
+   "E6": "Relevance score out of 100 by habitat: cabin 36.9, EVA prep 30.7, lunar base 30.1, exploration atmosphere 30.0, spacesuit 30.0. Rank 9 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: The Saffire-I experiment provides a new way to study a realistic fire on an exploration vehicle, which has not been possible in the past because the risks are too high. Instruments on an unmanned cargo vessel measure oxygen, carbon dioxide, heat, pressure and flame growth, and two video cameras provide views of the flame.",
+   "E8": "Most similar investigations (similarity 0 to 1): Saffire-III (0.69) and Saffire-II (0.68).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 6."
+  },
+  "hash": "704596a48d337fee"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-102",
+  "title": "SAME · PSI-102",
+  "items": {
+   "E1": "SAME (PSI-102): Smoke and Aerosol Measurement Experiment. Flight investigation, platform: International Space Station (ISS); hardware: Smoke & aerosol diagnostics.",
+   "E2": "Objective, from NASA PSI: One of the major goals of this investigation was to quantify the sizes that the liquid smoke particulate achieves in low gravity and to relate the droplet size distribution to the smoke generation and smoke transport conditions in the experiment. A numerical code was to be developed to predict the smoke droplet growth as a function of the fuel pyrolysis rate, the thermodynamic properties of the pyrolysis vapor, and the flow environment.",
+   "E3": "8 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Sample Material, Air Flow (cm/s). Measured: Weight loss rate (mg/min), Aging Duration (minutes).",
+   "E6": "Relevance score out of 100 by habitat: cabin 52.6, EVA prep 32.1, lunar base 30.1, exploration atmosphere 30.0, spacesuit 30.0. Rank 10 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: The SAME experiment will provide technology for an advanced fire detector for future spacecraft that will be used for long duration missions. SAME will provide quantitative data on the sensitivity of these detectors to reduced gravity smokes that will allow evaluation of the adequacy of these existing technologies using relevant data.",
+   "E8": "Most similar investigations (similarity 0 to 1): SAME-R (0.72) and DAFT / DAFT-2 (0.60).",
+   "E9": "Layers of fire safety it informs: Detection. Publications listed in PSI: 16."
+  },
+  "hash": "6ef25aad75424e09"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-100",
+  "title": "Saffire-III · PSI-100",
+  "items": {
+   "E1": "Saffire-III (PSI-100): Spacecraft Fire Experiment-III. Flight investigation, platform: International Space Station (ISS); hardware: Saffire module · Cygnus.",
+   "E2": "Objective, from NASA PSI: The objectives of this investigation were to: (1) determine how rapidly a large scale fire grows in low-gravity and (2) investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+   "E3": "2 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Varied: Direction. Measured: Sample Length.",
+   "E5": "Relevance score out of 100 by habitat: cabin 30.0, EVA prep 30.0, lunar base 30.0, exploration atmosphere 30.0, spacesuit 30.0. Rank 11 of 24 for the lunar base.",
+   "E6": "Benefit on Earth, from NASA PSI: The Saffire-I experiment provides a new way to study a realistic fire on an exploration vehicle, which has not been possible in the past because the risks are too high. Instruments on an unmanned cargo vessel measure oxygen, carbon dioxide, heat, pressure and flame growth, and two video cameras provide views of the flame.",
+   "E7": "Most similar investigations (similarity 0 to 1): Saffire-I (0.69) and Saffire-II (0.62).",
+   "E8": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 3."
+  },
+  "hash": "f94c3fb9661bf1f2"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-22",
+  "title": "ACME E-FIELD · PSI-22",
+  "items": {
+   "E1": "ACME E-FIELD (PSI-22): Advanced Combustion via Microgravity Experiments Electric-Field Effects on Laminar Diffusion Flames. Flight investigation, platform: International Space Station (ISS); hardware: ACME · Combustion Integrated Rack.",
+   "E2": "Objective, from NASA PSI: The objective of this investigation is to better understand the relationship between electric field voltage and chemi-ion current, analyze the dynamic response of flames to electric field changes, evaluate soot formation, and characterize stabilized near-limit lifted flames.",
+   "E3": "230 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Test Type, Test Day, Mesh Polarity, Fuel Bottle, Fuel Conc. Measured: Flames Ignited.",
+   "E6": "Relevance score out of 100 by habitat: cabin 62.1, EVA prep 27.8, lunar base 22.8, exploration atmosphere 22.5, spacesuit 22.5. Rank 12 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: The E-FIELD Flames research is not being conducted to serve any space applications, but it is possible that its findings could aid the development of future space-based combustion devices (e.g., for solid waste processing). The use of electric fields to control flames can reduce the production of harmful pollutants in practical terrestrial combustion.",
+   "E8": "Most similar investigations (similarity 0 to 1): ACME s-Flame (0.57) and ACME CLD (0.55).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 25."
+  },
+  "hash": "7d6ad4247e896556"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-47",
+  "title": "DAFT / DAFT-2 · PSI-47",
+  "items": {
+   "E1": "DAFT / DAFT-2 (PSI-47): Dust and Aerosol Measurement Feasibility Test / Dust and Aerosol Measurement Feasibility Test-2. Flight investigation, platform: International Space Station (ISS); hardware: Smoke & aerosol diagnostics.",
+   "E2": "Objective, from NASA PSI: The focus of DAFT / DAFT-2 was to mitigate the risk for the Smoke Aerosol Measurement Experiment (SAME). SAME relied on a commercially available condensate nuclei counter, the TSI P-Trak, to quantify smoke aerosols in a microgravity environment, however there were concerns that th P-Trak would not be reliable in microgravity as it relies on gravity to recycle isopropyl alcohol used in the measurement process.",
+   "E3": "2 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Varied: Actual Day, Hardware Description, Sampled Location. Measured: none.",
+   "E5": "Relevance score out of 100 by habitat: cabin 22.5, EVA prep 22.5, lunar base 22.5, exploration atmosphere 22.5, spacesuit 22.5. Rank 13 of 24 for the lunar base.",
+   "E6": "Benefit on Earth, from NASA PSI: Extended duration space flight missions with larger vessels will require fire detection systems with increased reliability and sensitivity. This research will impact the development of novel fire and smoke detection systems for the International Space Station and future spacecrafts.",
+   "E7": "Most similar investigations (similarity 0 to 1): SAME (0.60) and SAME-R (0.41).",
+   "E8": "Layers of fire safety it informs: Detection. Publications listed in PSI: 2."
+  },
+  "hash": "0ac8799315f205bd"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-107",
+  "title": "SPICE · PSI-107",
+  "items": {
+   "E1": "SPICE (PSI-107): Smoke Point In Co-flow Experiment. Flight investigation, platform: International Space Station (ISS); hardware: MSG fan-driven flow duct.",
+   "E2": "Objective, from NASA PSI: The objective of SPICE is to better understand the complex process of combustion by observing flames in a microgravity environment aboard the International Space Station (ISS) and analogous ground experiments. Specific objectives were: (1) Identify the laminar smoke-point properties of non-buoyant jet diffusion flames under various co-flow conditions in microgravity.",
+   "E3": "469 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Fuel, Nozzle (mm). Measured: Fuel Rate (sccm), Fuel Rate (mg/s), HC Fuel Rate (mg/s), Air Rate (cm/s).",
+   "E6": "Relevance score out of 100 by habitat: cabin 65.0, EVA prep 60.8, lunar base 21.9, exploration atmosphere 15.0, spacesuit 15.0. Rank 14 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: (1) Will improve our understanding of soot formation mechanisms and help design safer spacecraft environments. (2) Will contribute to refining our computational models for predicting flame behaviors under non-buoyant conditions.",
+   "E8": "Most similar investigations (similarity 0 to 1): SLICE (0.70) and SPICE analysis (0.49).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 9."
+  },
+  "hash": "dda6d76df41c1016"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-23",
+  "title": "ACME s-Flame · PSI-23",
+  "items": {
+   "E1": "ACME s-Flame (PSI-23): Advanced Combustion via Microgravity Experiments-Structure and Response of Spherical Diffusion Flames. Flight investigation, platform: International Space Station (ISS); hardware: ACME · Combustion Integrated Rack.",
+   "E2": "Objective, from NASA PSI: A series of experiments is proposed with the following specific objectives, in both soot-free and sooty flames, to compare with detailed computational simulation to assess transport properties and detailed chemical kinetics (including chemiluminescence): Objective A. Measure and characterize the transient structure (such as temperature and species distribution) of diffusion flames established at initially non-steady, spherical flame structures for mixtures of different H2/CH4/diluent ratios (soot-free) and different C2H4/diluent ratios (sooty), for different flow rates. Objective B. Determine the quasi-steady convective/chemical-kinetic extinction limits (low system Damköhler numbers) and radiative/chemical-kinetic extinction limits (high system Damköhler numbers) for mixtures of different H2/CH4/diluent ratios (soot-free) and different C2H4/diluent ratios (sooty).",
+   "E3": "276 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21%–30% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Test Type, Test Day*, Atmosphere*, Fuel Bottle. Measured: Flames Ignited*.",
+   "E6": "Relevance score out of 100 by habitat: cabin 48.8, EVA prep 20.8, lunar base 19.3, exploration atmosphere 15.4, spacesuit 15.0. Rank 15 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: The impact of this work consists of both practical and fundamental aspects. Practically, with diffusion flame burning as the basis in many combustion engines and devices, understanding the underlying dynamics and chemistry of diffusion flames is important in improving performance in terms of power, efficiency, pollutant emissions, and reliability.",
+   "E8": "Most similar investigations (similarity 0 to 1): ACME E-FIELD (0.57) and ACME BRE (0.43).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 44."
+  },
+  "hash": "b7f2397328e8e47c"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-39",
+  "title": "CFI · PSI-39",
+  "items": {
+   "E1": "CFI (PSI-39): Cool Flames Investigation. Flight investigation, platform: International Space Station (ISS); hardware: MDCA droplet rig · CIR.",
+   "E2": "Objective, from NASA PSI: The objectives of this investigation are to: 1) Examine the combustion behavior of n-dodecane and mixtures of n-dodecane/iso-dodecane at pressures ranging from 0.25 atm to 5 atm. 2) Analyze the effects of helium dilution on cool flame behavior.",
+   "E3": "79 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 17%–21% O2, 0.50–5.00 atm.",
+   "E5": "Varied: Pressure, Oxygen, Nitrogen, Helium, Fiber, Fuel. Measured: none.",
+   "E6": "Relevance score out of 100 by habitat: cabin 64.6, EVA prep 30.2, lunar base 16.1, exploration atmosphere 15.0, spacesuit 15.0. Rank 16 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: A basic understanding of cool flames is important for understanding ignition phenomena of practical fuels and fuel additives. Cool flames play a key role in the development and selection of new fuels and the design of advanced engines such as clean, high-efficiency Homogeneous Charge Compression Ignition (HCCI) engines.",
+   "E8": "Most similar investigations (similarity 0 to 1): FLEX (0.58) and FLEX-2 (0.41).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 7."
+  },
+  "hash": "ab1451abecd44126"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-21",
+  "title": "ACME CLD · PSI-21",
+  "items": {
+   "E1": "ACME CLD (PSI-21): Advanced Combustion via Microgravity Experiments / Coflow Laminar Diffusion Flame. Flight investigation, platform: International Space Station (ISS); hardware: ACME · Combustion Integrated Rack.",
+   "E2": "Objective, from NASA PSI: In order to provide the experimental data needed to allow rigorous testing of computational models at the extremes of the fuel dilution spectrum, we have the following objectives: A) Characterize the behavior of weak coflow diffusion flames of methane and ethylene, as a function of velocity and fuel dilution, through measurement of flame shape, lift-off heights, temperatures and extinction limits. B) Characterize the sooting tendencies of diffusion flames with long residence times, as a function of velocity and fuel dilution, through measurement of flame shape, gas temperatures in the soot-free portion of the flame, soot luminosity, soot temperatures, and soot volume fractions.",
+   "E3": "344 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Test Type, Test Day, Fuel MFC, N2 MFC, Fuel Bottle, Fuel conc. Range. Measured: Flames ignited.",
+   "E6": "Relevance score out of 100 by habitat: cabin 60.5, EVA prep 22.8, lunar base 15.5, exploration atmosphere 15.0, spacesuit 15.0. Rank 17 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: Diffusion flames are the flame type of most practical combustion devices. The ability to predict the coupled effects of complex transport phenomena with detailed chemical kinetics in such systems is critical in the modeling of turbulent reacting flows and in understanding the processes by which soot formation and radiative transfer take place.",
+   "E8": "Most similar investigations (similarity 0 to 1): ACME E-FIELD (0.55) and SPICE (0.43).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 18."
+  },
+  "hash": "559d5cea596e64d4"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-106",
+  "title": "SLICE · PSI-106",
+  "items": {
+   "E1": "SLICE (PSI-106): Structure and Liftoff In Combustion Experiment. Flight investigation, platform: International Space Station (ISS); hardware: MSG fan-driven flow duct.",
+   "E2": "Objective, from NASA PSI: Objective: The objective of this investigation is to better understand the structure and stability of laminar diffusion flames in microgravity. Specific objectives of this investigation were: 1. To investigate the structure of laminar diffusion flames in microgravity to understand the stabilizing mechanisms at the flames base.",
+   "E3": "12 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
+   "E5": "Varied: Fuel Type. Measured: none.",
+   "E6": "Relevance score out of 100 by habitat: cabin 44.7, EVA prep 18.1, lunar base 15.2, exploration atmosphere 15.0, spacesuit 15.0. Rank 18 of 24 for the lunar base.",
+   "E7": "Benefit on Earth, from NASA PSI: 1. Improved numerical models for flame behavior lead to more efficient combustion technologies on Earth. 2. Understanding soot formation aids in designing combustion systems with minimum emissions.",
+   "E8": "Most similar investigations (similarity 0 to 1): SPICE (0.70) and ACME CLD (0.43).",
+   "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 5."
+  },
+  "hash": "8cc282cf2be6cbe7"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-68",
+  "title": "FLEX-2 · PSI-68",
+  "items": {
+   "E1": "FLEX-2 (PSI-68): Flame Extinguishment Experiment - 2. Flight investigation, platform: International Space Station (ISS); hardware: MDCA droplet rig · CIR.",
+   "E2": "Objective, from NASA PSI: The primary goal of the FLEX-2 flight experiments is to extend the results of FLEX-1 to fuels and environmental conditions that mimic real combustor conditions, as well as, provide benchmark experimental data on bi-component droplet combustion over a wide range of initial conditions in order to validate numerical simulations and to develop new theoretical models. Detailed experimental objectives can be further itemized as: 1. Investigate the role of liquid-phase mixing on the burning characteristics of bi-component fuel droplets.",
+   "E3": "8 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Varied: Sample (Fuel Type). Measured: none.",
+   "E5": "Relevance score out of 100 by habitat: cabin 15.0, EVA prep 15.0, lunar base 15.0, exploration atmosphere 15.0, spacesuit 15.0. Rank 19 of 24 for the lunar base.",
+   "E6": "Benefit on Earth, from NASA PSI: The combustion of liquid fuels is the overwhelming energy source in the transportation sector. Insights gained from these studies can lead to more efficient and cleaner combustion technologies which are crucial for reducing pollution and greenhouse gas emissions.",
+   "E7": "Most similar investigations (similarity 0 to 1): FLEX (0.44) and CFI (0.41).",
+   "E8": "Layers of fire safety it informs: Suppression, Prevention. Publications listed in PSI: 48."
+  },
+  "hash": "c7eea83e069a8416"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-142",
+  "title": "Cool-flame counterflow · PSI-142",
+  "items": {
+   "E1": "Cool-flame counterflow (PSI-142): Quantitative Studies of Cool Flame Transitions at Radiation / Stretch Extinction Using Counterflow Flames. Ground investigation, platform: Not Applicable; hardware: Ground laboratory / modeling.",
+   "E2": "Objective, from NASA PSI: By using the Flame Extinguishment (FLEX) experimental data from the Physical Sciences Informatics (PSI) system of combustion science, the purpose of this grant was to conduct new simulations and ground-based experiments using ozone-sensitized counterflow flames to: 1) Develop a new diagram of the flammability limits of diffusional cool flames affected by radiation, diffusion, and convection. 2) Bridge the knowledge gap between the flammability limits and extinction limits of hot flames and cool flames.",
+   "E3": "8 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E4": "Varied: Data Description. Measured: none.",
+   "E5": "Relevance score out of 100 by habitat: cabin 10.5, EVA prep 10.5, lunar base 10.5, exploration atmosphere 10.5, spacesuit 10.5. Rank 20 of 24 for the lunar base.",
+   "E6": "Benefit on Earth, from NASA PSI: Obtaining a fundamental understanding of the warm diffusion flame is particularly relevant to combustion in highly turbulent flow fields and in microgravity environments, owing to the possibility of long residence times. The results showed that the warm flame has a double reaction zone structure and plays a critical role in the transition between cool flames and hot flames.",
+   "E7": "Most similar investigations (similarity 0 to 1): Cool-flame perturbation (0.57) and SPICE analysis (0.41).",
+   "E8": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 12."
+  },
+  "hash": "1228c99782b5f7f3"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-62",
+  "title": "BASS spread modeling · PSI-62",
+  "items": {
+   "E1": "BASS spread modeling (PSI-62): Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography. Ground investigation, platform: Ground laboratory; hardware: Ground laboratory / modeling.",
+   "E2": "Objective, from NASA PSI: The objective of this research was to develop and validate new flamelet generated manifold (FGM) modeling techniques for concurrent flame spread in microgravity. Concurrent flame spread presented one of the greatest modeling challenges in combustion science due to the intricate coupling between heat transfer, mass transport, and chemical kinetics near the solid-vapor interface.",
+   "E3": "No experimental data table in PSI: this is a ground, analysis or modeling investigation.",
+   "E4": "Relevance score out of 100 by habitat: cabin 10.5, EVA prep 10.5, lunar base 10.5, exploration atmosphere 10.5, spacesuit 10.5. Rank 21 of 24 for the lunar base.",
+   "E5": "Benefit on Earth, from NASA PSI: This research provides predictive tools for screening new materials’ flammability limits, which can lead to the design of safer spacecrafts. The development of Large Eddy Simulation subgrid models is expected to improve hazard assessment capabilities critical for managing fire risks during long-duration space missions and within confined spacecraft habitats.",
+   "E6": "Most similar investigations (similarity 0 to 1): BASS-II (0.47) and BASS (0.43).",
+   "E7": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 4."
+  },
+  "hash": "563df74b63e1e81b"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-60",
+  "title": "SPICE analysis · PSI-60",
+  "items": {
+   "E1": "SPICE analysis (PSI-60): Computational and Experimental Analysis of SPICE Data Sets. Ground investigation, platform: Ground laboratory; hardware: Ground laboratory / modeling.",
+   "E2": "Objective, from NASA PSI: This ground investigation sought to increase understanding of the issues that control the large discrepancy between soot formation in 1g and in 0g flames. The objective of this investigation was to integrate computational and experimental methods to derive temperature distributions and soot volume fractions from the Smoke Point in Coflow Experiment (SPICE) data available in PSI.",
+   "E3": "No experimental data table in PSI: this is a ground, analysis or modeling investigation.",
+   "E4": "Relevance score out of 100 by habitat: cabin 10.5, EVA prep 10.5, lunar base 10.5, exploration atmosphere 10.5, spacesuit 10.5. Rank 22 of 24 for the lunar base.",
+   "E5": "Benefit on Earth, from NASA PSI: This study sought to enhance understanding of soot formation, flame structure, and radiative transport under microgravity and normal gravity, improving predictive models for combustion in both spacecraft and terrestrial systems. For space applications, the results support safer fire detection, suppression, and cleaner combustion technologies critical for long-duration missions.",
+   "E6": "Most similar investigations (similarity 0 to 1): SPICE (0.49) and Cool-flame counterflow (0.41).",
+   "E7": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 1."
+  },
+  "hash": "b40a4eb8844d3b19"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-117",
+  "title": "Cool-flame perturbation · PSI-117",
+  "items": {
+   "E1": "Cool-flame perturbation (PSI-117): Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis. Ground investigation, platform: Ground laboratory; hardware: Ground laboratory / modeling.",
+   "E2": "Objective, from NASA PSI: The objective of this ground investigation was to use flight data obtained from PSI through NASA’s Flame Extinguishment Experiment (FLEX) to quantify how externally imposed thermal and convective perturbations regulated the dynamics and ultimate fate of already established droplet cool flames, and to explain run-to-run variability by isolating the roles of deliberate heating and unintentional drift-induced convection. Focusing on both small and large droplets, the work mapped stability windows for ignition, sustained oscillation, transitions to hot ignition and warm-flame behavior, and extinction under microgravity.",
+   "E3": "No experimental data table in PSI: this is a ground, analysis or modeling investigation.",
+   "E4": "Relevance score out of 100 by habitat: cabin 10.5, EVA prep 10.5, lunar base 10.5, exploration atmosphere 10.5, spacesuit 10.5. Rank 23 of 24 for the lunar base.",
+   "E5": "Benefit on Earth, from NASA PSI: Space Benefits: Potential to improve spacecraft fire-safety modeling by resolving cool-flame/extinction behavior in microgravity; leverages FLEX to define safer operating envelopes/materials. Earth Benefits: Advances low-temperature combustion understanding relevant to engine knock, efficiency, and emissions; delivers validated CFD tools transferrable to practical combustors.",
+   "E6": "Most similar investigations (similarity 0 to 1): Cool-flame counterflow (0.57) and SPICE analysis (0.40).",
+   "E7": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 10."
+  },
+  "hash": "62c438b051ecad65"
+ },
+ {
+  "kind": "investigation",
+  "id": "PSI-115",
+  "title": "SAME smoke modeling · PSI-115",
+  "items": {
+   "E1": "SAME smoke modeling (PSI-115): Utilization of the Smoke Aerosol Measurement Experiment Data for Advanced Modeling and Simulation of Smoke Generation in Micro-Gravity. Ground investigation, platform: Not Applicable; hardware: Ground laboratory / modeling.",
+   "E2": "Objective, from NASA PSI: The objective of this investigation was to use numerical simulation to explore the influence of gravity on pyrolysis smoke growth from a fundamental perspective. The intention of this effort is to quantify the differences between microgravity and Earth gravity smoke, and to identify the fluid dynamic mechanisms that cause the differences.",
+   "E3": "No experimental data table in PSI: this is a ground, analysis or modeling investigation.",
+   "E4": "Relevance score out of 100 by habitat: cabin 10.5, EVA prep 10.5, lunar base 10.5, exploration atmosphere 10.5, spacesuit 10.5. Rank 24 of 24 for the lunar base.",
+   "E5": "Benefit on Earth, from NASA PSI: Models and tools that characterize particles generated as smoke can be used to ascertain how temperature, gravity, and material properties affect the smoke produced. This would directly lead to better smoke detection devices and prevent fires that can lead to loss of materiel and loss of life.",
+   "E6": "Most similar investigations (similarity 0 to 1): SAME (0.40) and SAME-R (0.25).",
+   "E7": "Layers of fire safety it informs: Detection. Publications listed in PSI: 0."
+  },
+  "hash": "80055f0c79729d74"
+ }
+]

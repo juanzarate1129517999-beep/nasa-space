@@ -97,6 +97,19 @@
     return { near, dist: near.reduce((s, r) => s + r.d, 0) / k };
   }
   const featVec = (s) => [s.fuel === "Heptane" ? 1 : 0, s.o2, Math.log(s.p), s.co2, s.he, s.d0];
+  // Same rule as pipeline/models.py data_status(): leaving the flown range of any single input is an
+  // extrapolation even when the multivariate nearest-neighbour distance is small.
+  const FEAT_TXT = { x_o2: "oxygen", log_p: "pressure", x_co2: "CO₂", x_he: "helium", d0_mm: "droplet size" };
+  function outOfRange(x) {
+    const R = M.ranges || {};
+    return M.features.filter((f, i) => f !== "heptane" && R[f] && (x[i] < R[f][0] - 1e-9 || x[i] > R[f][1] + 1e-9));
+  }
+  function dataStatus(x) {
+    const nn = neighbors(x), thr = M.ood_threshold, beyond = outOfRange(x);
+    const s = nn.dist > 2 * thr ? "outside" : (nn.dist > thr || beyond.length ? "extrapolating" : "within");
+    return { s, nn, beyond };
+  }
+  const beyondTxt = (b) => b.map((f) => FEAT_TXT[f]).join(" and ");
 
   /* =========================================================== hero */
   function renderHero() {
@@ -114,13 +127,16 @@
     $("#habitats").innerHTML = D.habitats.map((hb) => {
       // same browser-side model as the scenario simulator, so the numbers always match
       const x = featVec({ fuel: "Methanol", o2: hb.x_o2, p: hb.p_atm, co2: 0, he: 0, d0: M.d0_median });
-      const r = { ...predict(x), ood: neighbors(x).dist > 2 * M.ood_threshold };
+      const st = dataStatus(x);
+      const r = { ...predict(x), ood: st.s === "outside" };
       const atm = `<div class="atm"><span>${o2pct(hb.x_o2)} O₂</span><span>${num(hb.p_atm, 2)} atm</span><span>${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>`;
+      const warn = st.s === "extrapolating"
+        ? `<div class="xtra" title="The ${beyondTxt(st.beyond) || "combination"} is beyond every flown FLEX test">Extrapolating · ${esc(beyondTxt(st.beyond) || "far from flown tests")} outside flown range</div>` : "";
       const body = r.ood
         ? `<div class="ood-note"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="${C.ink}" stroke-dasharray="2 2"/></svg><span><b>Outside all flight data.</b> No microgravity fire has been flown near this atmosphere — Skylab Phoenix withholds a prediction.</span></div>`
         : `<div class="pbar"><div class="plabel"><span>Self-extinguishes</span><b>${pct(r.p)}</b></div>
            <div class="track"><div class="ci" style="left:${100 * r.lo}%;width:${Math.max(1, 100 * (r.hi - r.lo))}%"></div><div class="pt" style="left:${100 * r.p}%"></div></div>
-           <div class="plabel" style="margin-top:6px"><span>90% interval</span><span style="font-family:var(--mono)">${pct(r.lo)}–${pct(r.hi)}</span></div></div>`;
+           <div class="plabel" style="margin-top:6px"><span>90% interval</span><span style="font-family:var(--mono)">${pct(r.lo)}–${pct(r.hi)}</span></div>${warn}</div>`;
       return `<button class="hab" data-hab="${hb.id}" title="${esc(hb.source)}"><span class="go">SIMULATE →</span><div class="name">${esc(hb.name)}</div><div class="det">${esc(hb.detail)}</div>${atm}${body}</button>`;
     }).join("");
     document.querySelectorAll(".hab").forEach((b) => b.addEventListener("click", () => {
@@ -173,7 +189,7 @@
       hovertemplate: "<b>%{text}</b><br>O₂ %{x:.1f}% · %{y:.2f} atm<br>%{customdata}<extra></extra>",
     });
     // habitat labels as offset annotations so they never collide with each other
-    const offs = { cabin: [-34, -38], eva_prep: [-46, 34], moon_base: [40, -38], suit: [-30, -34] };
+    const offs = { cabin: [-34, -38], eva_prep: [-46, 34], moon_base: [40, -38], exploration: [64, 26], suit: [-30, -34] };
     const habNotes = D.habitats.map((x) => ({
       x: Math.log10(100 * x.x_o2), y: Math.log10(x.p_atm), text: `<b>${esc(x.name)}</b>`, showarrow: true, arrowhead: 0, arrowwidth: 1,
       arrowcolor: C.ink3, ax: offs[x.id][0], ay: offs[x.id][1], font: { size: 12, color: C.ink, family: "Inter, sans-serif" },
@@ -196,7 +212,7 @@
   function renderInvControls() {
     $("#inv-habitat").innerHTML = D.habitats.map((x) => `<button aria-pressed="${x.id === invState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
     $("#inv-layer").innerHTML = ["All", "Prevention", "Detection", "Suppression"].map((l) => `<button aria-pressed="${l === invState.layer}" data-l="${l}">${l}</button>`).join("");
-    document.querySelectorAll("#inv-habitat button").forEach((b) => b.addEventListener("click", () => { invState.hab = b.dataset.h; invState.sel = null; renderInvControls(); renderInvList(); }));
+    document.querySelectorAll("#inv-habitat button").forEach((b) => b.addEventListener("click", () => { invState.hab = b.dataset.h; invState.sel = null; renderInvControls(); renderInvList(); safe(renderCompare, "compare"); }));
     document.querySelectorAll("#inv-layer button").forEach((b) => b.addEventListener("click", () => { invState.layer = b.dataset.l; renderInvControls(); renderInvList(); }));
   }
   function filteredInv() {
@@ -249,6 +265,8 @@
       <div style="display:flex;gap:6px;flex-wrap:wrap">${r.layers.map((l) => `<span class="tag solid layer-${l}">${l}</span>`).join("")}<span class="tag">${r.type}</span><span class="tag">${esc(r.family)}</span></div>
       <h3>${esc(r.name)} <span style="color:var(--ink-4);font-weight:400;font-size:15px;font-family:var(--mono)">${r.psi_id}</span></h3>
       <div class="ttl">${esc(r.title)}</div>
+      ${SI && SI.investigation[r.psi_id] ? `<div class="si-sum">${badge(SI.investigation[r.psi_id])}<p>${sentencesHtml(SI.investigation[r.psi_id], "inv")}</p>${evidenceHtml(SI.investigation[r.psi_id], "inv")}</div>` : ""}
+      <div class="label-sm">Objective · NASA PSI text</div>
       <p class="obj">${esc(r.objective || "No objective text in PSI metadata.")}</p>
       <div class="meta">
         <div><span>Science team</span><b>${esc(r.pi || "—")}</b></div>
@@ -269,7 +287,14 @@
       <div class="links">
         <a class="btn primary" href="${r.psi_url}" target="_blank" rel="noopener">Open in NASA PSI ↗</a>
         ${r.doi ? `<a class="btn" href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener">Dataset DOI ↗</a>` : ""}
+        <button class="btn" type="button" id="add-cmp">Add to comparison</button>
       </div>`;
+    wireCites(el);
+    $("#add-cmp").addEventListener("click", () => {
+      if (!cmpState.ids.includes(r.psi_id)) { cmpState.ids = [r.psi_id, ...cmpState.ids.filter((x) => x !== r.psi_id)].slice(0, 3); }
+      renderCompare();
+      document.getElementById("compare").scrollIntoView({ behavior: "smooth" });
+    });
   }
   function renderSimilarity() {
     const S = D.similarity;
@@ -339,12 +364,13 @@
     syncSliders();
     const x = featVec(sc);
     const r = predict(x);
-    const nn = neighbors(x);
+    const { s: st, nn, beyond } = dataStatus(x);
     const thr = M.ood_threshold;
     let status, show = true;
-    if (nn.dist <= thr) status = `<span class="status"><span class="dot"></span>Within flight data</span>`;
-    else if (nn.dist <= 2 * thr) status = `<span class="status warn"><span class="dot"></span>Extrapolating · use with caution</span>`;
+    if (st === "within") status = `<span class="status"><span class="dot"></span>Within flight data</span>`;
+    else if (st === "extrapolating") status = `<span class="status warn" title="${beyond.length ? `${esc(beyondTxt(beyond))} outside every flown FLEX test` : "far from the nearest flown tests"}"><span class="dot"></span>Extrapolating${beyond.length ? ` · ${esc(beyondTxt(beyond))} beyond flown range` : ""} · use with caution</span>`;
     else { status = `<span class="status out"><span class="dot"></span>Outside flight data · prediction withheld</span>`; show = false; }
+    syncUrl();
     $("#r-status").innerHTML = status;
     const big = $("#r-big");
     big.textContent = show ? pct(r.p) : "—";
@@ -397,7 +423,7 @@
       margin: { l: 52, r: 8, t: 8, b: 44 },
       annotations: habs.map((x) => ({
         x: 100 * x.x_o2, y: Math.log10(x.p_atm), text: esc(x.name), showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink3,
-        ax: { cabin: 0, eva_prep: -10, moon_base: 30 }[x.id] ?? 0, ay: { cabin: -42, eva_prep: 40, moon_base: -44 }[x.id] ?? -40,
+        ax: { cabin: 0, eva_prep: -10, moon_base: 30, exploration: 34 }[x.id] ?? 0, ay: { cabin: -42, eva_prep: 40, moon_base: -44, exploration: 40 }[x.id] ?? -40,
         font: { size: 11, color: C.ink }, bgcolor: "rgba(7,10,20,0.88)", borderpad: 3,
       })),
       xaxis: { range: [10, 40], ticksuffix: "%", title: { text: "Oxygen" }, gridcolor: "rgba(0,0,0,0)" },
@@ -527,7 +553,7 @@
       yaxis: { type: "log", tickvals: [0.3, 0.5, 0.7, 1, 2, 3], title: { text: "Pressure, atm" }, gridcolor: "rgba(0,0,0,0)" },
       annotations: habs.map((x) => ({
         x: 100 * x.x_o2, y: Math.log10(x.p_atm), text: esc(x.name), showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink3,
-        ax: { cabin: -40, eva_prep: -60, moon_base: 60 }[x.id] ?? 0, ay: { cabin: -36, eva_prep: -46, moon_base: -40 }[x.id] ?? -40,
+        ax: { cabin: -40, eva_prep: -60, moon_base: 60, exploration: 40 }[x.id] ?? 0, ay: { cabin: -36, eva_prep: -46, moon_base: -40, exploration: 36 }[x.id] ?? -40,
         font: { size: 11, color: C.ink }, bgcolor: "rgba(7,10,20,0.88)", borderpad: 3,
       })),
     }));
@@ -565,6 +591,246 @@
     $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly`;
   }
 
+  /* =========================================================== shareable state (?hab=…&o2=… in the URL) */
+  const QS = new URLSearchParams(location.search);
+  let urlReady = false, urlTimer = null;
+  function scenarioParams() {
+    const p = new URLSearchParams();
+    if (sc.preset) p.set("hab", sc.preset);
+    p.set("fuel", sc.fuel); p.set("o2", sc.o2.toFixed(3)); p.set("p", sc.p.toFixed(3));
+    if (sc.co2) p.set("co2", sc.co2.toFixed(2));
+    if (sc.he) p.set("he", sc.he.toFixed(2));
+    p.set("d0", sc.d0.toFixed(2));
+    if (audState.id) p.set("view", audState.id);
+    return p;
+  }
+  function syncUrl() {
+    if (!urlReady) return;
+    clearTimeout(urlTimer);
+    urlTimer = setTimeout(() => { try { history.replaceState(null, "", `?${scenarioParams()}${location.hash}`); } catch (e) { /* file:// */ } }, 250);
+  }
+  function applyUrlScenario() {
+    const g = (k, lo, hi) => { const v = parseFloat(QS.get(k)); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null; };
+    if (QS.get("hab") && D.habitats.some((x) => x.id === QS.get("hab"))) setPreset(QS.get("hab"));
+    if (["Methanol", "Heptane"].includes(QS.get("fuel"))) sc.fuel = QS.get("fuel");
+    const vals = { o2: g("o2", 0.10, 1), p: g("p", 0.25, 3.2), co2: g("co2", 0, 0.7), he: g("he", 0, 0.45), d0: g("d0", 1.1, 4.7) };
+    let changed = false;
+    for (const [k, v] of Object.entries(vals)) if (v != null && Math.abs(v - sc[k]) > 1e-9) { sc[k] = v; changed = true; }
+    if (sc.o2 + sc.co2 + sc.he > 1) { sc.co2 = 0; sc.he = 0; }
+    if (changed) sc.preset = QS.get("hab") && Math.abs(sc.o2 - D.habitats.find((x) => x.id === QS.get("hab"))?.x_o2) < 1e-6 ? QS.get("hab") : null;
+    renderScenarioControls(); updateScenario(true);
+    return QS.has("o2") || QS.has("hab");
+  }
+  async function copyText(t, btn) {
+    const old = btn.textContent;
+    try { await navigator.clipboard.writeText(t); btn.textContent = "Link copied ✓"; }
+    catch (e) { window.prompt("Copy this link:", t); }
+    setTimeout(() => { btn.textContent = old; }, 1800);
+  }
+  function shareUrl(hash) {
+    return `${location.origin}${location.pathname}?${scenarioParams()}${hash}`;
+  }
+
+  /* =========================================================== SI briefing */
+  const SI = window.SI || null;
+  const briefState = { hab: "moon_base" };
+  const citeChip = (c, scope) => `<button class="cite" type="button" data-e="${esc(c)}" data-scope="${scope}" title="Show evidence ${esc(c)}">${esc(c)}</button>`;
+  function sentencesHtml(b, scope) {
+    return b.sentences.map((s) => `<span class="sent">${esc(s.text)}${s.cites.map((c) => citeChip(c, scope)).join("")}</span>`).join(" ");
+  }
+  function evidenceHtml(b, scope, open = false) {
+    const used = new Set(b.sentences.flatMap((s) => s.cites));
+    return `<details class="evid" ${open ? "open" : ""} id="evid-${scope}"><summary>Evidence behind this briefing · ${Object.keys(b.evidence).length} items computed from PSI</summary>
+      <ol>${Object.entries(b.evidence).map(([k, t]) => `<li id="ev-${scope}-${k}" class="${used.has(k) ? "used" : ""}"><b>${k}</b> ${esc(t)}</li>`).join("")}</ol></details>`;
+  }
+  const badge = (b) => b.source === "si"
+    ? `<span class="badge si" title="Written by an SI model and checked by code: citations, numbers, no safety verdicts">SI-written · verified ✓</span>`
+    : `<span class="badge det" title="No verified SI draft for the current data; showing the evidence itself">Evidence brief · deterministic</span>`;
+  function wireCites(root) {
+    root.querySelectorAll(".cite").forEach((btn) => btn.addEventListener("click", () => {
+      const det = document.getElementById(`evid-${btn.dataset.scope}`);
+      if (det) det.open = true;
+      const li = document.getElementById(`ev-${btn.dataset.scope}-${btn.dataset.e}`);
+      if (li) { li.classList.remove("flash"); void li.offsetWidth; li.classList.add("flash"); li.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+    }));
+  }
+  function renderBrief() {
+    if (!SI) { $("#brief").innerHTML = '<p class="note">SI data not found — run python -m pipeline.run.</p>'; return; }
+    $("#brief-hab").innerHTML = D.habitats.map((x) => `<button aria-pressed="${x.id === briefState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
+    document.querySelectorAll("#brief-hab button").forEach((b) => b.addEventListener("click", () => { briefState.hab = b.dataset.h; renderBrief(); }));
+    const b = SI.habitat[briefState.hab];
+    const hb = D.habitats.find((x) => x.id === briefState.hab);
+    $("#brief").innerHTML = `<div class="brief-meta">${badge(b)}<span class="mono-sm">${o2pct(hb.x_o2)} O₂ · ${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>
+      ${b.headline ? `<h3 class="brief-h">${esc(b.headline)}</h3>` : ""}
+      <p class="brief-p">${sentencesHtml(b, "hab")}</p>${evidenceHtml(b, "hab")}`;
+    wireCites($("#brief"));
+  }
+  function briefMarkdown() {
+    const b = SI.habitat[briefState.hab], hb = D.habitats.find((x) => x.id === briefState.hab);
+    const lines = [`# Fire-safety briefing: ${hb.name}`, "", `${o2pct(hb.x_o2)} O2 at ${num(hb.p_atm * ATM_PSI, 1)} psi (${num(hb.p_atm, 2)} atm). ${hb.source}.`, "",
+      b.headline ? `## ${b.headline}\n` : "", ...b.sentences.map((s) => `- ${s.text} [${s.cites.join(", ")}]`), "", "## Evidence (computed from NASA PSI data)", "",
+      ...Object.entries(b.evidence).map(([k, t]) => `- **${k}** ${t}`), "",
+      `---`, b.source === "si" ? "Written by an SI model (Anthropic Claude) and published only after code verified every citation and number. No safety verdicts." : "Deterministic evidence brief (no verified SI draft for the current data).",
+      `Skylab Phoenix · NASA Space Apps 2026 · Flame in Freefall · data: NASA Physical Sciences Informatics (CC0) · pipeline run ${D.generated}.`,
+      "Research aid, not flight certification."];
+    return lines.join("\n");
+  }
+  function download(name, text, type = "text/markdown") {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type }));
+    a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  /* =========================================================== Ask the archive (BM25 over NASA text, in the browser) */
+  const STOP = new Set("a an and are as at be by can did do does for from has have how i in is it its of on or that the this to was were what when where which who why will with into than then there these those about after over under not no yes".split(" "));
+  const SYN = { fire: ["flame", "combustion", "burn"], flame: ["fire"], suppressant: ["suppression", "extinguish", "extinguishment", "diluent", "co2", "helium"],
+    suppress: ["suppression", "extinguish"], extinguish: ["extinction", "suppression"], smoke: ["aerosol", "soot", "particle"], detect: ["detection", "detector", "sensor"],
+    detector: ["detection", "smoke"], moon: ["lunar"], lunar: ["moon"], mars: ["martian", "partial"], oxygen: ["o2"], o2: ["oxygen"], gravity: ["microgravity", "g"],
+    material: ["solid", "fabric", "pmma"], solid: ["material"], droplet: ["fuel", "liquid"], cool: ["low-temperature"], spread: ["growth"], ventilation: ["flow", "airflow"] };
+  const stem = (w) => w.length > 4 && w.endsWith("ies") ? w.slice(0, -3) + "y" : w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w;
+  const toks = (t) => String(t).toLowerCase().replace(/₂/g, "2").split(/[^a-z0-9]+/).filter((w) => w && !STOP.has(w)).map(stem);
+  const CORPUS = (window.CORPUS || []).map((d) => ({ ...d, tf: (() => { const m = new Map(); for (const w of [...toks(d.title), ...toks(d.title), ...toks(d.text)]) m.set(w, (m.get(w) || 0) + 1); return m; })(), len: toks(d.title).length * 2 + toks(d.text).length }));
+  const AVGLEN = CORPUS.reduce((s, d) => s + d.len, 0) / Math.max(1, CORPUS.length);
+  const DF = (() => { const m = new Map(); CORPUS.forEach((d) => d.tf.forEach((_, w) => m.set(w, (m.get(w) || 0) + 1))); return m; })();
+  function search(q, k = 5) {
+    const base = toks(q);
+    const terms = new Map(base.map((w) => [w, 1]));
+    base.forEach((w) => (SYN[w] || []).forEach((s) => { const t = stem(s); if (!terms.has(t)) terms.set(t, 0.5); }));
+    const N = CORPUS.length;
+    const scored = CORPUS.map((d) => {
+      let s = 0;
+      terms.forEach((wt, w) => {
+        const f = d.tf.get(w); if (!f) return;
+        const idf = Math.log(1 + (N - DF.get(w) + 0.5) / (DF.get(w) + 0.5));
+        s += wt * idf * (f * 2.2) / (f + 1.2 * (0.25 + 0.75 * d.len / AVGLEN));
+      });
+      return { d, s };
+    }).filter((r) => r.s > 0).sort((a, b) => b.s - a.s);
+    return { hits: scored.slice(0, k), terms: [...terms.keys()] };
+  }
+  function snippet(text, terms, max = 320) {
+    const sents = text.split(/(?<=[.!?])\s+/);
+    let best = 0, bi = 0;
+    sents.forEach((s, i) => { const t = new Set(toks(s)); const sc2 = terms.filter((w) => t.has(w)).length; if (sc2 > best) { best = sc2; bi = i; } });
+    let out = sents.slice(bi, bi + 2).join(" ");
+    if (out.length > max) out = out.slice(0, max).replace(/\s+\S*$/, "") + "…";
+    const re = new RegExp(`\\b(${terms.filter((w) => w.length > 2).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\w*`, "gi");
+    return esc(out).replace(re, "<mark>$&</mark>");
+  }
+  const SUGGEST = ["Which suppressants did NASA test?", "What is a cool flame?", "Has any material burned in lunar-base air?", "Why might 1 g material screening not be conservative?",
+    "How does smoke change in microgravity?", "Does airflow direction matter?"];
+  function renderAsk(q) {
+    $("#ask-sug").innerHTML = SUGGEST.map((s) => `<button class="chip" type="button">${esc(s)}</button>`).join("");
+    document.querySelectorAll("#ask-sug .chip").forEach((b) => b.addEventListener("click", () => { $("#ask-q").value = b.textContent; renderAsk(b.textContent); }));
+    if (!q) { $("#ask-out").innerHTML = `<p class="note">${CORPUS.length} passages indexed from NASA PSI investigation records, Skylab Phoenix findings, habitat definitions and a short glossary.</p>`; return; }
+    const { hits, terms } = search(q);
+    if (!hits.length || hits[0].s < 1.2) {
+      $("#ask-out").innerHTML = `<p class="note"><b>No passage in the archive answers this well.</b> The archive covers the 24 PSI combustion investigations; try naming a fire type (droplet, solid, gas flame, smoke), a habitat, or a suppressant.</p>`;
+      return;
+    }
+    $("#ask-out").innerHTML = hits.map(({ d }) => `<article class="hit">
+        <div class="hit-top"><span class="tag">${esc(d.kind)}</span>${d.psi ? `<span class="mono-sm">${esc(d.psi)}</span>` : ""}</div>
+        <h4>${esc(d.title)}</h4><p>${snippet(d.text, terms)}</p>
+        ${d.url ? `<a class="src-link" href="${esc(d.url)}" ${d.url.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${d.url.startsWith("http") ? "Open the NASA PSI record ↗" : "Open in dashboard →"}</a>` : ""}
+      </article>`).join("") + `<p class="note">Ranked by BM25 relevance over NASA's own text. Passages are quoted, not generated.</p>`;
+  }
+
+  /* =========================================================== audience views */
+  const AUD = [
+    { id: "undergrad", name: "Undergraduate", intro: "New to microgravity fire? Three steps, about five minutes.", steps: [
+      ["Read the lunar-base briefing", "Each sentence has a citation; click one to see the number behind it.", { brief: "moon_base", go: "#briefing" }],
+      ["Raise the oxygen yourself", "Start from cabin air and move the oxygen slider to 30%: watch the chance that the flame puts itself out collapse.", { preset: "cabin", go: "#scenario" }],
+      ["Look up a term", "Ask the archive “What is a cool flame?”: a flame you can barely see.", { ask: "What is a cool flame?", go: "#briefing" }]] },
+    { id: "grad", name: "Graduate student", intro: "Find the investigation and data that fit your thesis question.", steps: [
+      ["Rank investigations for your habitat", "Relevance is a transparent formula; every score shows its parts.", { go: "#investigations" }],
+      ["Compare side by side", "Hardware, conditions, variables and outcomes of up to three investigations.", { go: "#compare" }],
+      ["Download the unified tables", "1,989 tests in SI units with a logged correction trail.", { go: "#quality" }]] },
+    { id: "professor", name: "Professor", intro: "Teaching material with the evidence attached.", steps: [
+      ["Coverage map", "Where NASA has flown fire versus where crews will live: a one-slide lecture.", { go: "#coverage" }],
+      ["Raw evidence charts", "Outcomes with sample sizes and intervals, ready for a problem set.", { go: "#evidence" }],
+      ["Findings ranked by evidence", "Each with its source investigation and an evidence score you can discuss.", { go: "#findings" }]] },
+    { id: "researcher", name: "Aerospace researcher", intro: "Methods, validation and the open questions.", steps: [
+      ["Validation and calibration", "Grouped by test day, against gradient boosting and baselines.", { go: "#quality" }],
+      ["What NASA should fly next", "Active learning on the bootstrap ensemble near lunar-base air.", { go: "#next" }],
+      ["Search NASA's text", "Objectives, hypotheses and publications of all 24 investigations.", { ask: "Which suppressants did NASA test?", go: "#briefing" }]] },
+    { id: "engineer", name: "Aerospace engineer", intro: "A design-review view of your cabin atmosphere.", steps: [
+      ["Brief for the exploration atmosphere", "8.2 psi, 34% O₂: what the data says and where it stops. Download it as Markdown.", { brief: "exploration", go: "#briefing" }],
+      ["Run your own atmosphere", "Set O₂, pressure and diluents; copy a link that reopens the exact case.", { preset: "exploration", go: "#scenario" }],
+      ["Design implications", "Detection, suppression and ventilation implications, each traced to a source.", { go: "#findings" }]] },
+  ];
+  const audState = { id: QS.get("view") && AUD.some((a) => a.id === QS.get("view")) ? QS.get("view") : "undergrad" };
+  function renderAudience() {
+    $("#aud-seg").innerHTML = AUD.map((a) => `<button aria-pressed="${a.id === audState.id}" data-a="${a.id}">${a.name}</button>`).join("");
+    document.querySelectorAll("#aud-seg button").forEach((b) => b.addEventListener("click", () => { audState.id = b.dataset.a; renderAudience(); syncUrl(); }));
+    const a = AUD.find((x) => x.id === audState.id);
+    $("#aud-path").innerHTML = `<p class="aud-intro">${esc(a.intro)}</p><ol class="steps">${a.steps.map(([t, d], i) => `<li><button type="button" class="step" data-i="${i}"><span class="n">${i + 1}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="arrow">→</span></button></li>`).join("")}</ol>`;
+    document.querySelectorAll("#aud-path .step").forEach((b) => b.addEventListener("click", () => {
+      const act = a.steps[+b.dataset.i][2];
+      if (act.brief) { briefState.hab = act.brief; renderBrief(); }
+      if (act.preset) setPreset(act.preset);
+      if (act.ask) { $("#ask-q").value = act.ask; renderAsk(act.ask); }
+      document.querySelector(act.go)?.scrollIntoView({ behavior: "smooth" });
+    }));
+  }
+
+  /* =========================================================== compare investigations */
+  const cmpState = { ids: ["PSI-69", "PSI-25", "PSI-99"] };
+  function renderCompare() {
+    const opts = [...INV].sort((a, b) => a.name.localeCompare(b.name));
+    $("#cmp-pick").innerHTML = cmpState.ids.map((id, k) => `<label class="pick"><span class="label-sm" style="margin:0">#${k + 1}</span><select data-k="${k}" aria-label="Investigation ${k + 1}"><option value="">—</option>${opts.map((r) => `<option value="${r.psi_id}" ${r.psi_id === id ? "selected" : ""}>${esc(r.name)} · ${r.psi_id}</option>`).join("")}</select></label>`).join("");
+    document.querySelectorAll("#cmp-pick select").forEach((s) => s.addEventListener("change", () => { cmpState.ids[+s.dataset.k] = s.value; renderCompare(); }));
+    const R = cmpState.ids.map((id) => INV.find((r) => r.psi_id === id)).filter(Boolean);
+    if (!R.length) { $("#cmp-table").innerHTML = ""; $("#cmp-note").textContent = "Pick an investigation."; return; }
+    const hab = invState.hab;
+    const rank = Object.fromEntries([...INV].sort((a, b) => b.relevance[hab].score - a.relevance[hab].score).map((r, i) => [r.psi_id, i + 1]));
+    const S = D.similarity;
+    const sim = (a, b) => S.matrix[S.ids.indexOf(a)][S.ids.indexOf(b)];
+    const names = (r, key) => [...new Set(r.tables.flatMap((t) => t[key].map((v) => v.variable)))];
+    const rows = [
+      ["Type · platform", (r) => `${r.type} · ${r.platform}`],
+      ["Hardware", (r) => r.hardware],
+      ["Fire type", (r) => r.family],
+      ["Safety layers", (r) => r.layers.join(", ")],
+      ["Records (labeled)", (r) => `${r.n_tests.toLocaleString("en-US")} (${r.n_with_outcome})`],
+      ["O₂ tested", (r) => (r.o2_min != null ? (r.o2_max > r.o2_min ? `${pct(r.o2_min, 1)}–${pct(r.o2_max, 1)}` : pct(r.o2_min, 1)) : "not reported")],
+      ["Pressure tested", (r) => (r.p_min != null ? `${r.p_max > r.p_min ? `${num(r.p_min)}–${num(r.p_max)}` : num(r.p_min)} atm${r.conditions_assumed ? " (cabin air assumed)" : ""}` : "not reported")],
+      ["What varied", (r) => names(r, "varied").slice(0, 5).join(", ") || "—"],
+      ["What was measured", (r) => names(r, "measured").slice(0, 5).join(", ") || "—"],
+      [`Relevance · ${habName(hab)}`, (r) => `${r.relevance[hab].score.toFixed(1)} / 100 · rank ${rank[r.psi_id]}`],
+      ["Publications in PSI", (r) => String(r.n_publications)],
+      [`Similarity to ${R[0].name}`, (r) => (r === R[0] ? "—" : sim(R[0].psi_id, r.psi_id).toFixed(2))],
+    ];
+    $("#cmp-table").innerHTML = `<thead><tr><th></th>${R.map((r) => `<th>${esc(r.name)} <span class="mono-sm">${r.psi_id}</span></th>`).join("")}</tr></thead><tbody>${rows.map(([k, f]) => {
+      const vals = R.map(f);
+      const diff = R.length > 1 && new Set(vals).size > 1;
+      return `<tr class="${diff ? "diff" : ""}"><th scope="row">${esc(k)}</th>${vals.map((v) => `<td>${esc(v)}</td>`).join("")}</tr>`;
+    }).join("")}</tbody>`;
+    const same = R.length > 1 ? rows.filter(([, f]) => new Set(R.map(f)).size === 1).map(([k]) => k.split(" ·")[0]) : [];
+    $("#cmp-note").textContent = R.length > 1 ? (same.length ? `Shared: ${same.join(", ")}. Highlighted rows differ.` : "These investigations differ on every row.") : "Pick a second investigation to compare.";
+  }
+
+  /* =========================================================== downloads + SI verification table */
+  function renderDownloads() {
+    const files = [
+      ["ensayos.csv", "All 1,989 test records in one schema, SI units (CSV)"],
+      ["investigaciones.csv", "Profile of the 24 investigations (CSV)"],
+      ["qc_log.csv", "Every correction to NASA's tables, with the original value (CSV)"],
+      ["findings.json", "Findings with evidence scores (JSON)"],
+      ["saffire2_ug_vs_1g.csv", "Saffire-II microgravity vs 1 g, sample by sample (CSV)"],
+      ["si_evidence_packs.json", "Evidence packs given to the SI model (JSON)"],
+      ["si_verification.json", "Firewall result for every SI briefing (JSON)"],
+    ];
+    $("#downloads").innerHTML = files.map(([f, d]) => `<a class="dl" href="data/downloads/${f}" download><span class="mono-sm">${f}</span><span>${d}</span><span class="arrow">↓</span></a>`).join("") +
+      `<a class="dl" href="data/ember.json" download><span class="mono-sm">ember.json</span><span>Everything this dashboard shows, including model coefficients (JSON)</span><span class="arrow">↓</span></a>`;
+    if (!SI) return;
+    const all = [...Object.entries(SI.habitat).map(([k, v]) => ["Habitat", D.habitats.find((x) => x.id === k).name, v]),
+      ...Object.entries(SI.investigation).map(([k, v]) => ["Investigation", `${INV.find((r) => r.psi_id === k)?.name || k} · ${k}`, v])];
+    $("#si-sub").textContent = `${SI.meta.verified} of ${SI.meta.total} briefings passed · generator: ${SI.meta.generator || "—"}`;
+    $("#si-table").innerHTML = `<thead><tr><th>Briefing</th><th>Kind</th><th class="num">Sentences</th><th class="num">Citations</th><th>Status</th></tr></thead><tbody>${all.map(([k, n, v]) =>
+      `<tr><td>${esc(n)}</td><td>${k}</td><td class="num">${v.sentences.length}</td><td class="num">${v.sentences.reduce((s, x) => s + x.cites.length, 0)}</td><td>${v.source === "si" ? "verified ✓" : `evidence brief${v.problems.length ? ` · ${esc(v.problems[0])}` : ""}`}</td></tr>`).join("")}</tbody>`;
+    $("#si-table").closest(".tbl-wrap").classList.add("scroll");
+  }
+
   /* =========================================================== nav highlight */
   function navSpy() {
     const links = [...document.querySelectorAll(".nav a")];
@@ -580,10 +846,18 @@
   /* =========================================================== boot */
   function safe(fn, name) { try { fn(); } catch (e) { console.error(`[Skylab Phoenix] ${name} failed`, e); } }
   safe(renderHero, "hero");
+  safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing");
+  $("#ask-form").addEventListener("submit", (e) => { e.preventDefault(); safe(() => renderAsk($("#ask-q").value), "ask"); });
+  $("#brief-dl").addEventListener("click", () => download(`skylab-phoenix-briefing-${briefState.hab}.md`, briefMarkdown()));
+  $("#brief-sim").addEventListener("click", () => { setPreset(briefState.hab); document.getElementById("scenario").scrollIntoView({ behavior: "smooth" }); });
   safe(() => { renderCoverageFilters(); renderCoverage(); }, "coverage");
-  safe(() => { renderInvControls(); renderInvList(); renderSimilarity(); }, "investigations");
+  safe(() => { renderInvControls(); renderInvList(); renderSimilarity(); renderCompare(); }, "investigations");
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
   safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario");
+  safe(() => { applyUrlScenario(); }, "url");
+  urlReady = true;
+  $("#share-btn").addEventListener("click", (e) => copyText(shareUrl("#scenario"), e.currentTarget));
+  safe(renderDownloads, "downloads");
   safe(renderEvidence, "evidence");
   safe(renderFindings, "findings");
   safe(renderNext, "next");

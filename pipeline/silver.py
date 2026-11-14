@@ -39,12 +39,13 @@ def _finish(df, psi, exp, familia):
     for c in SCHEMA:
         if c not in df.columns:
             df[c] = np.nan
-    df["qc_flags"] = df["qc_flags"].fillna("")
+    # cast all-NaN (float) columns to object before filling with text/bool: pandas 4 will refuse the implicit upcast
+    df["qc_flags"] = df["qc_flags"].astype(object).fillna("")
     df["n_eventos"] = df["n_eventos"].fillna(1)
-    df["gravedad"] = df["gravedad"].fillna("ug")
-    df["o2_ubicacion"] = df["o2_ubicacion"].fillna("ambiente")
+    df["gravedad"] = df["gravedad"].astype(object).fillna("ug")
+    df["o2_ubicacion"] = df["o2_ubicacion"].astype(object).fillna("ambiente")
     for c in ("o2_supuesto", "p_supuesta", "barrido_flujo", "con_resultado"):
-        df[c] = df[c].fillna(False).astype(bool)
+        df[c] = df[c].astype(object).fillna(False).astype(bool)
     df["test_uid"] = psi + ":" + df["test_uid"].astype(str).str.strip()
     return df[SCHEMA]
 

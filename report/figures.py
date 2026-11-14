@@ -25,12 +25,13 @@ ORANGE, BLUE, VIOLET, TEAL = "#ea580c", "#0284c7", "#7c3aed", "#0d9488"
 AMBER, ROSE = "#f59e0b", "#e11d48"
 FAM = {"solido": ("Materiales sólidos", ORANGE, "s"), "gota": ("Gotas de combustible", BLUE, "o"),
        "gas": ("Llamas de gas", VIOLET, "D"), "humo": ("Humo y polvo", TEAL, "^"), "polvo": ("Humo y polvo", TEAL, "^")}
-HAB_ES = {"cabin": "Cabina de nave", "eva_prep": "Preparación EVA", "moon_base": "Base lunar y rover", "suit": "Traje espacial"}
+HAB_ES = {"cabin": "Cabina de nave", "eva_prep": "Preparación EVA", "moon_base": "Base lunar y rover",
+          "exploration": "Atmósfera de exploración", "suit": "Traje espacial"}
 FIRE = LinearSegmentedColormap.from_list("fire", ["#fff7ed", "#fdba74", "#f97316", "#c2410c", "#431407"])
 COOL = LinearSegmentedColormap.from_list("cool", ["#f8fafc", "#c4b5fd", "#7c3aed", "#2e1065"])
 
 plt.rcParams.update({
-    "font.family": ["Segoe UI", "Calibri", "Arial", "DejaVu Sans"], "font.size": 9.5, "svg.fonttype": "none",
+    "font.family": ["Segoe UI", "Calibri", "Carlito", "Arial", "Liberation Sans", "DejaVu Sans"], "font.size": 9.5, "svg.fonttype": "none",
     "axes.edgecolor": LIGHT, "axes.labelcolor": INK2, "axes.titlesize": 11, "axes.titleweight": "semibold",
     "axes.titlecolor": INK, "axes.titlelocation": "left", "axes.titlepad": 10, "axes.spines.top": False,
     "axes.spines.right": False, "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.7,
@@ -67,7 +68,7 @@ def coverage():
         seen.add(fam)
     for h in D["habitats"]:
         ax.scatter(100 * h["x_o2"], h["p_atm"], marker="P", s=150, color=INK, zorder=5, edgecolors="white", linewidths=1.2)
-    off = {"cabin": (-34, 22), "eva_prep": (-40, -26), "moon_base": (24, 18), "suit": (-30, 20)}
+    off = {"cabin": (-34, 22), "eva_prep": (-40, -26), "moon_base": (24, 18), "exploration": (52, -16), "suit": (-30, 20)}
     for h in D["habitats"]:
         ax.annotate(HAB_ES[h["id"]], (100 * h["x_o2"], h["p_atm"]), xytext=off[h["id"]], textcoords="offset points",
                     fontsize=8.5, color=INK, fontweight="semibold", ha="center",
@@ -183,14 +184,14 @@ def saffire():
 # ---------------------------------------------------------------- 6 ranking heatmap
 def ranking():
     inv = sorted(D["investigations"], key=lambda r: -r["relevance"]["moon_base"]["score"])
-    habs = ["cabin", "eva_prep", "moon_base", "suit"]
+    habs = [h["id"] for h in D["habitats"]]
     Z = np.array([[r["relevance"][h]["score"] for h in habs] for r in inv])
     fig, ax = plt.subplots(figsize=(7.2, 7.4))
     ax.imshow(Z, cmap=FIRE, vmin=0, vmax=100, aspect="auto")
     for i in range(Z.shape[0]):
         for j in range(Z.shape[1]):
             ax.text(j, i, f"{Z[i, j]:.0f}", ha="center", va="center", fontsize=8, color="white" if Z[i, j] > 55 else INK)
-    ax.set_xticks(range(4), [HAB_ES[h] for h in habs]), ax.xaxis.tick_top()
+    ax.set_xticks(range(len(habs)), [HAB_ES[h].replace(" de ", "\nde ") for h in habs], fontsize=8), ax.xaxis.tick_top()
     ax.set_yticks(range(len(inv)), [f"{r['name']}  ({r['psi_id']})" for r in inv])
     ax.grid(False)
     for s in ax.spines.values():

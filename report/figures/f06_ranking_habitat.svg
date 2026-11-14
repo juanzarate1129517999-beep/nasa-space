@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="564.104922pt" height="458.079281pt" viewBox="0 0 564.104922 458.079281" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="549.260469pt" height="458.026pt" viewBox="0 0 549.260469 458.026" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-11-13T22:25:04.758552</dc:date>
+    <dc:date>2026-11-14T15:09:18.569027</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -21,494 +21,574 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 458.079281 
-L 564.104922 458.079281 
-L 564.104922 0 
+   <path d="M 0 458.026 
+L 549.260469 458.026 
+L 549.260469 0 
 L 0 0 
 z
 " style="fill: #ffffff"/>
   </g>
   <g id="axes_1">
    <g id="patch_2">
-    <path d="M 153.866328 452.319281 
-L 555.626328 452.319281 
-L 555.626328 42.063281 
-L 153.866328 42.063281 
+    <path d="M 141.740469 452.266 
+L 543.500469 452.266 
+L 543.500469 42.01 
+L 141.740469 42.01 
 z
 " style="fill: #ffffff"/>
    </g>
-   <g clip-path="url(#pe44122f8ce)">
+   <g clip-path="url(#p46a73670c9)">
     <image xlink:href="data:image/png;base64,
-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" id="imaged93c1a1ee2" transform="scale(1 -1) translate(0 -410.4)" x="153.818182" y="-41.788372" width="401.890909" height="410.4"/>
+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" id="imagebb5122d91a" transform="scale(1 -1) translate(0 -410.4)" x="142.036364" y="-41.735091" width="401.236364" height="410.4"/>
    </g>
    <g id="matplotlib.axis_1">
     <g id="xtick_1">
      <g id="line2d_1"/>
      <g id="text_1">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="204.086328" y="36.564014" transform="rotate(-0 204.086328 36.564014)">Cabina de nave</text>
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(170.828969 25.861562)">Cabina</text>
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(169.210219 35.627187)">de nave</text>
      </g>
     </g>
     <g id="xtick_2">
      <g id="line2d_2"/>
      <g id="text_2">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="304.526328" y="36.378281" transform="rotate(-0 304.526328 36.378281)">Preparación EVA</text>
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="262.268469" y="36.51" transform="rotate(-0 262.268469 36.51)">Preparación EVA</text>
      </g>
     </g>
     <g id="xtick_3">
      <g id="line2d_3"/>
      <g id="text_3">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="404.966328" y="36.327812" transform="rotate(-0 404.966328 36.327812)">Base lunar y rover</text>
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="342.620469" y="36.51" transform="rotate(-0 342.620469 36.51)">Base lunar y rover</text>
      </g>
     </g>
     <g id="xtick_4">
      <g id="line2d_4"/>
      <g id="text_4">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="505.406328" y="36.327812" transform="rotate(-0 505.406328 36.327812)">Traje espacial</text>
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(406.246844 25.861562)">Atmósfera</text>
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; fill: #64748b" transform="translate(399.135594 35.627187)">de exploración</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5"/>
+     <g id="text_5">
+      <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #64748b" x="503.324469" y="36.51" transform="rotate(-0 503.324469 36.51)">Traje espacial</text>
      </g>
     </g>
    </g>
    <g id="matplotlib.axis_2">
     <g id="ytick_1">
-     <g id="line2d_5"/>
-     <g id="text_5">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="54.068411" transform="rotate(-0 150.366328 54.068411)">FLEX  (PSI-69)</text>
+     <g id="line2d_6"/>
+     <g id="text_6">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="54.1195" transform="rotate(-0 138.240469 54.1195)">FLEX  (PSI-69)</text>
      </g>
     </g>
     <g id="ytick_2">
-     <g id="line2d_6"/>
-     <g id="text_6">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="71.162411" transform="rotate(-0 150.366328 71.162411)">ACME CFI-G  (PSI-159)</text>
+     <g id="line2d_7"/>
+     <g id="text_7">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="71.2135" transform="rotate(-0 138.240469 71.2135)">ACME CFI-G  (PSI-159)</text>
      </g>
     </g>
     <g id="ytick_3">
-     <g id="line2d_7"/>
-     <g id="text_7">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="88.256411" transform="rotate(-0 150.366328 88.256411)">ACME BRE  (PSI-20)</text>
+     <g id="line2d_8"/>
+     <g id="text_8">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="88.3075" transform="rotate(-0 138.240469 88.3075)">ACME BRE  (PSI-20)</text>
      </g>
     </g>
     <g id="ytick_4">
-     <g id="line2d_8"/>
-     <g id="text_8">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="105.350411" transform="rotate(-0 150.366328 105.350411)">BASS  (PSI-26)</text>
+     <g id="line2d_9"/>
+     <g id="text_9">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="105.4015" transform="rotate(-0 138.240469 105.4015)">BASS  (PSI-26)</text>
      </g>
     </g>
     <g id="ytick_5">
-     <g id="line2d_9"/>
-     <g id="text_9">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="122.444411" transform="rotate(-0 150.366328 122.444411)">BASS-II  (PSI-25)</text>
+     <g id="line2d_10"/>
+     <g id="text_10">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="122.4955" transform="rotate(-0 138.240469 122.4955)">BASS-II  (PSI-25)</text>
      </g>
     </g>
     <g id="ytick_6">
-     <g id="line2d_10"/>
-     <g id="text_10">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="139.596766" transform="rotate(-0 150.366328 139.596766)">ACME Flame Design  (PSI-10)</text>
+     <g id="line2d_11"/>
+     <g id="text_11">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="139.5895" transform="rotate(-0 138.240469 139.5895)">ACME Flame Design  (PSI-10)</text>
      </g>
     </g>
     <g id="ytick_7">
-     <g id="line2d_11"/>
-     <g id="text_11">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="156.632411" transform="rotate(-0 150.366328 156.632411)">SAME-R  (PSI-101)</text>
+     <g id="line2d_12"/>
+     <g id="text_12">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="156.6835" transform="rotate(-0 138.240469 156.6835)">SAME-R  (PSI-101)</text>
      </g>
     </g>
     <g id="ytick_8">
-     <g id="line2d_12"/>
-     <g id="text_12">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="173.835234" transform="rotate(-0 150.366328 173.835234)">Saffire-II  (PSI-99)</text>
+     <g id="line2d_13"/>
+     <g id="text_13">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="173.7775" transform="rotate(-0 138.240469 173.7775)">Saffire-II  (PSI-99)</text>
      </g>
     </g>
     <g id="ytick_9">
-     <g id="line2d_13"/>
-     <g id="text_13">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="190.929234" transform="rotate(-0 150.366328 190.929234)">Saffire-I  (PSI-98)</text>
+     <g id="line2d_14"/>
+     <g id="text_14">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="190.8715" transform="rotate(-0 138.240469 190.8715)">Saffire-I  (PSI-98)</text>
      </g>
     </g>
     <g id="ytick_10">
-     <g id="line2d_14"/>
-     <g id="text_14">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="207.914411" transform="rotate(-0 150.366328 207.914411)">SAME  (PSI-102)</text>
+     <g id="line2d_15"/>
+     <g id="text_15">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="207.9655" transform="rotate(-0 138.240469 207.9655)">SAME  (PSI-102)</text>
      </g>
     </g>
     <g id="ytick_11">
-     <g id="line2d_15"/>
-     <g id="text_15">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="225.117234" transform="rotate(-0 150.366328 225.117234)">Saffire-III  (PSI-100)</text>
+     <g id="line2d_16"/>
+     <g id="text_16">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="225.0595" transform="rotate(-0 138.240469 225.0595)">Saffire-III  (PSI-100)</text>
      </g>
     </g>
     <g id="ytick_12">
-     <g id="line2d_16"/>
-     <g id="text_16">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="242.102411" transform="rotate(-0 150.366328 242.102411)">ACME E-FIELD  (PSI-22)</text>
+     <g id="line2d_17"/>
+     <g id="text_17">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="242.1535" transform="rotate(-0 138.240469 242.1535)">ACME E-FIELD  (PSI-22)</text>
      </g>
     </g>
     <g id="ytick_13">
-     <g id="line2d_17"/>
-     <g id="text_17">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="259.196411" transform="rotate(-0 150.366328 259.196411)">DAFT / DAFT-2  (PSI-47)</text>
+     <g id="line2d_18"/>
+     <g id="text_18">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="259.2475" transform="rotate(-0 138.240469 259.2475)">DAFT / DAFT-2  (PSI-47)</text>
      </g>
     </g>
     <g id="ytick_14">
-     <g id="line2d_18"/>
-     <g id="text_18">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="276.290411" transform="rotate(-0 150.366328 276.290411)">SPICE  (PSI-107)</text>
+     <g id="line2d_19"/>
+     <g id="text_19">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="276.3415" transform="rotate(-0 138.240469 276.3415)">SPICE  (PSI-107)</text>
      </g>
     </g>
     <g id="ytick_15">
-     <g id="line2d_19"/>
-     <g id="text_19">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="293.442766" transform="rotate(-0 150.366328 293.442766)">ACME s-Flame  (PSI-23)</text>
+     <g id="line2d_20"/>
+     <g id="text_20">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="293.4355" transform="rotate(-0 138.240469 293.4355)">ACME s-Flame  (PSI-23)</text>
      </g>
     </g>
     <g id="ytick_16">
-     <g id="line2d_20"/>
-     <g id="text_20">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="310.478411" transform="rotate(-0 150.366328 310.478411)">CFI  (PSI-39)</text>
+     <g id="line2d_21"/>
+     <g id="text_21">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="310.5295" transform="rotate(-0 138.240469 310.5295)">CFI  (PSI-39)</text>
      </g>
     </g>
     <g id="ytick_17">
-     <g id="line2d_21"/>
-     <g id="text_21">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="327.572411" transform="rotate(-0 150.366328 327.572411)">ACME CLD  (PSI-21)</text>
+     <g id="line2d_22"/>
+     <g id="text_22">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="327.6235" transform="rotate(-0 138.240469 327.6235)">ACME CLD  (PSI-21)</text>
      </g>
     </g>
     <g id="ytick_18">
-     <g id="line2d_22"/>
-     <g id="text_22">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="344.666411" transform="rotate(-0 150.366328 344.666411)">SLICE  (PSI-106)</text>
+     <g id="line2d_23"/>
+     <g id="text_23">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="344.7175" transform="rotate(-0 138.240469 344.7175)">SLICE  (PSI-106)</text>
      </g>
     </g>
     <g id="ytick_19">
-     <g id="line2d_23"/>
-     <g id="text_23">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="361.760411" transform="rotate(-0 150.366328 361.760411)">FLEX-2  (PSI-68)</text>
+     <g id="line2d_24"/>
+     <g id="text_24">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="361.8115" transform="rotate(-0 138.240469 361.8115)">FLEX-2  (PSI-68)</text>
      </g>
     </g>
     <g id="ytick_20">
-     <g id="line2d_24"/>
-     <g id="text_24">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="378.963234" transform="rotate(-0 150.366328 378.963234)">Cool-flame counterflow  (PSI-142)</text>
+     <g id="line2d_25"/>
+     <g id="text_25">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="378.9055" transform="rotate(-0 138.240469 378.9055)">Cool-flame counterflow  (PSI-142)</text>
      </g>
     </g>
     <g id="ytick_21">
-     <g id="line2d_25"/>
-     <g id="text_25">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="396.006766" transform="rotate(-0 150.366328 396.006766)">BASS spread modeling  (PSI-62)</text>
+     <g id="line2d_26"/>
+     <g id="text_26">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="395.9995" transform="rotate(-0 138.240469 395.9995)">BASS spread modeling  (PSI-62)</text>
      </g>
     </g>
     <g id="ytick_22">
-     <g id="line2d_26"/>
-     <g id="text_26">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="413.100766" transform="rotate(-0 150.366328 413.100766)">SPICE analysis  (PSI-60)</text>
+     <g id="line2d_27"/>
+     <g id="text_27">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="413.0935" transform="rotate(-0 138.240469 413.0935)">SPICE analysis  (PSI-60)</text>
      </g>
     </g>
     <g id="ytick_23">
-     <g id="line2d_27"/>
-     <g id="text_27">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="430.245234" transform="rotate(-0 150.366328 430.245234)">Cool-flame perturbation  (PSI-117)</text>
+     <g id="line2d_28"/>
+     <g id="text_28">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="430.1875" transform="rotate(-0 138.240469 430.1875)">Cool-flame perturbation  (PSI-117)</text>
      </g>
     </g>
     <g id="ytick_24">
-     <g id="line2d_28"/>
-     <g id="text_28">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="150.366328" y="447.288766" transform="rotate(-0 150.366328 447.288766)">SAME smoke modeling  (PSI-115)</text>
+     <g id="line2d_29"/>
+     <g id="text_29">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="138.240469" y="447.2815" transform="rotate(-0 138.240469 447.2815)">SAME smoke modeling  (PSI-115)</text>
      </g>
     </g>
    </g>
-   <g id="text_29">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="52.680594" transform="rotate(-0 204.086328 52.680594)">100</text>
-   </g>
    <g id="text_30">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="304.526328" y="52.680594" transform="rotate(-0 304.526328 52.680594)">99</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="52.557" transform="rotate(-0 181.916469 52.557)">100</text>
    </g>
    <g id="text_31">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="404.966328" y="52.680594" transform="rotate(-0 404.966328 52.680594)">95</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="262.268469" y="52.557" transform="rotate(-0 262.268469 52.557)">99</text>
    </g>
    <g id="text_32">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="52.680594" transform="rotate(-0 505.406328 52.680594)">50</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="342.620469" y="52.557" transform="rotate(-0 342.620469 52.557)">95</text>
    </g>
    <g id="text_33">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="69.774594" transform="rotate(-0 204.086328 69.774594)">92</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="422.972469" y="52.557" transform="rotate(-0 422.972469 52.557)">82</text>
    </g>
    <g id="text_34">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="304.526328" y="69.774594" transform="rotate(-0 304.526328 69.774594)">69</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="52.557" transform="rotate(-0 503.324469 52.557)">50</text>
    </g>
    <g id="text_35">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="404.966328" y="69.774594" transform="rotate(-0 404.966328 69.774594)">67</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="69.651" transform="rotate(-0 181.916469 69.651)">92</text>
    </g>
    <g id="text_36">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="69.774594" transform="rotate(-0 505.406328 69.774594)">42</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="262.268469" y="69.651" transform="rotate(-0 262.268469 69.651)">68</text>
    </g>
    <g id="text_37">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="86.868594" transform="rotate(-0 204.086328 86.868594)">44</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="342.620469" y="69.651" transform="rotate(-0 342.620469 69.651)">67</text>
    </g>
    <g id="text_38">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="86.868594" transform="rotate(-0 304.526328 86.868594)">54</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="422.972469" y="69.651" transform="rotate(-0 422.972469 69.651)">86</text>
    </g>
    <g id="text_39">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="86.868594" transform="rotate(-0 404.966328 86.868594)">48</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="69.651" transform="rotate(-0 503.324469 69.651)">42</text>
    </g>
    <g id="text_40">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="86.868594" transform="rotate(-0 505.406328 86.868594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="86.745" transform="rotate(-0 181.916469 86.745)">44</text>
    </g>
    <g id="text_41">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="103.962594" transform="rotate(-0 204.086328 103.962594)">94</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="86.745" transform="rotate(-0 262.268469 86.745)">54</text>
    </g>
    <g id="text_42">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="304.526328" y="103.962594" transform="rotate(-0 304.526328 103.962594)">72</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="86.745" transform="rotate(-0 342.620469 86.745)">48</text>
    </g>
    <g id="text_43">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="103.962594" transform="rotate(-0 404.966328 103.962594)">47</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="86.745" transform="rotate(-0 422.972469 86.745)">53</text>
    </g>
    <g id="text_44">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="103.962594" transform="rotate(-0 505.406328 103.962594)">44</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="86.745" transform="rotate(-0 503.324469 86.745)">22</text>
    </g>
    <g id="text_45">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="121.056594" transform="rotate(-0 204.086328 121.056594)">91</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="103.839" transform="rotate(-0 181.916469 103.839)">94</text>
    </g>
    <g id="text_46">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="304.526328" y="121.056594" transform="rotate(-0 304.526328 121.056594)">55</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="262.268469" y="103.839" transform="rotate(-0 262.268469 103.839)">71</text>
    </g>
    <g id="text_47">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="121.056594" transform="rotate(-0 404.966328 121.056594)">42</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="103.839" transform="rotate(-0 342.620469 103.839)">47</text>
    </g>
    <g id="text_48">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="121.056594" transform="rotate(-0 505.406328 121.056594)">41</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="103.839" transform="rotate(-0 422.972469 103.839)">44</text>
    </g>
    <g id="text_49">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="138.150594" transform="rotate(-0 204.086328 138.150594)">65</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="103.839" transform="rotate(-0 503.324469 103.839)">44</text>
    </g>
    <g id="text_50">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="138.150594" transform="rotate(-0 304.526328 138.150594)">44</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="120.933" transform="rotate(-0 181.916469 120.933)">91</text>
    </g>
    <g id="text_51">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="138.150594" transform="rotate(-0 404.966328 138.150594)">39</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="120.933" transform="rotate(-0 262.268469 120.933)">55</text>
    </g>
    <g id="text_52">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="138.150594" transform="rotate(-0 505.406328 138.150594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="120.933" transform="rotate(-0 342.620469 120.933)">42</text>
    </g>
    <g id="text_53">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="155.244594" transform="rotate(-0 204.086328 155.244594)">80</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="120.933" transform="rotate(-0 422.972469 120.933)">41</text>
    </g>
    <g id="text_54">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="155.244594" transform="rotate(-0 304.526328 155.244594)">53</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="120.933" transform="rotate(-0 503.324469 120.933)">41</text>
    </g>
    <g id="text_55">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="155.244594" transform="rotate(-0 404.966328 155.244594)">32</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="138.027" transform="rotate(-0 181.916469 138.027)">65</text>
    </g>
    <g id="text_56">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="155.244594" transform="rotate(-0 505.406328 155.244594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="138.027" transform="rotate(-0 262.268469 138.027)">43</text>
    </g>
    <g id="text_57">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="172.338594" transform="rotate(-0 204.086328 172.338594)">54</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="138.027" transform="rotate(-0 342.620469 138.027)">39</text>
    </g>
    <g id="text_58">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="172.338594" transform="rotate(-0 304.526328 172.338594)">34</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="138.027" transform="rotate(-0 422.972469 138.027)">36</text>
    </g>
    <g id="text_59">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="172.338594" transform="rotate(-0 404.966328 172.338594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="138.027" transform="rotate(-0 503.324469 138.027)">15</text>
    </g>
    <g id="text_60">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="172.338594" transform="rotate(-0 505.406328 172.338594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="155.121" transform="rotate(-0 181.916469 155.121)">80</text>
    </g>
    <g id="text_61">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="189.432594" transform="rotate(-0 204.086328 189.432594)">37</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="155.121" transform="rotate(-0 262.268469 155.121)">52</text>
    </g>
    <g id="text_62">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="189.432594" transform="rotate(-0 304.526328 189.432594)">31</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="155.121" transform="rotate(-0 342.620469 155.121)">32</text>
    </g>
    <g id="text_63">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="189.432594" transform="rotate(-0 404.966328 189.432594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="155.121" transform="rotate(-0 422.972469 155.121)">30</text>
    </g>
    <g id="text_64">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="189.432594" transform="rotate(-0 505.406328 189.432594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="155.121" transform="rotate(-0 503.324469 155.121)">30</text>
    </g>
    <g id="text_65">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="206.526594" transform="rotate(-0 204.086328 206.526594)">53</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="172.215" transform="rotate(-0 181.916469 172.215)">54</text>
    </g>
    <g id="text_66">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="206.526594" transform="rotate(-0 304.526328 206.526594)">32</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="172.215" transform="rotate(-0 262.268469 172.215)">34</text>
    </g>
    <g id="text_67">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="206.526594" transform="rotate(-0 404.966328 206.526594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="172.215" transform="rotate(-0 342.620469 172.215)">30</text>
    </g>
    <g id="text_68">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="206.526594" transform="rotate(-0 505.406328 206.526594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="172.215" transform="rotate(-0 422.972469 172.215)">30</text>
    </g>
    <g id="text_69">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="223.620594" transform="rotate(-0 204.086328 223.620594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="172.215" transform="rotate(-0 503.324469 172.215)">30</text>
    </g>
    <g id="text_70">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="223.620594" transform="rotate(-0 304.526328 223.620594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="189.309" transform="rotate(-0 181.916469 189.309)">37</text>
    </g>
    <g id="text_71">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="223.620594" transform="rotate(-0 404.966328 223.620594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="189.309" transform="rotate(-0 262.268469 189.309)">31</text>
    </g>
    <g id="text_72">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="223.620594" transform="rotate(-0 505.406328 223.620594)">30</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="189.309" transform="rotate(-0 342.620469 189.309)">30</text>
    </g>
    <g id="text_73">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="240.714594" transform="rotate(-0 204.086328 240.714594)">62</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="189.309" transform="rotate(-0 422.972469 189.309)">30</text>
    </g>
    <g id="text_74">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="240.714594" transform="rotate(-0 304.526328 240.714594)">28</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="189.309" transform="rotate(-0 503.324469 189.309)">30</text>
    </g>
    <g id="text_75">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="240.714594" transform="rotate(-0 404.966328 240.714594)">23</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="206.403" transform="rotate(-0 181.916469 206.403)">53</text>
    </g>
    <g id="text_76">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="240.714594" transform="rotate(-0 505.406328 240.714594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="206.403" transform="rotate(-0 262.268469 206.403)">32</text>
    </g>
    <g id="text_77">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="257.808594" transform="rotate(-0 204.086328 257.808594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="206.403" transform="rotate(-0 342.620469 206.403)">30</text>
    </g>
    <g id="text_78">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="257.808594" transform="rotate(-0 304.526328 257.808594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="206.403" transform="rotate(-0 422.972469 206.403)">30</text>
    </g>
    <g id="text_79">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="257.808594" transform="rotate(-0 404.966328 257.808594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="206.403" transform="rotate(-0 503.324469 206.403)">30</text>
    </g>
    <g id="text_80">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="257.808594" transform="rotate(-0 505.406328 257.808594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="223.497" transform="rotate(-0 181.916469 223.497)">30</text>
    </g>
    <g id="text_81">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="274.902594" transform="rotate(-0 204.086328 274.902594)">65</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="223.497" transform="rotate(-0 262.268469 223.497)">30</text>
    </g>
    <g id="text_82">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="304.526328" y="274.902594" transform="rotate(-0 304.526328 274.902594)">61</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="223.497" transform="rotate(-0 342.620469 223.497)">30</text>
    </g>
    <g id="text_83">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="274.902594" transform="rotate(-0 404.966328 274.902594)">22</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="223.497" transform="rotate(-0 422.972469 223.497)">30</text>
    </g>
    <g id="text_84">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="274.902594" transform="rotate(-0 505.406328 274.902594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="223.497" transform="rotate(-0 503.324469 223.497)">30</text>
    </g>
    <g id="text_85">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="291.996594" transform="rotate(-0 204.086328 291.996594)">49</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="240.591" transform="rotate(-0 181.916469 240.591)">62</text>
    </g>
    <g id="text_86">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="291.996594" transform="rotate(-0 304.526328 291.996594)">21</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="240.591" transform="rotate(-0 262.268469 240.591)">28</text>
    </g>
    <g id="text_87">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="291.996594" transform="rotate(-0 404.966328 291.996594)">19</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="240.591" transform="rotate(-0 342.620469 240.591)">23</text>
    </g>
    <g id="text_88">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="291.996594" transform="rotate(-0 505.406328 291.996594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="240.591" transform="rotate(-0 422.972469 240.591)">22</text>
    </g>
    <g id="text_89">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="309.090594" transform="rotate(-0 204.086328 309.090594)">65</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="240.591" transform="rotate(-0 503.324469 240.591)">22</text>
    </g>
    <g id="text_90">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="309.090594" transform="rotate(-0 304.526328 309.090594)">31</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="257.685" transform="rotate(-0 181.916469 257.685)">22</text>
    </g>
    <g id="text_91">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="309.090594" transform="rotate(-0 404.966328 309.090594)">16</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="257.685" transform="rotate(-0 262.268469 257.685)">22</text>
    </g>
    <g id="text_92">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="309.090594" transform="rotate(-0 505.406328 309.090594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="257.685" transform="rotate(-0 342.620469 257.685)">22</text>
    </g>
    <g id="text_93">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="204.086328" y="326.184594" transform="rotate(-0 204.086328 326.184594)">60</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="257.685" transform="rotate(-0 422.972469 257.685)">22</text>
    </g>
    <g id="text_94">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="326.184594" transform="rotate(-0 304.526328 326.184594)">23</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="257.685" transform="rotate(-0 503.324469 257.685)">22</text>
    </g>
    <g id="text_95">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="326.184594" transform="rotate(-0 404.966328 326.184594)">16</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="274.779" transform="rotate(-0 181.916469 274.779)">65</text>
    </g>
    <g id="text_96">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="326.184594" transform="rotate(-0 505.406328 326.184594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="262.268469" y="274.779" transform="rotate(-0 262.268469 274.779)">61</text>
    </g>
    <g id="text_97">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="343.278594" transform="rotate(-0 204.086328 343.278594)">45</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="274.779" transform="rotate(-0 342.620469 274.779)">22</text>
    </g>
    <g id="text_98">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="343.278594" transform="rotate(-0 304.526328 343.278594)">18</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="274.779" transform="rotate(-0 422.972469 274.779)">15</text>
    </g>
    <g id="text_99">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="343.278594" transform="rotate(-0 404.966328 343.278594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="274.779" transform="rotate(-0 503.324469 274.779)">15</text>
    </g>
    <g id="text_100">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="343.278594" transform="rotate(-0 505.406328 343.278594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="291.873" transform="rotate(-0 181.916469 291.873)">49</text>
    </g>
    <g id="text_101">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="360.372594" transform="rotate(-0 204.086328 360.372594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="291.873" transform="rotate(-0 262.268469 291.873)">21</text>
    </g>
    <g id="text_102">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="360.372594" transform="rotate(-0 304.526328 360.372594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="291.873" transform="rotate(-0 342.620469 291.873)">19</text>
    </g>
    <g id="text_103">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="360.372594" transform="rotate(-0 404.966328 360.372594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="291.873" transform="rotate(-0 422.972469 291.873)">15</text>
    </g>
    <g id="text_104">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="360.372594" transform="rotate(-0 505.406328 360.372594)">15</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="291.873" transform="rotate(-0 503.324469 291.873)">15</text>
    </g>
    <g id="text_105">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="377.466594" transform="rotate(-0 204.086328 377.466594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="308.967" transform="rotate(-0 181.916469 308.967)">65</text>
    </g>
    <g id="text_106">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="377.466594" transform="rotate(-0 304.526328 377.466594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="308.967" transform="rotate(-0 262.268469 308.967)">30</text>
    </g>
    <g id="text_107">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="377.466594" transform="rotate(-0 404.966328 377.466594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="308.967" transform="rotate(-0 342.620469 308.967)">16</text>
    </g>
    <g id="text_108">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="377.466594" transform="rotate(-0 505.406328 377.466594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="308.967" transform="rotate(-0 422.972469 308.967)">15</text>
    </g>
    <g id="text_109">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="394.560594" transform="rotate(-0 204.086328 394.560594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="308.967" transform="rotate(-0 503.324469 308.967)">15</text>
    </g>
    <g id="text_110">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="394.560594" transform="rotate(-0 304.526328 394.560594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="181.916469" y="326.061" transform="rotate(-0 181.916469 326.061)">60</text>
    </g>
    <g id="text_111">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="394.560594" transform="rotate(-0 404.966328 394.560594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="326.061" transform="rotate(-0 262.268469 326.061)">23</text>
    </g>
    <g id="text_112">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="394.560594" transform="rotate(-0 505.406328 394.560594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="326.061" transform="rotate(-0 342.620469 326.061)">16</text>
    </g>
    <g id="text_113">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="411.654594" transform="rotate(-0 204.086328 411.654594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="326.061" transform="rotate(-0 422.972469 326.061)">15</text>
    </g>
    <g id="text_114">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="411.654594" transform="rotate(-0 304.526328 411.654594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="326.061" transform="rotate(-0 503.324469 326.061)">15</text>
    </g>
    <g id="text_115">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="411.654594" transform="rotate(-0 404.966328 411.654594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="343.155" transform="rotate(-0 181.916469 343.155)">45</text>
    </g>
    <g id="text_116">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="411.654594" transform="rotate(-0 505.406328 411.654594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="343.155" transform="rotate(-0 262.268469 343.155)">18</text>
    </g>
    <g id="text_117">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="428.748594" transform="rotate(-0 204.086328 428.748594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="343.155" transform="rotate(-0 342.620469 343.155)">15</text>
    </g>
    <g id="text_118">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="428.748594" transform="rotate(-0 304.526328 428.748594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="343.155" transform="rotate(-0 422.972469 343.155)">15</text>
    </g>
    <g id="text_119">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="428.748594" transform="rotate(-0 404.966328 428.748594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="343.155" transform="rotate(-0 503.324469 343.155)">15</text>
    </g>
    <g id="text_120">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="428.748594" transform="rotate(-0 505.406328 428.748594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="360.249" transform="rotate(-0 181.916469 360.249)">15</text>
    </g>
    <g id="text_121">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="204.086328" y="445.842594" transform="rotate(-0 204.086328 445.842594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="360.249" transform="rotate(-0 262.268469 360.249)">15</text>
    </g>
    <g id="text_122">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="304.526328" y="445.842594" transform="rotate(-0 304.526328 445.842594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="360.249" transform="rotate(-0 342.620469 360.249)">15</text>
    </g>
    <g id="text_123">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="404.966328" y="445.842594" transform="rotate(-0 404.966328 445.842594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="360.249" transform="rotate(-0 422.972469 360.249)">15</text>
    </g>
    <g id="text_124">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="505.406328" y="445.842594" transform="rotate(-0 505.406328 445.842594)">10</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="360.249" transform="rotate(-0 503.324469 360.249)">15</text>
    </g>
    <g id="text_125">
-    <text style="font-weight: 600; font-size: 11px; font-family: 'Segoe UI', 'Calibri', 'Arial', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="153.866328" y="14.063281" transform="rotate(-0 153.866328 14.063281)">Relevancia (0–100) de cada investigación por hábitat, ordenada para la base lunar</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="377.343" transform="rotate(-0 181.916469 377.343)">10</text>
+   </g>
+   <g id="text_126">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="377.343" transform="rotate(-0 262.268469 377.343)">10</text>
+   </g>
+   <g id="text_127">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="377.343" transform="rotate(-0 342.620469 377.343)">10</text>
+   </g>
+   <g id="text_128">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="377.343" transform="rotate(-0 422.972469 377.343)">10</text>
+   </g>
+   <g id="text_129">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="377.343" transform="rotate(-0 503.324469 377.343)">10</text>
+   </g>
+   <g id="text_130">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="394.437" transform="rotate(-0 181.916469 394.437)">10</text>
+   </g>
+   <g id="text_131">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="394.437" transform="rotate(-0 262.268469 394.437)">10</text>
+   </g>
+   <g id="text_132">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="394.437" transform="rotate(-0 342.620469 394.437)">10</text>
+   </g>
+   <g id="text_133">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="394.437" transform="rotate(-0 422.972469 394.437)">10</text>
+   </g>
+   <g id="text_134">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="394.437" transform="rotate(-0 503.324469 394.437)">10</text>
+   </g>
+   <g id="text_135">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="411.531" transform="rotate(-0 181.916469 411.531)">10</text>
+   </g>
+   <g id="text_136">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="411.531" transform="rotate(-0 262.268469 411.531)">10</text>
+   </g>
+   <g id="text_137">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="411.531" transform="rotate(-0 342.620469 411.531)">10</text>
+   </g>
+   <g id="text_138">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="411.531" transform="rotate(-0 422.972469 411.531)">10</text>
+   </g>
+   <g id="text_139">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="411.531" transform="rotate(-0 503.324469 411.531)">10</text>
+   </g>
+   <g id="text_140">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="428.625" transform="rotate(-0 181.916469 428.625)">10</text>
+   </g>
+   <g id="text_141">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="428.625" transform="rotate(-0 262.268469 428.625)">10</text>
+   </g>
+   <g id="text_142">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="428.625" transform="rotate(-0 342.620469 428.625)">10</text>
+   </g>
+   <g id="text_143">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="428.625" transform="rotate(-0 422.972469 428.625)">10</text>
+   </g>
+   <g id="text_144">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="428.625" transform="rotate(-0 503.324469 428.625)">10</text>
+   </g>
+   <g id="text_145">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="181.916469" y="445.719" transform="rotate(-0 181.916469 445.719)">10</text>
+   </g>
+   <g id="text_146">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="262.268469" y="445.719" transform="rotate(-0 262.268469 445.719)">10</text>
+   </g>
+   <g id="text_147">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="342.620469" y="445.719" transform="rotate(-0 342.620469 445.719)">10</text>
+   </g>
+   <g id="text_148">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="422.972469" y="445.719" transform="rotate(-0 422.972469 445.719)">10</text>
+   </g>
+   <g id="text_149">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: middle; fill: #0f172a" x="503.324469" y="445.719" transform="rotate(-0 503.324469 445.719)">10</text>
+   </g>
+   <g id="text_150">
+    <text style="font-weight: 600; font-size: 11px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="141.740469" y="14.01" transform="rotate(-0 141.740469 14.01)">Relevancia (0–100) de cada investigación por hábitat, ordenada para la base lunar</text>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="pe44122f8ce">
-   <rect x="153.866328" y="42.063281" width="401.76" height="410.256"/>
+  <clipPath id="p46a73670c9">
+   <rect x="141.740469" y="42.01" width="401.76" height="410.256"/>
   </clipPath>
  </defs>
 </svg>
