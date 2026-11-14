@@ -105,13 +105,13 @@
     const S = D.summary;
     const auc = M.validation.models.find((m) => m.key === "lr").auc;
     const k = [
-      [S.investigations, `<small>/ ${S.flight} flight</small>`, "PSI combustion investigations profiled and ranked"],
+      [S.investigations, `<small>/ ${S.flight} flight</small>`, "NASA PSI combustion investigations, profiled and ranked"],
       [S.records.toLocaleString("en-US"), "", `test records cleaned into one schema · ${S.with_outcome} with a labeled outcome`],
       [S.qc_fixes, "", "corrections to NASA's tables, each one logged with the original value"],
-      [S.moon_envelope, `<small>/ ${S.ambient.toLocaleString("en-US")}</small>`, "flight tests anywhere near lunar-base air"],
-      [auc.toFixed(2), "<small>AUC</small>", "self-extinction model, scored on held-out ISS test days"],
+      [auc.toFixed(2), "<small>AUC</small>", "self-extinction model, scored on ISS test days it never saw"],
     ];
     $("#kpis").innerHTML = k.map(([v, s, l]) => `<div><dt>${l}</dt><dd>${v}${s}</dd></div>`).join("");
+    $("#hero-lead").innerHTML = `NASA's archive holds ${S.ambient.toLocaleString("en-US")} flight fires with a known atmosphere. Only <b>${S.moon_envelope}</b> came near that air, and no solid material has burned in orbit above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
     const names = [...INV].sort((a, b) => a.name.localeCompare(b.name)).map((r) => `<span>${esc(r.name)}</span>`).join("");
     $("#marquee").innerHTML = names; $("#marquee-2").innerHTML = names;
 
