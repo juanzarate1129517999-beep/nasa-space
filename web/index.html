@@ -9,7 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <!-- Cache-busting: GitHub Pages caches files for 10 min, so every visit asks for the latest site files -->
+  <script>window.__V = Date.now();</script>
+  <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__V + '">');</script>
+  <noscript><link rel="stylesheet" href="styles.css"></noscript>
 </head>
 <body>
 <div class="loading" id="loading">SKYLAB PHOENIX · LOADING NASA PSI DATA…</div>
@@ -290,8 +293,8 @@
   </div>
 </footer>
 
-<script src="data/ember.js"></script>
+<script>document.write('<script src="data/ember.js?v=' + window.__V + '"><\/script>');</script>
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
-<script src="app.js"></script>
+<script>document.write('<script src="app.js?v=' + window.__V + '"><\/script>');</script>
 </body>
 </html>
