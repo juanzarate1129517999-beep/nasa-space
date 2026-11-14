@@ -16,7 +16,7 @@
 | Models | FLEX logistic, 200-model bootstrap, AUC 0.88 (day-grouped CV) vs GBM 0.84 and O₂-only 0.80; calibration plot; CFI-G limiting-temperature test | None (deterministic match score) | Solids GBM (AUC 0.958), gas-flame survival model, droplet Gaussian process |
 | Out-of-data handling | kNN distance **and** per-input flown range → within / extrapolating / withheld | O₂ gate ±2 points + score threshold | In/out of tested range label |
 | Next experiment | Active learning on the bootstrap ensemble | — | 5 recommended experiments |
-| Data quality | 50 logged corrections | Status per value (recorded, approx, suspect…) | 103 logged corrections |
+| Data quality | 53 logged corrections | Status per value (recorded, approx, suspect…) | 103 logged corrections |
 | Habitats | Cabin, EVA prep, lunar base, exploration 8.2 psi / 34%, suit | ISS, lunar base, exploration, EVA | Mission presets incl. Moon, Mars |
 | Audiences | “Choose your view” for 5 audiences | Engineer focus | 5 audience views |
 | Compare investigations | Up to 3 side by side, differences highlighted | — | Up to 3 side by side |
@@ -47,6 +47,6 @@
 
 ## What we chose not to add, and why
 
-- **A solid-materials flammability model:** PSI has no labeled solid-material flight test above 22.7% O₂, so a model would extrapolate exactly where the decision matters. We report the gap instead.
+- **A fitted solid-materials classifier:** PSI has no labeled solid-material flight test above 22.7% O₂, so a black-box model would extrapolate exactly where the decision matters. Instead we use NASA's own fitted flammability boundary from the BASS-II report, add the CO and CO₂ measured in 129 BASS-II tests, and mark every habitat above cabin air as extrapolation.
 - **A 3D scene or hardware sensors:** they look good but add no evidence.
 - **Free-form SI answers to any question:** our search quotes NASA text, and SI text appears only where code can verify it.

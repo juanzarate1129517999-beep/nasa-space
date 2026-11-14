@@ -19,7 +19,7 @@ def test_summary_counts():
     s = EMBER["summary"]
     assert s["investigations"] == 24 and s["flight"] == 19
     assert s["records"] == 1989 and s["with_outcome"] == 688
-    assert s["qc_fixes"] == len(EMBER["qc"]) == 50
+    assert s["qc_fixes"] == len(EMBER["qc"]) == 53
 
 
 def test_every_investigation_has_a_score_for_every_habitat():
@@ -43,7 +43,7 @@ def test_sentence_splitter_keeps_numbered_lists_together():
 
 
 def test_downloads_are_published():
-    for name in ("ensayos.csv", "investigaciones.csv", "qc_log.csv", "findings.json", "si_evidence_packs.json", "si_verification.json"):
+    for name in ("solidos_bass2_gases.csv", "ensayos.csv", "investigaciones.csv", "qc_log.csv", "findings.json", "si_evidence_packs.json", "si_verification.json"):
         assert (WEB_DATA / "downloads" / name).stat().st_size > 0
 
 
@@ -148,3 +148,25 @@ def test_silver_layer_rebuilds_the_same_records():
     assert len(ens) == EMBER["summary"]["records"]
     assert ens["x_o2"].dropna().between(0, 1).all()
     assert ens["p_atm"].dropna().gt(0).all()
+
+
+def test_solid_flammability_boundary_matches_the_nasa_report():
+    from pipeline import solids
+    a = [x / 10 for x in range(1, 400)]
+    o2 = solids.boundary_o2(a)
+    k = int(o2.argmin())
+    assert 13.4 <= o2[k] <= 13.7 and 8 <= a[k] <= 12
+    assert abs(float(solids.boundary_o2(0.0)) - 19.4) < 0.01
+    S = EMBER["solids"]
+    assert S["min_o2_pct"] < S["g1_upward_limit_pct"]
+    assert all(h["burns_in_still_air"] for h in S["habitats"])
+    assert all(h["extrapolated"] for h in S["habitats"] if h["o2_pct"] > S["tested_o2_pct"][1])
+
+
+def test_solid_gas_data_is_clean():
+    pts = EMBER["solids"]["points"]
+    assert len(pts) == EMBER["solids"]["n_tests"] == 129
+    assert all(p["o2_final_pct"] is None or p["o2_final_pct"] > 10 for p in pts)
+    assert sum(1 for q in EMBER["qc"] if q["psi_id"] == "PSI-25" and "final O2" in q["campo"]) == 3
+    S = EMBER["solids"]
+    assert S["co_rods_low_o2_median_ppm"] > S["co_rods_high_o2_median_ppm"]

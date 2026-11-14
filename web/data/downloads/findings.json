@@ -75,6 +75,21 @@
   }
  },
  {
+  "id": "solid_limit",
+  "layer": "Prevention",
+  "title": "In orbit, solids keep burning at less oxygen than Earth tests allow",
+  "text": "In BASS-II, PMMA rod flames kept burning down to 13.5% O₂. NASA's fitted flammability boundary bottoms out at 13.5% O₂ near 1.7–2.5 cm/s of airflow, below the 15.4% limit of the normal-gravity upward test. Below 17% O₂ the rods released a median 137 ppm of CO (n=23), against 60 ppm above 20% O₂ (n=6).",
+  "implication": "Earth screening can understate how readily a material burns in the gentle airflow of a spacecraft; near-limit solid fires also make more carbon monoxide, a target for detection.",
+  "source": "PSI-25 BASS-II · NASA/TM-20210011385",
+  "score": 69.8,
+  "components": {
+   "volume": 0.685,
+   "quality": 0.9,
+   "agreement": 0.667,
+   "closeness": 0.5
+  }
+ },
+ {
   "id": "co2",
   "layer": "Suppression",
   "title": "CO₂ dilution suppresses droplet fires at reduced pressure",

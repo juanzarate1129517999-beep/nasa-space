@@ -49,3 +49,6 @@ PSI-20,ACME BRE,2019-April-1,Oxygen Conc (percent),2100%,21.0,Value formatted as
 PSI-25/26,BASS,2 rows,material,unrecognized,dropped,"Rows that are not a recognizable fuel sample (headers, calibrations)"
 PSI-99,Saffire-II,2-4..2-6,Samle Thickness,037 mm,0.37 mm,Missing decimal point
 PSI-99,Saffire-II,2-7,Material,PMMA & Nomex,excluded from μg-vs-1g comparison,"Composite sample: PMMA burned fully, Nomex never ignited"
+PSI-25,BASS-II (Bhattacharjee),B2,calibrated final O2 % by vol,1.6,NaN,Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded
+PSI-25,BASS-II (Fernandez-Pello),P22a,calibrated final O2 % by vol,0.6,NaN,Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded
+PSI-25,BASS-II (T'ien),T28a,calibrated final O2 % by vol,0.9,NaN,Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded
