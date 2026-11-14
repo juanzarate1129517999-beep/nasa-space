@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-11-14T15:44:42.216789</dc:date>
+    <dc:date>2026-11-14T21:20:05.174467</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -40,97 +40,105 @@ z
    <g id="patch_3">
     <path d="M 23.256172 246.274 
 L 166.848172 246.274 
-L 166.848172 234.292113 
-L 23.256172 234.292113 
+L 166.848172 235.325034 
+L 23.256172 235.325034 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="patch_4">
-    <path d="M 23.256172 226.304189 
-L 191.772172 226.304189 
-L 191.772172 214.322302 
-L 23.256172 214.322302 
+    <path d="M 23.256172 228.025724 
+L 191.772172 228.025724 
+L 191.772172 217.076759 
+L 23.256172 217.076759 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="patch_5">
-    <path d="M 23.256172 206.334377 
-L 213.348172 206.334377 
-L 213.348172 194.352491 
-L 23.256172 194.352491 
+    <path d="M 23.256172 209.777448 
+L 213.348172 209.777448 
+L 213.348172 198.828483 
+L 23.256172 198.828483 
 z
-" clip-path="url(#p5768989360)" style="fill: #0d9488"/>
+" clip-path="url(#p0211196d62)" style="fill: #0d9488"/>
    </g>
    <g id="patch_6">
-    <path d="M 23.256172 186.364566 
-L 257.988172 186.364566 
-L 257.988172 174.382679 
-L 23.256172 174.382679 
+    <path d="M 23.256172 191.529172 
+L 257.988172 191.529172 
+L 257.988172 180.580207 
+L 23.256172 180.580207 
 z
-" clip-path="url(#p5768989360)" style="fill: #0d9488"/>
+" clip-path="url(#p0211196d62)" style="fill: #0d9488"/>
    </g>
    <g id="patch_7">
-    <path d="M 23.256172 166.394755 
-L 267.288172 166.394755 
-L 267.288172 154.412868 
-L 23.256172 154.412868 
+    <path d="M 23.256172 173.280897 
+L 267.288172 173.280897 
+L 267.288172 162.331931 
+L 23.256172 162.331931 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="patch_8">
-    <path d="M 23.256172 146.424943 
-L 278.448172 146.424943 
-L 278.448172 134.443057 
-L 23.256172 134.443057 
+    <path d="M 23.256172 155.032621 
+L 278.448172 155.032621 
+L 278.448172 144.083655 
+L 23.256172 144.083655 
 z
-" clip-path="url(#p5768989360)" style="fill: #0284c7"/>
+" clip-path="url(#p0211196d62)" style="fill: #0284c7"/>
    </g>
    <g id="patch_9">
-    <path d="M 23.256172 126.455132 
-L 286.632172 126.455132 
-L 286.632172 114.473245 
-L 23.256172 114.473245 
+    <path d="M 23.256172 136.784345 
+L 282.912172 136.784345 
+L 282.912172 125.835379 
+L 23.256172 125.835379 
 z
-" clip-path="url(#p5768989360)" style="fill: #0284c7"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="patch_10">
-    <path d="M 23.256172 106.485321 
-L 304.488172 106.485321 
-L 304.488172 94.503434 
-L 23.256172 94.503434 
+    <path d="M 23.256172 118.536069 
+L 286.632172 118.536069 
+L 286.632172 107.587103 
+L 23.256172 107.587103 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #0284c7"/>
    </g>
    <g id="patch_11">
-    <path d="M 23.256172 86.515509 
-L 305.604172 86.515509 
-L 305.604172 74.533623 
-L 23.256172 74.533623 
+    <path d="M 23.256172 100.287793 
+L 304.488172 100.287793 
+L 304.488172 89.338828 
+L 23.256172 89.338828 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="patch_12">
-    <path d="M 23.256172 66.545698 
-L 338.340172 66.545698 
-L 338.340172 54.563811 
-L 23.256172 54.563811 
+    <path d="M 23.256172 82.039517 
+L 305.604172 82.039517 
+L 305.604172 71.090552 
+L 23.256172 71.090552 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="patch_13">
-    <path d="M 23.256172 46.575887 
-L 395.256172 46.575887 
+    <path d="M 23.256172 63.791241 
+L 338.340172 63.791241 
+L 338.340172 52.842276 
+L 23.256172 52.842276 
+z
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 23.256172 45.542966 
+L 395.256172 45.542966 
 L 395.256172 34.594 
 L 23.256172 34.594 
 z
-" clip-path="url(#p5768989360)" style="fill: #ea580c"/>
+" clip-path="url(#p0211196d62)" style="fill: #ea580c"/>
    </g>
    <g id="matplotlib.axis_1">
     <g id="xtick_1">
      <g id="line2d_1">
       <path d="M 23.256172 256.858 
 L 23.256172 24.01 
-" clip-path="url(#p5768989360)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
+" clip-path="url(#p0211196d62)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
      </g>
      <g id="line2d_2"/>
      <g id="text_1">
@@ -141,7 +149,7 @@ L 23.256172 24.01
      <g id="line2d_3">
       <path d="M 97.656172 256.858 
 L 97.656172 24.01 
-" clip-path="url(#p5768989360)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
+" clip-path="url(#p0211196d62)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
      </g>
      <g id="line2d_4"/>
      <g id="text_2">
@@ -152,7 +160,7 @@ L 97.656172 24.01
      <g id="line2d_5">
       <path d="M 172.056172 256.858 
 L 172.056172 24.01 
-" clip-path="url(#p5768989360)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
+" clip-path="url(#p0211196d62)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
      </g>
      <g id="line2d_6"/>
      <g id="text_3">
@@ -163,7 +171,7 @@ L 172.056172 24.01
      <g id="line2d_7">
       <path d="M 246.456172 256.858 
 L 246.456172 24.01 
-" clip-path="url(#p5768989360)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
+" clip-path="url(#p0211196d62)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
      </g>
      <g id="line2d_8"/>
      <g id="text_4">
@@ -174,7 +182,7 @@ L 246.456172 24.01
      <g id="line2d_9">
       <path d="M 320.856172 256.858 
 L 320.856172 24.01 
-" clip-path="url(#p5768989360)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
+" clip-path="url(#p0211196d62)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
      </g>
      <g id="line2d_10"/>
      <g id="text_5">
@@ -185,7 +193,7 @@ L 320.856172 24.01
      <g id="line2d_11">
       <path d="M 395.256172 256.858 
 L 395.256172 24.01 
-" clip-path="url(#p5768989360)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
+" clip-path="url(#p0211196d62)" style="fill: none; stroke: #e2e8f0; stroke-width: 0.7; stroke-linecap: square"/>
      </g>
      <g id="line2d_12"/>
      <g id="text_6">
@@ -200,118 +208,127 @@ L 395.256172 24.01
     <g id="ytick_1">
      <g id="line2d_13"/>
      <g id="text_8">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="243.845557" transform="rotate(-0 19.756172 243.845557)">F11</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="244.362017" transform="rotate(-0 19.756172 244.362017)">F12</text>
      </g>
     </g>
     <g id="ytick_2">
      <g id="line2d_14"/>
      <g id="text_9">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="223.875745" transform="rotate(-0 19.756172 223.875745)">F10</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="226.113741" transform="rotate(-0 19.756172 226.113741)">F11</text>
      </g>
     </g>
     <g id="ytick_3">
      <g id="line2d_15"/>
      <g id="text_10">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="203.905934" transform="rotate(-0 19.756172 203.905934)">F9</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="207.865466" transform="rotate(-0 19.756172 207.865466)">F10</text>
      </g>
     </g>
     <g id="ytick_4">
      <g id="line2d_16"/>
      <g id="text_11">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="183.936123" transform="rotate(-0 19.756172 183.936123)">F8</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="189.61719" transform="rotate(-0 19.756172 189.61719)">F9</text>
      </g>
     </g>
     <g id="ytick_5">
      <g id="line2d_17"/>
      <g id="text_12">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="163.966311" transform="rotate(-0 19.756172 163.966311)">F7</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="171.368914" transform="rotate(-0 19.756172 171.368914)">F8</text>
      </g>
     </g>
     <g id="ytick_6">
      <g id="line2d_18"/>
      <g id="text_13">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="143.9965" transform="rotate(-0 19.756172 143.9965)">F6</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="153.120638" transform="rotate(-0 19.756172 153.120638)">F7</text>
      </g>
     </g>
     <g id="ytick_7">
      <g id="line2d_19"/>
      <g id="text_14">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="124.026689" transform="rotate(-0 19.756172 124.026689)">F5</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="134.872362" transform="rotate(-0 19.756172 134.872362)">F6</text>
      </g>
     </g>
     <g id="ytick_8">
      <g id="line2d_20"/>
      <g id="text_15">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="104.056877" transform="rotate(-0 19.756172 104.056877)">F4</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="116.624086" transform="rotate(-0 19.756172 116.624086)">F5</text>
      </g>
     </g>
     <g id="ytick_9">
      <g id="line2d_21"/>
      <g id="text_16">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="84.087066" transform="rotate(-0 19.756172 84.087066)">F3</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="98.37581" transform="rotate(-0 19.756172 98.37581)">F4</text>
      </g>
     </g>
     <g id="ytick_10">
      <g id="line2d_22"/>
      <g id="text_17">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="64.117255" transform="rotate(-0 19.756172 64.117255)">F2</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="80.127534" transform="rotate(-0 19.756172 80.127534)">F3</text>
      </g>
     </g>
     <g id="ytick_11">
      <g id="line2d_23"/>
      <g id="text_18">
-      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="44.147443" transform="rotate(-0 19.756172 44.147443)">F1</text>
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="61.879259" transform="rotate(-0 19.756172 61.879259)">F2</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_24"/>
+     <g id="text_19">
+      <text style="font-size: 9.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: end; fill: #64748b" x="19.756172" y="43.630983" transform="rotate(-0 19.756172 43.630983)">F1</text>
      </g>
     </g>
    </g>
-   <g id="patch_14">
+   <g id="patch_15">
     <path d="M 23.256172 256.858 
 L 23.256172 24.01 
 " style="fill: none; stroke: #cbd5e1; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
-   <g id="patch_15">
+   <g id="patch_16">
     <path d="M 23.256172 256.858 
 L 425.016172 256.858 
 " style="fill: none; stroke: #cbd5e1; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
-   <g id="text_19">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="170.568172" y="242.283057" transform="rotate(-0 170.568172 242.283057)">39</text>
-   </g>
    <g id="text_20">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="195.492172" y="222.313245" transform="rotate(-0 195.492172 222.313245)">45</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="170.568172" y="242.799517" transform="rotate(-0 170.568172 242.799517)">39</text>
    </g>
    <g id="text_21">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="217.068172" y="202.343434" transform="rotate(-0 217.068172 202.343434)">51</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="195.492172" y="224.551241" transform="rotate(-0 195.492172 224.551241)">45</text>
    </g>
    <g id="text_22">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="261.708172" y="182.373623" transform="rotate(-0 261.708172 182.373623)">63</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="217.068172" y="206.302966" transform="rotate(-0 217.068172 206.302966)">51</text>
    </g>
    <g id="text_23">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="271.008172" y="162.403811" transform="rotate(-0 271.008172 162.403811)">66</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="261.708172" y="188.05469" transform="rotate(-0 261.708172 188.05469)">63</text>
    </g>
    <g id="text_24">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="282.168172" y="142.434" transform="rotate(-0 282.168172 142.434)">69</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="271.008172" y="169.806414" transform="rotate(-0 271.008172 169.806414)">66</text>
    </g>
    <g id="text_25">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="290.352172" y="122.464189" transform="rotate(-0 290.352172 122.464189)">71</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="282.168172" y="151.558138" transform="rotate(-0 282.168172 151.558138)">69</text>
    </g>
    <g id="text_26">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="308.208172" y="102.494377" transform="rotate(-0 308.208172 102.494377)">76</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="286.632172" y="133.309862" transform="rotate(-0 286.632172 133.309862)">70</text>
    </g>
    <g id="text_27">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="309.324172" y="82.524566" transform="rotate(-0 309.324172 82.524566)">76</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="290.352172" y="115.061586" transform="rotate(-0 290.352172 115.061586)">71</text>
    </g>
    <g id="text_28">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="342.060172" y="62.554755" transform="rotate(-0 342.060172 62.554755)">85</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="308.208172" y="96.81331" transform="rotate(-0 308.208172 96.81331)">76</text>
    </g>
    <g id="text_29">
-    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="398.976172" y="42.584943" transform="rotate(-0 398.976172 42.584943)">100</text>
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="309.324172" y="78.565034" transform="rotate(-0 309.324172 78.565034)">76</text>
    </g>
    <g id="text_30">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="342.060172" y="60.316759" transform="rotate(-0 342.060172 60.316759)">85</text>
+   </g>
+   <g id="text_31">
+    <text style="font-size: 8px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="398.976172" y="42.068483" transform="rotate(-0 398.976172 42.068483)">100</text>
+   </g>
+   <g id="text_32">
     <text style="font-weight: 600; font-size: 11px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start; fill: #0f172a" x="23.256172" y="14.01" transform="rotate(-0 23.256172 14.01)">Findings ranked by strength of evidence</text>
    </g>
    <g id="legend_1">
-    <g id="patch_16">
+    <g id="patch_17">
      <path d="M 351.631953 221.583 
 L 368.631953 221.583 
 L 368.631953 215.633 
@@ -319,10 +336,10 @@ L 351.631953 215.633
 z
 " style="fill: #ea580c; stroke: #ea580c; stroke-linejoin: miter"/>
     </g>
-    <g id="text_31">
+    <g id="text_33">
      <text style="font-size: 8.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start" x="375.431953" y="221.583" transform="rotate(-0 375.431953 221.583)">Prevention</text>
     </g>
-    <g id="patch_17">
+    <g id="patch_18">
      <path d="M 351.631953 234.333 
 L 368.631953 234.333 
 L 368.631953 228.383 
@@ -330,10 +347,10 @@ L 351.631953 228.383
 z
 " style="fill: #0d9488; stroke: #0d9488; stroke-linejoin: miter"/>
     </g>
-    <g id="text_32">
+    <g id="text_34">
      <text style="font-size: 8.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start" x="375.431953" y="234.333" transform="rotate(-0 375.431953 234.333)">Detection</text>
     </g>
-    <g id="patch_18">
+    <g id="patch_19">
      <path d="M 351.631953 247.083 
 L 368.631953 247.083 
 L 368.631953 241.133 
@@ -341,14 +358,14 @@ L 351.631953 241.133
 z
 " style="fill: #0284c7; stroke: #0284c7; stroke-linejoin: miter"/>
     </g>
-    <g id="text_33">
+    <g id="text_35">
      <text style="font-size: 8.5px; font-family: 'Segoe UI', 'Calibri', 'Carlito', 'Arial', 'Liberation Sans', 'DejaVu Sans'; text-anchor: start" x="375.431953" y="247.083" transform="rotate(-0 375.431953 247.083)">Suppression</text>
     </g>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="p5768989360">
+  <clipPath id="p0211196d62">
    <rect x="23.256172" y="24.01" width="401.76" height="232.848"/>
   </clipPath>
  </defs>

@@ -28,9 +28,11 @@
       <a href="#coverage">Coverage</a>
       <a href="#investigations">Investigations</a>
       <a href="#scenario">Scenario</a>
+      <a href="#solids">Solids</a>
       <a href="#evidence">Evidence</a>
       <a href="#findings">Findings</a>
       <a href="#next">Next test</a>
+      <a href="#earth">On Earth</a>
       <a href="#quality">Data</a>
     </nav>
     <a class="btn btn--fire btn--sm nav__cta" href="https://github.com/juanzarate1129517999-beep/nasa-space" target="_blank" rel="noopener">Source <span aria-hidden="true">↗</span></a>
@@ -74,6 +76,13 @@
       </header>
       <div class="habitats rv" id="habitats"></div>
       <p class="note rv">Methanol droplet, no suppressant. Droplet flames are what FLEX flew; solid cabin materials have no flight data in these atmospheres. The model says “extrapolating” when any input leaves the flown range and withholds a number far from the data. Select an atmosphere to open it in the simulator.</p>
+      <div class="history rv">
+        <div class="history__head">
+          <p class="label">Why it matters</p>
+          <h3>Apollo 1, Apollo 13, Mir: each one involved oxygen. <span class="mute">The Moon base will breathe more of it.</span></h3>
+        </div>
+        <ol class="history__list" id="history"></ol>
+      </div>
     </div>
   </section>
 
@@ -82,7 +91,7 @@
       <header class="sec__head rv">
         <p class="eyebrow">01 · SI briefing</p>
         <h2>Ask the archive. <span class="mute">Get an answer you can check, sentence by sentence.</span></h2>
-        <p class="sec__lead">The SI layer writes a short briefing for each habitat and each investigation from numbered evidence computed by the pipeline. Code publishes a briefing only if every sentence cites its evidence, every number appears in that evidence, and nothing reads as a safety verdict. The SI interprets; rankings and predictions stay deterministic.</p>
+        <p class="sec__lead">The SI (super intelligence, as the challenge calls it) layer writes a short briefing for each habitat and each investigation from numbered evidence computed by the pipeline. Code publishes a briefing only if every sentence cites its evidence, every number appears in that evidence, and nothing reads as a safety verdict. The SI interprets; rankings and predictions stay deterministic.</p>
         <p class="objective">Challenge objectives · SI-powered · summarize · interpret</p>
       </header>
       <div class="audience rv">
@@ -229,10 +238,46 @@
     </div>
   </section>
 
-  <section class="sec sec--alt" id="evidence">
+  <section class="sec sec--alt" id="solids">
     <div class="wrap">
       <header class="sec__head rv">
-        <p class="eyebrow">05 · Evidence</p>
+        <p class="eyebrow">05 · Solid materials</p>
+        <h2>Cabin materials in orbit. <span class="mute">They keep burning at less oxygen than Earth tests suggest.</span></h2>
+        <p class="sec__lead">Fabrics and plastics are what actually burns in a spacecraft. BASS and BASS-II burned PMMA rods, slabs and films, SIBAL fabric and Nomex in the ISS glovebox while astronauts varied the airflow; Saffire-I to -III burned large samples on Cygnus. Here are the measured limits, the gases those fires released, and what they imply for each habitat.</p>
+        <p class="objective">Challenge background · flammability studies focus on solid materials such as fabrics and plastics (BASS, BASS-II, Saffire)</p>
+      </header>
+      <dl class="facts facts--4 rv" id="solid-facts"></dl>
+      <div class="grid-2 card--gap rv">
+        <div class="card">
+          <p class="label">NASA flammability boundary · PMMA rods · 1 atm</p>
+          <h3>Where a solid flame can survive.</h3>
+          <p class="sub">Above the line a PMMA rod keeps burning; below it the flame goes out. Solid line: inside the conditions BASS-II tested. Dashed: the same equation extended, which is extrapolation.</p>
+          <div class="legend" id="solid-legend"></div>
+          <div class="chart" id="solid-map" role="img" aria-label="Flammability boundary of PMMA rods: oxygen versus airflow"></div>
+          <p class="note" id="solid-note"></p>
+        </div>
+        <div class="card">
+          <p class="label">BASS-II gas sensors · 118 tests</p>
+          <h3>Starved flames make more carbon monoxide.</h3>
+          <p class="sub">Carbon monoxide added to the glovebox by each test, against the oxygen level at ignition. Slabs burn more mass, so they release more of everything.</p>
+          <div class="legend" id="solid-co-legend"></div>
+          <div class="chart" id="solid-co" role="img" aria-label="Carbon monoxide produced versus oxygen"></div>
+          <p class="note" id="solid-co-note"></p>
+        </div>
+      </div>
+      <div class="card card--gap rv">
+        <p class="label">What the boundary implies per habitat</p>
+        <h3>In every crewed atmosphere, a PMMA rod can burn in still air.</h3>
+        <div class="tbl-wrap"><table id="solid-hab"></table></div>
+        <p class="note" id="solid-hab-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="evidence">
+    <div class="wrap">
+      <header class="sec__head rv">
+        <p class="eyebrow">06 · Evidence</p>
         <h2>The measurements behind the insights. <span class="mute">With sample sizes and intervals.</span></h2>
         <p class="sec__lead">Raw outcomes, so every claim can be checked against the tests themselves.</p>
         <p class="objective">Challenge objectives · interpret findings · prevention · detection · suppression · partial gravity</p>
@@ -272,7 +317,7 @@
     <div class="wrap">
       <header class="sec__head sec__head--row rv">
         <div>
-          <p class="eyebrow">06 · Findings</p>
+          <p class="eyebrow">07 · Findings</p>
           <h2>Fire-safety findings. <span class="mute">Ranked by strength of evidence.</span></h2>
           <p class="sec__lead">Every number in these statements is computed by the pipeline from PSI tables. The score combines test volume, validation quality, agreement across investigations and closeness to lunar-base conditions.</p>
           <p class="objective">Challenge objective · highlight research for next-generation fire safety</p>
@@ -286,7 +331,7 @@
   <section class="sec" id="next">
     <div class="wrap">
       <header class="sec__head rv">
-        <p class="eyebrow">07 · Next experiment</p>
+        <p class="eyebrow">08 · Next experiment</p>
         <h2>What NASA should fly next. <span class="mute">Where one new test would teach the most.</span></h2>
         <p class="sec__lead">Active learning on the model: among conditions near the lunar-base atmosphere, Skylab Phoenix picks those where the 200 bootstrap models disagree the most. Partial-gravity data (LUCI, FM2) is not in PSI yet; these conditions are where it would pay off first.</p>
       </header>
@@ -316,10 +361,22 @@
     </div>
   </section>
 
-  <section class="sec sec--alt" id="quality">
+  <section class="sec sec--alt" id="earth">
     <div class="wrap">
       <header class="sec__head rv">
-        <p class="eyebrow">08 · Data &amp; validation</p>
+        <p class="eyebrow">09 · On Earth</p>
+        <h2>Space fire research comes home. <span class="mute">Detectors, air tanks, suits and water mist.</span></h2>
+        <p class="sec__lead">The challenge asks how PSI data can also make fire safer on Earth. NASA technology already did: smoke detection, firefighter air tanks and protective clothing, and fine-water-mist extinguishers developed for the ISS. The same data in this dashboard points to more.</p>
+        <p class="objective">Challenge objective · potential applications of the PSI data to fire safety on Earth</p>
+      </header>
+      <div class="earth rv" id="earth-list"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="quality">
+    <div class="wrap">
+      <header class="sec__head rv">
+        <p class="eyebrow">10 · Data &amp; validation</p>
         <h2>Reproducible pipeline. <span class="mute">Honest validation.</span></h2>
         <p class="sec__lead">One command rebuilds everything from NASA's public API. Every correction to NASA's tables is logged, and the model is scored only on test days it never saw.</p>
       </header>
@@ -353,6 +410,11 @@
           <p class="sub" id="si-sub"></p>
           <div class="tbl-wrap"><table id="si-table"></table></div>
           <p class="note">Checks per sentence: at least one citation to an existing evidence item; every number present in the cited items; no safety verdict (“is safe”, “certified”, “guaranteed”…); the evidence pack unchanged since the draft was written. A briefing that fails shows the evidence itself, labelled “Evidence brief”. Regenerate with <code>python scripts/si_generate.py</code>.</p>
+        </div>
+        <div class="card">
+          <p class="label">Challenge resources</p>
+          <h3>Every resource the challenge lists, and where we use it.</h3>
+          <div class="downloads" id="resources"></div>
         </div>
         <div class="card">
           <p class="label">Downloads</p>

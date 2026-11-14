@@ -40,6 +40,14 @@ s1 = {r["direccion"].strip().lower(): r["tiempo_quemado_s"] for r in D["saffire1
 INV = D["investigations"]
 picks = D["next"]["picks"]
 FIND = D["findings"]
+SOL = D["solids"]
+
+
+def solid_table():
+    body = "".join(f"<tr><td>{E(h['name'])}</td><td class='num'>{h['o2_pct']:g}%</td><td>Keeps burning</td>"
+                   f"<td class='num'>≈ {h['blowoff_flow_cm_s']:.0f} cm/s</td>"
+                   f"<td>{'Extrapolated O₂ and flow' if h['o2_pct'] > SOL['tested_o2_pct'][1] else 'O₂ tested · flow extrapolated'}</td></tr>" for h in SOL["habitats"])
+    return "<table class='compact keep'><thead><tr><th>Habitat</th><th class='num'>O₂</th><th>Still air</th><th class='num'>Burns up to</th><th>Status</th></tr></thead><tbody>" + body + "</tbody></table>"
 HAB = {"cabin": "Spacecraft cabin (ISS, Gateway, Orion)", "eva_prep": "EVA prep",
        "moon_base": "Lunar base & pressurized rover", "exploration": "Exploration atmosphere (8.2 psi)", "suit": "Spacesuit"}
 LAYER_CLASS = {"Prevention": "Prevention", "Detection": "Detection", "Suppression": "Suppression"}
@@ -430,7 +438,7 @@ doc = f"""<!doctype html>
 
 <section class="page">
 <h2>Fire-safety findings ranked by evidence</h2>
-<p class="lead">The pipeline produces {len(FIND)} findings. Each has an evidence score and a design implication, and every number in them is computed from the PSI tables.</p>
+<p class="lead">The pipeline produces {len(FIND)} findings. Each has an evidence score and a design implication. Every number in them is computed from the PSI tables, except the solid-material limits, which are quoted from NASA's BASS-II report stored in PSI.</p>
 <div class="formula">Evidence = 100 × ( 0.35 · volume + 0.25 · quality + 0.20 · agreement + 0.20 · closeness to the Moon )</div>
 <p class="note">Volume = log(1 + n)/log(301). Quality = model validation or type of measurement. Agreement = investigations pointing the same way (max. 3). Closeness = how near lunar-base air the evidence is.</p>
 {fig('f15_hallazgos', 'Evidence score of each finding, coloured by safety layer.', Fn())}
@@ -439,8 +447,23 @@ doc = f"""<!doctype html>
 </section>
 
 <section class="page">
+<h3>Solid materials: the limits measured in orbit</h3>
+<p>Fabrics and plastics are what burns in a spacecraft, and the challenge points to BASS, BASS-II and Saffire. From the BASS-II test matrices (PSI-25) we extracted the oxygen, CO and CO₂ readings of {SOL['n_tests']} tests, and from NASA's BASS-II summary report (NASA/TM-20210011385, also in PSI) the flammability boundary that the investigators fitted to their PMMA rod tests: X<sub>O₂</sub> = 6·exp(−0.5a) + 0.0167a + 13.4 (%), where a = 1.5U/r is the stretch rate ({SOL['boundary']['page']}).</p>
+<ul>
+<li>The boundary bottoms out at about <b>{SOL['min_o2_pct']}% O₂</b> near {SOL['min_flow_cm_s'][0]:.1f}–{SOL['min_flow_cm_s'][1]:.1f} cm/s of airflow, below the <b>{SOL['g1_upward_limit_pct']}%</b> limit of the normal-gravity upward test ({SOL['g1_page']}). In the gentle airflow typical near spacecraft surfaces, solids burn at less oxygen than Earth tests indicate.</li>
+<li>Rods needed about {SOL['ignition_limit_pct']}% O₂ to ignite ({SOL['ignition_page']}); once lit, flames survived to {SOL['lowest_final_o2_rods_pct']:.1f}% (BASS-II table).</li>
+<li>Near the limit, flames run fuel-rich: PMMA rods released a median <b>{SOL['co_rods_low_o2_median_ppm']:.0f} ppm</b> of CO below 17% O₂ ({SOL['n_rods_low']} tests) against {SOL['co_rods_high_o2_median_ppm']:.0f} ppm above 20% ({SOL['n_rods_high']} tests).</li>
+<li>Three final-O₂ values in NASA's table (0.6–1.6%) are physically impossible in the 250 L glovebox; they are logged in the quality log and excluded.</li>
+</ul>
+<p class="tcap"><b>Table {T()}.</b> What the boundary implies for each habitat (PMMA rod, 1 atm).</p>
+{solid_table()}
+<p class="note">With no forced airflow the boundary sits at {SOL['zero_flow_o2_pct']}% O₂, below every habitat. No solid has burned in orbit above {SOL['max_o2_any_solid_pct']}% O₂ or at reduced pressure, so every habitat above cabin air is an extrapolation, which is why solid-material flammability at ≥30% O₂ and ≤10.2 psi is the flight test the data asks for.</p>
+{shot('11_solidos', 'Solid materials in the dashboard: NASA flammability boundary with habitat oxygen levels, CO released by each BASS-II test, and the implication per habitat.', Fn())}
+</section>
+
+<section class="page">
 <h2>The SI layer: briefings you can check</h2>
-<p class="lead">The challenge asks for an SI-powered dashboard. Skylab Phoenix uses SI where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.</p>
+<p class="lead">The challenge asks for a super intelligence (SI) powered dashboard. Skylab Phoenix uses SI where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.</p>
 <h3>11.1 How it works</h3>
 <ol>
 <li><b>Evidence packs.</b> For each of the 5 habitats and 24 investigations, <code>pipeline/si.py</code> writes numbered evidence items (E1, E2…) computed from the gold data: model predictions with their intervals, the most relevant investigations, coverage, validation and the top findings.</li>
@@ -458,7 +481,7 @@ doc = f"""<!doctype html>
 <section class="page">
 <h2>The Skylab Phoenix dashboard</h2>
 <p class="lead">A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. Plotly is bundled, so it also works without internet once loaded.</p>
-<p>Sections: home with indicators and habitat cards; SI briefing and Ask the archive, with guided views for undergraduates, graduate students, professors, researchers and engineers; coverage; investigations (ranking, profile, side-by-side comparison and similarity); scenario simulator with shareable links; evidence; findings; next experiment; and data and validation with downloads. It works on desktop and mobile and is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.</p>
+<p>Sections: home with indicators, habitat cards and lessons from history (Apollo 1, Apollo 13, Mir); SI briefing and Ask the archive, with guided views for undergraduates, graduate students, professors, researchers and engineers; coverage; investigations (ranking, profile, side-by-side comparison and similarity); scenario simulator with shareable links; solid materials; evidence; findings; next experiment; applications on Earth; and data and validation with downloads and links to all ten resources the challenge lists. It works on desktop and mobile and is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.</p>
 {shot('01_inicio', 'Home: headline, key indicators and self-extinction probability per habitat. The spacesuit appears as “outside the data”.', Fn())}
 {shot('02_cobertura', 'Coverage: every flight test against the habitat atmospheres, with filters by family.', Fn())}
 {shot('03_investigaciones', 'Investigations: ranking by habitat and safety layer, and a profile generated from the data (what varied, what was measured, score breakdown).', Fn())}

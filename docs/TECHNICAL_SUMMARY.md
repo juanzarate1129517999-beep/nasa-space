@@ -13,7 +13,7 @@ Artemis surface habitats and pressurized rovers are expected to run at **30% O�
 - **Source:** PSI public API, 24 Combustion Science investigations (19 flight, 5 ground), CC0.
 - **Silver layer:** one parser per experiment maps every table to a common schema in SI units (O₂ mole fraction, pressure in atm, flow in cm/s, droplet diameter in mm), with flags for assumed cabin air and for O₂ measured at the burner rather than in the room.
 - **Result:** 1,989 test records, 688 with a labeled outcome.
-- **Quality:** 50 corrections, each logged with the original value and the rule applied (`data/gold/qc_log.csv`): spreadsheet auto-fill errors (CH4 → CH5, CH6…), “3400%” instead of 34%, an impossible 0 mmHg pressure, mole fractions that do not sum to 1, duplicate rows, inconsistent labels.
+- **Quality:** 53 corrections, each logged with the original value and the rule applied (`data/gold/qc_log.csv`): spreadsheet auto-fill errors (CH4 → CH5, CH6…), “3400%” instead of 34%, an impossible 0 mmHg pressure, mole fractions that do not sum to 1, duplicate rows, inconsistent labels.
 
 ## 3. Summaries, ranking and similarity
 
@@ -50,11 +50,18 @@ A 200-model bootstrap (resampling whole test days) gives the 90% interval of eve
 
 **Next experiment (active learning).** Among atmospheres near lunar-base air, the pipeline picks where the bootstrap models disagree most: a methanol droplet at 27% O₂, 0.60 atm and 30% CO₂ (current 90% interval 10–51%), that is, the CO₂ needed to suppress a fire at lunar-base conditions.
 
-## 5. SI layer
+## 5. Solid materials
+
+- **Data:** O₂, CO and CO₂ before and after each of 129 BASS-II tests (PMMA rods, slabs and films, SIBAL fabric, Nomex), from the test matrices in PSI-25. Three final-O₂ values (0.6–1.6%) are physically impossible in the 250 L glovebox and are logged and excluded.
+- **Flammability boundary (quoted):** NASA/TM-20210011385, p. 75, Eq. (6.1): X_O2 = 6 exp(−0.5a) + 0.0167a + 13.4 (%), a = 1.5U/r. Minimum about 13.5% O₂ near 1.7–2.5 cm/s, below the 15.4% limit of the normal-gravity upward test; with no forced flow the boundary is 19.4% O₂, below every habitat.
+- **CO:** PMMA rods released a median 137 ppm of CO below 17% O₂ (23 tests) against 60 ppm above 20% (6 tests).
+- **Limit:** no solid has burned in orbit above 22.7% O₂ or at reduced pressure; all habitats above cabin air are extrapolation.
+
+## 6. SI layer
 
 For each habitat and investigation the pipeline writes a numbered evidence pack. An SI model (Anthropic Claude) writes a 2–4 sentence briefing; each sentence lists the items it relies on. A verification firewall publishes the briefing only if every sentence cites existing evidence, every number appears in the cited evidence, there is no safety verdict, and the evidence is unchanged since the draft (hash). 29 of 29 briefings pass; any that fail are replaced by a labelled deterministic brief. “Ask the archive” is a BM25 search over NASA's own text, which quotes rather than generates.
 
-## 6. Findings (ranked by evidence score)
+## 7. Findings (ranked by evidence score)
 
 1. **Almost no flight data where the Moon base will live:** 37 of 1,647 records sit inside the lunar-base envelope; no solid-material test exceeds 22.7% O₂ or was flown at reduced pressure.
 2. **Lunar-base air makes self-extinction about 11× less likely than cabin air** (72% → 6%), so material screening at 21% O₂ and 1 atm cannot be reused without re-testing.
@@ -64,7 +71,7 @@ For each habitat and investigation the pipeline writes a numbered evidence pack.
 6. **Cool flames were confirmed in orbit** and burn with almost no visible light, so optical detectors can miss them.
 7. **Airflow direction matters:** the same Saffire-I fabric burned about 6× longer with concurrent flow.
 
-## 7. Limitations
+## 8. Limitations
 
 - Droplet and gas-flame models do not transfer directly to solid cabin materials.
 - PSI has no partial-gravity combustion data; microgravity and 1 g results only bound lunar and Martian behaviour.

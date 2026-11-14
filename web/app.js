@@ -635,6 +635,90 @@
       yaxis: { type: "log", tickvals: PSI_TICKS, title: { text: "Cabin pressure, psi" }, gridcolor: "rgba(0,0,0,0)" },
     }));
   }
+  const RES = {
+    psi: ["PSI Data Repository: Combustion Science", "https://psi.nasa.gov/physci/repo/search?q=combustion", "The data source: all 24 investigations are downloaded, cleaned and modelled from it."],
+    cs: ["NASA Combustion Science", "https://www.nasa.gov/glenn/glenn-expertise-space-exploration/physical-sciences-program/combustion-science/", "Linked as background; the investigation profiles themselves are built from PSI metadata and tables."],
+    cast: ["NASA ScienceCasts: The Power of Studying Combustion on the ISS", "https://www.youtube.com/watch?v=W1oXykoz9zg", "Linked from the undergraduate path as a first introduction."],
+    guide: ["A Researcher's Guide to ISS Combustion Science", "https://www.nasa.gov/missions/station/a-researchers-guide-to-combustion-science/", "Linked as NASA's overview of the ISS experiments whose data sit in PSI."],
+    a1: ["Apollo 1", "https://sma.nasa.gov/sma-disciplines/accllp/apollo-1", "Why oxygen-enriched cabins matter (Why it matters)."],
+    a13: ["Apollo 13", "https://sma.nasa.gov/sma-disciplines/accllp/apollo-13", "Oxygen-system fire risk (Why it matters)."],
+    mir: ["25 Years Ago: Fire Aboard Space Station Mir", "https://www.nasa.gov/history/25-years-ago-fire-aboard-space-station-mir/", "Oxygen-generator fire in orbit (Why it matters)."],
+    tanks: ["Fireman's Air Tanks", "https://spinoff.nasa.gov/node/9582", "Spacesuit technology in firefighting (On Earth)."],
+    detector: ["Fire Detector", "https://spinoff.nasa.gov/node/9407", "Smoke versus dust discrimination, linked to SAME, SAME-R and DAFT (On Earth)."],
+    attire: ["New Technology for the Fire Attire", "https://spinoff.nasa.gov/node/9918", "Spacesuit materials in firefighter clothing (On Earth)."],
+  };
+  const CHALLENGE_URL = "https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/";
+  function renderHistory() {
+    const S = D.solids;
+    const ev = [
+      ["2026", "Artemis II", "A smoke alarm went off about 80,000 miles from Earth. As the commander put it, it gets everyone's attention.", CHALLENGE_URL, "Challenge brief"],
+      ["1997", "Mir", "A fire caused by an oxygen generator failure erupted aboard the station during joint operations.", RES.mir[1], "NASA history"],
+      ["1970", "Apollo 13", "An oxygen tank exploded on the way to the Moon; the crew survived a life-threatening flight home.", RES.a13[1], "NASA lessons learned"],
+      ["1967", "Apollo 1", `Fire erupted in the oxygen-filled spacecraft during a pre-launch test and the crew died. Today, no solid material has burned in orbit above ${S.max_o2_any_solid_pct}% O₂.`, RES.a1[1], "NASA lessons learned"],
+    ];
+    $("#history").innerHTML = ev.map(([y, n, d, u, s]) => `<li><span class="yr">${y}</span><div><b>${esc(n)}</b><p>${esc(d)}</p><a class="src-link" href="${u}" target="_blank" rel="noopener">${esc(s)} ↗</a></div></li>`).join("");
+  }
+  function renderSolids() {
+    const S = D.solids, B = S.boundary;
+    $("#solid-facts").innerHTML = [
+      [`${S.min_o2_pct}%`, `lowest O₂ for a lasting PMMA flame in orbit, against ${S.g1_upward_limit_pct}% in the normal-gravity upward test`],
+      [`${S.min_flow_cm_s[0].toFixed(1)}–${S.min_flow_cm_s[1].toFixed(1)}`, "cm/s: the gentle breeze where solids burn at the lowest oxygen, typical of spacecraft flows near surfaces"],
+      [`${S.ignition_limit_pct}%`, `O₂ needed to ignite a rod; once lit, flames survived down to ${S.lowest_final_o2_rods_pct}%`],
+      [`${S.max_o2_any_solid_pct}%`, `highest O₂ in which any solid has burned in orbit (${S.n_solid_tests} flight tests); the Moon base will be at 30%+`],
+    ].map(([v, l]) => `<div><dt>${l}</dt><dd>${v}</dd></div>`).join("");
+    const u = B.flow_cm_s, o = B.o2_pct;
+    const inT = u.map((v, i) => (B.tested[i] ? o[i] : null)), outT = u.map((v, i) => (!B.tested[i] || i === B.tested.lastIndexOf(true) ? o[i] : null));
+    const xr = [0.3, 300], yr = [12, 36];
+    const vis = u.map((v, i) => v >= xr[0] && v <= xr[1]);
+    const X = u.filter((_, i) => vis[i]), Y = o.filter((_, i) => vis[i]);
+    const habs = D.habitats.filter((h) => h.x_o2 < 1);
+    $("#solid-legend").innerHTML = [legendItem("line", C.amber, "NASA boundary (tested range)"), legendItem("line", C.ink3, "Extrapolated"), legendItem("bar", "rgba(242,96,15,0.35)", "Keeps burning"), legendItem("bar", "rgba(203,213,225,0.18)", "Where BASS-II tested")].join("");
+    plot("solid-map", [
+      { x: X.concat([...X].reverse()), y: Y.concat(X.map(() => yr[1])), type: "scatter", fill: "toself", fillcolor: "rgba(242,96,15,0.13)", line: { width: 0 }, hoverinfo: "skip" },
+      { x: u, y: outT, type: "scatter", mode: "lines", line: { color: C.ink3, width: 2, dash: "dash" }, hoverinfo: "skip", connectgaps: false },
+      { x: u, y: inT, type: "scatter", mode: "lines", line: { color: C.amber, width: 3 }, connectgaps: false, hovertemplate: "airflow %{x:.1f} cm/s<br>flame survives above %{y:.1f}% O₂<extra></extra>" },
+    ], layout({
+      margin: { l: 52, r: 150, t: 10, b: 48 },
+      xaxis: { type: "log", range: xr.map(Math.log10), tickvals: [0.3, 1, 2, 5, 10, 20, 50, 100, 200], title: { text: "Airflow past the sample, cm/s (log)" } },
+      yaxis: { range: yr, ticksuffix: "%", title: { text: "Oxygen in the air" } },
+      shapes: [
+        { type: "rect", x0: xr[0], x1: S.tested_flow_cm_s[1], y0: S.tested_o2_pct[0], y1: S.tested_o2_pct[1], line: { color: C.line2, width: 1, dash: "dot" }, fillcolor: "rgba(203,213,225,0.06)", layer: "below" },
+        { type: "line", x0: xr[0], x1: xr[1], y0: S.g1_upward_limit_pct, y1: S.g1_upward_limit_pct, line: { color: "#7dd3fc", width: 1.2, dash: "dot" } },
+        ...habs.map((h) => ({ type: "line", x0: xr[0], x1: xr[1], y0: 100 * h.x_o2, y1: 100 * h.x_o2, line: { color: h.id === "moon_base" ? C.orange : C.line2, width: h.id === "moon_base" ? 1.6 : 1 } })),
+      ],
+      annotations: [
+        ...habs.map((h) => ({ x: 1, xref: "paper", xanchor: "left", y: 100 * h.x_o2, text: ` ${esc(h.name)} ${o2pct(h.x_o2)}`, showarrow: false, font: { size: 10.5, color: h.id === "moon_base" ? C.orange : C.ink3 } })),
+        { x: 1, xref: "paper", xanchor: "left", y: S.g1_upward_limit_pct, text: ` 1 g test limit ${S.g1_upward_limit_pct}%`, showarrow: false, font: { size: 10.5, color: "#7dd3fc" } },
+        { x: Math.log10(2.1), y: S.min_o2_pct - 0.35, text: `lowest point ≈ 2 cm/s, ${S.min_o2_pct}% O₂`, showarrow: false, yanchor: "top", font: { family: "Geist Mono, monospace", size: 10, color: C.amber } },
+        { x: Math.log10(0.45), y: 34.5, xanchor: "left", text: "KEEPS BURNING", showarrow: false, font: { family: "Geist Mono, monospace", size: 10.5, color: C.orange } },
+        { x: Math.log10(250), y: 12.7, xanchor: "right", text: "FLAME GOES OUT", showarrow: false, font: { family: "Geist Mono, monospace", size: 10.5, color: "#5eead4" } },
+      ],
+    }));
+    $("#solid-note").innerHTML = `Equation: ${esc(B.equation)} · ${esc(S.source)}, ${esc(B.page)}. Above about ${S.tested_o2_pct[1]}% O₂ and beyond ${S.tested_flow_cm_s[1]} cm/s no solid was flown, so the dashed line and every habitat above cabin air are extrapolation.`;
+    const fams = [["PMMA rod", C.orange, "circle"], ["PMMA slab", C.amber, "square"], ["PMMA thin film", C.violet, "diamond"], ["SIBAL fabric", C.blue, "triangle-up"]];
+    $("#solid-co-legend").innerHTML = fams.map(([f, c, s]) => legendItem(s === "square" ? "square" : s === "diamond" ? "diamond" : s === "triangle-up" ? "tri" : "circle", c, f)).join("");
+    plot("solid-co", fams.map(([f, c, s]) => {
+      const pts = S.points.filter((q) => q.family === f && q.co_produced_ppm != null);
+      return { x: pts.map((q) => q.o2_initial_pct), y: pts.map((q) => q.co_produced_ppm), type: "scatter", mode: "markers", name: f,
+        marker: { symbol: s, size: 9, color: c, opacity: 0.85, line: { color: C.bg, width: 1 } }, customdata: pts.map((q) => [q.test, q.material]),
+        hovertemplate: "<b>%{customdata[0]}</b> · %{customdata[1]}<br>O₂ %{x:.1f}% · CO +%{y:.0f} ppm<extra></extra>" };
+    }), layout({ margin: { l: 56, r: 12, t: 10, b: 48 }, xaxis: { ticksuffix: "%", title: { text: "Oxygen when the sample was lit" } }, yaxis: { title: { text: "CO added, ppm" } } }));
+    $("#solid-co-note").innerHTML = `PMMA rods: median <b>${Math.round(S.co_rods_low_o2_median_ppm)} ppm</b> of CO below 17% O₂ (${S.n_rods_low} tests) against <b>${Math.round(S.co_rods_high_o2_median_ppm)} ppm</b> above 20% (${S.n_rods_high} tests), consistent with the BASS-II report: near the limit flames run fuel-rich. Three final-O₂ readings in NASA's table (0.6–1.6%) are physically impossible in the 250 L glovebox and are excluded (see the quality log).`;
+    $("#solid-hab").innerHTML = `<thead><tr><th>Habitat</th><th class="num">O₂</th><th>In still air</th><th class="num">Burns up to an airflow of</th><th>Data status</th></tr></thead><tbody>${S.habitats.map((h) => `<tr${h.habitat === "moon_base" ? ' class="hl"' : ""}><td>${esc(h.name)}</td><td class="num">${o2pct(h.o2_pct / 100)}</td><td>${h.burns_in_still_air ? "Keeps burning" : "Goes out"}</td><td class="num">≈ ${Math.round(h.blowoff_flow_cm_s)} cm/s</td><td>${h.o2_pct > S.tested_o2_pct[1] ? '<span class="status warn"><span class="dot"></span>Extrapolated O₂ and flow</span>' : '<span class="status warn"><span class="dot"></span>O₂ tested · flow extrapolated</span>'}</td></tr>`).join("")}</tbody>`;
+    $("#solid-hab-note").textContent = `Read from NASA's boundary for a ${B.rod_radius_cm} cm PMMA rod at 1 atm: with no forced airflow the boundary sits at ${S.zero_flow_o2_pct}% O₂, below every habitat. The habitats run at lower pressure, which BASS-II never tested; this is why solid-material flammability at ≥30% O₂ and ≤10.2 psi is the flight test the data asks for. The spacesuit (100% O₂) is far outside any solid test.`;
+  }
+  function renderEarth() {
+    const n = D.solids.n_earth_benefit;
+    const items = [
+      ["Smoke or dust?", "A 1970s shuttle smoke detector learned to tell smoke from dust, cutting nuisance alarms; it found use in mining. In PSI, SAME and SAME-R measured real smoke in orbit and DAFT measured dust with one of the same instruments: the data a detector needs to tell them apart.", RES.detector, "#evidence"],
+      ["Firefighter air tanks", "In the 1970s, spacesuit technology was adapted to improve firefighters' air tanks and breathing gear.", RES.tanks, ""],
+      ["Protective clothing", "Spacesuit materials improved firefighter clothing in the 1980s. BASS-II shows why material tests should include weak airflow, where fabrics and plastics burn at lower oxygen.", RES.attire, "#solids"],
+      ["Water mist and suppression", "Fine-water-mist extinguishers developed for the ISS have practical applications on Earth. FLEX measured how diluting the air with CO₂ or helium puts droplet fires out.", ["Challenge brief", CHALLENGE_URL], "#evidence"],
+      ["Benefits listed by NASA", `${n === 24 ? "All 24" : `${n} of the 24`} investigations list a benefit on Earth in PSI; each investigation profile quotes it in NASA's own words.`, ["PSI Data Repository", RES.psi[1]], "#investigations"],
+    ];
+    $("#earth-list").innerHTML = items.map(([t, d, r, go]) => `<article class="earth__item"><h4>${esc(t)}</h4><p>${esc(d)}</p><div class="earth__links"><a class="src-link" href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])} ↗</a>${go ? `<a class="src-link" href="${go}">See the data →</a>` : ""}</div></article>`).join("");
+    $("#resources").innerHTML = Object.values(RES).map(([t, u, how]) => `<a class="dl dl--stack" href="${u}" target="_blank" rel="noopener"><span><span class="mono-sm">${esc(t)}</span><small>${esc(how)}</small></span><span class="arrow">↗</span></a>`).join("");
+  }
   function renderQuality() {
     const S = D.summary;
     const steps = [
@@ -805,7 +889,7 @@
   }
 
   const AUD = [
-    { id: "undergrad", name: "Undergraduate", intro: "New to microgravity fire? Three steps, about five minutes.", steps: [
+    { id: "undergrad", name: "Undergraduate", intro: "New to microgravity fire? Three steps, about five minutes.", link: ["Or start with NASA's 4-minute video: The Power of Studying Combustion on the ISS ↗", "https://www.youtube.com/watch?v=W1oXykoz9zg"], steps: [
       ["Read the lunar-base briefing", "Each sentence has a citation; click one to see the number behind it.", { brief: "moon_base", go: "#briefing" }],
       ["Raise the oxygen yourself", "Start from cabin air and move the oxygen slider to 30%: watch the chance that the flame puts itself out collapse.", { preset: "cabin", go: "#scenario" }],
       ["Look up a term", "Ask the archive “What is a cool flame?”: a flame you can barely see.", { ask: "What is a cool flame?", go: "#briefing" }]] },
@@ -831,7 +915,7 @@
     $("#aud-seg").innerHTML = AUD.map((a) => `<button aria-pressed="${a.id === audState.id}" data-a="${a.id}">${a.name}</button>`).join("");
     document.querySelectorAll("#aud-seg button").forEach((b) => b.addEventListener("click", () => { audState.id = b.dataset.a; renderAudience(); syncUrl(); }));
     const a = AUD.find((x) => x.id === audState.id);
-    $("#aud-path").innerHTML = `<p class="aud-intro">${esc(a.intro)}</p><ol class="steps">${a.steps.map(([t, d], i) => `<li><button type="button" class="step" data-i="${i}"><span class="n">${i + 1}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="arrow">→</span></button></li>`).join("")}</ol>`;
+    $("#aud-path").innerHTML = `<p class="aud-intro">${esc(a.intro)}${a.link ? ` <a class="src-link" href="${a.link[1]}" target="_blank" rel="noopener">${esc(a.link[0])}</a>` : ""}</p><ol class="steps">${a.steps.map(([t, d], i) => `<li><button type="button" class="step" data-i="${i}"><span class="n">${i + 1}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="arrow">→</span></button></li>`).join("")}</ol>`;
     document.querySelectorAll("#aud-path .step").forEach((b) => b.addEventListener("click", () => {
       const act = a.steps[+b.dataset.i][2];
       if (act.brief) { briefState.hab = act.brief; renderBrief(); }
@@ -924,6 +1008,7 @@
   safe(renderDownloads, "downloads");
   safe(renderEvidence, "evidence");
   safe(renderFindings, "findings");
+  safe(() => { renderHistory(); renderSolids(); renderEarth(); }, "solids");
   safe(renderNext, "next");
   $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
   safe(renderQuality, "quality");

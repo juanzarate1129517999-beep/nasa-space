@@ -8,10 +8,12 @@
 
 Skylab Phoenix convierte los datos de combustión de vuelo del repositorio NASA PSI en hallazgos de seguridad contra incendios para la base lunar, las naves y los trajes espaciales:
 
-- **Ingeniería de datos:** limpia las 24 investigaciones de *Combustion Science*, lleva todo a un esquema común en unidades SI y registra cada corrección (50 en total).
+- **Ingeniería de datos:** limpia las 24 investigaciones de *Combustion Science*, lleva todo a un esquema común en unidades SI y registra cada corrección (53 en total).
 - **Análisis:** perfila, rankea y compara cada investigación para cinco atmósferas: cabina, preparación de EVA, base lunar, atmósfera de exploración de NASA (8,2 psi y 34 % O₂) y traje espacial.
 - **Machine learning:** modelos validados con incertidumbre explícita, un detector de "fuera de los datos" que también revisa el rango volado de cada variable, y la recomendación del próximo experimento.
 - **Capa SI (lo que pide el título del reto):** una SI (Claude, de Anthropic) escribe resúmenes en lenguaje claro por hábitat y por investigación. El código los publica solo si cada frase cita su evidencia, cada número aparece en esa evidencia y no hay veredictos de seguridad. Pasan 29 de 29.
+- **Materiales sólidos (BASS-II):** en órbita, las llamas sobre PMMA sobreviven hasta cerca de 13,5 % de O₂ con una brisa de 2 cm/s, por debajo del 15,4 % del ensayo ascendente en gravedad normal (límite ajustado por la NASA, NASA/TM-20210011385, PSI-25). Cerca del límite liberan más del doble de CO. Ningún sólido ha ardido en órbita por encima de 22,7 % de O₂.
+- **Historia y Tierra:** lecciones de Apollo 1, Apollo 13 y Mir, aplicaciones en la Tierra y los diez recursos oficiales del reto enlazados.
 - **Para cada público:** vistas guiadas para pregrado, posgrado, profesores, investigadores e ingenieros; búsqueda "Ask the archive" sobre el texto de NASA; comparación lado a lado; enlaces compartibles; descargas.
 
 ## Cómo correrlo

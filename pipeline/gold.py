@@ -67,7 +67,7 @@ def _score(n, quality, agree, closeness):
                                "agreement": round(min(1.0, agree / 3), 3), "closeness": round(closeness, 3)}
 
 
-def findings(ens, models, sup, cov, saffire2, saffire1, bands):
+def findings(ens, models, sup, cov, saffire2, saffire1, bands, solid):
     fx = ens[ens["experimento"] == "FLEX"]
     hi = fx[fx["x_o2"] >= 0.30]
     hi_low_p = hi[hi["p_atm"] < 0.8]
@@ -156,6 +156,17 @@ def findings(ens, models, sup, cov, saffire2, saffire1, bands):
                   f"Ultem together have {int(nsolid['material_familia'].isin(['Nomex', 'Silicona', 'Ultem']).sum())}.",
              implication="Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
              source="PSI-26 BASS · PSI-25 BASS-II", n=len(nsolid), quality=1.0, agree=2, closeness=0.2),
+        dict(id="solid_limit", layer="Prevention", title="In orbit, solids keep burning at less oxygen than Earth tests allow",
+             text=f"In BASS-II, PMMA rod flames kept burning down to {solid['lowest_final_o2_rods_pct']:.1f}% O₂. NASA's fitted "
+                  f"flammability boundary bottoms out at {solid['min_o2_pct']:.1f}% O₂ near {solid['min_flow_cm_s'][0]:.1f}–"
+                  f"{solid['min_flow_cm_s'][1]:.1f} cm/s of airflow, below the {solid['g1_upward_limit_pct']:.1f}% limit of the "
+                  f"normal-gravity upward test. Below 17% O₂ the rods released a median {solid['co_rods_low_o2_median_ppm']:.0f} ppm "
+                  f"of CO (n={solid['n_rods_low']}), against {solid['co_rods_high_o2_median_ppm']:.0f} ppm above 20% O₂ "
+                  f"(n={solid['n_rods_high']}).",
+             implication="Earth screening can understate how readily a material burns in the gentle airflow of a spacecraft; "
+                         "near-limit solid fires also make more carbon monoxide, a target for detection.",
+             source="PSI-25 BASS-II · NASA/TM-20210011385", n=next(x["n"] for x in solid["by_family"] if x["family"] == "PMMA rod"), quality=0.9,
+             agree=2, closeness=0.5),
     ]
     for f in F:
         f["score"], f["components"] = _score(f.pop("n"), f.pop("quality"), f.pop("agree"), f.pop("closeness"))
@@ -180,17 +191,21 @@ def _jsonable(o):
     return o
 
 
-def write(ens, saffire2, saffire1, invs, sim, models):
+def write(ens, saffire2, saffire1, invs, sim, models, gas, solid):
     GOLD.mkdir(parents=True, exist_ok=True)
     WEB_DATA.mkdir(parents=True, exist_ok=True)
     ens.to_csv(GOLD / "ensayos.csv", index=False)
     qc = pd.DataFrame(QC.rows)
     qc.to_csv(GOLD / "qc_log.csv", index=False)
     saffire2.to_csv(GOLD / "saffire2_ug_vs_1g.csv", index=False)
+    gas.to_csv(GOLD / "solidos_bass2_gases.csv", index=False)
     pd.DataFrame([{k: v for k, v in r.items() if k not in ("tables", "publications", "relevance")} for r in invs]) \
         .to_csv(GOLD / "investigaciones.csv", index=False)
     sup, cov, bands = suppression(ens), coverage(ens), o2_bands(ens)
-    F = findings(ens, models, sup, cov, saffire2, saffire1, bands)
+    F = findings(ens, models, sup, cov, saffire2, saffire1, bands, solid)
+    sol = ens[(ens["familia"] == "solido") & (ens["material_familia"] != "Vela/cera")]
+    solid = {**solid, "max_o2_any_solid_pct": round(100 * float(sol["x_o2"].max()), 1),
+             "n_solid_tests": int(len(sol)), "n_earth_benefit": sum(bool(r.get("earth_benefit")) for r in invs)}
     flex = dict(models["flex"])
     payload = {
         "generated": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"),
@@ -201,7 +216,7 @@ def write(ens, saffire2, saffire1, invs, sim, models):
         "investigations": invs, "similarity": sim, "coverage": cov, "o2_bands": bands, "suppression": sup,
         "saffire2": saffire2.to_dict(orient="records"), "saffire1": saffire1.to_dict(orient="records"),
         "flex": flex, "cfig": models["cfig"], "habitat_check": models["habitat_check"], "next": models["next"],
-        "findings": F, "qc": qc.to_dict(orient="records"),
+        "solids": solid, "findings": F, "qc": qc.to_dict(orient="records"),
     }
     payload = _jsonable(payload)
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
@@ -210,6 +225,6 @@ def write(ens, saffire2, saffire1, invs, sim, models):
     (GOLD / "findings.json").write_text(json.dumps(F, ensure_ascii=False, indent=1), encoding="utf-8")
     dl = WEB_DATA / "downloads"
     dl.mkdir(parents=True, exist_ok=True)
-    for name in ("ensayos.csv", "investigaciones.csv", "qc_log.csv", "saffire2_ug_vs_1g.csv", "findings.json"):
+    for name in ("ensayos.csv", "investigaciones.csv", "qc_log.csv", "saffire2_ug_vs_1g.csv", "solidos_bass2_gases.csv", "findings.json"):
         (dl / name).write_bytes((GOLD / name).read_bytes())
     return payload

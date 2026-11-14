@@ -41,6 +41,14 @@ sup = {(r["pressure"][:3], r["co2"]): r for r in D["suppression"]["co2"]}
 INV = D["investigations"]
 picks = D["next"]["picks"]
 FIND = D["findings"]
+SOL = D["solids"]
+
+
+def solid_table():
+    body = "".join(f"<tr><td>{E(h['name'])}</td><td class='num'>{h['o2_pct']:g}%</td><td>Sigue ardiendo</td>"
+                   f"<td class='num'>≈ {h['blowoff_flow_cm_s']:.0f} cm/s</td>"
+                   f"<td>{'O₂ y flujo extrapolados' if h['o2_pct'] > SOL['tested_o2_pct'][1] else 'O₂ ensayado · flujo extrapolado'}</td></tr>" for h in SOL["habitats"])
+    return "<table class='compact keep'><thead><tr><th>Hábitat</th><th class='num'>O₂</th><th>Aire quieto</th><th class='num'>Arde hasta</th><th>Estado</th></tr></thead><tbody>" + body + "</tbody></table>"
 
 FAM_ES = {"Fuel droplets": "Gotas de combustible", "Gas flames": "Llamas de gas", "Solid materials": "Materiales sólidos",
           "Smoke & dust": "Humo y polvo"}
@@ -453,7 +461,7 @@ doc = f"""<!doctype html>
 
 <section class="page">
 <h2>Hallazgos de seguridad rankeados por evidencia</h2>
-<p class="lead">El pipeline genera {len(FIND)} hallazgos. Cada uno tiene un puntaje de evidencia y una implicación de diseño, y todos sus números se calculan desde las tablas de PSI.</p>
+<p class="lead">El pipeline genera {len(FIND)} hallazgos. Cada uno tiene un puntaje de evidencia y una implicación de diseño. Todos sus números se calculan desde las tablas de PSI, salvo los límites de materiales sólidos, que se citan del informe de BASS-II de la NASA guardado en PSI.</p>
 <div class="formula">Evidencia = 100 × ( 0,35 · volumen + 0,25 · calidad + 0,20 · concordancia + 0,20 · cercanía a la Luna )</div>
 <p class="note">Volumen = log(1 + n)/log(301). Calidad = validación del modelo o tipo de medición. Concordancia = investigaciones que apuntan en la misma dirección (máx. 3). Cercanía = qué tan cerca de la atmósfera lunar está la evidencia.</p>
 {fig('f15_hallazgos', 'Puntaje de evidencia de cada hallazgo, coloreado por capa de seguridad.', Fn())}
@@ -462,9 +470,24 @@ doc = f"""<!doctype html>
 </section>
 
 <section class="page">
+<h3>Materiales sólidos: los límites medidos en órbita</h3>
+<p>Telas y plásticos son lo que arde en una nave, y el reto apunta a BASS, BASS-II y Saffire. De las matrices de ensayo de BASS-II (PSI-25) extrajimos las lecturas de O₂, CO y CO₂ de {SOL['n_tests']} ensayos, y del informe resumen de BASS-II de la NASA (NASA/TM-20210011385, también en PSI) el límite de inflamabilidad que los investigadores ajustaron a sus ensayos con varillas de PMMA: X<sub>O₂</sub> = 6·exp(−0,5a) + 0,0167a + 13,4 (%), donde a = 1,5U/r es la tasa de estiramiento (p. 75, ec. 6.1).</p>
+<ul>
+<li>El límite toca fondo en cerca de <b>{SOL['min_o2_pct']} % de O₂</b> con un flujo de aire de {SOL['min_flow_cm_s'][0]:.1f}–{SOL['min_flow_cm_s'][1]:.1f} cm/s, por debajo del <b>{SOL['g1_upward_limit_pct']} %</b> del ensayo ascendente en gravedad normal (p. 76 y p. 89). Con la brisa suave típica cerca de las superficies de una nave, los sólidos arden con menos oxígeno del que indican los ensayos en la Tierra.</li>
+<li>Las varillas necesitaron cerca de {SOL['ignition_limit_pct']} % de O₂ para encender (p. 68); ya encendidas, las llamas sobrevivieron hasta {SOL['lowest_final_o2_rods_pct']:.1f} % (tabla de BASS-II).</li>
+<li>Cerca del límite las llamas son ricas en combustible: las varillas de PMMA liberaron una mediana de <b>{SOL['co_rods_low_o2_median_ppm']:.0f} ppm</b> de CO por debajo de 17 % de O₂ ({SOL['n_rods_low']} ensayos), frente a {SOL['co_rods_high_o2_median_ppm']:.0f} ppm por encima de 20 % ({SOL['n_rods_high']} ensayos).</li>
+<li>Tres valores de O₂ final en la tabla de la NASA (0,6–1,6 %) son físicamente imposibles en la cámara de 250 L; quedan en el registro de calidad y se excluyen.</li>
+</ul>
+<p class="tcap"><b>Tabla {T()}.</b> Lo que implica el límite para cada hábitat (varilla de PMMA, 1 atm).</p>
+{solid_table()}
+<p class="note">Sin flujo forzado el límite está en {SOL['zero_flow_o2_pct']} % de O₂, por debajo de todos los hábitats. Ningún sólido ha ardido en órbita por encima de {SOL['max_o2_any_solid_pct']} % de O₂ ni a presión reducida, así que todo hábitat por encima del aire de cabina es extrapolación; por eso la inflamabilidad de sólidos a ≥30 % de O₂ y ≤10,2 psi es el ensayo de vuelo que piden los datos.</p>
+{shot('11_solidos', 'Materiales sólidos en el dashboard: límite de inflamabilidad de la NASA con los niveles de O₂ de cada hábitat, CO liberado en cada ensayo de BASS-II e implicación por hábitat.', Fn())}
+</section>
+
+<section class="page">
 <h2>El dashboard Skylab Phoenix</h2>
 <p class="lead">Un sitio web estático con diseño propio. Los modelos corren en el navegador, así que cada control es una predicción en vivo y no hace falta un servidor que pueda fallar durante la demo.</p>
-<p>Secciones: inicio con indicadores y tarjetas por hábitat; cobertura; investigaciones (ranking, ficha y similitud); simulador de escenarios; evidencia; hallazgos; próximo experimento; y datos y validación. Funciona en escritorio y en móvil, y se publica tal cual en GitHub Pages, Vercel o Netlify.</p>
+<p>Secciones: inicio con indicadores, tarjetas por hábitat y lecciones de la historia (Apollo 1, Apollo 13, Mir); briefing SI; cobertura; investigaciones (ranking, ficha, comparación y similitud); simulador de escenarios; materiales sólidos; evidencia; hallazgos; próximo experimento; aplicaciones en la Tierra; y datos y validación, con los diez recursos oficiales del reto enlazados. Funciona en escritorio y en móvil, y se publica tal cual en GitHub Pages, Vercel o Netlify.</p>
 {shot('01_inicio', 'Inicio: titular, indicadores clave y probabilidad de autoextinción por hábitat. El traje espacial aparece como «fuera de los datos».', Fn())}
 {shot('02_cobertura', 'Cobertura: todos los ensayos de vuelo frente a las atmósferas de los hábitats, con filtros por familia.', Fn())}
 {shot('03_investigaciones', 'Investigaciones: ranking por hábitat y capa de seguridad, y ficha generada desde los datos (qué varió, qué se midió, desglose del puntaje).', Fn())}
