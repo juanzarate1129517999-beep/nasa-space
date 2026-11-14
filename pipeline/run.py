@@ -1,7 +1,7 @@
 """Run the whole Skylab Phoenix pipeline: python -m pipeline.run"""
 import time
 
-from . import gold, investigations, models, silver
+from . import gold, investigations, models, si, silver
 from .common import GOLD, WEB_DATA
 
 
@@ -16,6 +16,8 @@ def main():
     print(f"[models] FLEX logistic  AUC {lr['auc']:.3f}  Brier {lr['brier']:.3f}  (n={m['flex']['n']})")
     out = gold.write(ens, saffire2, saffire1, invs, sim, m)
     print(f"[gold]   {len(out['findings'])} findings, {out['summary']['qc_fixes']} QC log entries")
+    ok, total = si.build(out)
+    print(f"[si]     {ok}/{total} SI briefs passed the verification firewall (others show the labelled evidence brief)")
     print(f"[export] {GOLD} and {WEB_DATA / 'ember.json'}  ({time.time() - t:.1f}s)")
 
 

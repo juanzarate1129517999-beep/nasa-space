@@ -1,0 +1,51 @@
+psi_id,experimento,registro,campo,valor_original,valor_nuevo,regla
+PSI-69,FLEX,114,Ambient pressure; mmHg,0.0,NaN,Physically impossible pressure (0 mmHg); excluded from models
+PSI-69,FLEX,69,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,75,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,76,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,79,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,80,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,81,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-39,CFI,"1285, 1286, 1287, 1288, 1289, 1295, 1296, 1297",row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-159,CFI-G inverse,19 rows,Hot ignition,yes/no (lowercase),Yes/No,Inconsistent capitalization normalized
+PSI-159,CFI-G inverse,8 rows,Hot ignition,flash,"ignited=1, resultado=flash",Momentary 'flash' ignition kept as ignition but labeled separately
+PSI-10,Flame Design,3 rows (N),multiple,RAMPED,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
+PSI-21,ACME CLD,1,Fuel Bottle,40% CH5,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,2,Fuel Bottle,40% CH6,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,3,Fuel Bottle,40% CH7,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,4,Fuel Bottle,40% CH8,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,5,Fuel Bottle,40% CH9,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,6,Fuel Bottle,40% CH10,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,7,Fuel Bottle,40% CH11,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,8,Fuel Bottle,40% CH12,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,9,Fuel Bottle,40% CH13,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,10,Fuel Bottle,40% CH14,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,12,Fuel Bottle,100% CH5,100% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,13,Fuel Bottle,100% CH6,100% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,15,Fuel Bottle,100% C2H5,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,16,Fuel Bottle,100% C2H6,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,17,Fuel Bottle,100% C2H7,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,18,Fuel Bottle,100% C2H8,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,19,Fuel Bottle,100% C2H9,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,20,Fuel Bottle,100% C2H10,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,21,Fuel Bottle,100% C2H11,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,23,Fuel Bottle,50% C2H5,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,24,Fuel Bottle,50% C2H6,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,25,Fuel Bottle,50% C2H7,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,26,Fuel Bottle,50% C2H8,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,27,Fuel Bottle,50% C2H9,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,29,Fuel Bottle,30% C2H5,30% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,31,Fuel Bottle,40% CH5,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,1,Atmosphere*,~21% O2 with N3,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,2,Atmosphere*,~21% O2 with N4,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,5,Atmosphere*,~21% O2 with N3,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,6,Atmosphere*,~21% O2 with N4,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,7,Atmosphere*,~21% O2 with N5,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,8,Atmosphere*,~21% O2 with N6,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,1,Fuel Bottle,50% C2H4 with N3,50% C2H4 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,3,Fuel Bottle,45% CH4 with N3,45% CH4 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-20,ACME BRE,2019-March-7,Oxygen Conc (percent),3400%,34.0,Value formatted as percent of a percent (3400% -> 34)
+PSI-20,ACME BRE,2019-April-1,Oxygen Conc (percent),2100%,21.0,Value formatted as percent of a percent (3400% -> 34)
+PSI-25/26,BASS,2 rows,material,unrecognized,dropped,"Rows that are not a recognizable fuel sample (headers, calibrations)"
+PSI-99,Saffire-II,2-4..2-6,Samle Thickness,037 mm,0.37 mm,Missing decimal point
+PSI-99,Saffire-II,2-7,Material,PMMA & Nomex,excluded from μg-vs-1g comparison,"Composite sample: PMMA burned fully, Nomex never ignited"

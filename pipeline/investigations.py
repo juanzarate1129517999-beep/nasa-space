@@ -55,7 +55,8 @@ MEASURE_COL = re.compile(r"extinction|burn|rate|length|ignit|rt/r0|weight loss|t
 
 def _clean_col(c):
     c = re.sub(r"\s+", " ", str(c).replace("﻿", "").replace("ï»¿", "")).strip()
-    return c.replace("O initial", "O2 initial").replace("CO initial", "CO2 initial")
+    # the PSI tables lost the subscript 2 and the micro sign (µ-g appears as "?-g")
+    return c.replace("O initial", "O2 initial").replace("CO initial", "CO2 initial").replace("?-g", "µg")
 
 
 def _fmt(v):
@@ -99,10 +100,24 @@ def profile_table(path):
             "varied": varied, "fixed": fixed, "measured": measured}
 
 
+ENUM = re.compile(r"\(?(?:\d{1,2}|[A-Za-z])[.)]")
+
+
 def _sentences(text, n=2):
+    """First n sentences, without cutting numbered lists ("1. ... 2.") or ending on "as follows:"."""
     text = re.sub(r"\s+", " ", str(text or "")).strip()
-    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z])", text)
-    return " ".join(parts[:n])
+    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z(\d])", text)
+    merged = []
+    for p in parts:
+        if merged and (ENUM.fullmatch(merged[-1].split(" ")[-1]) or ENUM.fullmatch(merged[-1])):
+            merged[-1] += " " + p  # a bare list marker belongs to the item that follows it
+        else:
+            merged.append(p)
+    k = min(n, len(merged))
+    while k < len(merged) and re.search(r"(follows|include|includes|were|are)\s*[.:]$", merged[k - 1], re.I):
+        k += 1  # the sentence announces a list: keep its first item
+    out = " ".join(merged[:k])
+    return re.sub(r"\s+\(?\d{1,2}[.)]?$", "", out).strip()
 
 
 def _kernel(x_o2, p_atm, h):

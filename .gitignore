@@ -32,3 +32,6 @@ _interno/
 # Regenerable inputs (scripts/fetch_psi_catalog.py) and legacy outputs
 data/catalog/
 data/processed/
+
+# Test cache
+.pytest_cache/

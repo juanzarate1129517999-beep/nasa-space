@@ -39,12 +39,13 @@ def _finish(df, psi, exp, familia):
     for c in SCHEMA:
         if c not in df.columns:
             df[c] = np.nan
-    df["qc_flags"] = df["qc_flags"].fillna("")
+    # cast all-NaN (float) columns to object before filling with text/bool: pandas 4 will refuse the implicit upcast
+    df["qc_flags"] = df["qc_flags"].astype(object).fillna("")
     df["n_eventos"] = df["n_eventos"].fillna(1)
-    df["gravedad"] = df["gravedad"].fillna("ug")
-    df["o2_ubicacion"] = df["o2_ubicacion"].fillna("ambiente")
+    df["gravedad"] = df["gravedad"].astype(object).fillna("ug")
+    df["o2_ubicacion"] = df["o2_ubicacion"].astype(object).fillna("ambiente")
     for c in ("o2_supuesto", "p_supuesta", "barrido_flujo", "con_resultado"):
-        df[c] = df[c].fillna(False).astype(bool)
+        df[c] = df[c].astype(object).fillna(False).astype(bool)
     df["test_uid"] = psi + ":" + df["test_uid"].astype(str).str.strip()
     return df[SCHEMA]
 
@@ -221,7 +222,7 @@ def acme_daily():
                 "n_eventos": _num(pd.Series([s.loc[idx, "Flames Ignited*"]]))[0]}]), "PSI-23", "ACME s-Flame", "gas"))
 
     b = _csv("PSI-20", "ACME BRE")
-    for idx, r in b.iterrows():
+    for _, r in b.iterrows():
         raw = str(r["Oxygen Conc (percent)"])
         vals = [float(v) for v in re.findall(r"\d+\.?\d*", raw)]
         if "%" in raw and len(vals) == 1 and vals[0] > 100:
@@ -276,11 +277,7 @@ def _first_flow(text):
 
 def solids():
     raw = str(RAW)
-    parts = []
-    for fn, psi in ((btt.bass, "PSI-26"), (btt.bass2, "PSI-25"), (btt.saffire, None)):
-        d = fn(raw)
-        parts.append(d)
-    d = pd.concat(parts, ignore_index=True)
+    d = pd.concat([fn(raw) for fn in (btt.bass, btt.bass2, btt.saffire)], ignore_index=True)
     for c in ("observaciones", "flujo_cm_s_texto", "ventilador_texto", "direccion_flujo"):
         d[c] = d[c].fillna("").astype(str).replace("nan", "")
     d["familia_material"] = d["material"].map(btt.family)

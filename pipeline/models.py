@@ -8,7 +8,6 @@ Exported as coefficients + bootstrap ensembles so the web dashboard can run the
 models live in the browser, with uncertainty, and no server.
 """
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
@@ -125,6 +124,9 @@ def flex_model(ens):
         "features": FLEX_FEATURES, "labels": FLEX_LABELS, "mu": mu.tolist(), "sd": sd.tolist(),
         "coef": np.r_[full.intercept_, full.coef_.ravel()].tolist(), "boot": np.round(boots, 5).tolist(),
         "ood_threshold": float(np.percentile(knn, 95)), "ood_k": 5,
+        # flown range of each input: leaving it on any single axis is an extrapolation even when the
+        # multivariate nearest-neighbour distance is small (e.g. a pressure below every flown test)
+        "ranges": {f: [float(X[:, i].min()), float(X[:, i].max())] for i, f in enumerate(FLEX_FEATURES)},
         # median droplet size snapped to the dashboard slider grid (1.1 mm + k·0.05 mm) so both agree exactly
         "d0_median": float(round(1.1 + np.round((np.median(d["d0_mm"]) - 1.1) / 0.05) * 0.05, 2)),
         "train": train.round(4).to_dict(orient="records"), "train_std": np.round(Xs, 4).tolist(),
@@ -205,6 +207,19 @@ def cfig_model(ens):
 
 
 # ------------------------------------------------------------------ M4 habitat check + next experiment
+def out_of_range(model, row):
+    """Inputs (raw units) that fall outside the range flown in FLEX."""
+    return [f for f, v in zip(model["features"], row) if f != "heptane" and not
+            (model["ranges"][f][0] - 1e-9 <= v <= model["ranges"][f][1] + 1e-9)]
+
+
+def data_status(dist, threshold, outside_range=()):
+    """Same three-way rule as the dashboard: within the flown tests, extrapolating, or outside (prediction withheld)."""
+    if dist > 2 * threshold:
+        return "outside"
+    return "extrapolating" if dist > threshold or outside_range else "within"
+
+
 def habitat_check(m1):
     out = []
     for h in HABITATS:
@@ -213,8 +228,10 @@ def habitat_check(m1):
             x = [[hep, h["x_o2"], np.log(h["p_atm"]), 0.0, 0.0, m1["d0_median"]]]
             mean, lo, hi = flex_predict(m1, x)
             dist = float(flex_ood(m1, x)[0])
+            beyond = out_of_range(m1, x[0])
+            status = data_status(dist, m1["ood_threshold"], beyond)
             row["fuels"][fuel] = {"p": float(mean[0]), "lo": float(lo[0]), "hi": float(hi[0]), "ood_distance": dist,
-                                  "ood": bool(dist > m1["ood_threshold"])}
+                                  "status": status, "ood": status == "outside", "out_of_range": beyond}
         out.append(row)
     return out
 

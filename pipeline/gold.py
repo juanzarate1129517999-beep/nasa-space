@@ -211,4 +211,9 @@ def write(ens, saffire2, saffire1, invs, sim, models):
     # Same data as a script so the dashboard also works when opened from disk (file://)
     (WEB_DATA / "ember.js").write_text("window.EMBER=" + blob + ";", encoding="utf-8")
     (GOLD / "findings.json").write_text(json.dumps(F, ensure_ascii=False, indent=1), encoding="utf-8")
+    # Downloadable copies for the dashboard (GitHub Pages serves only the web/ folder)
+    dl = WEB_DATA / "downloads"
+    dl.mkdir(parents=True, exist_ok=True)
+    for name in ("ensayos.csv", "investigaciones.csv", "qc_log.csv", "saffire2_ug_vs_1g.csv", "findings.json"):
+        (dl / name).write_bytes((GOLD / name).read_bytes())
     return payload
