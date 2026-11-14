@@ -186,7 +186,7 @@
         <div class="console__main">
           <div class="result">
             <div>
-              <p class="label">P(flame self-extinguishes)</p>
+              <p class="label">Chance the flame goes out on its own</p>
               <div class="big" id="r-big">—</div>
               <div class="cap" id="r-cap"></div>
             </div>
@@ -200,10 +200,14 @@
             </div>
           </div>
           <div class="console__chart">
-            <p class="label">Probability map</p>
-            <p class="sub">Current fuel, diluents and droplet size · brighter means the fire is more likely to keep burning · dots are the flown FLEX tests</p>
+            <div class="chart-head">
+              <div><p class="label">Explore</p><h3 id="viz-label">Will a droplet fire go out on its own?</h3></div>
+              <div class="seg" id="viz-seg" role="group" aria-label="Chart view"></div>
+            </div>
+            <p class="sub" id="viz-sub"></p>
             <div class="legend" id="map-legend"></div>
-            <div class="chart" id="map-chart" role="img" aria-label="Probability of self-extinction over oxygen and pressure"></div>
+            <div class="chart" id="map-chart" role="img" aria-label="Chance that a droplet fire goes out on its own, by oxygen and pressure"></div>
+            <p class="note" id="viz-note"></p>
           </div>
         </div>
       </div>
@@ -286,21 +290,29 @@
         <h2>What NASA should fly next. <span class="mute">Where one new test would teach the most.</span></h2>
         <p class="sec__lead">Active learning on the model: among conditions near the lunar-base atmosphere, Skylab Phoenix picks those where the 200 bootstrap models disagree the most. Partial-gravity data (LUCI, FM2) is not in PSI yet; these conditions are where it would pay off first.</p>
       </header>
-      <div class="grid-2 rv">
+      <div class="mission rv" id="mission"></div>
+      <div class="grid-2 card--gap rv">
         <div class="card">
-          <p class="label">Model uncertainty</p>
-          <h3>Across atmospheres.</h3>
-          <p class="sub">Width of the 90% interval without CO₂ · brighter means more uncertain · numbered dots are the recommended tests (they add CO₂, see table).</p>
-          <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
+          <p class="label">All six candidates</p>
+          <h3>How sure is the model today?</h3>
+          <p class="sub" id="next-sub"></p>
+          <div class="chart short" id="range-chart" role="img" aria-label="Range of today's estimate for each recommended test"></div>
         </div>
         <div class="card">
           <p class="label">Recommendations</p>
-          <h3>Test conditions.</h3>
-          <p class="sub" id="next-sub"></p>
+          <h3>Test conditions, in plain numbers.</h3>
           <div class="tbl-wrap"><table id="next-table"></table></div>
           <p class="note" id="next-note"></p>
         </div>
       </div>
+      <details class="card card--gap more rv" id="unc-details">
+        <summary><span><span class="label">For researchers</span><b>Where the model is unsure</b></span></summary>
+        <div class="more__body">
+          <div class="controls-row"><span class="mono-sm">Background computed at</span><div class="seg" id="unc-co2" role="group" aria-label="CO2 level for the map"></div></div>
+          <p class="sub">Width of the 90% range for a methanol droplet at the chosen CO₂ level. Brighter means more doubt. Orange dots are the recommended tests at that CO₂ level; outlined dots use another level.</p>
+          <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
+        </div>
+      </details>
     </div>
   </section>
 

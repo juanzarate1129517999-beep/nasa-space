@@ -362,7 +362,7 @@
     big.classList.toggle("muted", !show);
     const dil = [sc.co2 ? `${(100 * sc.co2).toFixed(0)}% CO₂` : "", sc.he ? `${(100 * sc.he).toFixed(0)}% He` : ""].filter(Boolean).join(" + ") || "no diluent";
     $("#r-cap").innerHTML = show
-      ? `${sc.fuel} droplet, d₀ ${sc.d0.toFixed(2)} mm · ${(100 * sc.o2).toFixed(1)}% O₂ · ${sc.p.toFixed(2)} atm (${(sc.p * ATM_PSI).toFixed(1)} psi) · ${dil}`
+      ? `<b>About ${100 - Math.round(100 * r.p)} of 100 droplet fires like this keep burning.</b><br>${sc.fuel} droplet, d₀ ${sc.d0.toFixed(2)} mm · ${(100 * sc.o2).toFixed(1)}% O₂ · ${(sc.p * ATM_PSI).toFixed(1)} psi (${sc.p.toFixed(2)} atm) · ${dil}`
       : `No ISS test was flown near this atmosphere (distance ${nn.dist.toFixed(1)}; predictions are withheld beyond ${(2 * thr).toFixed(1)}, twice the out-of-data limit). This gap is itself a finding — see “Next experiment”.`;
     $("#r-ci").style.left = `${100 * r.lo}%`; $("#r-ci").style.width = `${Math.max(1, 100 * (r.hi - r.lo))}%`;
     $("#r-pt").style.left = `${100 * r.p}%`;
@@ -376,43 +376,105 @@
     $("#nn-note").textContent = `Mean distance to the 5 nearest tests: ${nn.dist.toFixed(2)} (out-of-data limit ${thr.toFixed(2)}, the 95th percentile among flown tests).`;
     renderMap(remap);
   }
-  let mapDrawn = false;
-  function renderMap(remap) {
+  const viz = { view: "curve", clickBound: false };
+  const PSI = (atm) => atm * ATM_PSI;
+  const PSI_TICKS = [4.4, 7.3, 10.2, 14.7, 22, 29.4, 44];
+  function statusAt(x) { const nn = neighbors(x), thr = M.ood_threshold; return nn.dist > thr || outOfRange(x).length ? (nn.dist > 2 * thr ? "outside" : "extrapolating") : "within"; }
+  function renderVizControls() {
+    $("#viz-seg").innerHTML = [["curve", "Simple · oxygen curve"], ["map", "Map · oxygen × pressure"]].map(([k, l]) => `<button type="button" aria-pressed="${viz.view === k}" data-v="${k}">${l}</button>`).join("");
+    document.querySelectorAll("#viz-seg button").forEach((b) => b.addEventListener("click", () => { viz.view = b.dataset.v; renderVizControls(); renderMap(true); }));
+  }
+  function renderMap() {
+    if (!$("#viz-seg").children.length) renderVizControls();
+    const dil = [sc.co2 ? `${(100 * sc.co2).toFixed(0)}% CO₂` : "", sc.he ? `${(100 * sc.he).toFixed(0)}% helium` : ""].filter(Boolean).join(" + ") || "no suppressant";
+    if (viz.view === "curve") renderCurve(dil); else renderRiskMap(dil);
+  }
+  function renderCurve(dil) {
+    const xmax = Math.max(0.40, Math.min(1, sc.o2 + 0.05)), xs = [];
+    for (let v = 0.10; v <= xmax + 1e-9; v += 0.0025) xs.push(+v.toFixed(4));
+    const pts = xs.map((o) => { const x = featVec({ ...sc, o2: o }); return { o, ...predict(x), st: statusAt(x) }; });
+    const ok = pts.map((q) => q.st !== "outside");
+    const seg = (f) => pts.map((q, i) => (ok[i] ? f(q) : null));
+    const shapes = [
+      { type: "rect", xref: "x", yref: "y", x0: 10, x1: 100 * xmax, y0: 0.5, y1: 1, fillcolor: "rgba(15,157,143,0.07)", line: { width: 0 }, layer: "below" },
+      { type: "rect", xref: "x", yref: "y", x0: 10, x1: 100 * xmax, y0: 0, y1: 0.5, fillcolor: "rgba(242,96,15,0.07)", line: { width: 0 }, layer: "below" },
+      { type: "line", xref: "x", yref: "y", x0: 10, x1: 100 * xmax, y0: 0.5, y1: 0.5, line: { color: C.ink4, width: 1, dash: "dot" } },
+    ];
+    const bands = [];
+    let i = 0;
+    while (i < pts.length) {
+      if (pts[i].st === "within") { i++; continue; }
+      let j = i; while (j + 1 < pts.length && pts[j + 1].st !== "within") j++;
+      shapes.push({ type: "rect", xref: "x", yref: "paper", x0: 100 * pts[i].o, x1: 100 * pts[j].o, y0: 0, y1: 1, fillcolor: "rgba(148,163,184,0.10)", line: { width: 0 }, layer: "below" });
+      bands.push([100 * pts[i].o, 100 * pts[j].o]);
+      i = j + 1;
+    }
+    const here = predict(featVec(sc)), hereSt = statusAt(featVec(sc));
+    const same = D.habitats.filter((h) => Math.abs(Math.log(h.p_atm / sc.p)) < 0.08 && h.x_o2 <= xmax);
+    const ann = [
+      { x: 10.4, y: 0.97, xanchor: "left", yanchor: "top", text: "GOES OUT ON ITS OWN", showarrow: false, font: { family: "Geist Mono, monospace", size: 10.5, color: "#5eead4" } },
+      { x: 10.4, y: 0.03, xanchor: "left", yanchor: "bottom", text: innerWidth < 700 ? "KEEPS BURNING" : "KEEPS BURNING · NEEDS DETECTION AND SUPPRESSION", showarrow: false, font: { family: "Geist Mono, monospace", size: 10.5, color: C.orange } },
+      ...same.map((h, k) => ({ x: 100 * h.x_o2, y: 1.0, yref: "y", text: esc(h.name), showarrow: false, yanchor: "bottom", xanchor: same.length > 1 ? (k === 0 ? "right" : "left") : "center", font: { size: 11, color: C.ink2 } })),
+    ];
+    bands.filter(([a, b]) => b - a >= 1).forEach(([a, b]) => ann.push({ x: (a + b) / 2, y: 0.5, text: "NO FLIGHT DATA", textangle: -90, showarrow: false, font: { family: "Geist Mono, monospace", size: 10, color: C.ink3 } }));
+    same.forEach((h) => shapes.push({ type: "line", xref: "x", yref: "y", x0: 100 * h.x_o2, x1: 100 * h.x_o2, y0: 0, y1: 1, line: { color: C.line2, width: 1, dash: "dot" } }));
+    $("#viz-label").textContent = "Will a droplet fire go out on its own?";
+    $("#viz-sub").textContent = `${sc.fuel} droplet at ${PSI(sc.p).toFixed(1)} psi (${sc.p.toFixed(2)} atm), ${dil}. The line is the model's best estimate; the band is its 90% range. Move the oxygen slider or pick a habitat.`;
+    $("#map-legend").innerHTML = [legendItem("line", C.amber, "Chance it goes out on its own"), legendItem("bar", "rgba(251,191,36,0.3)", "90% range"), legendItem("bar", "rgba(148,163,184,0.35)", "No flight data"), legendItem("circle", C.ink, "Your scenario")].join("");
+    $("#viz-note").textContent = "Above the dotted 50% line, most fires like this put themselves out; below it, most keep burning. Grey bands are atmospheres no FLEX flight test came close to.";
+    plot("map-chart", [
+      { x: pts.map((q) => 100 * q.o), y: seg((q) => q.hi), type: "scatter", mode: "lines", line: { width: 0 }, hoverinfo: "skip", connectgaps: false },
+      { x: pts.map((q) => 100 * q.o), y: seg((q) => q.lo), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(251,191,36,0.20)", hoverinfo: "skip", connectgaps: false },
+      { x: pts.map((q) => 100 * q.o), y: seg((q) => q.p), type: "scatter", mode: "lines", line: { color: C.amber, width: 2.5 }, connectgaps: false,
+        customdata: pts.map((q) => [q.lo, q.hi]), hovertemplate: "O₂ %{x:.1f}%<br>goes out on its own: %{y:.0%}<br>90% range %{customdata[0]:.0%}–%{customdata[1]:.0%}<extra></extra>" },
+      { x: [100 * sc.o2], y: [hereSt === "outside" ? 0.5 : here.p], type: "scatter", mode: "markers+text", text: [hereSt === "outside" ? "withheld" : pct(here.p)], textposition: "top right", textfont: { family: "Geist Mono, monospace", size: 12, color: C.ink },
+        marker: { size: 13, color: hereSt === "outside" ? C.bg : C.ink, line: { color: C.orange, width: 3 } }, hoverinfo: "skip" },
+    ], layout({
+      margin: { l: 56, r: 16, t: 26, b: 48 }, shapes, annotations: ann,
+      xaxis: { range: [10, 100 * xmax], ticksuffix: "%", title: { text: "Oxygen in the air" }, gridcolor: C.line },
+      yaxis: { range: [0, 1.05], tickformat: ".0%", tickvals: [0, 0.25, 0.5, 0.75, 1], title: { text: "Chance it goes out on its own" } },
+    }));
+  }
+  function renderRiskMap(dil) {
     const o2 = [], p = [];
     for (let i = 0; i <= 60; i++) o2.push(0.10 + i * 0.005);
-    for (let j = 0; j <= 48; j++) p.push(Math.exp(Math.log(0.3) + (j * (Math.log(3.2) - Math.log(0.3))) / 48));
-    const scen = { x: [100 * sc.o2], y: [sc.p], type: "scatter", mode: "markers", hoverinfo: "skip", marker: { symbol: "cross-thin", size: 26, color: C.ink, line: { color: C.ink, width: 3 } } };
-    const scenRing = { x: [100 * sc.o2], y: [sc.p], type: "scatter", mode: "markers", hoverinfo: "skip", marker: { symbol: "circle-open", size: 30, color: C.bg, line: { width: 4 } } };
-    if (mapDrawn && !remap && hasPlotly) {
-      Plotly.restyle("map-chart", { x: [scenRing.x, scen.x], y: [scenRing.y, scen.y] }, [3, 4]);
-      return;
-    }
-    $("#map-legend").innerHTML = [legendItem("circle", C.ink, "Flown test · self-extinguished"), legendItem("circle", C.ink, "Flown test · kept burning", true), legendItem("cross", C.ink, "Your scenario")].join("");
-    const z = p.map((pp) => o2.map((oo) => pointEstimate(stdz([sc.fuel === "Heptane" ? 1 : 0, oo, Math.log(pp), sc.co2, sc.he, sc.d0]))));
+    for (let j = 0; j <= 40; j++) p.push(Math.exp(Math.log(0.3) + (j * (Math.log(3.2) - Math.log(0.3))) / 40));
+    const base = (oo, pp) => [sc.fuel === "Heptane" ? 1 : 0, oo, Math.log(pp), sc.co2, sc.he, sc.d0];
+    const risk = p.map((pp) => o2.map((oo) => 1 - pointEstimate(stdz(base(oo, pp)))));
+    const gap = p.map((pp) => o2.map((oo) => (statusAt(base(oo, pp)) === "within" ? null : 1)));
     const tr = M.train;
-    const ext = tr.filter((t) => t.autoextincion === 1), burn = tr.filter((t) => t.autoextincion === 0);
     const habs = D.habitats.filter((x) => x.x_o2 <= 0.4);
-    plot("map-chart", [
-      { z, x: o2.map((v) => 100 * v), y: p, type: "heatmap", zmin: 0, zmax: 1, zsmooth: "best",
-        colorscale: [[0, "#fde68a"], [0.25, "#f97316"], [0.5, "#e11d48"], [0.75, "#4c1d95"], [1, "#0d1220"]],
-        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.8, title: { text: "P(self-ext.)", side: "right", font: { size: 10.5, color: C.ink3 } } },
-        hovertemplate: "O₂ %{x:.1f}% · %{y:.2f} atm<br>P(self-extinction) %{z:.0%}<extra></extra>" },
-      { x: ext.map((t) => 100 * t.x_o2), y: ext.map((t) => t.p_atm), type: "scatter", mode: "markers", name: "Self-extinguished",
-        marker: { symbol: "circle", size: 8, color: C.ink, line: { color: C.bg, width: 1.6 } }, hovertemplate: "Flown test: self-extinguished<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>" },
-      { x: burn.map((t) => 100 * t.x_o2), y: burn.map((t) => t.p_atm), type: "scatter", mode: "markers", name: "Kept burning",
-        marker: { symbol: "circle", size: 8, color: C.bg, line: { color: C.ink, width: 1.6 } }, hovertemplate: "Flown test: kept burning<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>" },
-      scenRing, scen,
+    $("#viz-label").textContent = "Fire risk map";
+    $("#viz-sub").textContent = `${sc.fuel} droplet, ${dil}. Brighter means the fire is more likely to keep burning. Click anywhere on the map to test that atmosphere.`;
+    $("#map-legend").innerHTML = [legendItem("line", "#fff", "50% line: half of fires go out"), legendItem("bar", "rgba(148,163,184,0.45)", "No flight data"), legendItem("circle", C.ink2, "Flown FLEX test"), legendItem("cross", C.ink, "Your scenario")].join("");
+    $("#viz-note").textContent = "Dark areas: most fires put themselves out. Bright areas: most keep burning and must be detected and suppressed. Grey veil: no FLEX flight test came close, so the colours there are extrapolation.";
+    const y = p.map(PSI);
+    const el = plot("map-chart", [
+      { z: risk, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, zsmooth: "best",
+        colorscale: [[0, "#0d1220"], [0.3, "#3b1d6e"], [0.55, "#e11d48"], [0.78, "#f97316"], [1, "#fde68a"]],
+        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "keeps burning", side: "right", font: { size: 10.5, color: C.ink3 } } },
+        hovertemplate: "O₂ %{x:.1f}% · %{y:.1f} psi<br>keeps burning: %{z:.0%}<br><i>click to test</i><extra></extra>" },
+      { z: gap, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, showscale: false, hoverinfo: "skip", colorscale: [[0, "rgba(148,163,184,0.42)"], [1, "rgba(148,163,184,0.42)"]] },
+      { z: risk, x: o2.map((v) => 100 * v), y, type: "contour", showscale: false, hoverinfo: "skip", contours: { start: 0.5, end: 0.5, size: 1, coloring: "none" }, line: { color: "#ffffff", width: 1.6, dash: "dash" } },
+      { x: tr.map((t) => 100 * t.x_o2), y: tr.map((t) => PSI(t.p_atm)), type: "scatter", mode: "markers", marker: { size: 4, color: "rgba(241,245,249,0.75)" }, hoverinfo: "skip" },
+      { x: habs.map((h) => 100 * h.x_o2), y: habs.map((h) => PSI(h.p_atm)), type: "scatter", mode: "markers+text", text: habs.map((h) => h.name), textposition: habs.map((h) => (h.id === "cabin" ? "top center" : h.id === "eva_prep" ? "bottom left" : h.id === "exploration" ? "bottom right" : "top right")),
+        textfont: { size: 11.5, color: C.ink }, marker: { symbol: "diamond", size: 9, color: C.ink, line: { color: C.bg, width: 1.5 } }, hoverinfo: "skip" },
+      { x: [100 * sc.o2], y: [PSI(sc.p)], type: "scatter", mode: "markers", hoverinfo: "skip", marker: { symbol: "cross-thin", size: 24, color: C.ink, line: { color: C.ink, width: 3 } } },
     ], layout({
-      margin: { l: 52, r: 8, t: 8, b: 44 },
-      annotations: habs.map((x) => ({
-        x: 100 * x.x_o2, y: Math.log10(x.p_atm), text: esc(x.name), showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink3,
-        ax: { cabin: 0, eva_prep: -10, moon_base: 30, exploration: 34 }[x.id] ?? 0, ay: { cabin: -42, eva_prep: 40, moon_base: -44, exploration: 40 }[x.id] ?? -40,
-        font: { size: 11, color: C.ink }, bgcolor: "rgba(7,10,20,0.88)", borderpad: 3,
-      })),
-      xaxis: { range: [10, 40], ticksuffix: "%", title: { text: "Oxygen" }, gridcolor: "rgba(0,0,0,0)" },
-      yaxis: { type: "log", range: [Math.log10(0.3), Math.log10(3.2)], tickvals: [0.3, 0.5, 0.7, 1, 2, 3], title: { text: "Pressure, atm" }, gridcolor: "rgba(0,0,0,0)" },
+      margin: { l: 56, r: 8, t: 8, b: 48 },
+      xaxis: { range: [10, 40], ticksuffix: "%", title: { text: "Oxygen in the air" }, gridcolor: "rgba(0,0,0,0)" },
+      yaxis: { type: "log", range: [Math.log10(PSI(0.3)), Math.log10(PSI(3.2))], tickvals: PSI_TICKS, title: { text: "Cabin pressure, psi" }, gridcolor: "rgba(0,0,0,0)" },
     }));
-    mapDrawn = true;
+    if (el && !viz.clickBound) {
+      viz.clickBound = true;
+      el.on("plotly_click", (ev) => {
+        if (viz.view !== "map" || !ev.points.length) return;
+        const pt = ev.points[0];
+        sc.o2 = Math.min(1 - sc.co2 - sc.he, Math.max(0.1, Math.round(pt.x * 2) / 200));
+        sc.p = Math.min(3.2, Math.max(0.25, +(pt.y / ATM_PSI).toFixed(3)));
+        sc.preset = null; renderPresetsPressed(); updateScenario(true);
+      });
+    }
   }
   function renderDrivers() {
     const d = [...M.drivers].reverse();
@@ -510,35 +572,69 @@
       </article>`).join("");
   }
 
+  const nextState = { co2: null };
+  function pickLabel(k) { return `${o2pct(k.x_o2)} O₂ · ${PSI(k.p_atm).toFixed(1)} psi · ${(100 * k.x_co2).toFixed(0)}% CO₂`; }
   function renderNext() {
-    const N = D.next;
-    const flown = M.train.filter((t) => t.x_co2 === 0 && t.x_he === 0);
-    const habs = D.habitats.filter((x) => x.x_o2 <= 0.4);
-    plot("unc-chart", [
-      { z: N.map.spread, x: N.map.o2.map((v) => 100 * v), y: N.map.p, type: "heatmap", zsmooth: "best",
-        colorscale: [[0, "#0d1220"], [0.5, "#5b21b6"], [1, "#ddd6fe"]],
-        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.8, title: { text: "90% band", side: "right", font: { size: 10.5, color: C.ink3 } } },
-        hovertemplate: "O₂ %{x:.0f}% · %{y:.2f} atm<br>uncertainty band %{z:.0%}<extra></extra>" },
-      { x: flown.map((t) => 100 * t.x_o2), y: flown.map((t) => t.p_atm), type: "scatter", mode: "markers", marker: { size: 5, color: C.bg, line: { color: C.ink3, width: 1 } }, hovertemplate: "Flown FLEX test (no diluent)<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>" },
-      { x: N.picks.map((p) => 100 * p.x_o2), y: N.picks.map((p) => p.p_atm), type: "scatter", mode: "markers+text", text: N.picks.map((_, i) => String(i + 1)), textposition: "middle center",
-        textfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: "#fff" }, marker: { size: 18, color: C.orange, line: { color: C.bg, width: 2 } },
-        customdata: N.picks.map((p) => [p.fuel, 100 * p.x_co2]), hovertemplate: "<b>Recommended %{text}</b><br>%{customdata[0]} · O₂ %{x:.0f}% · %{y:.2f} atm · CO₂ %{customdata[1]:.0f}%<extra></extra>" },
-      { x: habs.map((x) => 100 * x.x_o2), y: habs.map((x) => x.p_atm), type: "scatter", mode: "markers", marker: { symbol: "cross-thin", size: 16, color: C.ink, line: { color: C.ink, width: 2 } }, hoverinfo: "skip" },
+    const N = D.next, k = N.picks[0];
+    const asks = k.x_co2 > 0
+      ? `How much CO₂ it takes to put out a ${k.fuel.toLowerCase()} fire in air close to the lunar base (${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi).`
+      : `Whether a ${k.fuel.toLowerCase()} fire goes out on its own in air close to the lunar base.`;
+    $("#mission").innerHTML = `
+      <div class="mission__main">
+        <p class="label">Recommended flight test · #1 of ${N.picks.length}</p>
+        <h3 class="mission__title">${esc(k.fuel)} droplet <span class="mute">at</span> ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi <span class="mute">with</span> ${(100 * k.x_co2).toFixed(0)}% CO₂</h3>
+      </div>
+      <dl class="mission__facts">
+        <div><dt>What it answers</dt><dd>${esc(asks)}</dd></div>
+        <div><dt>Why this one</dt><dd>Today the model can only say the flame goes out on its own somewhere between <b>${pct(k.interval[0])} and ${pct(k.interval[1])}</b> of the time. That is the widest doubt near lunar-base air, so one flight here teaches the most.</dd></div>
+        <div><dt>How it was chosen</dt><dd>Active learning: the 200 bootstrap models were asked about every candidate atmosphere near the lunar base; this is where they disagree most.</dd></div>
+      </dl>`;
+    const narrow = innerWidth < 700;
+    const P = N.picks.map((q, i) => ({ ...q, i, lab: narrow ? `#${i + 1}` : `#${i + 1}  ${pickLabel(q)}` })).reverse();
+    plot("range-chart", [
+      { x: P.map((q) => q.p_ext), y: P.map((q) => q.lab), type: "scatter", mode: "markers", marker: { size: 12, color: C.ink, line: { color: C.bg, width: 2 } },
+        customdata: P.map((q) => [q.interval[0], q.interval[1]]), hovertemplate: "<b>%{y}</b><br>best estimate %{x:.0%}<br>could be anywhere from %{customdata[0]:.0%} to %{customdata[1]:.0%}<extra></extra>" },
     ], layout({
-      margin: { l: 52, r: 8, t: 8, b: 44 }, xaxis: { ticksuffix: "%", title: { text: "Oxygen" }, gridcolor: "rgba(0,0,0,0)" },
-      yaxis: { type: "log", tickvals: [0.3, 0.5, 0.7, 1, 2, 3], title: { text: "Pressure, atm" }, gridcolor: "rgba(0,0,0,0)" },
-      annotations: habs.map((x) => ({
-        x: 100 * x.x_o2, y: Math.log10(x.p_atm), text: esc(x.name), showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink3,
-        ax: { cabin: -40, eva_prep: -60, moon_base: 60, exploration: 40 }[x.id] ?? 0, ay: { cabin: -36, eva_prep: -46, moon_base: -40, exploration: 36 }[x.id] ?? -40,
-        font: { size: 11, color: C.ink }, bgcolor: "rgba(7,10,20,0.88)", borderpad: 3,
-      })),
+      margin: { l: 10, r: 18, t: 6, b: 44 },
+      shapes: P.map((q) => ({ type: "line", xref: "x", yref: "y", x0: q.interval[0], x1: q.interval[1], y0: q.lab, y1: q.lab, line: { color: q.i === 0 ? C.orange : C.ink4, width: q.i === 0 ? 12 : 8 }, layer: "below" })),
+      xaxis: { range: [0, 1], tickformat: ".0%", tickvals: [0, 0.25, 0.5, 0.75, 1], title: { text: narrow ? "Chance it goes out on its own" : "Chance the flame goes out on its own (today's estimate)" } },
+      yaxis: { type: "category", tickfont: { family: "Geist Mono, monospace", size: 11.5, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
     }));
-    $("#next-sub").textContent = "Ranked by expected information gain near lunar-base air · numbered on the map";
-    $("#next-table").innerHTML = `<thead><tr><th>#</th><th>Fuel</th><th class="num">O₂</th><th class="num">Pressure</th><th class="num">CO₂</th><th class="num">P(self-ext.) today</th><th class="num">Uncertainty</th></tr></thead><tbody>${N.picks.map((p, i) => `
-      <tr${i === 0 ? ' class="hl"' : ""}><td class="mono">${i + 1}</td><td>${p.fuel}</td><td class="num">${(100 * p.x_o2).toFixed(0)}%</td><td class="num">${p.p_atm.toFixed(2)} atm · ${(p.p_atm * ATM_PSI).toFixed(1)} psi</td><td class="num">${(100 * p.x_co2).toFixed(0)}%</td><td class="num">${pct(p.p_ext)} <span style="color:var(--ink-4)">(${pct(p.interval[0])}–${pct(p.interval[1])})</span></td><td class="num">±${(50 * p.uncertainty).toFixed(0)} pts</td></tr>`).join("")}</tbody>`;
-    $("#next-note").innerHTML = `<b>Why these:</b> the model is least certain about how much CO₂ it takes to put out a fire at the reduced pressure and elevated O₂ planned for the Moon base — exactly the suppression question a lunar habitat must answer. Score = ${esc(N.score_formula)}.`;
+    $("#next-sub").textContent = "A long bar means the model does not know yet. The dot is its best guess.";
+    $("#next-table").innerHTML = `<thead><tr><th>#</th><th>Atmosphere to fly</th><th class="num">CO₂ added</th><th class="num">Goes out today</th><th class="num">Doubt</th></tr></thead><tbody>${N.picks.map((q, i) => `
+      <tr${i === 0 ? ' class="hl"' : ""}><td class="mono">${i + 1}</td><td>${esc(q.fuel)} · ${o2pct(q.x_o2)} O₂ · ${PSI(q.p_atm).toFixed(1)} psi <span class="mono-sm">${q.p_atm.toFixed(2)} atm</span></td><td class="num">${(100 * q.x_co2).toFixed(0)}%</td><td class="num">${pct(q.interval[0])}–${pct(q.interval[1])}</td><td class="num">${pct(q.uncertainty)}</td></tr>`).join("")}</tbody>`;
+    $("#next-note").innerHTML = `<b>Doubt</b> is the width of the 90% range. All six candidates add CO₂ near lunar-base oxygen and pressure: the open question is how much CO₂ it takes to put out a fire in the air planned for the Moon base. Score = ${esc(N.score_formula)}.`;
+    const levels = [...new Set(N.picks.map((q) => q.x_co2))].sort((a, b) => a - b);
+    if (nextState.co2 == null) nextState.co2 = k.x_co2;
+    $("#unc-co2").innerHTML = levels.map((c) => `<button type="button" aria-pressed="${c === nextState.co2}" data-c="${c}">${(100 * c).toFixed(0)}% CO₂</button>`).join("");
+    document.querySelectorAll("#unc-co2 button").forEach((b) => b.addEventListener("click", () => { nextState.co2 = +b.dataset.c; renderNext(); }));
+    if ($("#unc-details").open) renderUncMap();
   }
-
+  function renderUncMap() {
+    const N = D.next, c = nextState.co2, d0 = M.d0_median;
+    const go2 = [], gp = [];
+    for (let v = 0.15; v <= 0.40 + 1e-9; v += 0.01) go2.push(+v.toFixed(3));
+    for (let j = 0; j <= 30; j++) gp.push(Math.exp(Math.log(0.3) + (j * (Math.log(1.4) - Math.log(0.3))) / 30));
+    const z = gp.map((pp) => go2.map((oo) => (oo + c > 0.95 ? null : (() => { const r = predict([0, oo, Math.log(pp), c, 0, d0]); return r.hi - r.lo; })())));
+    const on = N.picks.map((q, i) => ({ ...q, i })).filter((q) => Math.abs(q.x_co2 - c) < 1e-9);
+    const off = N.picks.map((q, i) => ({ ...q, i })).filter((q) => Math.abs(q.x_co2 - c) >= 1e-9);
+    const habs = D.habitats.filter((x) => x.x_o2 <= 0.4 && x.p_atm <= 1.4);
+    plot("unc-chart", [
+      { z, x: go2.map((v) => 100 * v), y: gp.map(PSI), type: "heatmap", zsmooth: "best", zmin: 0, zmax: 0.6,
+        colorscale: [[0, "#0d1220"], [0.5, "#5b21b6"], [1, "#ddd6fe"]],
+        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "doubt", side: "right", font: { size: 10.5, color: C.ink3 } } },
+        hovertemplate: `O₂ %{x:.0f}% · %{y:.1f} psi · ${(100 * c).toFixed(0)}% CO₂<br>doubt (90% range) %{z:.0%}<extra></extra>` },
+      { x: habs.map((h) => 100 * h.x_o2), y: habs.map((h) => PSI(h.p_atm)), type: "scatter", mode: "markers+text", text: habs.map((h) => h.name), textposition: "top center", textfont: { size: 11, color: C.ink2 }, marker: { symbol: "diamond", size: 8, color: C.ink }, hoverinfo: "skip" },
+      { x: off.map((q) => 100 * q.x_o2), y: off.map((q) => PSI(q.p_atm)), type: "scatter", mode: "markers+text", text: off.map((q) => String(q.i + 1)), textposition: "middle center", textfont: { family: "Geist Mono, monospace", size: 9, color: C.ink3 },
+        marker: { size: 16, color: "rgba(0,0,0,0)", line: { color: C.ink4, width: 1.2 } }, hovertemplate: "Candidate %{text} (other CO₂ level)<extra></extra>" },
+      { x: on.map((q) => 100 * q.x_o2), y: on.map((q) => PSI(q.p_atm)), type: "scatter", mode: "markers+text", text: on.map((q) => String(q.i + 1)), textposition: "middle center", textfont: { family: "Geist Mono, monospace", size: 10, color: "#fff" },
+        marker: { size: 20, color: C.orange, line: { color: C.bg, width: 2 } }, hovertemplate: `Candidate %{text} · ${(100 * c).toFixed(0)}% CO₂<extra></extra>` },
+    ], layout({
+      margin: { l: 56, r: 8, t: 8, b: 48 },
+      xaxis: { range: [15, 40], ticksuffix: "%", title: { text: "Oxygen in the air" }, gridcolor: "rgba(0,0,0,0)" },
+      yaxis: { type: "log", tickvals: PSI_TICKS, title: { text: "Cabin pressure, psi" }, gridcolor: "rgba(0,0,0,0)" },
+    }));
+  }
   function renderQuality() {
     const S = D.summary;
     const steps = [
@@ -829,6 +925,7 @@
   safe(renderEvidence, "evidence");
   safe(renderFindings, "findings");
   safe(renderNext, "next");
+  $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
   safe(renderQuality, "quality");
   safe(navSpy, "nav");
   safe(() => {

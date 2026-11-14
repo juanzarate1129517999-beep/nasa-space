@@ -468,9 +468,9 @@ doc = f"""<!doctype html>
 {shot('01_inicio', 'Inicio: titular, indicadores clave y probabilidad de autoextinción por hábitat. El traje espacial aparece como «fuera de los datos».', Fn())}
 {shot('02_cobertura', 'Cobertura: todos los ensayos de vuelo frente a las atmósferas de los hábitats, con filtros por familia.', Fn())}
 {shot('03_investigaciones', 'Investigaciones: ranking por hábitat y capa de seguridad, y ficha generada desde los datos (qué varió, qué se midió, desglose del puntaje).', Fn())}
-{shot('04_simulador', 'Simulador: presets de hábitat y controles de O₂, presión, CO₂, helio, diámetro y combustible. Resultado con intervalo, estado «dentro o fuera de los datos» y mapa de probabilidad en vivo.', Fn())}
+{shot('04_simulador', 'Simulador: presets de hábitat y controles de O₂, presión, CO₂, helio, diámetro y combustible. Resultado en palabras simples con su intervalo y estado de los datos, y una curva en vivo de la probabilidad de que el fuego se apague solo, con las atmósferas sin ensayos de vuelo sombreadas.', Fn())}
 {shot('05_evidencia', 'Evidencia: desenlace según O₂, supresión con CO₂, temperatura límite y microgravedad frente a 1 g.', Fn())}
-{shot('07_proximo', 'Próximo experimento: mapa de incertidumbre y ensayos recomendados.', Fn())}
+{shot('07_proximo', 'Próximo experimento: el ensayo recomendado en lenguaje claro, qué tan seguro está hoy el modelo en cada candidato y las condiciones del ensayo.', Fn())}
 {shot('08_validacion', 'Datos y validación: arquitectura, métricas frente a baselines, calibración y registro de calidad.', Fn())}
 </section>
 

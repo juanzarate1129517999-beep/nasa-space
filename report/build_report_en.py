@@ -463,9 +463,9 @@ doc = f"""<!doctype html>
 {shot('02_cobertura', 'Coverage: every flight test against the habitat atmospheres, with filters by family.', Fn())}
 {shot('03_investigaciones', 'Investigations: ranking by habitat and safety layer, and a profile generated from the data (what varied, what was measured, score breakdown).', Fn())}
 {shot('10_comparar', 'Side-by-side comparison of up to three investigations; rows that differ are highlighted.', Fn())}
-{shot('04_simulador', 'Simulator: habitat presets and controls for O₂, pressure, CO₂, helium, droplet size and fuel. Result with interval, in/out-of-data status and a live probability map.', Fn())}
+{shot('04_simulador', 'Simulator: habitat presets and controls for O₂, pressure, CO₂, helium, droplet size and fuel. Result in plain words with its interval and data status, and a live curve of the chance that the fire goes out on its own, with the atmospheres no flight test reached shaded.', Fn())}
 {shot('05_evidencia', 'Evidence: outcome by O₂, CO₂ suppression, limiting temperature and microgravity versus 1 g.', Fn())}
-{shot('07_proximo', 'Next experiment: uncertainty map and recommended tests.', Fn())}
+{shot('07_proximo', 'Next experiment: the recommended flight test in plain language, how sure the model is today for each candidate, and the test conditions.', Fn())}
 {shot('08_validacion', 'Data and validation: architecture, metrics against baselines, calibration and quality log.', Fn())}
 </section>
 
