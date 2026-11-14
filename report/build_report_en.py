@@ -1,13 +1,3 @@
-"""Build the Skylab Phoenix technical report in English as HTML and print it to PDF with headless Edge/Chrome.
-
-Usage:
-    python -m pipeline.run              # refresh data
-    python report/figures.py en         # refresh the English figures (report/figures_en/)
-    python report/build_report_en.py    # -> report/Technical_Report_Skylab_Phoenix.pdf
-
-English edition of report/build_report.py (Spanish). Every number is read from web/data/ember.json and
-web/data/si.js (the pipeline exports). Written with AI assistance (Anthropic Claude); see docs/AI_USE.md.
-"""
 import html
 import json
 import os
@@ -15,6 +5,7 @@ import re
 import shutil
 import subprocess
 from collections import Counter
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,7 +55,6 @@ def shot(name, caption, num):
             f'<figcaption><b>Figure {num}.</b> {caption}</figcaption></figure>')
 
 
-# ---------------------------------------------------------------- tables built from data
 def inv_table():
     rows = []
     for r in sorted(INV, key=lambda r: (r["type"] != "Flight", r["family"], -r["n_tests"])):
@@ -170,7 +160,6 @@ SCHEMA = [("test_uid", "Unique id: PSI + test"), ("psi_id / experimento", "Sourc
           ("tad_k / zst", "Adiabatic flame temperature and stoichiometric mixture fraction"), ("tasa_quemado / tiempo_quemado_s", "Burning measurements"),
           ("n_eventos", "Flames per record (ACME daily tables)"), ("qc_flags", "Quality flags applied to the row")]
 
-# ---------------------------------------------------------------- document
 moon = HC["moon_base"]["fuels"]["Methanol"]
 cab = HC["cabin"]["fuels"]["Methanol"]
 qc_counts = Counter(q["experimento"] for q in D["qc"])
@@ -192,6 +181,9 @@ def Fn():
     return next(fig_no)
 
 
+TODAY = date.today()
+DATE = f"{TODAY:%B} {TODAY.day}, {TODAY.year}"
+
 doc = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <title>Skylab Phoenix · Technical report</title>
@@ -201,7 +193,6 @@ doc = f"""<!doctype html>
 <style>@page {{ @bottom-left {{ content: "Skylab Phoenix · Technical report · NASA Space Apps 2026"; }} }} @page :first {{ @bottom-left {{ content: none; }} }}</style>
 </head><body>
 
-<!-- =============================== COVER -->
 <section class="cover">
   <div class="cover-band"></div>
   <div class="logo">{logo}</div>
@@ -223,10 +214,9 @@ doc = f"""<!doctype html>
     <tr><td>Tools</td><td>Python · pandas · scikit-learn · SciPy · Plotly · HTML/CSS/JavaScript · Anthropic Claude (SI briefings)</td></tr>
     <tr><td>Keywords</td><td>microgravity, flammability, lunar base, data engineering, machine learning, uncertainty, active learning, verified SI</td></tr>
   </table>
-  <p class="cover-date">November 14, 2026 · English edition</p>
+  <p class="cover-date">{DATE} · English edition</p>
 </section>
 
-<!-- =============================== ABSTRACT -->
 <section class="page">
 <h2 class="nonum">Abstract</h2>
 <p class="lead">Artemis lunar-surface habitats and pressurized rovers will run at <b>30% oxygen or more and 10.2 psi or less</b>. Skylab Phoenix answers, from NASA's own flight data, what happens to fire in that atmosphere and where that data runs out.</p>
@@ -238,7 +228,6 @@ doc = f"""<!doctype html>
 </div>
 </section>
 
-<!-- =============================== CONTENTS -->
 <section class="page toc">
 <h2 class="nonum">Contents</h2>
 <ol>
@@ -257,7 +246,6 @@ doc = f"""<!doctype html>
 <p class="note">Use of AI: the SI briefings are written by Anthropic Claude and published only after code verification (Section 11); code and documentation were written with AI assistance. Details in docs/AI_USE.md.</p>
 </section>
 
-<!-- =============================== 1 -->
 <section class="page">
 <h2>Introduction</h2>
 <p class="lead">Fire is one of the most serious risks of crewed spaceflight, and in microgravity it behaves differently than on Earth.</p>
@@ -271,7 +259,6 @@ doc = f"""<!doctype html>
 </ol>
 </section>
 
-<!-- =============================== 2 -->
 <section class="page">
 <h2>The challenge and the research question</h2>
 <p class="lead">The challenge asks for an SI-powered web dashboard that <b>summarizes, ranks and interprets</b> NASA's combustion investigations. Skylab Phoenix answers each official objective with a data component.</p>
@@ -290,7 +277,6 @@ doc = f"""<!doctype html>
 <p>Professors, graduate and undergraduate students, researchers and, above all, aerospace engineers who design habitats and select materials. The dashboard offers a guided view for each of these audiences.</p>
 </section>
 
-<!-- =============================== 3 -->
 <section class="page">
 <h2>Conceptual framework: fire in microgravity</h2>
 <p class="lead">Without buoyancy, fire depends on transport by diffusion and ventilation. Gravity, airflow, oxygen and pressure therefore interact in ways a test on Earth does not capture.</p>
@@ -316,7 +302,6 @@ doc = f"""<!doctype html>
 <p>Compared with Earth's air, the lunar base will have over 40% more oxygen. Even if the O₂ partial pressure is similar, the higher mole fraction speeds combustion and reduces the ability of the inert gas to cool the flame.</p>
 </section>
 
-<!-- =============================== 4 -->
 <section class="page">
 <h2>Data: source, scope and inventory</h2>
 <p class="lead">We use a single data source, the one the challenge names: NASA's PSI repository (CC0 license). Of its 133 results for “combustion”, 24 belong to <i>Combustion Science</i>: 19 flight experiments and 5 ground investigations.</p>
@@ -326,7 +311,6 @@ doc = f"""<!doctype html>
 <p class="note">Hardware grouping as on the challenge page: the CIR combustion rack with ACME (gases) or MDCA (droplets), the fan-driven duct of the Microgravity Science Glovebox (MSG), and the Saffire module inside the Cygnus spacecraft.</p>
 </section>
 
-<!-- =============================== 5 -->
 <section class="page">
 <h2>Data engineering</h2>
 <p class="lead">A layered pipeline, reproducible with one command, turns 22 heterogeneous tables into one schema in SI units. Every correction is logged with the original value and the rule applied.</p>
@@ -354,7 +338,6 @@ doc = f"""<!doctype html>
 <p>Examples: a 0 mmHg pressure in FLEX (excluded from the models), “3400%” and “2100%” in ACME BRE (34% and 21%), 8 identical duplicate rows in CFI, a missing decimal point in Saffire-II (“037 mm” → 0.37 mm) and 19 lowercase “yes/no” labels in CFI-G. None was fixed silently: all can be audited.</p>
 </section>
 
-<!-- =============================== 6 -->
 <section class="page">
 <h2>Exploratory analysis</h2>
 <p class="lead">Before any model, the data shows three patterns: almost no tests near lunar-base air, fires stop putting themselves out as oxygen rises, and CO₂ suppresses fires at reduced pressure.</p>
@@ -371,7 +354,6 @@ doc = f"""<!doctype html>
 <p>Of {CG['ignition']['tests']} ACME CFI-G tests, {CG['ignition']['ignited']} ignited and <b>{CG['ignition']['cool_flames']} produced confirmed cool flames</b>, all with {', '.join(CG['cool_flame_conditions']['fuel'])}, near {p(CG['cool_flame_conditions']['o2'][1])} O₂ and {n(CG['cool_flame_conditions']['p_atm'][0], 1)} atm. They are rare, but an optical detector may miss them.</p>
 </section>
 
-<!-- =============================== 7 -->
 <section class="page">
 <h2>Summaries, ranking and similarity of investigations</h2>
 <p class="lead">Each investigation has a profile generated from its data and a relevance score per habitat. The score is a visible formula, not a black box.</p>
@@ -392,7 +374,6 @@ doc = f"""<!doctype html>
 {fig('f07_similitud', 'Similarity matrix ordered by hierarchical clustering (average linkage). Clear blocks emerge: droplets (FLEX, FLEX-2, CFI), Saffire, BASS, smoke (SAME, SAME-R, DAFT) and the ACME family.', Fn(), True)}
 </section>
 
-<!-- =============================== 8 -->
 <section class="page">
 <h2>Machine learning</h2>
 <p class="lead">With hundreds of tests rather than millions, we chose small, interpretable, calibrated models. We compare them with baselines and validate them without letting tests from the same day leak between training and testing.</p>
@@ -436,7 +417,6 @@ doc = f"""<!doctype html>
 <p>For normal flames, self-extinction becomes more likely as flame temperature falls. The 50% point (≈ {n(nrm['t50'])} K; 90% CI {n(nrm['t50_lo'])}–{n(nrm['t50_hi'])} K) lies <b>just above the hottest flame tested ({n(nrm['tad_max'])} K)</b>, so it is an extrapolation. For inverse flames, no single temperature explains extinction. Conclusion: flame temperature is not a universal criterion, and reporting this negative result is part of the project's scientific honesty.</p>
 </section>
 
-<!-- =============================== 9 -->
 <section class="page">
 <h2>Next experiment: active learning</h2>
 <p class="lead">If NASA could fly one more test, which one would teach the most? Skylab Phoenix searches near lunar-base air for the conditions where the 200 bootstrap models disagree most.</p>
@@ -448,7 +428,6 @@ doc = f"""<!doctype html>
 <p><b>Reading:</b> the model is most unsure about <b>how much CO₂ it takes to put out a fire at the reduced pressure and elevated O₂ of the lunar base</b>. That is exactly the suppression question a lunar habitat must answer before choosing extinguishers. Since PSI has no partial-gravity data, these conditions are also the first worth repeating in LUCI or FM2.</p>
 </section>
 
-<!-- =============================== 10 -->
 <section class="page">
 <h2>Fire-safety findings ranked by evidence</h2>
 <p class="lead">The pipeline produces {len(FIND)} findings. Each has an evidence score and a design implication, and every number in them is computed from the PSI tables.</p>
@@ -459,10 +438,9 @@ doc = f"""<!doctype html>
 {findings_table()}
 </section>
 
-<!-- =============================== 11 SI -->
 <section class="page">
 <h2>The SI layer: briefings you can check</h2>
-<p class="lead">The challenge asks for an SI-powered dashboard. Skylab Phoenix uses SI (super intelligence) where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.</p>
+<p class="lead">The challenge asks for an SI-powered dashboard. Skylab Phoenix uses SI where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.</p>
 <h3>11.1 How it works</h3>
 <ol>
 <li><b>Evidence packs.</b> For each of the 5 habitats and 24 investigations, <code>pipeline/si.py</code> writes numbered evidence items (E1, E2…) computed from the gold data: model predictions with their intervals, the most relevant investigations, coverage, validation and the top findings.</li>
@@ -477,7 +455,6 @@ doc = f"""<!doctype html>
 {shot('09_si_briefing', 'SI briefing with citations and the evidence behind each sentence (left), and Ask the archive answering “Which suppressants did NASA test?” with NASA passages (right).', Fn())}
 </section>
 
-<!-- =============================== 12 -->
 <section class="page">
 <h2>The Skylab Phoenix dashboard</h2>
 <p class="lead">A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. Plotly is bundled, so it also works without internet once loaded.</p>
@@ -492,7 +469,6 @@ doc = f"""<!doctype html>
 {shot('08_validacion', 'Data and validation: architecture, metrics against baselines, calibration and quality log.', Fn())}
 </section>
 
-<!-- =============================== 13 -->
 <section class="page">
 <h2>Discussion and limitations</h2>
 <p class="lead">Saying clearly what the data does not allow is part of the result.</p>
@@ -511,7 +487,6 @@ doc = f"""<!doctype html>
 <p>Validation by whole test days, comparison with baselines, bootstrap intervals, a calibration diagram, an out-of-data guard with a per-input range check, a public correction log, a verified SI layer, automated tests in continuous integration, and wording that separates what was measured from what was extrapolated.</p>
 </section>
 
-<!-- =============================== 14-17 -->
 <section class="page">
 <h2>Impact for exploration and on Earth</h2>
 <ul>
@@ -557,7 +532,6 @@ python scripts/serve.py             # dashboard at http://127.0.0.1:8765</pre>
 </tbody></table>
 </section>
 
-<!-- =============================== REFERENCES + ANNEXES -->
 <section class="page refs">
 <h2 class="nonum">References</h2>
 <ol>
@@ -607,15 +581,16 @@ print("HTML ->", out_html)
 
 browsers = [Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),
             Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
+            Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
             Path(shutil.which("chromium") or "/nonexistent"),
-            *sorted(Path("/opt/pw-browsers").glob("chromium-*/chrome-linux64/chrome"))]  # Playwright's Chromium (Linux/CI)
+            *sorted(Path("/opt/pw-browsers").glob("chromium-*/chrome-linux64/chrome"))]
 exe = next((b for b in browsers if b.exists()), None)
 if exe:
     pdf = REP / "Technical_Report_Skylab_Phoenix.pdf"
     before = pdf.stat().st_mtime if pdf.exists() else 0
     args = [str(exe), "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=15000"]
     if hasattr(os, "geteuid") and os.geteuid() == 0:
-        args.append("--no-sandbox")  # Chromium refuses to run as root (containers, CI) without it
+        args.append("--no-sandbox")
     run = subprocess.run(args + [f"--print-to-pdf={pdf}", out_html.as_uri()], check=False, capture_output=True, timeout=180)
     if pdf.exists() and pdf.stat().st_mtime > before:
         print("PDF  ->", pdf, f"{pdf.stat().st_size / 1e6:.1f} MB")

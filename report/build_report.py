@@ -1,18 +1,10 @@
-"""Build the Skylab Phoenix technical report (Spanish) as HTML and print it to PDF with headless Edge/Chrome.
-
-Usage:
-    python -m pipeline.run          # refresh data
-    python report/figures.py        # refresh figures
-    python report/build_report.py   # -> report/Informe_Skylab_Phoenix.pdf
-
-Every number in the report is read from web/data/ember.json (the pipeline export).
-"""
 import html
 import json
 import os
 import shutil
 import subprocess
 from collections import Counter
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,7 +15,6 @@ E = html.escape
 
 
 def n(x, d=0):
-    """Spanish number format: 1.647 · 0,88."""
     s = f"{x:,.{d}f}"
     return s.replace(",", "§").replace(".", ",").replace("§", ".")
 
@@ -95,7 +86,6 @@ def shot(name, caption, num):
             f'<figcaption><b>Figura {num}.</b> {caption}</figcaption></figure>')
 
 
-# ---------------------------------------------------------------- tables built from data
 def inv_table():
     rows = []
     for r in sorted(INV, key=lambda r: (r["type"] != "Flight", r["family"], -r["n_tests"])):
@@ -194,7 +184,6 @@ SCHEMA = [("test_uid", "Identificador único: PSI + ensayo"), ("psi_id / experim
           ("n_eventos", "Llamas por registro (tablas diarias de ACME)"), ("qc_flags", "Banderas de calidad aplicadas a la fila")]
 
 
-# ---------------------------------------------------------------- document
 moon = HC["moon_base"]["fuels"]["Methanol"]
 cab = HC["cabin"]["fuels"]["Methanol"]
 eva = HC["eva_prep"]["fuels"]["Methanol"]
@@ -214,6 +203,10 @@ def Fn():
     return next(fig_no)
 
 
+MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+HOY = date.today()
+FECHA = f"{HOY.day} de {MESES[HOY.month - 1]} de {HOY.year}"
+
 doc = f"""<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <title>Skylab Phoenix · Informe técnico</title>
@@ -222,7 +215,6 @@ doc = f"""<!doctype html>
 <link rel="stylesheet" href="report.css">
 </head><body>
 
-<!-- =============================== PORTADA -->
 <section class="cover">
   <div class="cover-band"></div>
   <div class="logo">{logo}</div>
@@ -241,13 +233,12 @@ doc = f"""<!doctype html>
     <tr><td>Líder del equipo</td><td>Juan Sebastián Zárate</td></tr>
     <tr><td>Integrantes</td><td>Juan Sebastián Zárate (líder)<br>Javier Medina</td></tr>
     <tr><td>Fuente de datos</td><td>NASA Physical Sciences Informatics (PSI) · 24 investigaciones de <i>Combustion Science</i> · licencia CC0</td></tr>
-    <tr><td>Herramientas</td><td>Python · pandas · scikit-learn · SciPy · Plotly · HTML/CSS/JavaScript</td></tr>
+    <tr><td>Herramientas</td><td>Python · pandas · scikit-learn · SciPy · Plotly · HTML/CSS/JavaScript · Anthropic Claude (resúmenes SI)</td></tr>
     <tr><td>Palabras clave</td><td>microgravedad, inflamabilidad, base lunar, ingeniería de datos, machine learning, incertidumbre, aprendizaje activo</td></tr>
   </table>
-  <p class="cover-date">13 de noviembre de 2026</p>
+  <p class="cover-date">{FECHA}</p>
 </section>
 
-<!-- =============================== RESUMEN -->
 <section class="page">
 <h2 class="nonum">Resumen</h2>
 <p class="lead">La base lunar y los rovers presurizados de Artemis tendrán una atmósfera con <b>30 % de oxígeno o más y 10,2 psi o menos</b>. Skylab Phoenix responde con los propios datos de vuelo de NASA qué le pasa al fuego en esa atmósfera y dónde se acaban esos datos.</p>
@@ -261,7 +252,6 @@ doc = f"""<!doctype html>
 </div>
 </section>
 
-<!-- =============================== ÍNDICE -->
 <section class="page toc">
 <h2 class="nonum">Contenido</h2>
 <ol>
@@ -277,9 +267,9 @@ doc = f"""<!doctype html>
 <tr><td><b>Juan Sebastián Zárate</b></td><td>Líder del equipo</td><td>Dirección científica (combustión), ingeniería de datos, modelado, validación y presentación</td></tr>
 <tr><td><b>Javier Medina</b></td><td>Integrante</td><td>Investigación del reto y de sus fundamentos, guía conceptual del proyecto, revisión y apoyo en el desarrollo</td></tr>
 </tbody></table>
+<p class="note">Uso de IA: los resúmenes SI del dashboard los escribe Anthropic Claude y se publican solo si el código verifica cada cita y cada número (la capa SI se describe en la sección 11 de la edición en inglés). El código y la documentación se escribieron con asistencia de IA y el equipo los ejecutó, revisó y probó. Detalles en docs/AI_USE.md.</p>
 </section>
 
-<!-- =============================== 1 -->
 <section class="page">
 <h2>Introducción</h2>
 <p class="lead">El fuego es uno de los riesgos más graves de los vuelos tripulados, y en microgravedad se comporta distinto que en la Tierra.</p>
@@ -293,7 +283,6 @@ doc = f"""<!doctype html>
 </ol>
 </section>
 
-<!-- =============================== 2 -->
 <section class="page">
 <h2>El reto y la pregunta de investigación</h2>
 <p class="lead">El reto pide un dashboard web impulsado por «súper inteligencia» que <b>resuma, rankee e interprete</b> las investigaciones de combustión de NASA. Skylab Phoenix responde cada objetivo oficial con un componente de datos.</p>
@@ -311,7 +300,6 @@ doc = f"""<!doctype html>
 <p>Profesores, estudiantes de posgrado y pregrado, investigadores y, sobre todo, ingenieros aeroespaciales que diseñan hábitats y seleccionan materiales. El dashboard está en inglés porque el jurado es internacional. Este informe está en español para el equipo y los jurados locales.</p>
 </section>
 
-<!-- =============================== 3 -->
 <section class="page">
 <h2>Marco conceptual: el fuego en microgravedad</h2>
 <p class="lead">Sin flotación, el fuego depende del transporte por difusión y por la ventilación. Por eso la gravedad, el flujo de aire, el oxígeno y la presión interactúan de formas que una prueba en la Tierra no captura.</p>
@@ -337,7 +325,6 @@ doc = f"""<!doctype html>
 <p>Respecto al aire terrestre, la base lunar tendrá más de 40 % más oxígeno. Aunque la presión parcial de O₂ sea parecida, la fracción molar más alta acelera la combustión y reduce la capacidad del gas inerte para enfriar la llama.</p>
 </section>
 
-<!-- =============================== 4 -->
 <section class="page">
 <h2>Datos: fuente, alcance e inventario</h2>
 <p class="lead">Usamos una sola fuente de datos, la que señala el reto: el repositorio PSI de NASA (licencia CC0). De sus 133 resultados para «combustion», 24 son de <i>Combustion Science</i>: 19 experimentos de vuelo y 5 investigaciones en tierra.</p>
@@ -347,7 +334,6 @@ doc = f"""<!doctype html>
 <p class="note">Agrupación por hardware según la página del reto: rack de combustión CIR con ACME (gases) o MDCA (gotas), ducto con ventilador del Microgravity Science Glovebox (MSG) y módulo Saffire dentro de la nave Cygnus.</p>
 </section>
 
-<!-- =============================== 5 -->
 <section class="page">
 <h2>Ingeniería de datos</h2>
 <p class="lead">Un pipeline por capas, reproducible con un solo comando, convierte 22 tablas heterogéneas en un esquema común con unidades SI. Cada corrección queda registrada con el valor original y la regla aplicada.</p>
@@ -375,7 +361,6 @@ doc = f"""<!doctype html>
 <p>Ejemplos de correcciones: una presión de 0 mmHg en FLEX (excluida de los modelos), «3400 %» y «2100 %» en ACME BRE (34 % y 21 %), 8 filas idénticas repetidas en CFI, un punto decimal faltante en Saffire-II («037 mm» → 0,37 mm) y 19 etiquetas «yes/no» en minúscula en CFI-G. Ninguna se corrigió en silencio: todas pueden auditarse.</p>
 </section>
 
-<!-- =============================== 6 -->
 <section class="page">
 <h2>Análisis exploratorio</h2>
 <p class="lead">Los datos muestran tres patrones antes de cualquier modelo: casi no hay ensayos cerca de la atmósfera lunar, con más oxígeno el fuego deja de apagarse solo, y el CO₂ suprime a presión reducida.</p>
@@ -392,7 +377,6 @@ doc = f"""<!doctype html>
 <p>De {CG['ignition']['tests']} ensayos de ACME CFI-G, {CG['ignition']['ignited']} encendieron y <b>{CG['ignition']['cool_flames']} produjeron llamas frías confirmadas</b>. Todas con {', '.join(CG['cool_flame_conditions']['fuel'])}, cerca de {p(CG['cool_flame_conditions']['o2'][1])} de O₂ y {n(CG['cool_flame_conditions']['p_atm'][0], 1)} atm. Son raras, pero un detector óptico puede no verlas.</p>
 </section>
 
-<!-- =============================== 7 -->
 <section class="page">
 <h2>Resumen, ranking y similitud de investigaciones</h2>
 <p class="lead">Cada investigación tiene una ficha generada desde sus datos y un puntaje de relevancia por hábitat. El puntaje es una fórmula visible, no una caja negra.</p>
@@ -413,7 +397,6 @@ doc = f"""<!doctype html>
 {fig('f07_similitud', 'Matriz de similitud ordenada por agrupamiento jerárquico (enlace promedio). Se forman bloques claros: gotas (FLEX, FLEX-2, CFI), Saffire, BASS, humo (SAME, SAME-R, DAFT) y la familia ACME.', Fn(), True)}
 </section>
 
-<!-- =============================== 8 -->
 <section class="page">
 <h2>Machine learning</h2>
 <p class="lead">Con cientos de ensayos y no millones, elegimos modelos pequeños, interpretables y calibrados. Los comparamos con baselines y los validamos sin dejar que ensayos del mismo día se filtren entre entrenamiento y prueba.</p>
@@ -457,7 +440,6 @@ doc = f"""<!doctype html>
 <p>En las llamas normales, la autoextinción se vuelve más probable cuando baja la temperatura de llama. El punto del 50 % (≈ {n(nrm['t50'])} K; IC 90 %: {n(nrm['t50_lo'])}–{n(nrm['t50_hi'])} K) queda <b>justo por encima de la llama más caliente ensayada ({n(nrm['tad_max'])} K)</b>, así que es una extrapolación. En las llamas inversas, una sola temperatura no explica la extinción. Conclusión: la temperatura de llama no es un criterio universal, y reportar este resultado negativo es parte de la honestidad científica del proyecto.</p>
 </section>
 
-<!-- =============================== 9 -->
 <section class="page">
 <h2>Próximo experimento: aprendizaje activo</h2>
 <p class="lead">Si NASA pudiera volar un ensayo más, ¿cuál enseñaría más? Skylab Phoenix busca, cerca de la atmósfera lunar, las condiciones donde los 200 modelos bootstrap más discrepan.</p>
@@ -469,7 +451,6 @@ doc = f"""<!doctype html>
 <p><b>Lectura:</b> el modelo duda sobre todo de <b>cuánto CO₂ hace falta para apagar un fuego a la presión reducida y el O₂ elevado de la base lunar</b>. Es justo la pregunta de supresión que un hábitat lunar debe resolver antes de elegir extintores. Como PSI no tiene datos de gravedad parcial, estas condiciones son también las primeras que convendría repetir en LUCI o FM2.</p>
 </section>
 
-<!-- =============================== 10 -->
 <section class="page">
 <h2>Hallazgos de seguridad rankeados por evidencia</h2>
 <p class="lead">El pipeline genera {len(FIND)} hallazgos. Cada uno tiene un puntaje de evidencia y una implicación de diseño, y todos sus números se calculan desde las tablas de PSI.</p>
@@ -480,7 +461,6 @@ doc = f"""<!doctype html>
 {findings_table()}
 </section>
 
-<!-- =============================== 11 -->
 <section class="page">
 <h2>El dashboard Skylab Phoenix</h2>
 <p class="lead">Un sitio web estático con diseño propio. Los modelos corren en el navegador, así que cada control es una predicción en vivo y no hace falta un servidor que pueda fallar durante la demo.</p>
@@ -494,7 +474,6 @@ doc = f"""<!doctype html>
 {shot('08_validacion', 'Datos y validación: arquitectura, métricas frente a baselines, calibración y registro de calidad.', Fn())}
 </section>
 
-<!-- =============================== 12 -->
 <section class="page">
 <h2>Discusión y limitaciones</h2>
 <p class="lead">Decir con claridad lo que los datos no permiten es parte del resultado.</p>
@@ -512,7 +491,6 @@ doc = f"""<!doctype html>
 <p>Validación por días completos, comparación con baselines, intervalos bootstrap, diagrama de calibración, detector fuera de datos, registro público de correcciones y textos que distinguen lo medido de lo extrapolado.</p>
 </section>
 
-<!-- =============================== 13-16 -->
 <section class="page">
 <h2>Impacto en la exploración y en la Tierra</h2>
 <ul>
@@ -557,7 +535,6 @@ python scripts/serve.py         # dashboard en http://127.0.0.1:8765</pre>
 </tbody></table>
 </section>
 
-<!-- =============================== REFERENCIAS + ANEXOS -->
 <section class="page refs">
 <h2 class="nonum">Referencias</h2>
 <ol>
@@ -604,15 +581,16 @@ print("HTML ->", out_html)
 
 browsers = [Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),
             Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
+            Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
             Path(shutil.which("chromium") or "/nonexistent"),
-            *sorted(Path("/opt/pw-browsers").glob("chromium-*/chrome-linux64/chrome"))]  # Playwright's Chromium (Linux/CI)
+            *sorted(Path("/opt/pw-browsers").glob("chromium-*/chrome-linux64/chrome"))]
 exe = next((b for b in browsers if b.exists()), None)
 if exe:
     pdf = REP / "Informe_Skylab_Phoenix.pdf"
     before = pdf.stat().st_mtime if pdf.exists() else 0
     args = [str(exe), "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=15000"]
     if hasattr(os, "geteuid") and os.geteuid() == 0:
-        args.append("--no-sandbox")  # Chromium refuses to run as root (containers, CI) without it
+        args.append("--no-sandbox")
     run = subprocess.run(args + [f"--print-to-pdf={pdf}", out_html.as_uri()], check=False, capture_output=True, timeout=180)
     if pdf.exists() and pdf.stat().st_mtime > before:
         print("PDF  ->", pdf, f"{pdf.stat().st_size / 1e6:.1f} MB")

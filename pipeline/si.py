@@ -1,41 +1,20 @@
-"""SI layer: evidence packs -> SI drafts -> verification firewall -> dashboard export.
-
-How it works
-1. `build_packs` turns the gold outputs into small, numbered evidence packs: one per habitat
-   and one per PSI investigation. Every item is a sentence computed from the data (E1, E2, ...).
-2. An SI model (see scripts/si_generate.py) writes a short briefing for each pack. Each sentence
-   must list the evidence items it relies on. Drafts are stored in data/si/drafts.json together
-   with the hash of the pack they were written from.
-3. `verify` is the firewall. A draft is published only if every sentence
-   - cites at least one existing evidence item,
-   - uses only numbers that appear in the items it cites,
-   - makes no safety verdict ("is safe", "certified", ...),
-   and the pack has not changed since the draft was written. Otherwise the dashboard shows a
-   labelled deterministic brief built directly from the evidence items.
-
-The SI interprets; it never decides. Scores, rankings and predictions stay deterministic.
-Written with AI assistance (Anthropic Claude); see docs/AI_USE.md.
-"""
 import hashlib
 import json
 import re
 
-from .common import HABITATS, RAW, ROOT, WEB_DATA
+from .common import HABITATS, PSI_TO_ATM, RAW, ROOT, WEB_DATA
 
 SI_DIR = ROOT / "data" / "si"
 PACKS = SI_DIR / "evidence_packs.json"
 DRAFTS = SI_DIR / "drafts.json"
 REPORT = SI_DIR / "verification.json"
-PSI_TO_ATM = 1 / 14.6959
 
-# A number is a run of digits not glued to a letter or a hyphen (so "O2", "PSI-69", "CFI-G" are not numbers).
-NUM = re.compile(r"(?<![A-Za-z\-\d.,])(\d[\d,]*(?:\.\d+)?)")
+NUM = re.compile(r"(?<![A-Za-z]-)(?<![A-Za-z\d.,])(\d[\d,]*(?:\.\d+)?)")
 VERDICT = re.compile(r"\b(is|are|be|remains?) (completely |fully |perfectly )?safe\b|\bsafe to\b|\bcertif|\bguarantee|"
                      r"\bapproved for\b|\bno (fire )?risk\b|\brisk-free\b|\bwill never\b", re.I)
 MAX_SENTENCE = 420
 
 
-# ---------------------------------------------------------------- formatting (shared by packs and checks)
 def pct(p, d=0):
     return f"{100 * p:.{d}f}%"
 
@@ -58,7 +37,6 @@ def numbers(text):
     return {norm_num(x) for x in NUM.findall(text)}
 
 
-# ---------------------------------------------------------------- evidence packs
 STATUS_TXT = {"within": "inside the range of flown ISS tests",
               "extrapolating": "beyond the flown ISS tests (extrapolation, use with caution)"}
 FEATURE_TXT = {"x_o2": "oxygen", "log_p": "pressure", "x_co2": "CO2", "x_he": "helium", "d0_mm": "droplet size"}
@@ -160,7 +138,6 @@ def build_packs(P):
     return packs
 
 
-# ---------------------------------------------------------------- verification firewall
 def check_sentence(s, items):
     problems = []
     text, cites = s.get("text", ""), s.get("cites", [])
@@ -183,7 +160,6 @@ def check_sentence(s, items):
 
 
 def verify(draft, pack):
-    """Return a list of problems; an empty list means the draft passes the firewall."""
     if not draft:
         return ["no draft"]
     problems = []
@@ -195,7 +171,7 @@ def verify(draft, pack):
     for i, s in enumerate(sents):
         problems += [f"sentence {i + 1}: {p}" for p in check_sentence(s, pack["items"])]
     head = draft.get("headline", "")
-    if head:  # a headline may summarize the whole pack, so it may use any number from it
+    if head:
         invented = sorted(numbers(head) - set().union(*(numbers(t) for t in pack["items"].values())))
         if invented:
             problems.append(f"headline: number(s) not in the evidence: {invented}")
@@ -205,12 +181,15 @@ def verify(draft, pack):
 
 
 def deterministic_brief(pack):
-    """Fallback shown when no verified SI draft exists: the evidence itself, labelled as such."""
-    keys = ["E2", "E5"] if pack["kind"] == "habitat" else ["E2" if "E2" in pack["items"] else "E1", "E3"]
-    return [{"text": pack["items"][k], "cites": [k]} for k in keys if k in pack["items"]]
+    items = pack["items"]
+    if pack["kind"] == "habitat":
+        ranked = next(k for k, t in items.items() if t.startswith("Most relevant PSI investigations"))
+        keys = ["E2", ranked]
+    else:
+        keys = ["E2" if "E2" in items else "E1", "E3"]
+    return [{"text": items[k], "cites": [k]} for k in keys if k in items]
 
 
-# ---------------------------------------------------------------- search corpus for "Ask the archive"
 GLOSSARY = [
     ("Self-extinction", "A flame that goes out on its own before the fuel is used up, without any suppressant. In FLEX this is the "
      "'extinction' outcome; in ACME CFI-G it is a flame that went out before the fuel flow was stopped."),
@@ -256,7 +235,6 @@ def corpus(P):
     return out
 
 
-# ---------------------------------------------------------------- build
 def build(P):
     SI_DIR.mkdir(parents=True, exist_ok=True)
     packs = build_packs(P)

@@ -23,7 +23,6 @@ ul, ol { margin: 0 0 9pt; padding-left: 16pt; }
 li { margin-bottom: 3pt; }
 .page { break-before: page; }
 
-/* ---------------- cover (mirrors the reference layout) */
 .cover { height: 297mm; padding: 26mm 22mm 18mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 .cover-band { position: absolute; left: 0; right: 0; top: 0; height: 7mm; background: var(--fire); }
 .cover::after { content: ""; position: absolute; right: -60mm; top: 40mm; width: 150mm; height: 150mm; border-radius: 50%;
@@ -44,7 +43,6 @@ table.meta tr:last-child td { border-bottom: 1px solid var(--line); }
 table.meta td:first-child { width: 38mm; color: var(--muted); }
 .cover-date { font-size: 8pt; color: var(--muted); margin-top: 5mm; }
 
-/* ---------------- headings */
 h2 { counter-increment: h2; font-size: 19pt; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 4mm; padding-top: 1mm; font-weight: 750; }
 h2::before { content: counter(h2, decimal-leading-zero); display: block; font-size: 8pt; letter-spacing: .14em; color: var(--orange); font-weight: 700; margin-bottom: 1.5mm; }
 h2.nonum { counter-increment: none; }
@@ -58,7 +56,6 @@ section.page > h2:not(:first-child) { margin-top: 9mm; }
 table.keep { break-inside: avoid; }
 td.mono { white-space: nowrap; }
 
-/* ---------------- tables */
 table { width: 100%; border-collapse: collapse; font-size: 8.2pt; margin: 2mm 0 5mm; break-inside: auto; }
 thead { display: table-header-group; }
 tr { break-inside: avoid; }
@@ -76,7 +73,6 @@ table.tiny { font-size: 6.9pt; } table.tiny td, table.tiny th { padding: 1.1mm 1
 .tcap b, .fcap b { color: var(--orange); }
 .note { font-size: 8pt; color: var(--muted); }
 
-/* ---------------- figures */
 figure { margin: 3mm 0 5mm; break-inside: avoid; text-align: center; }
 figure img { max-width: 100%; max-height: 118mm; }
 figure.wide img { width: 100%; }
@@ -86,7 +82,6 @@ figure.shot img { width: 100%; border-radius: 2mm; border: 1px solid #1e293b; ma
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
 .two figure img { max-height: 70mm; }
 
-/* ---------------- callouts, formulas */
 .callout { border-radius: 2.5mm; padding: 4mm 5mm; margin: 4mm 0; background: linear-gradient(90deg, #fff7ed, #fdf2f8 60%, #f5f3ff); border-left: 1.2mm solid var(--orange); color: var(--ink); font-size: 9.6pt; break-inside: avoid; }
 .callout.q { font-size: 11pt; font-weight: 500; border-left-color: var(--violet); }
 .formula { font-family: "JetBrains Mono", Consolas, monospace; font-size: 8.2pt; background: #0f172a; color: #fde68a; padding: 3mm 4mm; border-radius: 2mm; margin: 3mm 0; break-inside: avoid; }
@@ -94,7 +89,6 @@ p.en { font-style: italic; color: var(--muted); }
 pre { background: #0f172a; color: #e2e8f0; font-size: 7.8pt; padding: 4mm; border-radius: 2mm; white-space: pre-wrap; break-inside: avoid; }
 ul.defs li { margin-bottom: 2mm; }
 
-/* ---------------- architecture */
 .arch { display: grid; grid-template-columns: 1fr 5mm 1fr 5mm 1fr 5mm 1fr 5mm 1fr; align-items: stretch; margin: 4mm 0 1mm; }
 .arch .arrow { display: grid; place-items: center; color: var(--muted); font-size: 12pt; }
 .arch .st { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm; background: #fff; border-top: 1.4mm solid; }
@@ -107,14 +101,12 @@ ul.defs li { margin-bottom: 2mm; }
 .arch .s4 { border-top-color: var(--violet); } .arch .s4 span { color: var(--violet); }
 .arch .s5 { border-top-color: var(--blue); } .arch .s5 span { color: var(--blue); }
 
-/* ---------------- findings */
 table.findings td.score { font-size: 12pt; font-weight: 750; color: var(--orange); }
 table.findings .impl { font-size: 7.8pt; color: var(--ink2); margin-top: 1mm; padding-left: 2mm; border-left: 0.6mm solid var(--amber); }
 table.findings .src { font-size: 6.8pt; color: #94a3b8; margin-top: 1mm; }
 .tag { display: inline-block; font-size: 6.8pt; font-weight: 600; color: #fff; padding: 0.6mm 2mm; border-radius: 1mm; white-space: nowrap; }
 .t-Prevention { background: var(--orange); } .t-Detection { background: var(--teal); } .t-Suppression { background: var(--blue); }
 
-/* ---------------- toc */
 .toc ol { columns: 2; column-gap: 10mm; font-size: 10.5pt; color: var(--ink); padding-left: 7mm; }
 .toc ol li { margin-bottom: 2.6mm; break-inside: avoid; }
 .toc ol li::marker { color: var(--orange); font-weight: 700; }

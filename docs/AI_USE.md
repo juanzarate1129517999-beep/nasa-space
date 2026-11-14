@@ -19,7 +19,7 @@ Metadata: every SI briefing carries `"source": "si"` in `web/data/si.js`, the ge
 
 ## AI assistance in building the project
 
-- **Code and documentation** were written with AI assistance (Anthropic Claude, through Claude Code), then run, reviewed and tested by the team. Files written this way say so in their header (for example `pipeline/si.py`, `scripts/si_generate.py`, `tests/`). The git history records Claude as co-author on those commits.
+- **Code and documentation** were written with AI assistance (Anthropic Claude, through Claude Code), then run, reviewed and tested by the team. This is acknowledged in descriptive text (this file, the README, the dashboard footer, the reports and the submission page) and in metadata: the git history records Claude as co-author on those commits, and `data/si/drafts.json → meta.generator` names the SI model.
 - **Research** of the challenge and of NASA sources used web search; every source used is cited in the README, the report and the dashboard.
 - **Images and video:** the dashboard has no SI-generated images, video or audio; the charts are plotted from data. *Team to confirm* for the logo (`web/assets/phoenix.svg`) and for any image or video in the demo: if one was generated with SI, add a visible “SI-generated” watermark before submitting.
 - **NASA branding:** no NASA logo, insignia or mission patch is used anywhere in the project.

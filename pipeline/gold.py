@@ -1,4 +1,3 @@
-"""Gold layer: analytic tables, data-derived findings with evidence scores, and the web export."""
 import json
 import math
 
@@ -9,7 +8,6 @@ from .common import GOLD, HABITATS, QC, WEB_DATA
 
 
 def wilson(k, n, z=1.645):
-    """90% Wilson interval for a proportion."""
     if n == 0:
         return [None, None]
     p = k / n
@@ -208,10 +206,8 @@ def write(ens, saffire2, saffire1, invs, sim, models):
     payload = _jsonable(payload)
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     (WEB_DATA / "ember.json").write_text(blob, encoding="utf-8")
-    # Same data as a script so the dashboard also works when opened from disk (file://)
     (WEB_DATA / "ember.js").write_text("window.EMBER=" + blob + ";", encoding="utf-8")
     (GOLD / "findings.json").write_text(json.dumps(F, ensure_ascii=False, indent=1), encoding="utf-8")
-    # Downloadable copies for the dashboard (GitHub Pages serves only the web/ folder)
     dl = WEB_DATA / "downloads"
     dl.mkdir(parents=True, exist_ok=True)
     for name in ("ensayos.csv", "investigaciones.csv", "qc_log.csv", "saffire2_ug_vs_1g.csv", "findings.json"):

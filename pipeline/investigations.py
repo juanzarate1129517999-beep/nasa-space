@@ -1,10 +1,3 @@
-"""Investigation-level gold table: the 24 PSI Combustion Science investigations.
-
-For each investigation: metadata (objective, PI, DOI, publications), an automatic
-profile of its experimental tables (what varied, what was held fixed, what was
-measured), test-condition coverage, fire-safety layer, similarity to the others,
-and a transparent relevance score for each habitable environment.
-"""
 import ast
 import json
 import re
@@ -16,7 +9,6 @@ from scipy.spatial.distance import squareform
 
 from .common import CATALOG, HABITATS, RAW
 
-# Grouping used by the challenge page itself ("Hardware" section).
 HARDWARE = {
     **{k: "ACME · Combustion Integrated Rack" for k in ("PSI-10", "PSI-20", "PSI-21", "PSI-22", "PSI-23", "PSI-159")},
     **{k: "MDCA droplet rig · CIR" for k in ("PSI-69", "PSI-68", "PSI-39")},
@@ -38,11 +30,9 @@ SHORT = {"PSI-142": "Cool-flame counterflow", "PSI-62": "BASS spread modeling", 
          "PSI-117": "Cool-flame perturbation", "PSI-115": "SAME smoke modeling", "PSI-10": "ACME Flame Design",
          "PSI-21": "ACME CLD", "PSI-22": "ACME E-FIELD", "PSI-23": "ACME s-Flame", "PSI-47": "DAFT / DAFT-2",
          "PSI-98": "Saffire-I", "PSI-99": "Saffire-II", "PSI-100": "Saffire-III"}
-# Safety layers as framed by the challenge: prevention, detection, suppression.
 LAYERS = {"PSI-101": ["Detection"], "PSI-102": ["Detection"], "PSI-47": ["Detection"], "PSI-115": ["Detection"],
           "PSI-69": ["Suppression", "Prevention"], "PSI-68": ["Suppression", "Prevention"],
           "PSI-26": ["Prevention", "Suppression"], "PSI-25": ["Prevention", "Suppression"]}
-# How directly the challenge page points to each investigation (1 = named as core).
 DIRECTNESS = {**{k: 1.0 for k in ("PSI-26", "PSI-25", "PSI-98", "PSI-99", "PSI-100", "PSI-102", "PSI-101", "PSI-69")},
               **{k: 0.75 for k in ("PSI-20", "PSI-47", "PSI-159", "PSI-22")}}
 
@@ -55,7 +45,6 @@ MEASURE_COL = re.compile(r"extinction|burn|rate|length|ignit|rt/r0|weight loss|t
 
 def _clean_col(c):
     c = re.sub(r"\s+", " ", str(c).replace("﻿", "").replace("ï»¿", "")).strip()
-    # the PSI tables lost the subscript 2 and the micro sign (µ-g appears as "?-g")
     return c.replace("O initial", "O2 initial").replace("CO initial", "CO2 initial").replace("?-g", "µg")
 
 
@@ -81,7 +70,7 @@ def profile_table(path):
             continue
         num = pd.to_numeric(s, errors="coerce")
         if "pressure" in c.lower():
-            num = num.where(num > 0)  # 0 pressure is a logged data-entry error (see QC log)
+            num = num.where(num > 0)
         is_num = num.notna().mean() > 0.8
         nun = num.dropna().nunique() if is_num else s.astype(str).str.strip().nunique()
         if is_num:
@@ -104,35 +93,32 @@ ENUM = re.compile(r"\(?(?:\d{1,2}|[A-Za-z])[.)]")
 
 
 def _sentences(text, n=2):
-    """First n sentences, without cutting numbered lists ("1. ... 2.") or ending on "as follows:"."""
     text = re.sub(r"\s+", " ", str(text or "")).strip()
     parts = re.split(r"(?<=[.!?])\s+(?=[A-Z(\d])", text)
     merged = []
     for p in parts:
         if merged and (ENUM.fullmatch(merged[-1].split(" ")[-1]) or ENUM.fullmatch(merged[-1])):
-            merged[-1] += " " + p  # a bare list marker belongs to the item that follows it
+            merged[-1] += " " + p
         else:
             merged.append(p)
     k = min(n, len(merged))
     while k < len(merged) and re.search(r"(follows|include|includes|were|are)\s*[.:]$", merged[k - 1], re.I):
-        k += 1  # the sentence announces a list: keep its first item
+        k += 1
     out = " ".join(merged[:k])
     return re.sub(r"\s+\(?\d{1,2}[.)]?$", "", out).strip()
 
 
 def _kernel(x_o2, p_atm, h):
-    """Closeness of test conditions to a habitat atmosphere (1 = identical)."""
     d2 = ((x_o2 - h["x_o2"]) / O2_SCALE) ** 2
     if p_atm is not None:
         d2 = d2 + (np.log(p_atm / h["p_atm"]) / np.log(P_SCALE)) ** 2
     return np.exp(-d2 / 2)
 
 
-O2_SCALE, P_SCALE = 0.03, 1.3  # one "unit" of distance = 3 points of O2 or a 30% pressure ratio
+O2_SCALE, P_SCALE = 0.03, 1.3
 
 
 def _search_fields():
-    """Team surnames and Earth-benefit text from the raw PSI search export."""
     path = CATALOG.parent / "search_combustion.json"
     if not path.exists():
         return {}
@@ -141,7 +127,6 @@ def _search_fields():
         person = x.get("Person") or {}
         if isinstance(person, list):
             person = person[0] if person else {}
-        # PSI merges all team members into one string per field; surnames split cleanly on spaces
         surnames = [s for s in str(person.get("Last Name", "")).split() if s]
         out[x.get("Accession")] = {"team": ", ".join(surnames),
                                    "earth": _sentences(x.get("Research Impacts/Earth Benefits"), 2)}
@@ -191,7 +176,6 @@ def build(ensayos):
             "psi_url": f"https://psi.nasa.gov/physci/repo/data/investigations/{psi}",
             "size_mb": float(c["total_mb"]) if pd.notna(c["total_mb"]) else None,
         }
-        # ---- relevance per habitat: 50% condition proximity, 20% evidence, 30% challenge directness
         directness = DIRECTNESS.get(psi, 0.5 if flight else 0.35)
         evidence = min(1.0, np.log1p(n_outcome) / np.log1p(300))
         scores = {}
@@ -202,7 +186,7 @@ def build(ensayos):
                 w = np.where(cond["o2_ubicacion"].eq("quemador"), 0.5, 1.0)
                 w = w * np.where(cond["o2_supuesto"] | cond["p_supuesta"], 0.6, 1.0)
                 n_eff += float((_kernel(cond["x_o2"].values, cond["p_atm"].values, h) * w).sum())
-            if len(o2_only):  # pressure not reported (ACME BRE): O2 match only, half weight
+            if len(o2_only):
                 n_eff += float(0.5 * _kernel(o2_only["x_o2"].values, None, h).sum())
             prox = 1 - np.exp(-n_eff / 8)
             total = 0.5 * prox + 0.2 * evidence + 0.3 * directness
