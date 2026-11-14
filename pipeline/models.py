@@ -8,7 +8,6 @@ Exported as coefficients + bootstrap ensembles so the web dashboard can run the
 models live in the browser, with uncertainty, and no server.
 """
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score

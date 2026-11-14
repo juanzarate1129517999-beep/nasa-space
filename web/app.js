@@ -3,18 +3,12 @@
   "use strict";
   const D = window.EMBER;
   const $ = (s, el = document) => el.querySelector(s);
-  const h = (tag, attrs = {}, html = "") => {
-    const e = document.createElement(tag);
-    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-    e.innerHTML = html;
-    return e;
-  };
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const pct = (p, d = 0) => (p == null ? "—" : (100 * p).toFixed(d) + "%");
   const o2pct = (x) => pct(x, Math.round(x * 1000) % 10 ? 1 : 0); // 26.5% but 30%, 100%
   const num = (v, d = 2) => (v == null ? "—" : Number(v).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d }));
   const ATM_PSI = 14.6959;
-  const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "#1c2640", line2: "#29355a", bg: "#070a14", surface: "#0d1220", g2: "#cbd5e1", g3: "#94a3b8", g4: "#64748b", g5: "#475569", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24", rose: "#f43f5e" };
+  const C = { ink: "#f1f5f9", ink2: "#cbd5e1", ink3: "#94a3b8", ink4: "#64748b", line: "#1c2640", line2: "#29355a", bg: "#070a14", surface: "#0d1220", orange: "#f2600f", blue: "#0b93d6", violet: "#8b5cf6", teal: "#0f9d8f", amber: "#fbbf24" };
   const FAMILY = {
     solido: { name: "Solid materials", symbol: "square", color: C.orange },
     gota: { name: "Fuel droplets", symbol: "circle", color: C.blue },

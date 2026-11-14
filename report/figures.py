@@ -222,7 +222,7 @@ def validation():
     V = D["flex"]["validation"]["models"]
     names = ["Logística\n(desplegado)", "Gradient\nboosting", "Solo\noxígeno", "Tasa\nbase"]
     fig, axes = plt.subplots(1, 3, figsize=(7.6, 2.9))
-    for ax, key, lab, better in ((axes[0], "auc", "AUC (más alto = mejor)", "hi"), (axes[1], "brier", "Brier (más bajo = mejor)", "lo"),
+    for ax, key, lab, _better in ((axes[0], "auc", "AUC (más alto = mejor)", "hi"), (axes[1], "brier", "Brier (más bajo = mejor)", "lo"),
                                  (axes[2], "log_loss", "Log loss (más bajo = mejor)", "lo")):
         vals = [m[key] for m in V]
         cols = [ORANGE if m["deployed"] else LIGHT for m in V]
@@ -311,7 +311,7 @@ def probmaps():
 def habitats():
     H = [h for h in D["habitat_check"] if h["habitat"] != "suit"]
     fig, ax = plt.subplots(figsize=(7.2, 2.7))
-    for k, (fuel, col, off) in enumerate((("Methanol", ORANGE, -0.13), ("Heptane", BLUE, 0.13))):
+    for fuel, col, off in (("Methanol", ORANGE, -0.13), ("Heptane", BLUE, 0.13)):
         for i, h in enumerate(H):
             r = h["fuels"][fuel]
             ax.plot([r["lo"], r["hi"]], [i + off, i + off], color=col, lw=2.2, alpha=0.45)

@@ -120,7 +120,7 @@ def main():
         store["drafts"][key] = draft
         done += 1
         print(f"✓ {key}")
-    store["meta"] = {"generator": f"Anthropic Claude ({MODEL}) via scripts/si_generate.py",
+    store["meta"] = {"generator": "Anthropic Claude via scripts/si_generate.py",
                      "input": "data/si/evidence_packs.json", "regenerate": "python scripts/si_generate.py",
                      "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash"}
     si.DRAFTS.write_text(json.dumps(store, ensure_ascii=False, indent=1), encoding="utf-8")

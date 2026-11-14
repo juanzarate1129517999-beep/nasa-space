@@ -66,7 +66,7 @@ def bass2(root):
     parts = []
     for pi, df in sheets.items():
         df.columns = [str(c).strip() for c in df.columns]
-        col = lambda key: [c for c in df.columns if key.lower() in c.lower()][0]
+        col = lambda key, df=df: [c for c in df.columns if key.lower() in c.lower()][0]
         df = df[df[col("Material")].notna()]
         parts.append(pd.DataFrame({
             "experimento": "BASS-II",
@@ -93,7 +93,7 @@ def saffire(root):
         df = pd.read_csv(os.path.join(root, acc, fn), encoding="latin-1")
         df.columns = [str(c).strip() for c in df.columns]
         df = df[df.iloc[:, 0].astype(str).str.match(r"^(S\d|\d-\d)")]
-        get = lambda key: next((df[c] for c in df.columns if key.lower() in c.lower()), pd.Series("", index=df.index))
+        get = lambda key, df=df: next((df[c] for c in df.columns if key.lower() in c.lower()), pd.Series("", index=df.index))
         notes = ("ug_burn_length=" + get("-g Burn Length").astype(str) + "; ug_spread=" + get("-g Spread").astype(str)
                  + "; 1g_burn_length=" + get("1-g Burn Length").astype(str) + "; 1g_spread_rate=" + get("1-g Spread Rate").astype(str)
                  + "; burn_time=" + get("Burn Time").astype(str))

@@ -222,7 +222,7 @@ def acme_daily():
                 "n_eventos": _num(pd.Series([s.loc[idx, "Flames Ignited*"]]))[0]}]), "PSI-23", "ACME s-Flame", "gas"))
 
     b = _csv("PSI-20", "ACME BRE")
-    for idx, r in b.iterrows():
+    for _, r in b.iterrows():
         raw = str(r["Oxygen Conc (percent)"])
         vals = [float(v) for v in re.findall(r"\d+\.?\d*", raw)]
         if "%" in raw and len(vals) == 1 and vals[0] > 100:
@@ -277,11 +277,7 @@ def _first_flow(text):
 
 def solids():
     raw = str(RAW)
-    parts = []
-    for fn, psi in ((btt.bass, "PSI-26"), (btt.bass2, "PSI-25"), (btt.saffire, None)):
-        d = fn(raw)
-        parts.append(d)
-    d = pd.concat(parts, ignore_index=True)
+    d = pd.concat([fn(raw) for fn in (btt.bass, btt.bass2, btt.saffire)], ignore_index=True)
     for c in ("observaciones", "flujo_cm_s_texto", "ventilador_texto", "direccion_flujo"):
         d[c] = d[c].fillna("").astype(str).replace("nan", "")
     d["familia_material"] = d["material"].map(btt.family)
