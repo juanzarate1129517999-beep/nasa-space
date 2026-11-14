@@ -112,9 +112,8 @@
     ];
     $("#kpis").innerHTML = k.map(([v, s, l]) => `<div><dt>${l}</dt><dd>${v}${s}</dd></div>`).join("");
     $("#hero-lead").innerHTML = `NASA's archive holds ${S.ambient.toLocaleString("en-US")} flight fires with a known atmosphere. Only <b>${S.moon_envelope}</b> came near that air, and no solid material has burned in orbit above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
-    const names = [...INV].sort((a, b) => a.name.localeCompare(b.name)).map((r) => `<span>${esc(r.name)}</span>`).join("");
-    $("#marquee").innerHTML = names; $("#marquee-2").innerHTML = names;
-
+  }
+  function renderHabitats() {
     $("#habitats").innerHTML = D.habitats.map((hb) => {
       const x = featVec({ fuel: "Methanol", o2: hb.x_o2, p: hb.p_atm, co2: 0, he: 0, d0: M.d0_median });
       const st = dataStatus(x);
@@ -130,7 +129,7 @@
     }).join("");
     document.querySelectorAll(".hab").forEach((b) => b.addEventListener("click", () => {
       setPreset(b.dataset.hab);
-      document.getElementById("scenario").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("scenario").scrollIntoView({ behavior: "smooth", block: "start" });
     }));
   }
 
@@ -195,27 +194,74 @@
   const invState = { hab: "moon_base", layer: "All", q: "", sel: null };
   const INV = D.investigations;
   const habName = (id) => D.habitats.find((x) => x.id === id).name;
+  const WPRESET = [["Default", [0.5, 0.2, 0.3]], ["Atmosphere first", [0.7, 0.1, 0.2]], ["Safety relevance first", [0.3, 0.1, 0.6]], ["Data volume first", [0.3, 0.5, 0.2]]];
+  const wt = { w: [0.5, 0.2, 0.3], vol: "outcomes" };
+  const volOf = (r, h) => (wt.vol === "records" ? Math.min(1, Math.log1p(r.n_tests) / Math.log1p(300)) : r.relevance[h].evidence);
+  const scoreOf = (r, h) => { const q = r.relevance[h]; return 100 * (wt.w[0] * q.proximity + wt.w[1] * volOf(r, h) + wt.w[2] * q.directness); };
+  let robust = {};
+  function computeRobust(h) {
+    let seed = 7;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const gam2 = () => -Math.log(rnd()) - Math.log(rnd());
+    const C = INV.map((r) => [r.relevance[h].proximity, volOf(r, h), r.relevance[h].directness]);
+    const cnt = new Array(INV.length).fill(0), N = 2000;
+    for (let k = 0; k < N; k++) {
+      const g = [gam2(), gam2(), gam2()], t = g[0] + g[1] + g[2];
+      const sc = C.map((c, i) => [i, (g[0] * c[0] + g[1] * c[1] + g[2] * c[2]) / t]).sort((a, b) => b[1] - a[1]);
+      for (let j = 0; j < 3; j++) cnt[sc[j][0]]++;
+    }
+    robust = Object.fromEntries(INV.map((r, i) => [r.psi_id, cnt[i] / N]));
+  }
+  function renderCriteria() {
+    const names = [["Atmosphere closeness", "How many tests ran within ~3 points of O₂ and ~30% of the pressure of the habitat."], [wt.vol === "records" ? "Data volume · measured records" : "Data volume · labeled outcomes", wt.vol === "records" ? "Test records with measured results, log scale." : "Tests with a labeled outcome (went out, kept burning), log scale."], ["Fire-safety directness", "1.0 for flight tests of cabin materials, smoke and droplet fires; 0.75 for gas-flame work; 0.5 other flight, 0.35 ground."]];
+    const top = [...INV].sort((a, b) => scoreOf(b, invState.hab) - scoreOf(a, invState.hab)).slice(0, 3);
+    const solid = top.map((r) => robust[r.psi_id] || 0);
+    $("#criteria").innerHTML = `
+      <div class="crit__w">
+        <div class="crit__top"><p class="label">Ranking criteria · ${esc(habName(invState.hab))}</p><div class="seg seg--wrap" id="w-pre">${WPRESET.map(([n, w]) => `<button type="button" data-w="${w.join(",")}" aria-pressed="${w.every((v, i) => Math.abs(v - wt.w[i]) < 1e-6)}">${n}</button>`).join("")}</div></div>
+        ${names.map(([n, d], i) => `<div class="slider"><div class="top"><label for="w-${i}">${n}</label><output>${Math.round(100 * wt.w[i])}%</output></div><input type="range" id="w-${i}" min="0" max="100" step="5" value="${Math.round(100 * wt.w[i])}"><p class="crit__d">${d}</p></div>`).join("")}
+        <div class="controls-row" style="margin:14px 0 0"><span class="mono-sm">Data volume counts</span><div class="seg" id="w-vol"><button type="button" data-v="outcomes" aria-pressed="${wt.vol === "outcomes"}">Labeled outcomes</button><button type="button" data-v="records" aria-pressed="${wt.vol === "records"}">All measured records</button></div></div>
+      </div>
+      <div class="crit__r">
+        <p class="label">Does the answer hold?</p>
+        <p class="crit__big">${top.map((r, i) => `<span><b>${esc(r.name)}</b><small>top 3 in ${Math.round(100 * solid[i])}% of weightings</small></span>`).join("")}</p>
+        <p class="note">We re-ranked with 2,000 random weightings of the three criteria. A high share means the place does not depend on our choice of weights. Smoke studies (SAME, SAME-R) and ACME BRE have no labeled outcomes, so “labeled outcomes” scores them zero on data volume; switch to “all measured records” to see their measured data count.</p>
+      </div>`;
+    document.querySelectorAll("#criteria input[type=range]").forEach((el, i) => el.addEventListener("input", () => {
+      const v = +el.value / 100, rest = 1 - v, others = [0, 1, 2].filter((k) => k !== i), sum = others.reduce((a, k) => a + wt.w[k], 0);
+      wt.w[i] = v; others.forEach((k) => { wt.w[k] = sum > 0 ? (rest * wt.w[k]) / sum : rest / 2; });
+      rerankSoon();
+    }));
+    document.querySelectorAll("#w-pre button").forEach((b) => b.addEventListener("click", () => { wt.w = b.dataset.w.split(",").map(Number); rerank(); }));
+    document.querySelectorAll("#w-vol button").forEach((b) => b.addEventListener("click", () => { wt.vol = b.dataset.v; computeRobust(invState.hab); rerank(); }));
+  }
+  let rrT = null;
+  function rerankSoon() {
+    document.querySelectorAll("#criteria input[type=range]").forEach((el, k) => { el.value = Math.round(100 * wt.w[k]); el.previousElementSibling.querySelector("output").textContent = `${Math.round(100 * wt.w[k])}%`; });
+    clearTimeout(rrT); rrT = setTimeout(() => { renderInvList(); safe(renderCompare, "compare"); }, 60);
+  }
+  function rerank() { renderCriteria(); renderInvList(); safe(renderCompare, "compare"); }
   function renderInvControls() {
     $("#inv-habitat").innerHTML = D.habitats.map((x) => `<button aria-pressed="${x.id === invState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
     $("#inv-layer").innerHTML = ["All", "Prevention", "Detection", "Suppression"].map((l) => `<button aria-pressed="${l === invState.layer}" data-l="${l}">${l}</button>`).join("");
-    document.querySelectorAll("#inv-habitat button").forEach((b) => b.addEventListener("click", () => { invState.hab = b.dataset.h; invState.sel = null; renderInvControls(); renderInvList(); safe(renderCompare, "compare"); }));
+    document.querySelectorAll("#inv-habitat button").forEach((b) => b.addEventListener("click", () => { invState.hab = b.dataset.h; invState.sel = null; computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); safe(renderCompare, "compare"); }));
     document.querySelectorAll("#inv-layer button").forEach((b) => b.addEventListener("click", () => { invState.layer = b.dataset.l; renderInvControls(); renderInvList(); }));
   }
   function filteredInv() {
     const q = invState.q.trim().toLowerCase();
     return INV.filter((r) => invState.layer === "All" || r.layers.includes(invState.layer))
       .filter((r) => !q || [r.name, r.title, r.psi_id, r.pi, r.family, r.hardware, ...(r.keywords || [])].join(" ").toLowerCase().includes(q))
-      .sort((a, b) => b.relevance[invState.hab].score - a.relevance[invState.hab].score);
+      .sort((a, b) => scoreOf(b, invState.hab) - scoreOf(a, invState.hab));
   }
   function renderInvList() {
     const rows = filteredInv();
     if (!invState.sel || !rows.find((r) => r.psi_id === invState.sel)) invState.sel = rows.length ? rows[0].psi_id : null;
     $("#inv-list").innerHTML = rows.length ? rows.map((r, i) => {
-      const s = r.relevance[invState.hab].score;
+      const s = scoreOf(r, invState.hab), rb = robust[r.psi_id];
       return `<button class="inv-row" role="option" aria-selected="${r.psi_id === invState.sel}" data-id="${r.psi_id}">
         <span class="rk">${String(i + 1).padStart(2, "0")}</span>
         <span><span class="nm">${esc(r.name)} <small>${r.psi_id}</small></span><span class="mt">${esc(r.family)} · ${r.type} · ${r.n_tests.toLocaleString("en-US")} records${r.n_with_outcome ? ` · ${r.n_with_outcome} labeled` : ""}</span></span>
-        <span class="score"><span class="n">${s.toFixed(1)}</span><span class="bar"><i style="width:${s}%"></i></span></span></button>`;
+        <span class="score"><span class="n">${s.toFixed(1)}</span><span class="bar"><i style="width:${s}%"></i></span>${rb != null && rb >= 0.05 ? `<span class="rb" title="Share of 2,000 random weightings in which it stays in the top 3">top 3 in ${Math.round(100 * rb)}%</span>` : ""}</span></button>`;
     }).join("") : '<p class="note" style="padding:18px">No investigation matches.</p>';
     document.querySelectorAll(".inv-row").forEach((b) => b.addEventListener("click", () => selectInv(b.dataset.id)));
     renderInvDetail();
@@ -260,11 +306,11 @@
         <div><span>Hardware</span><b>${esc(r.hardware)}</b></div>
         <div><span>Conditions tested</span><b>${cond}</b></div>
       </div>
-      <div class="label">Relevance for ${esc(habName(invState.hab))} · ${rel.score.toFixed(1)} / 100</div>
+      <div class="label">Relevance for ${esc(habName(invState.hab))} · ${scoreOf(r, invState.hab).toFixed(1)} / 100</div>
       <div class="breakdown">
-        <div class="r"><span>Condition proximity ×0.5</span>${bar(rel.proximity)}<span class="n">${rel.proximity.toFixed(2)}</span></div>
-        <div class="r"><span>Labeled evidence ×0.2</span>${bar(rel.evidence)}<span class="n">${rel.evidence.toFixed(2)}</span></div>
-        <div class="r"><span>Fire-safety directness ×0.3</span>${bar(rel.directness)}<span class="n">${rel.directness.toFixed(2)}</span></div>
+        <div class="r"><span>Atmosphere closeness ×${wt.w[0].toFixed(2)}</span>${bar(rel.proximity)}<span class="n">${rel.proximity.toFixed(2)}</span></div>
+        <div class="r"><span>${wt.vol === "records" ? "Measured records" : "Labeled outcomes"} ×${wt.w[1].toFixed(2)}</span>${bar(volOf(r, invState.hab))}<span class="n">${volOf(r, invState.hab).toFixed(2)}</span></div>
+        <div class="r"><span>Fire-safety directness ×${wt.w[2].toFixed(2)}</span>${bar(rel.directness)}<span class="n">${rel.directness.toFixed(2)}</span></div>
       </div>
       <p class="note">≈${rel.n_near} test-equivalents within ~3 points of O₂ and ~30% of the pressure of this habitat.</p>
       ${tables || '<p class="note">No experimental table in PSI (ground or modeling investigation).</p>'}
@@ -279,32 +325,9 @@
     $("#add-cmp").addEventListener("click", () => {
       if (!cmpState.ids.includes(r.psi_id)) { cmpState.ids = [r.psi_id, ...cmpState.ids.filter((x) => x !== r.psi_id)].slice(0, 3); }
       renderCompare();
-      document.getElementById("compare").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("compare").scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
-  function renderSimilarity() {
-    const S = D.similarity;
-    const w = S.weights;
-    $("#sim-sub").textContent = `Similarity = ${Math.round(100 * w.keywords_jaccard)}% shared keywords + ${Math.round(100 * w.same_family)}% same fuel family + ${Math.round(100 * w.same_hardware)}% same hardware + ${Math.round(100 * w.o2_range_overlap)}% overlapping O₂ range + ${Math.round(100 * w.linked_in_psi)}% linked in PSI · ordered by hierarchical clustering · click a cell to open it`;
-    const el = plot("sim-chart", [{
-      z: S.matrix, x: S.names, y: S.names, type: "heatmap", zmin: 0, zmax: 1, xgap: 1, ygap: 1,
-      colorscale: [[0, "#0d1220"], [0.35, "#3b1d10"], [0.7, "#f2600f"], [1, "#fde68a"]],
-      colorbar: { thickness: 8, outlinewidth: 0, tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, len: 0.6 },
-      hovertemplate: "<b>%{y}</b> ↔ <b>%{x}</b><br>similarity %{z:.2f}<extra></extra>",
-    }], layout({
-      margin: { l: 150, r: 10, t: 6, b: 140 },
-      xaxis: { tickangle: -50, gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist, Inter, sans-serif", size: 11, color: C.ink2 } },
-      yaxis: { autorange: "reversed", gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist, Inter, sans-serif", size: 11, color: C.ink2 } },
-    }));
-    if (el) el.on("plotly_click", (ev) => {
-      const name = ev.points[0].y;
-      const id = S.ids[S.names.indexOf(name)];
-      invState.layer = "All"; invState.q = ""; $("#inv-search").value = "";
-      renderInvControls(); renderInvList(); selectInv(id);
-      document.getElementById("investigations").scrollIntoView({ behavior: "smooth" });
-    });
-  }
-
   const SL = [
     { k: "o2", label: "Oxygen", min: 0.10, max: 1.0, step: 0.005, fmt: (v) => `${(100 * v).toFixed(1)}%`, ticks: ["10%", "40%", "70%", "100%"] },
     { k: "p", label: "Pressure", min: 0.25, max: 3.2, step: 0.005, fmt: (v) => `${v.toFixed(2)} atm<small>${(v * ATM_PSI).toFixed(1)} psi</small>`, ticks: ["0.25", "1.0", "2.0", "3.2 atm"] },
@@ -782,8 +805,8 @@
     catch (e) { window.prompt("Copy this link:", t); }
     setTimeout(() => { btn.textContent = old; }, 1800);
   }
-  function shareUrl(hash) {
-    return `${location.origin}${location.pathname}?${scenarioParams()}${hash}`;
+  function shareUrl() {
+    return `${location.origin}${location.pathname}?${scenarioParams()}#/lab`;
   }
 
   const SI = window.SI || null;
@@ -919,9 +942,9 @@
     document.querySelectorAll("#aud-path .step").forEach((b) => b.addEventListener("click", () => {
       const act = a.steps[+b.dataset.i][2];
       if (act.brief) { briefState.hab = act.brief; renderBrief(); }
-      if (act.preset) setPreset(act.preset);
+      if (act.preset) { ensure("lab"); setPreset(act.preset); }
       if (act.ask) { $("#ask-q").value = act.ask; renderAsk(act.ask); }
-      document.querySelector(act.go)?.scrollIntoView({ behavior: "smooth" });
+      go(act.go);
     }));
   }
 
@@ -933,7 +956,7 @@
     const R = cmpState.ids.map((id) => INV.find((r) => r.psi_id === id)).filter(Boolean);
     if (!R.length) { $("#cmp-table").innerHTML = ""; $("#cmp-note").textContent = "Pick an investigation."; return; }
     const hab = invState.hab;
-    const rank = Object.fromEntries([...INV].sort((a, b) => b.relevance[hab].score - a.relevance[hab].score).map((r, i) => [r.psi_id, i + 1]));
+    const rank = Object.fromEntries([...INV].sort((a, b) => scoreOf(b, hab) - scoreOf(a, hab)).map((r, i) => [r.psi_id, i + 1]));
     const S = D.similarity;
     const sim = (a, b) => S.matrix[S.ids.indexOf(a)][S.ids.indexOf(b)];
     const names = (r, key) => [...new Set(r.tables.flatMap((t) => t[key].map((v) => v.variable)))];
@@ -947,7 +970,7 @@
       ["Pressure tested", (r) => (r.p_min != null ? `${r.p_max > r.p_min ? `${num(r.p_min)}–${num(r.p_max)}` : num(r.p_min)} atm${r.conditions_assumed ? " (cabin air assumed)" : ""}` : "not reported")],
       ["What varied", (r) => names(r, "varied").slice(0, 5).join(", ") || "—"],
       ["What was measured", (r) => names(r, "measured").slice(0, 5).join(", ") || "—"],
-      [`Relevance · ${habName(hab)}`, (r) => `${r.relevance[hab].score.toFixed(1)} / 100 · rank ${rank[r.psi_id]}`],
+      [`Relevance · ${habName(hab)}`, (r) => `${scoreOf(r, hab).toFixed(1)} / 100 · rank ${rank[r.psi_id]}`],
       ["Publications in PSI", (r) => String(r.n_publications)],
       [`Similarity to ${R[0].name}`, (r) => (r === R[0] ? "—" : sim(R[0].psi_id, r.psi_id).toFixed(2))],
     ];
@@ -981,38 +1004,208 @@
     $("#si-table").closest(".tbl-wrap").classList.add("scroll");
   }
 
-  function navSpy() {
-    const links = [...document.querySelectorAll(".nav__links a")];
-    const map = new Map(links.map((a) => [a.getAttribute("href").slice(1), a]));
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { links.forEach((a) => a.classList.remove("is-on")); map.get(e.target.id)?.classList.add("is-on"); }
-      });
-    }, { rootMargin: "-45% 0px -50% 0px" });
-    map.forEach((_, id) => { const s = document.getElementById(id); if (s) obs.observe(s); });
+  function nearCount(hb) {
+    let n = 0;
+    for (const g of D.coverage.groups) for (let k = 0; k < g.x_o2.length; k++) {
+      const o = g.x_o2[k], pp = g.p_atm[k];
+      if (o == null || pp == null) continue;
+      if (Math.abs(o - hb.x_o2) <= 0.03 && Math.abs(Math.log(pp / hb.p_atm)) <= Math.log(1.3)) n++;
+    }
+    return n;
+  }
+  function habPredict(hb) {
+    const x = featVec({ fuel: "Methanol", o2: hb.x_o2, p: hb.p_atm, co2: 0, he: 0, d0: M.d0_median });
+    return { ...predict(x), st: dataStatus(x).s };
+  }
+  const DEST = {
+    iss: { hab: "cabin", label: "ISS", sub: "where the fires flew", title: "International Space Station", g: "≈ 0 g", where: "Every flight test in this archive burned here or on a Cygnus cargo ship." },
+    moon: { hab: "moon_base", label: "Moon", sub: "lunar base · 30% O₂", title: "Lunar base and rover", g: "0.17 g", where: "Planned air for the Moon base and pressurized rover, from the challenge brief." },
+    mars: { hab: "exploration", label: "Mars", sub: "exploration air · 34% O₂", title: "Mars and exploration habitats", g: "0.38 g", where: "NASA's exploration atmosphere, proposed for long missions to the Moon and Mars." },
+    earth: { hab: "cabin", label: "Earth", sub: "where materials are tested", title: "Earth: where materials are screened", g: "1 g", where: "Spacecraft materials are certified with flame tests in Earth gravity." },
+  };
+  let globe = null;
+  function destInfo(id) {
+    const d = DEST[id], hb = D.habitats.find((x) => x.id === d.hab), r = habPredict(hb), S = D.solids;
+    if (id === "earth") return { v: `${S.g1_upward_limit_pct}%`, l: "O₂ a PMMA rod needs in the upward flame test on Earth", t: `In orbit, BASS-II rods kept burning down to ${S.min_o2_pct}%. At gentle cabin airflows, Earth screening can understate the risk.`, hb };
+    const near = nearCount(hb);
+    if (r.st === "outside") return { v: "—", muted: true, l: "prediction withheld: no flight data near this air", t: `${near} flight tests ran within 3 points of O₂ and 30% of this pressure.`, hb };
+    return { v: pct(r.p), l: `chance a droplet fire goes out on its own · 90% range ${pct(r.lo)}–${pct(r.hi)}${r.st === "extrapolating" ? " · extrapolating" : ""}`, t: `${near} flight tests ran within 3 points of O₂ and 30% of this pressure.`, hb };
+  }
+  function renderDests() {
+    $("#dests").innerHTML = Object.entries(DEST).map(([k, d]) => {
+      const x = destInfo(k);
+      return `<li class="dst"><span class="dst__n">${esc(d.label)}</span><b>${esc(d.title)}</b>
+        <span class="atm"><span>${o2pct(x.hb.x_o2)} O₂</span><span>${num(x.hb.p_atm * ATM_PSI, 1)} psi</span><span>${d.g}</span></span>
+        <span class="dst__v${x.muted ? " muted" : ""}">${x.v}</span><span class="dst__l">${esc(x.l)}</span><span class="dst__t">${esc(x.t)}</span>
+        <a class="dst__go" href="#/lab" data-hab="${d.hab}">Open in the Fire Lab →</a></li>`;
+    }).join("");
+    document.querySelectorAll("#dests [data-hab]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); ensure("lab"); setPreset(a.dataset.hab); location.hash = "#/lab"; }));
+  }
+  function destDetail(id) {
+    const x = destInfo(id);
+    return `<span class="glabel__v${x.muted ? " muted" : ""}">${x.v}</span><span class="glabel__l">${esc(x.l)}</span><a href="#/lab" class="glabel__a" data-hab="${DEST[id].hab}">Open in the Fire Lab →</a>`;
+  }
+  function initGlobe() {
+    if (!window.PhoenixGlobe || !window.THREE) { $("#globe").classList.add("globe--fallback"); return; }
+    globe = window.PhoenixGlobe.init($("#globe"), {
+      base: "assets/3d/",
+      bodies: [
+        { id: "iss", label: DEST.iss.label, sub: DEST.iss.sub },
+        { id: "moon", label: DEST.moon.label, sub: DEST.moon.sub },
+        { id: "mars", label: DEST.mars.label, sub: DEST.mars.sub },
+        { id: "earth", label: DEST.earth.label, sub: DEST.earth.sub },
+      ],
+      detail: destDetail,
+    });
+  }
+  function renderAnswers() {
+    const S = D.summary, SO = D.solids;
+    const cab = habPredict(D.habitats.find((x) => x.id === "cabin")), moon = habPredict(D.habitats.find((x) => x.id === "moon_base"));
+    const k = D.next.picks[0];
+    const items = [
+      ["The gap", `${S.moon_envelope}<small>/ ${S.ambient.toLocaleString("en-US")}</small>`, "flight tests anywhere near lunar-base air", `No solid material has burned in orbit above ${SO.max_o2_any_solid_pct}% O₂, and none at reduced pressure.`, "#/findings", "See the gap"],
+      ["Prevention", pct(moon.p), "chance a droplet fire goes out on its own in lunar-base air", `Against ${pct(cab.p)} in cabin air. On the Moon base, a fire must be detected and put out; it will not die on its own.`, "#/lab", "Try it in the Fire Lab"],
+      ["Solids", `${SO.min_o2_pct}%`, "lowest oxygen where a plastic rod kept burning in orbit", `Below the ${SO.g1_upward_limit_pct}% limit of the upward test used on Earth. Watch the flight video.`, "#/flames", "Watch the flames"],
+      ["Next flight", `${pct(k.interval[0])}–${pct(k.interval[1])}`, "today's range for the test that would teach the most", `${k.fuel} droplet at ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi, ${(100 * k.x_co2).toFixed(0)}% CO₂: the widest doubt near lunar-base air.`, "#/next", "See the recommendation"],
+    ];
+    $("#answer-list").innerHTML = items.map(([t, v, l, d, h, a], i) => `<li class="answer"><a href="${h}"><span class="answer__n">${String(i + 1).padStart(2, "0")} · ${t}</span><span class="answer__v">${v}</span><span class="answer__l">${l}</span><span class="answer__d">${esc(d)}</span><span class="answer__go">${a} →</span></a></li>`).join("");
+    const tiles = [
+      ["flames", "Flames", "Real ISS flight video: the same plastic at four oxygen levels, plus fabric, film, a droplet and a gas sphere."],
+      ["lab", "Fire Lab", "Set oxygen, pressure and suppressant; a validated model answers with uncertainty."],
+      ["findings", "Findings", "Where NASA has flown fire versus where crews will live, and what the tests show."],
+      ["ranking", "Ranking", "The 24 investigations ranked for your habitat, with weights you can change."],
+      ["next", "Next flight", "The experiment NASA should fly next, chosen by where the models disagree most."],
+      ["ask", "Ask SI", "Cited briefings checked by code, and a search over NASA's own text."],
+    ];
+    $("#tiles").innerHTML = tiles.map(([v, t, d], i) => `<a class="tile" href="#/${v}"><span class="tile__n">${String(i + 1).padStart(2, "0")}</span><b>${t}</b><small>${d}</small><span class="tile__go" aria-hidden="true">→</span></a>`).join("");
   }
 
+  const ROD = [
+    { f: "bass2-rod-15", o2: 15.1, test: "O17", flow: "3 cm/s, then 0, then 11", x: 2.2, cap: "Small, dim and blue. Near the limit there is little soot left to glow, yet the flame holds on." },
+    { f: "bass2-rod-17", o2: 16.7, test: "O10", flow: "5, 2, then 0 cm/s", x: 3.0, cap: "Brighter, with a yellow tail: a little more oxygen already means more soot." },
+    { f: "bass2-rod-18", o2: 18.0, test: "O3b", flow: "5, 3, 2, 1 cm/s, then lower", x: 4.0, cap: "Orange and sooty, wrapped around the tip; it shrinks each time the airflow is turned down." },
+    { f: "bass2-rod-22", o2: 22.2, test: "O1", flow: "20, 10, 5, 2, then 1 cm/s", x: 6.6, cap: "Air close to the station's: a large, bright, sooty flame that changes shape as the airflow drops." },
+  ];
+  const REEL = [
+    { f: "bass2-sibal-18", kind: "Solid · fabric", t: "SIBAL cotton-fiberglass fabric", m: "18.5% O₂ · 10 cm/s · BASS-II test T1", x: 1.2, psi: "PSI-25", cap: "A small, dim flame on a 2 cm strip of the fabric NASA uses as a cabin-textile stand-in." },
+    { f: "bass2-film-22", kind: "Solid · thin film", t: "100 µm acrylic film", m: "22.2% O₂ · 5 cm/s · BASS-II test B1", x: 1.8, psi: "PSI-25", cap: "Thin material burns as a flame front that travels along the strip." },
+    { f: "cfi-droplet", kind: "Liquid · fuel droplet", t: "Fuel droplet, backlit", m: "Cool Flame Investigation · CIR rack", x: 6, psi: "PSI-39", cap: "Two needles deploy the droplet (dark disc), a hot wire lights it, and it shrinks as it burns." },
+    { f: "cfig-butane-39", kind: "Gas · burner flame", t: "Butane from a spherical burner", m: "39.1% O₂ · 1 atm · ACME CFI-G test 21102 B1", x: 4.5, psi: "PSI-159", cap: "Nothing rises, so the flame is a sphere. NASA's table: it went out on its own after 38 s." },
+  ];
+  const vidUrl = (f) => `assets/video/${f}.mp4`;
+  const psiUrl = (id) => (INV.find((r) => r.psi_id === id) || {}).psi_url || "#";
+  let rodI = 0;
+  function renderStage() {
+    const r = ROD[rodI], SO = D.solids;
+    const pos = (v) => `${(100 * (v - 12)) / (32 - 12)}%`;
+    $("#stage").innerHTML = `
+      <div class="stage__video"><video id="stage-v" src="${vidUrl(r.f)}" poster="assets/video/${r.f}.jpg" muted loop playsinline autoplay preload="auto"></video><span class="stage__tag">ISS · BASS-II · ×${r.x} speed</span></div>
+      <div class="stage__side">
+        <p class="label">Oxygen in the glovebox</p>
+        <div class="stage__o2">${r.o2}<small>% O₂</small></div>
+        <div class="o2bar" aria-hidden="true">
+          <i class="o2bar__fill" style="width:${pos(r.o2)}"></i>
+          ${[[SO.min_o2_pct, "orbit limit", "lim"], [SO.g1_upward_limit_pct, "Earth test limit", "g1"], [21, "Earth air", "air"], [30, "Moon base", "moon"]].map(([v, t, c]) => `<span class="o2bar__m o2bar__m--${c}" style="left:${pos(v)}"><b>${v}%</b>${t}</span>`).join("")}
+        </div>
+        <div class="seg stage__pick" role="group" aria-label="Oxygen level">${ROD.map((x, i) => `<button type="button" data-i="${i}" aria-pressed="${i === rodI}">${x.o2}%</button>`).join("")}</div>
+        <p class="stage__cap">${esc(r.cap)}</p>
+        <dl class="stage__meta"><div><dt>Sample</dt><dd>¼-inch clear acrylic (PMMA) rod</dd></div><div><dt>Airflow</dt><dd>${esc(r.flow)}</dd></div><div><dt>NASA test</dt><dd><a class="src-link" href="${psiUrl("PSI-25")}" target="_blank" rel="noopener">BASS-II ${r.test} · PSI-25 ↗</a></dd></div></dl>
+      </div>`;
+    document.querySelectorAll(".stage__pick button").forEach((b) => b.addEventListener("click", () => { rodI = +b.dataset.i; renderStage(); }));
+    const v = $("#stage-v"); if (v) { v.playbackRate = 1; v.play().catch(() => {}); }
+  }
+  function renderReel() {
+    $("#reel").innerHTML = REEL.map((r) => `<figure class="clip"><div class="clip__v"><video data-src="${vidUrl(r.f)}" poster="assets/video/${r.f}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${r.x}</span></div>
+      <figcaption><span class="label">${esc(r.kind)}</span><b>${esc(r.t)}</b><span class="mono-sm">${esc(r.m)}</span><small>${esc(r.cap)}</small><a class="src-link" href="${psiUrl(r.psi)}" target="_blank" rel="noopener">${r.psi} ↗</a></figcaption></figure>`).join("");
+    const vids = [...document.querySelectorAll("#reel video")];
+    const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => {
+      const v = e.target;
+      if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
+    }), { threshold: 0.25 }) : null;
+    vids.forEach((v) => (io ? io.observe(v) : (v.src = v.dataset.src)));
+  }
+
+  const VIEWS = ["home", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
+  const ALIAS = { scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
+    investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
+  const done = {};
+  const INIT = {
+    home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(renderDests, "destinations"); safe(initGlobe, "globe"); },
+    flames: () => { safe(renderStage, "stage"); safe(renderReel, "reel"); safe(renderSolids, "solids"); },
+    lab: () => { safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
+    findings: () => { safe(() => { renderCoverageFilters(); renderCoverage(); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
+    ranking: () => { safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
+    next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
+    ask: () => { safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing"); },
+    data: () => { safe(renderQuality, "quality"); safe(renderDownloads, "downloads"); safe(renderEarth, "resources"); },
+  };
+  function ensure(v) { if (!done[v] && INIT[v]) { done[v] = true; INIT[v](); } }
+  function resizeIn(root) {
+    if (!hasPlotly || !root) return;
+    root.querySelectorAll(".js-plotly-plot").forEach((el) => { try { Plotly.Plots.resize(el); } catch (e) {} });
+  }
+  function viewOf(el) { const v = el && el.closest(".view"); return v ? v.dataset.view : null; }
+  function parseHash() {
+    const h = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
+    const [a, b] = h.split("/");
+    if (!a) return { v: "home" };
+    if (VIEWS.includes(a)) return { v: a, anchor: b || null };
+    if (ALIAS[a]) return { v: ALIAS[a], anchor: document.getElementById(a) && !document.getElementById(a).classList.contains("view") ? a : null };
+    const el = document.getElementById(a);
+    return el && viewOf(el) ? { v: viewOf(el), anchor: a } : { v: "home" };
+  }
+  let current = null;
+  function route() {
+    const { v, anchor } = parseHash();
+    ensure(v);
+    const changed = v !== current;
+    current = v;
+    document.querySelectorAll(".view").forEach((s) => { s.hidden = s.dataset.view !== v; });
+    document.querySelectorAll(".nav__links a").forEach((a) => a.classList.toggle("is-on", a.dataset.v === v));
+    document.body.dataset.view = v;
+    if (globe) { if (v === "home") globe.resume(); else globe.pause(); }
+    const view = document.querySelector(`.view[data-view="${v}"]`);
+    view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
+    requestAnimationFrame(() => {
+      resizeIn(view);
+      const el = anchor && document.getElementById(anchor);
+      if (el) { const d = el.closest("details"); if (d) d.open = true; el.scrollIntoView({ behavior: changed ? "instant" : "smooth", block: "start" }); }
+      else if (changed) window.scrollTo({ top: 0, behavior: "instant" });
+    });
+    if (v !== "home") document.querySelectorAll(`.view:not([data-view="home"]) video`).forEach((x) => { if (viewOf(x) !== v) x.pause(); });
+  }
+  function go(target) {
+    const id = String(target).replace(/^#\/?/, "");
+    const el = document.getElementById(id);
+    const v = VIEWS.includes(id) ? id : (el ? viewOf(el) : ALIAS[id]);
+    if (!v) return;
+    ensure(v);
+    const next = el && !el.classList.contains("view") && id !== v ? `#/${v}/${id}` : `#/${v}`;
+    if (location.hash === next) route(); else location.hash = next;
+  }
+  document.addEventListener("click", (e) => {
+    const g = e.target.closest(".glabel__a");
+    if (g) { e.preventDefault(); ensure("lab"); setPreset(g.dataset.hab); location.hash = "#/lab"; return; }
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const h = a.getAttribute("href");
+    if (h.startsWith("#/") || h === "#") return;
+    e.preventDefault();
+    go(h);
+  });
+
   function safe(fn, name) { try { fn(); } catch (e) { console.error(`[Skylab Phoenix] ${name} failed`, e); } }
-  safe(renderHero, "hero");
-  safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing");
   $("#ask-form").addEventListener("submit", (e) => { e.preventDefault(); safe(() => renderAsk($("#ask-q").value), "ask"); });
   $("#brief-dl").addEventListener("click", () => download(`skylab-phoenix-briefing-${briefState.hab}.md`, briefMarkdown()));
-  $("#brief-sim").addEventListener("click", () => { setPreset(briefState.hab); document.getElementById("scenario").scrollIntoView({ behavior: "smooth" }); });
-  safe(() => { renderCoverageFilters(); renderCoverage(); }, "coverage");
-  safe(() => { renderInvControls(); renderInvList(); renderSimilarity(); renderCompare(); }, "investigations");
+  $("#brief-sim").addEventListener("click", () => { ensure("lab"); setPreset(briefState.hab); location.hash = "#/lab"; });
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
-  safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario");
-  safe(() => { applyUrlScenario(); }, "url");
-  urlReady = true;
-  $("#share-btn").addEventListener("click", (e) => copyText(shareUrl("#scenario"), e.currentTarget));
-  safe(renderDownloads, "downloads");
-  safe(renderEvidence, "evidence");
-  safe(renderFindings, "findings");
-  safe(() => { renderHistory(); renderSolids(); renderEarth(); }, "solids");
-  safe(renderNext, "next");
+  $("#share-btn").addEventListener("click", (e) => copyText(shareUrl(), e.currentTarget));
   $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
-  safe(renderQuality, "quality");
-  safe(navSpy, "nav");
+  document.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) resizeIn(d); }));
+  $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly · three.js`;
+  if (QS.has("o2") || QS.has("hab")) { if (!location.hash || location.hash === "#" || location.hash === "#scenario") history.replaceState(null, "", `${location.search}#/lab`); }
+  route();
+  addEventListener("hashchange", route);
   safe(() => {
     const nav = $("#nav"), burger = $("#burger"), menu = $("#navLinks");
     const onScroll = () => nav.classList.toggle("is-scrolled", scrollY > 8);
@@ -1025,15 +1218,8 @@
       const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
       rv.forEach((el) => io.observe(el));
     } else rv.forEach((el) => el.classList.add("in"));
-    window.addEventListener("hashchange", () => rv.forEach((el) => el.classList.add("in")));
   }, "chrome");
   const hideLoading = () => { $("#loading").classList.add("done"); document.documentElement.classList.add("is-ready"); };
   requestAnimationFrame(hideLoading);
   setTimeout(hideLoading, 300);
-  if (location.search.includes("offsets")) setTimeout(() => {
-    const o = {};
-    document.querySelectorAll("main > section").forEach((sec, i) => { o[sec.id || `s${i}`] = [Math.round(sec.getBoundingClientRect().top + scrollY), sec.offsetHeight]; });
-    o.total = document.documentElement.scrollHeight;
-    const pre = document.createElement("pre"); pre.id = "offsets"; pre.textContent = JSON.stringify(o); pre.hidden = true; document.body.append(pre);
-  }, 1500);
 })();
