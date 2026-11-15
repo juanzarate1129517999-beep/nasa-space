@@ -1,0 +1,182 @@
+[
+ {
+  "id": "coverage_gap",
+  "layer": "Prevention",
+  "title": "Almost no flight data where the Moon base will live",
+  "text": "Of 1,613 flight-test records with an ambient O₂ and pressure (718 measured, the rest run in ISS cabin air), 37 sit inside the lunar-base envelope (≥28% O₂, ≤0.75 atm), all from CFI-G normal, FLEX. No solid-material test exceeds 22.7% O₂ and none was flown at reduced pressure. Spacesuit conditions (100% O₂, 4.3 psi): 0 tests.",
+  "implication": "The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+  "source": "All 24 PSI investigations",
+  "score": 100.0,
+  "components": {
+   "volume": 1.0,
+   "quality": 1.0,
+   "agreement": 1.0,
+   "closeness": 1.0
+  }
+ },
+ {
+  "id": "model_moon",
+  "layer": "Prevention",
+  "title": "Lunar-base air makes self-extinction ~11× less likely than cabin air",
+  "text": "The validated FLEX model gives a methanol droplet flame a 72% chance of self-extinguishing in cabin air (21%, 1 atm) and 6% at 30% O₂ and 10.2 psi (90% interval 2%–14%). Out-of-sample AUC 0.88 with whole test days held out.",
+  "implication": "Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
+  "source": "PSI-69 FLEX · Skylab Phoenix model",
+  "score": 84.7,
+  "components": {
+   "volume": 0.976,
+   "quality": 0.954,
+   "agreement": 0.333,
+   "closeness": 1.0
+  }
+ },
+ {
+  "id": "pmma",
+  "layer": "Prevention",
+  "title": "Solid-material data is dominated by one plastic",
+  "text": "177 of 238 solid-material tests (candles excluded) are PMMA; Nomex, silicone and Ultem together have 16.",
+  "implication": "Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
+  "source": "PSI-26 BASS · PSI-25 BASS-II",
+  "score": 75.9,
+  "components": {
+   "volume": 0.96,
+   "quality": 1.0,
+   "agreement": 0.667,
+   "closeness": 0.2
+  }
+ },
+ {
+  "id": "o2_no_self_ext",
+  "layer": "Prevention",
+  "title": "Above 30% O₂, flames stop putting themselves out",
+  "text": "In FLEX, 24 droplet fires burned at 30–34% O₂ (17 of them at 0.70 atm, next to the lunar-base atmosphere). Only 2 self-extinguished — 0 of the 17 at 0.70 atm — against 73 of 79 below 18% O₂.",
+  "implication": "A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
+  "source": "PSI-69 FLEX",
+  "score": 75.6,
+  "components": {
+   "volume": 0.564,
+   "quality": 0.9,
+   "agreement": 0.667,
+   "closeness": 1.0
+  }
+ },
+ {
+  "id": "helium",
+  "layer": "Suppression",
+  "title": "Helium and larger droplets push flames toward extinction",
+  "text": "Holding everything else fixed, adding helium raises the odds of self-extinction (standardized effect +0.47, 90% CI +0.23 to +0.93); so does a larger initial droplet (+0.81), consistent with radiative-loss extinction of large microgravity flames.",
+  "implication": "Diluent choice matters: helium-rich atmospheres change fire behavior, not only O₂ level.",
+  "source": "PSI-69 FLEX · Skylab Phoenix model",
+  "score": 70.8,
+  "components": {
+   "volume": 0.976,
+   "quality": 0.8,
+   "agreement": 0.333,
+   "closeness": 0.5
+  }
+ },
+ {
+  "id": "solid_limit",
+  "layer": "Prevention",
+  "title": "In orbit, solids keep burning at less oxygen than Earth tests allow",
+  "text": "In BASS-II, PMMA rod flames kept burning down to 13.5% O₂. NASA's fitted flammability boundary bottoms out at 13.5% O₂ near 1.7–2.5 cm/s of airflow, below the 15.4% limit of the normal-gravity upward test. Below 17% O₂ the rods released a median 137 ppm of CO (n=23), against 59 ppm above 20% O₂ (n=6).",
+  "implication": "Earth screening can understate how readily a material burns in the gentle airflow of a spacecraft; near-limit solid fires also make more carbon monoxide, a target for detection.",
+  "source": "PSI-25 BASS-II · NASA/TM-20210011385",
+  "score": 69.8,
+  "components": {
+   "volume": 0.685,
+   "quality": 0.9,
+   "agreement": 0.667,
+   "closeness": 0.5
+  }
+ },
+ {
+  "id": "co2",
+  "layer": "Suppression",
+  "title": "CO₂ dilution suppresses droplet fires at reduced pressure",
+  "text": "At 0.7 atm, droplet flames self-extinguished in 50% of tests without CO₂ (n=46) and in 100% with >30% CO₂ (n=22). Once O₂ is accounted for, the model attributes a smaller, uncertain effect to CO₂ — CO₂ tests were often run at different O₂ levels.",
+  "implication": "CO₂ works, but its effect is confounded with O₂ in FLEX: a controlled CO₂ series at lunar-base O₂ is needed.",
+  "source": "PSI-69 FLEX",
+  "score": 68.6,
+  "components": {
+   "volume": 0.814,
+   "quality": 0.7,
+   "agreement": 0.333,
+   "closeness": 0.8
+  }
+ },
+ {
+  "id": "tad_limit",
+  "layer": "Prevention",
+  "title": "One limiting flame temperature? Only for normal gas flames",
+  "text": "For ACME CFI-G normal flames, self-extinction becomes more likely as adiabatic flame temperature drops (AUC 0.70). The 50% point, ≈ 2,844 K (90% CI 2,740–3,135 K), lies just above the hottest normal flame tested (2,730 K), so it is an extrapolation. For inverse flames the same single-variable rule has no predictive power (AUC 0.46).",
+  "implication": "Flame temperature alone is not a universal extinction criterion; geometry and flow matter.",
+  "source": "PSI-159 ACME CFI-G",
+  "score": 65.3,
+  "components": {
+   "volume": 0.983,
+   "quality": 0.491,
+   "agreement": 0.333,
+   "closeness": 0.6
+  }
+ },
+ {
+  "id": "smoke",
+  "layer": "Detection",
+  "title": "Smoke differs by material, and ages before it reaches a detector",
+  "text": "SAME and SAME-R measured smoke from Kapton, Teflon, silicone, Pyrell and lamp wick in orbit, including how particle size grows with aging time (109 SAME-R tests, 8 SAME).",
+  "implication": "Detector thresholds should be set per material and per transport time, not from 1-g smoke.",
+  "source": "PSI-101 SAME-R · PSI-102 SAME",
+  "score": 63.1,
+  "components": {
+   "volume": 0.836,
+   "quality": 0.5,
+   "agreement": 0.667,
+   "closeness": 0.4
+  }
+ },
+ {
+  "id": "cool_flames",
+  "layer": "Detection",
+  "title": "Cool flames: invisible fire, confirmed in orbit",
+  "text": "7 cool flames were confirmed in ACME CFI-G, all with 30% butane near 40% O₂ and 2.0 atm. They burn at low temperature with almost no visible light.",
+  "implication": "Optical flame detectors can miss cool flames; chemical (CO, aldehyde) sensing is a candidate complement.",
+  "source": "PSI-159 ACME CFI-G · PSI-39 CFI",
+  "score": 51.1,
+  "components": {
+   "volume": 0.364,
+   "quality": 0.6,
+   "agreement": 0.667,
+   "closeness": 0.5
+  }
+ },
+ {
+  "id": "one_g",
+  "layer": "Prevention",
+  "title": "At 20 cm/s, the 1-g test was the more severe one",
+  "text": "Saffire-II burned the same samples in orbit and on the ground: in 8 of 8 single-material samples, 1 g burned as much or more than microgravity (silicone barely spread in orbit but burned fully on the ground). BASS's concern — that 1-g screening may not be conservative — applies to low-flow conditions Saffire-II did not test.",
+  "implication": "μg and 1-g results bound partial gravity only for the flow regime that was tested; low-flow is the open question.",
+  "source": "PSI-99 Saffire-II · PSI-25 BASS-II",
+  "score": 45.3,
+  "components": {
+   "volume": 0.385,
+   "quality": 0.5,
+   "agreement": 0.667,
+   "closeness": 0.3
+  }
+ },
+ {
+  "id": "flow_direction",
+  "layer": "Prevention",
+  "title": "Concurrent airflow made a large fire burn 6× longer",
+  "text": "In Saffire-I the same 94 × 40 cm SIBAL fabric burned for 420 s with concurrent flow and 70 s with opposed flow, both at 20 cm/s and ~21.5% O₂.",
+  "implication": "Cabin ventilation direction defines the worst case; fan layout is a fire-safety design variable.",
+  "source": "PSI-98 Saffire-I",
+  "score": 38.6,
+  "components": {
+   "volume": 0.192,
+   "quality": 0.5,
+   "agreement": 0.667,
+   "closeness": 0.3
+  }
+ }
+]
