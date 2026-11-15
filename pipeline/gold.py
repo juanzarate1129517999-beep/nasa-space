@@ -111,11 +111,15 @@ def findings(ens, models, sup, cov, saffire2, saffire1, bands, solid):
     inv = m2["by_type"]["inverse"]
     he_drv = next(d for d in m1["drivers"] if d["feature"] == "x_he")
     d0_drv = next(d for d in m1["drivers"] if d["feature"] == "d0_mm")
+    co2_drv = next(d for d in m1["drivers"] if d["feature"] == "x_co2")
+    lit = solid["literature"]
     F = [
         dict(id="o2_no_self_ext", layer="Prevention", title="Above 30% O₂, flames stop putting themselves out",
              text=f"In FLEX, {len(hi)} droplet fires burned at 30–34% O₂ ({len(hi_low_p)} of them at 0.70 atm, next to the lunar-base "
                   f"atmosphere). Only {int(hi['autoextincion'].sum())} self-extinguished — "
-                  f"{int(hi_low_p['autoextincion'].sum())} of the {len(hi_low_p)} at 0.70 atm — against "
+                  f"{int(hi_low_p['autoextincion'].sum())} of the {len(hi_low_p)} at 0.70 atm, where "
+                  f"{int((hi_low_p['resultado'] == 'disrupcion').sum())} broke apart and "
+                  f"{int((hi_low_p['resultado'] == 'completo').sum())} burned to completion — against "
                   f"{bands[0]['extincion']} of {bands[0]['n']} below 18% O₂.",
              implication="A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
              source="PSI-69 FLEX", n=len(hi), quality=0.9, agree=2, closeness=1.0),
@@ -123,27 +127,32 @@ def findings(ens, models, sup, cov, saffire2, saffire1, bands, solid):
              title=f"Lunar-base air makes self-extinction ~{cab['p'] / moon['p']:.0f}× less likely than cabin air",
              text=f"The validated FLEX model gives a methanol droplet flame a {cab['p']:.0%} chance of self-extinguishing in cabin air "
                   f"(21%, 1 atm) and {moon['p']:.0%} at 30% O₂ and 10.2 psi (90% interval {moon['lo']:.0%}–{moon['hi']:.0%}). "
-                  f"Out-of-sample AUC {auc:.2f} with whole test days held out.",
+                  f"There, the droplet is predicted to break apart {moon['disruption']['p']:.0%} of the time and burn to completion "
+                  f"{moon['completion']['p']:.0%}; even a droplet that burns steadily goes out only {moon['steady_extinction']['p']:.0%} "
+                  f"of the time. Out-of-sample AUC {auc:.2f} with whole test days held out.",
              implication="Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
              source="PSI-69 FLEX · Skylab Phoenix model", n=m1["n"], quality=min(1, (auc - 0.5) / 0.4), agree=1, closeness=1.0),
         dict(id="coverage_gap", layer="Prevention", title="Almost no flight data where the Moon base will live",
              text=f"Of {cov['n_ambient']:,} flight-test records with an ambient O₂ and pressure ({cov['n_measured']:,} measured, the rest "
                   f"run in ISS cabin air), {cov['n_moon_envelope']} sit inside the "
                   f"lunar-base envelope (≥28% O₂, ≤0.75 atm), all from {', '.join(cov['moon_envelope_experiments'])}. "
-                  f"No solid-material test exceeds {nsolid['x_o2'].max():.1%} O₂ and none was flown at reduced pressure. "
+                  f"No solid-material test in PSI's tables exceeds {nsolid['x_o2'].max():.1%} O₂ or was flown at reduced pressure; "
+                  f"NASA's Saffire V and VI (published, not in PSI) burned {lit['elevated']['n']} large samples at "
+                  f"{lit['elevated']['o2_pct'][0]}–{lit['elevated']['o2_pct'][1]}% O₂ and {lit['elevated']['p_atm'][0]:.2f}–{lit['elevated']['p_atm'][1]:.2f} atm. "
                   f"Spacesuit conditions (100% O₂, 4.3 psi): {cov['n_suit_envelope']} tests.",
-             implication="The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+             implication="The highest-value next flight experiment maps the flammability limits of habitat materials at ≥30% O₂ and ≤10.2 psi.",
              source="All 24 PSI investigations", n=cov["n_ambient"], quality=1.0, agree=3, closeness=1.0),
         dict(id="co2", layer="Suppression", title="CO₂ dilution suppresses droplet fires at reduced pressure",
              text=(f"At 0.7 atm, droplet flames self-extinguished in {r0['rate']:.0%} of tests without CO₂ (n={r0['n']}) and in "
                    f"{rmax['rate']:.0%} with {rmax['co2']} CO₂ (n={rmax['n']}). Once O₂ is accounted for, the model attributes a "
-                   f"smaller, uncertain effect to CO₂ — CO₂ tests were often run at different O₂ levels.") if r0 and rmax else "",
+                   f"smaller effect to CO₂ ({100 * co2_drv['coef']:+.0f} points per standard deviation, 90% CI "
+                   f"{100 * co2_drv['lo']:+.0f} to {100 * co2_drv['hi']:+.0f}) — CO₂ tests were often run at different O₂ levels.") if r0 and rmax else "",
              implication="CO₂ works, but its effect is confounded with O₂ in FLEX: a controlled CO₂ series at lunar-base O₂ is needed.",
              source="PSI-69 FLEX", n=sum(r["n"] for r in red), quality=0.7, agree=1, closeness=0.8),
         dict(id="helium", layer="Suppression", title="Helium and larger droplets push flames toward extinction",
-             text=f"Holding everything else fixed, adding helium raises the odds of self-extinction (standardized effect "
-                  f"{he_drv['coef']:+.2f}, 90% CI {he_drv['lo']:+.2f} to {he_drv['hi']:+.2f}); so does a larger initial droplet "
-                  f"({d0_drv['coef']:+.2f}), consistent with radiative-loss extinction of large microgravity flames.",
+             text=f"Holding everything else fixed, one standard deviation more helium changes the chance of self-extinction by "
+                  f"{100 * he_drv['coef']:+.0f} points (90% CI {100 * he_drv['lo']:+.0f} to {100 * he_drv['hi']:+.0f}); a larger initial "
+                  f"droplet by {100 * d0_drv['coef']:+.0f} points, consistent with radiative-loss extinction of large microgravity flames.",
              implication="Diluent choice matters: helium-rich atmospheres change fire behavior, not only O₂ level.",
              source="PSI-69 FLEX · Skylab Phoenix model", n=m1["n"], quality=0.8, agree=1, closeness=0.5),
         dict(id="flow_direction", layer="Prevention", title="Concurrent airflow made a large fire burn 6× longer",

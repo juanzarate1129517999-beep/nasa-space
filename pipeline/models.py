@@ -13,6 +13,43 @@ FLEX_FEATURES = ["heptane", "x_o2", "log_p", "x_co2", "x_he", "d0_mm"]
 FLEX_LABELS = {"heptane": "Fuel: heptane (vs methanol)", "x_o2": "Oxygen mole fraction", "log_p": "Pressure (log)",
                "x_co2": "CO₂ diluent", "x_he": "Helium diluent", "d0_mm": "Initial droplet diameter"}
 
+# Physics features computed from the six inputs a test is set up with (nothing measured after ignition).
+# t_st: Burke-Schumann stoichiometric flame temperature of the droplet's diffusion flame (no radiation or
+# dissociation): T0 + Q·Y_O2 / (cp·(s + Y_O2)), Q = lower heating value, s = mass of O2 per mass of fuel.
+# res: log(d0²·p), a flame residence time (d²/D with D ∝ 1/p).
+PHYS = {"t0_k": 298.0, "q_j_kg": {"Methanol": 19.9e6, "Heptane": 44.6e6}, "s_o2": {"Methanol": 1.5, "Heptane": 3.52},
+        "molar_mass": {"o2": 32.0, "n2": 28.0, "co2": 44.0, "he": 4.0},
+        "cp_j_mol_k": {"o2": 35.0, "n2": 33.0, "co2": 54.0, "he": 20.8}}
+STAGE_FEATURES = {
+    "disruption": FLEX_FEATURES,
+    "extinction": ["heptane", "t_st", "res", "x_he", "hep_t_st", "hep_res"],
+}
+STAGE_LABELS = {"t_st": "Stoichiometric flame temperature", "res": "Residence time, log(d0²·p)",
+                "hep_t_st": "Heptane × flame temperature", "hep_res": "Heptane × residence time", **FLEX_LABELS}
+
+
+def physics(rows):
+    """Six raw inputs [heptane, x_o2, log_p, x_co2, x_he, d0_mm] -> dict of derived feature columns."""
+    R = np.atleast_2d(np.asarray(rows, float))
+    hep, o2, logp, co2, he, d0 = R.T
+    n2 = np.clip(1 - o2 - co2 - he, 0, None)
+    M, CP = PHYS["molar_mass"], PHYS["cp_j_mol_k"]
+    mass = o2 * M["o2"] + n2 * M["n2"] + co2 * M["co2"] + he * M["he"]
+    yo = o2 * M["o2"] / mass
+    cp = (o2 * CP["o2"] + n2 * CP["n2"] + co2 * CP["co2"] + he * CP["he"]) / (mass / 1000)
+    q = np.where(hep == 1, PHYS["q_j_kg"]["Heptane"], PHYS["q_j_kg"]["Methanol"])
+    s = np.where(hep == 1, PHYS["s_o2"]["Heptane"], PHYS["s_o2"]["Methanol"])
+    t_st = PHYS["t0_k"] + q * yo / (cp * (s + yo))
+    res = np.log(d0 ** 2 * np.exp(logp))
+    cols = {"heptane": hep, "x_o2": o2, "log_p": logp, "x_co2": co2, "x_he": he, "d0_mm": d0,
+            "t_st": t_st, "res": res, "hep_t_st": hep * t_st, "hep_res": hep * res}
+    return cols
+
+
+def stage_matrix(rows, stage):
+    c = physics(rows)
+    return np.column_stack([c[f] for f in STAGE_FEATURES[stage]])
+
 
 def _metrics(y, p):
     p = np.clip(p, 1e-4, 1 - 1e-4)
@@ -70,54 +107,164 @@ def _knn_dist(Xs, k=5):
     return np.sort(d, axis=1)[:, :k].mean(axis=1)
 
 
+def _fit_stage(X, y, C=1.0):
+    Xs, mu, sd = _standardize(X)
+    m = LogisticRegression(C=C, max_iter=5000).fit(Xs, y)
+    return mu, sd, np.r_[m.intercept_, m.coef_.ravel()]
+
+
+def _stage_p(coefs, mu, sd, X):
+    Xs = (X - mu) / sd
+    B = np.atleast_2d(coefs)
+    return 1 / (1 + np.exp(-(B[:, :1].T + Xs @ B[:, 1:].T)))
+
+
+def _two_stage_oof(raw, res, groups, reps=20, seed=11):
+    """Repeated GroupKFold: whole ISS test days held out, fold assignment reshuffled each repeat."""
+    rng = np.random.default_rng(seed)
+    XA, XB = stage_matrix(raw, "disruption"), stage_matrix(raw, "extinction")
+    yD, yE = res == "disrupcion", res == "extincion"
+    runs = []
+    for _ in range(reps):
+        ug = np.unique(groups)
+        perm = {u: i for i, u in enumerate(rng.permutation(ug))}
+        gg = np.array([perm[g] for g in groups])
+        pD, pE = np.zeros(len(res)), np.zeros(len(res))
+        for tr, te in GroupKFold(n_splits=5).split(raw, res, gg):
+            muA, sdA, cA = _fit_stage(XA[tr], yD[tr])
+            pD[te] = _stage_p(cA, muA, sdA, XA[te])[:, 0]
+            trB = tr[~yD[tr]]
+            muB, sdB, cB = _fit_stage(XB[trB], yE[trB])
+            pE[te] = _stage_p(cB, muB, sdB, XB[te])[:, 0]
+        runs.append((pD, pE))
+    return runs
+
+
+def _repeated_oof(make, X, y, groups, reps=20, seed=11):
+    rng = np.random.default_rng(seed)
+    out = []
+    for _ in range(reps):
+        ug = np.unique(groups)
+        perm = {u: i for i, u in enumerate(rng.permutation(ug))}
+        out.append(_oof(make, X, y, np.array([perm[g] for g in groups])))
+    return out
+
+
+def _mean_metrics(y, ps):
+    ms = [_metrics(y, p) for p in ps]
+    out = {k: float(np.mean([m[k] for m in ms])) for k in ms[0]}
+    out["auc_sd"] = float(np.std([m["auc"] for m in ms]))
+    return out
+
+
 def flex_model(ens):
     d = ens[(ens["experimento"] == "FLEX") & ens["p_atm"].notna() & ens["autoextincion"].notna()].copy()
     d["heptane"] = (d["combustible"].str.lower() == "heptane").astype(float)
     d["log_p"] = np.log(d["p_atm"])
     d = d.dropna(subset=FLEX_FEATURES)
-    X = d[FLEX_FEATURES].to_numpy(float)
-    y = d["autoextincion"].to_numpy(int)
+    raw = d[FLEX_FEATURES].to_numpy(float)
+    res = d["resultado"].to_numpy(str)
+    y = (res == "extincion").astype(int)
     groups = d["fecha"].dt.strftime("%Y-%m-%d").fillna("na").to_numpy()
-    Xs, mu, sd = _standardize(X)
-    C = 1.0
+    Xs_raw, mu, sd = _standardize(raw)
+    reps = 20
 
-    logit = lambda: LogisticRegression(C=C, max_iter=2000)
-    oof_lr = _oof(logit, Xs, y, groups)
-    oof_gb = _oof(lambda: HistGradientBoostingClassifier(max_depth=3, learning_rate=0.05, max_iter=200,
-                                                         min_samples_leaf=10), Xs, y, groups)
+    runs = _two_stage_oof(raw, res, groups, reps)
+    pE_runs = [(1 - pD) * pE for pD, pE in runs]
+    pD_runs = [pD for pD, _ in runs]
+    steady = res != "disrupcion"
+    logit = lambda: LogisticRegression(C=1.0, max_iter=2000)
+    lr6 = _repeated_oof(logit, Xs_raw, y, groups, reps)
+    gb = _repeated_oof(lambda: HistGradientBoostingClassifier(max_depth=3, learning_rate=0.05, max_iter=200,
+                                                              min_samples_leaf=10), Xs_raw, y, groups, 5)
     o2_col = FLEX_FEATURES.index("x_o2")
-    oof_o2 = _oof(logit, Xs[:, [o2_col]], y, groups)
-    oof_prior = _oof(lambda: _Prior(), Xs, y, groups)
+    o2 = _repeated_oof(logit, Xs_raw[:, [o2_col]], y, groups, reps)
+    prior = _repeated_oof(lambda: _Prior(), Xs_raw, y, groups, 1)
+    oof_E = np.mean(pE_runs, axis=0)
+    oof_D = np.mean(pD_runs, axis=0)
     validation = {
-        "scheme": f"GroupKFold (5 folds), whole test days held out · {len(np.unique(groups))} test days · n = {len(y)}",
+        "scheme": f"GroupKFold (5 folds), whole ISS test days held out, repeated {reps} times with reshuffled folds · "
+                  f"{len(np.unique(groups))} test days · n = {len(y)}",
+        "reps": reps,
         "models": [
-            {"name": "Skylab Phoenix logistic (6 physical inputs)", "key": "lr", **_metrics(y, oof_lr), "deployed": True},
-            {"name": "Gradient boosting (same inputs)", "key": "gb", **_metrics(y, oof_gb), "deployed": False},
-            {"name": "Baseline: oxygen only", "key": "o2", **_metrics(y, oof_o2), "deployed": False},
-            {"name": "Baseline: always predict the base rate", "key": "prior", **_metrics(y, oof_prior),
+            {"name": "Skylab Phoenix two-stage physics model", "key": "lr", **_mean_metrics(y, pE_runs), "deployed": True},
+            {"name": "Single logistic on the 6 raw inputs (previous model)", "key": "lr6", **_mean_metrics(y, lr6), "deployed": False},
+            {"name": "Gradient boosting (6 raw inputs)", "key": "gb", **_mean_metrics(y, gb), "deployed": False},
+            {"name": "Baseline: oxygen only", "key": "o2", **_mean_metrics(y, o2), "deployed": False},
+            {"name": "Baseline: always predict the base rate", "key": "prior", **_mean_metrics(y, prior),
              "auc": 0.5, "deployed": False},
         ],
-        "reliability": _reliability(y, oof_lr),
+        "stages": {
+            "disruption": {**_mean_metrics((res == "disrupcion").astype(int), pD_runs),
+                           "question": "Does the droplet break apart (disruption)?", "n": int(len(y))},
+            "extinction": {**_mean_metrics(y[steady], [pE[steady] for _, pE in runs]),
+                           "question": "If it burns steadily, does the flame go out with fuel left (vs burning to completion)?",
+                           "n": int(steady.sum())},
+            "completion": {**_mean_metrics((res == "completo").astype(int), [(1 - pD) * (1 - pE) for pD, pE in runs]),
+                           "question": "Does the droplet burn to completion?", "n": int(len(y))},
+        },
+        "reliability": _reliability(y, oof_E),
     }
-    full = logit().fit(Xs, y)
-    boots = _bootstrap_logit(Xs, y, C, groups)
-    knn = _knn_dist(Xs)
-    coef_ci = np.percentile(boots[:, 1:], [5, 95], axis=0)
-    drivers = [{"feature": f, "label": FLEX_LABELS[f], "coef": float(full.coef_[0, i]),
-                "lo": float(coef_ci[0, i]), "hi": float(coef_ci[1, i])} for i, f in enumerate(FLEX_FEATURES)]
+
+    # Final fits and a paired, day-level bootstrap: both stages are refit on the same resampled test days.
+    XA, XB = stage_matrix(raw, "disruption"), stage_matrix(raw, "extinction")
+    yD = res == "disrupcion"
+    stages = {}
+    for name, X, yy, mask in (("disruption", XA, yD, np.ones(len(y), bool)), ("extinction", XB, y == 1, steady)):
+        m_, s_, c_ = _fit_stage(X[mask], yy[mask])
+        stages[name] = {"features": STAGE_FEATURES[name], "labels": [STAGE_LABELS[f] for f in STAGE_FEATURES[name]],
+                        "mu": m_.tolist(), "sd": s_.tolist(), "coef": c_.tolist(), "boot": []}
+    idx_all = np.arange(len(y))
+    ug = np.unique(groups)
+    while len(stages["disruption"]["boot"]) < N_BOOT:
+        pick = RNG.choice(ug, size=len(ug), replace=True)
+        idx = np.concatenate([idx_all[groups == g] for g in pick])
+        ib = idx[steady[idx]]
+        if len(np.unique(yD[idx])) < 2 or len(np.unique(y[ib])) < 2:
+            continue
+        for name, X, yy, ii in (("disruption", XA, yD, idx), ("extinction", XB, y == 1, ib)):
+            st = stages[name]
+            Xs = (X[ii] - np.array(st["mu"])) / np.array(st["sd"])
+            mm = LogisticRegression(C=1.0, max_iter=5000).fit(Xs, yy[ii])
+            st["boot"].append(np.round(np.r_[mm.intercept_, mm.coef_.ravel()], 5).tolist())
+
+    model = {"features": FLEX_FEATURES, "labels": FLEX_LABELS, "mu": mu.tolist(), "sd": sd.tolist(),
+             "stages": stages, "phys": PHYS, "n": int(len(y)), "base_rate": float(y.mean()),
+             "outcomes": {k: int((res == k).sum()) for k in ("extincion", "disrupcion", "completo")}}
+
+    # Drivers: average change in the chance the flame goes out on its own for +1 SD of each input
+    # (heptane: methanol -> heptane), with the 90% bootstrap interval.
+    def effects(use_boot):
+        out = []
+        for i, f in enumerate(FLEX_FEATURES):
+            lo_, hi_ = raw.copy(), raw.copy()
+            if f == "heptane":
+                lo_[:, i], hi_[:, i] = 0.0, 1.0
+            else:
+                lo_[:, i] -= sd[i] / 2
+                hi_[:, i] += sd[i] / 2
+            a = flex_predict3(model, hi_, use_boot, keep_draws=True)["extinction"]
+            b = flex_predict3(model, lo_, use_boot, keep_draws=True)["extinction"]
+            out.append((a - b).mean(axis=0))
+        return np.array(out)
+    point = effects(False)[:, 0]
+    draws = effects(True)
+    ci = np.percentile(draws, [5, 95], axis=1)
+    drivers = [{"feature": f, "label": FLEX_LABELS[f], "coef": float(point[i]), "lo": float(ci[0, i]), "hi": float(ci[1, i])}
+               for i, f in enumerate(FLEX_FEATURES)]
     drivers.sort(key=lambda r: -abs(r["coef"]))
-    train = d.assign(p_oof=oof_lr)[["test_uid", "combustible", "x_o2", "p_atm", "x_co2", "x_he", "d0_mm",
-                                   "resultado", "autoextincion", "p_oof", "fecha", "tasa_quemado", "tiempo_quemado_s", "d_ext_mm"]]
+    knn = _knn_dist(Xs_raw)
+    train = d.assign(p_oof=oof_E, p_disr_oof=oof_D)[["test_uid", "combustible", "x_o2", "p_atm", "x_co2", "x_he", "d0_mm",
+                                   "resultado", "autoextincion", "p_oof", "p_disr_oof", "fecha", "tasa_quemado", "tiempo_quemado_s", "d_ext_mm"]]
     train["fecha"] = train["fecha"].dt.strftime("%Y-%m-%d")
-    return {
-        "features": FLEX_FEATURES, "labels": FLEX_LABELS, "mu": mu.tolist(), "sd": sd.tolist(),
-        "coef": np.r_[full.intercept_, full.coef_.ravel()].tolist(), "boot": np.round(boots, 5).tolist(),
+    model.update({
         "ood_threshold": float(np.percentile(knn, 95)), "ood_k": 5,
-        "ranges": {f: [float(X[:, i].min()), float(X[:, i].max())] for i, f in enumerate(FLEX_FEATURES)},
+        "ranges": {f: [float(raw[:, i].min()), float(raw[:, i].max())] for i, f in enumerate(FLEX_FEATURES)},
         "d0_median": float(round(1.1 + np.round((np.median(d["d0_mm"]) - 1.1) / 0.05) * 0.05, 2)),
-        "train": train.round(4).to_dict(orient="records"), "train_std": np.round(Xs, 4).tolist(),
-        "validation": validation, "drivers": drivers, "n": int(len(y)), "base_rate": float(y.mean()),
-    }
+        "train": train.round(4).to_dict(orient="records"), "train_std": np.round(Xs_raw, 4).tolist(),
+        "validation": validation, "drivers": drivers,
+    })
+    return model
 
 
 class _Prior:
@@ -129,12 +276,28 @@ class _Prior:
         return np.c_[np.full(len(X), 1 - self.p), np.full(len(X), self.p)]
 
 
+def flex_predict3(model, rows, use_boot=True, keep_draws=False):
+    """Chance of each ending: extinction (goes out on its own), disruption (breaks apart), completion (burns out)."""
+    rows = np.atleast_2d(np.asarray(rows, float))
+    St = model["stages"]
+    out = {}
+    pr = {}
+    for name in ("disruption", "extinction"):
+        st = St[name]
+        B = np.array(st["boot"]) if use_boot else np.array([st["coef"]])
+        pr[name] = _stage_p(B, np.array(st["mu"]), np.array(st["sd"]), stage_matrix(rows, name))
+    pD, pS = pr["disruption"], pr["extinction"]
+    draws = {"extinction": (1 - pD) * pS, "disruption": pD, "completion": (1 - pD) * (1 - pS), "steady_extinction": pS}
+    if keep_draws:
+        return draws
+    for k, P in draws.items():
+        out[k] = {"p": P.mean(axis=1), "lo": np.percentile(P, 5, axis=1), "hi": np.percentile(P, 95, axis=1)}
+    return out
+
+
 def flex_predict(model, rows, use_boot=True):
-    Xs = (np.asarray(rows, float) - np.array(model["mu"])) / np.array(model["sd"])
-    B = np.array(model["boot"]) if use_boot else np.array([model["coef"]])
-    z = B[:, :1].T + Xs @ B[:, 1:].T
-    p = 1 / (1 + np.exp(-z))
-    return p.mean(axis=1), np.percentile(p, 5, axis=1), np.percentile(p, 95, axis=1)
+    r = flex_predict3(model, rows, use_boot)["extinction"]
+    return r["p"], r["lo"], r["hi"]
 
 
 def flex_ood(model, rows):
@@ -207,12 +370,15 @@ def habitat_check(m1):
         row = {"habitat": h["id"], "name": h["name"], "x_o2": h["x_o2"], "p_atm": h["p_atm"], "fuels": {}}
         for fuel, hep in (("Methanol", 0.0), ("Heptane", 1.0)):
             x = [[hep, h["x_o2"], np.log(h["p_atm"]), 0.0, 0.0, m1["d0_median"]]]
-            mean, lo, hi = flex_predict(m1, x)
+            r3 = flex_predict3(m1, x)
             dist = float(flex_ood(m1, x)[0])
             beyond = out_of_range(m1, x[0])
             status = data_status(dist, m1["ood_threshold"], beyond)
-            row["fuels"][fuel] = {"p": float(mean[0]), "lo": float(lo[0]), "hi": float(hi[0]), "ood_distance": dist,
-                                  "status": status, "ood": status == "outside", "out_of_range": beyond}
+            e = r3["extinction"]
+            row["fuels"][fuel] = {"p": float(e["p"][0]), "lo": float(e["lo"][0]), "hi": float(e["hi"][0]),
+                                  **{f"{k}": {"p": float(r3[k]["p"][0]), "lo": float(r3[k]["lo"][0]), "hi": float(r3[k]["hi"][0])}
+                                     for k in ("disruption", "completion", "steady_extinction")},
+                                  "ood_distance": dist, "status": status, "ood": status == "outside", "out_of_range": beyond}
         out.append(row)
     return out
 
@@ -231,9 +397,7 @@ def next_experiment(m1, top=6):
                     rows.append([hep, a, np.log(b), c, 0.0, m1["d0_median"]])
                     meta.append((fuel, a, b, c))
     rows = np.array(rows)
-    Xs = (rows - np.array(m1["mu"])) / np.array(m1["sd"])
-    B = np.array(m1["boot"])
-    P = 1 / (1 + np.exp(-(B[:, :1].T + Xs @ B[:, 1:].T)))
+    P = flex_predict3(m1, rows, keep_draws=True)["extinction"]
     spread = np.percentile(P, 95, axis=1) - np.percentile(P, 5, axis=1)
     dist = flex_ood(m1, rows)
     moon = next(h for h in HABITATS if h["id"] == "moon_base")
@@ -262,8 +426,7 @@ def next_experiment(m1, top=6):
         r = []
         for b in gp:
             xx = np.array([[0.0, a, np.log(b), 0, 0, m1["d0_median"]], [1.0, a, np.log(b), 0, 0, m1["d0_median"]]])
-            xs = (xx - np.array(m1["mu"])) / np.array(m1["sd"])
-            pp = 1 / (1 + np.exp(-(B[:, :1].T + xs @ B[:, 1:].T)))
+            pp = flex_predict3(m1, xx, keep_draws=True)["extinction"]
             r.append(float(np.mean(np.percentile(pp, 95, axis=1) - np.percentile(pp, 5, axis=1))))
         grid.append(r)
     return {"picks": picks, "map": {"o2": go2.tolist(), "p": gp.tolist(), "spread": np.round(grid, 4).T.tolist()},

@@ -1,3 +1,5 @@
+from pathlib import Path
+import json
 import re
 
 import numpy as np
@@ -117,6 +119,29 @@ def habitat_flammability():
     return out
 
 
+LITERATURE = Path(__file__).resolve().parents[1] / "data" / "literature" / "saffire_iv_vi.csv"
+LIT_URL = "https://ntrs.nasa.gov/citations/20240002981"
+
+
+def literature():
+    """Saffire IV-VI burns on Cygnus, transcribed from NASA's paper (not in PSI's tables)."""
+    lit = pd.read_csv(LITERATURE)
+    lit["p_atm"] = (lit["p_kpa"] / 101.325).round(3)
+    burned = lit[lit["ignited"] == 1]
+    return {
+        "rows": json.loads(lit.to_json(orient="records")),
+        "citation": "Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-2024-365 (NTRS 20240002981)",
+        "url": LIT_URL,
+        "n_burned": int(len(burned)), "max_o2_pct": round(100 * float(burned["x_o2"].max()), 1),
+        "min_p_atm": float(burned["p_atm"].min()),
+        "elevated": {"n": int((burned["x_o2"] >= 0.25).sum()),
+                     "o2_pct": [round(100 * float(burned.loc[burned["x_o2"] >= 0.25, "x_o2"].min()), 1),
+                                round(100 * float(burned.loc[burned["x_o2"] >= 0.25, "x_o2"].max()), 1)],
+                     "p_atm": [float(burned.loc[burned["x_o2"] >= 0.25, "p_atm"].min()),
+                               float(burned.loc[burned["x_o2"] >= 0.25, "p_atm"].max())]},
+    }
+
+
 def build():
     gas = bass2_gas()
     a = np.exp(np.linspace(np.log(0.05), np.log(1500), 240))
@@ -149,4 +174,5 @@ def build():
                        "co2_produced_pct", "o2_consumed_pct", "note"]].round(3).to_dict(orient="records"),
         "habitats": habitat_flammability(),
     }
+    payload["literature"] = literature()
     return gas, payload

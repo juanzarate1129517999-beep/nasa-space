@@ -50,7 +50,8 @@ def _model_item(name, fuel, r, d0, thr):
     if r.get("out_of_range"):
         why = f" because its {' and '.join(FEATURE_TXT[f] for f in r['out_of_range'])} lies outside every flown FLEX test"
     return (f"FLEX model, {fuel.lower()} droplet ({d0:.2f} mm, no diluent): {pct(r['p'])} chance the flame puts itself out "
-            f"in {name} (90% interval {pct(r['lo'])}–{pct(r['hi'])}); this input is {STATUS_TXT[r['status']]}{why}.")
+            f"in {name} (90% interval {pct(r['lo'])}–{pct(r['hi'])}), {pct(r['disruption']['p'])} that the droplet breaks apart and "
+            f"{pct(r['completion']['p'])} that it burns to completion; this input is {STATUS_TXT[r['status']]}{why}.")
 
 
 def habitat_pack(h, P):
@@ -75,7 +76,11 @@ def habitat_pack(h, P):
                  f"and 30% of the pressure of this habitat.")
     cov = P["coverage"]
     items.append(f"Across all PSI flight tests with an ambient O2 and pressure, {cov['n_moon_envelope']} of {cov['n_ambient']:,} records sit "
-                 f"inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.")
+                 f"inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test in PSI's tables was flown there.")
+    lit = P["solids"]["literature"]
+    items.append(f"Outside PSI, NASA's Saffire V and VI burned {lit['elevated']['n']} large fabric and PMMA samples on Cygnus at "
+                 f"{lit['elevated']['o2_pct'][0]}–{lit['elevated']['o2_pct'][1]}% O2 and {lit['elevated']['p_atm'][0]:.2f}–"
+                 f"{lit['elevated']['p_atm'][1]:.2f} atm, all at one airflow; the Nomex sample did not ignite ({lit['citation']}).")
     items.append(f"The FLEX model was validated on held-out ISS test days: AUC {lr['auc']:.2f} and Brier score {lr['brier']:.3f} "
                  f"(n = {F['n']}), better than an oxygen-only baseline.")
     for f in P["findings"][:4]:
@@ -133,8 +138,9 @@ def module_pack(m, P):
         f"{m['name']} of the Skylab Phoenix lunar base: {o2(m['x_o2'])} O2 at {m['psi']} psi ({m['p_atm']:.2f} atm), "
         f"{m['volume_m3']} m³ of free volume ({m['volume_ref']}). Lunar gravity is 0.166 g, and NASA PSI holds no combustion test at that gravity.",
         f"NASA's BASS-II flammability boundary: a PMMA rod keeps burning in still air above {f('materials', 0)} O2 (measured at 1 atm). "
-        f"This module runs at {f('materials', 1)} O2, while the highest O2 any solid has burned at in orbit is {f('materials', 2)}, so this answer is an extrapolation.",
-        f"Saffire-II measured flame spread of {f('materials', 4)} over cotton-fiberglass fabric at about 22% O2 in a 20 cm/s airflow; no fabric has burned in orbit at {f('materials', 1)} O2.",
+        f"This module runs at {f('materials', 1)} O2, while the highest O2 any solid has burned at in NASA PSI's tables is {f('materials', 2)}, so this answer is an extrapolation.",
+        f"Saffire-II measured flame spread of {f('materials', 5)} over cotton-fiberglass fabric at about 22% O2 in a 20 cm/s airflow. Outside PSI, "
+        f"NASA's Saffire VI burned the same fabric and PMMA at up to {f('materials', 3)} (published), without mapping where they stop burning.",
         f"FLEX model in this air: a methanol droplet flame goes out on its own {f('liquids', 0)}; a heptane droplet flame {f('liquids', 1)}; "
         f"the same methanol fire in ISS cabin air goes out {f('liquids', 2)} of the time.",
         f"BASS-II: one PMMA rod burn added a median {f('detection', 0)} of CO to the 250 L glovebox; mixed into this module that is about {f('detection', 4)} "

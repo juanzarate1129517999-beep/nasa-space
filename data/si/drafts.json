@@ -4,20 +4,20 @@
   "input": "data/si/evidence_packs.json",
   "regenerate": "python scripts/si_generate.py (needs ANTHROPIC_API_KEY)",
   "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash",
-  "note": "After the November 2026 data audit (34 duplicate SPICE rows removed), 6 briefs were updated in a Claude Code session with the same rules: 2 sentences rewritten with the new numbers (1,613 records; SPICE 435 records, EVA prep 60.0) and all 6 re-verified by pipeline/si.py against the new evidence packs. The four lunar-base briefs (three modules and the base report) were written in a Claude Code session with the same rules and verified by pipeline/si.py."
+  "note": "After the November 2026 data audit (34 duplicate SPICE rows removed), 6 briefs were updated in a Claude Code session with the same rules: 2 sentences rewritten with the new numbers (1,613 records; SPICE 435 records, EVA prep 60.0) and all 6 re-verified by pipeline/si.py against the new evidence packs. The four lunar-base briefs (three modules and the base report) were written in a Claude Code session with the same rules and verified by pipeline/si.py. After the three-ending FLEX model and the published Saffire IV-VI burns were added (November 2026), the 5 habitat, 3 module and base briefs were rewritten in a Claude Code session with the same rules and checked by the same firewall."
  },
  "drafts": {
   "habitat:cabin": {
    "headline": "Cabin air is where NASA's fire data is richest",
    "sentences": [
     {
-     "text": "In spacecraft cabin air, the FLEX model gives a methanol droplet flame a 72% chance of putting itself out (90% interval 56%–86%), and this input sits inside the flown ISS tests.",
+     "text": "In spacecraft cabin air, the FLEX model gives a methanol droplet flame a 75% chance of putting itself out (90% interval 62%–86%); in 16% of cases the droplet breaks apart and in 9% it burns to completion.",
      "cites": [
       "E2"
      ]
     },
     {
-     "text": "Heptane, a heavier fuel, puts itself out less often: 44% (90% interval 30%–59%).",
+     "text": "Heptane, a heavier fuel, puts itself out less often: 46% (90% interval 32%–62%), and it breaks apart 29% of the time.",
      "cites": [
       "E3"
      ]
@@ -32,17 +32,17 @@
     {
      "text": "Even here the solid-material record is thin and dominated by one plastic, so cabin fabrics and other polymers still need flight data.",
      "cites": [
-      "E10"
+      "E11"
      ]
     }
    ],
-   "pack_hash": "62913b682f1ec1d7"
+   "pack_hash": "d958419dbcdd4293"
   },
   "habitat:eva_prep": {
    "headline": "Raising oxygen to 26.5% already changes how fires behave",
    "sentences": [
     {
-     "text": "At 26.5% O2 and 10.2 psi, the FLEX model gives a methanol droplet flame a 21% chance of putting itself out (90% interval 8%–37%), against 72% in cabin air.",
+     "text": "At 26.5% O2 and 10.2 psi, the FLEX model gives a methanol droplet flame a 26% chance of putting itself out (90% interval 11%–42%), against 75% in cabin air.",
      "cites": [
       "E1",
       "E2",
@@ -50,10 +50,11 @@
      ]
     },
     {
-     "text": "For heptane the chance drops to 7%, so a fire in this atmosphere should be expected to keep burning until it is detected and suppressed.",
+     "text": "More often the droplet breaks apart (58% for methanol, 76% for heptane), and heptane goes out on its own only 2% of the time, so a fire in this atmosphere has to be detected and suppressed.",
      "cites": [
+      "E2",
       "E3",
-      "E12"
+      "E13"
      ]
     },
     {
@@ -64,19 +65,19 @@
      ]
     },
     {
-     "text": "The most informative next flight test is a methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model is still uncertain (90% interval 10%–51%).",
+     "text": "The most informative next flight test is a methanol droplet at 28% O2, 0.75 atm and 30% CO2, where the model is still uncertain (90% interval 11%–48%).",
      "cites": [
-      "E13"
+      "E14"
      ]
     }
    ],
-   "pack_hash": "7289787eeb8ce348"
+   "pack_hash": "37ef0bd9dbb8623d"
   },
   "habitat:moon_base": {
    "headline": "In lunar-base air, fires stop putting themselves out, and the data runs thin",
    "sentences": [
     {
-     "text": "In lunar-base air (30% O2 at 10.2 psi), the FLEX model gives a methanol droplet flame only a 6% chance of putting itself out (90% interval 2%–14%), against 72% in spacecraft cabin air.",
+     "text": "In lunar-base air (30% O2 at 10.2 psi), the FLEX model gives a methanol droplet flame only an 8% chance of putting itself out (90% interval 1%–16%), against 75% in spacecraft cabin air.",
      "cites": [
       "E1",
       "E2",
@@ -84,32 +85,33 @@
      ]
     },
     {
-     "text": "Only 37 of 1,613 flight records with a known atmosphere sit inside the lunar-base envelope, and no solid material has been burned there.",
+     "text": "Most of these droplets are predicted to break apart (81%) and 11% to burn to completion, so almost every fire ends by scattering or burning out its fuel rather than by going out.",
      "cites": [
-      "E7"
+      "E2"
      ]
     },
     {
-     "text": "FLEX is the most relevant investigation (95.1 out of 100), followed by ACME CFI-G (66.8) and ACME BRE (48.1).",
+     "text": "Only 37 of 1,613 flight records with a known atmosphere sit inside the lunar-base envelope, none of them solids; outside PSI, NASA's Saffire V and VI burned 4 large fabric and PMMA samples at 26.2–31.0% O2 without mapping a limit.",
      "cites": [
-      "E5"
+      "E7",
+      "E8"
      ]
     },
     {
-     "text": "Material screening done at 21% / 1 atm cannot be carried over without re-testing, and the highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
+     "text": "Material screening done at 21% / 1 atm cannot be carried over without re-testing, and the highest-value next flight experiment maps the flammability limits of habitat materials at ≥30% O₂ and ≤10.2 psi.",
      "cites": [
-      "E9",
-      "E10"
+      "E10",
+      "E11"
      ]
     }
    ],
-   "pack_hash": "2b3279c7a6189248"
+   "pack_hash": "e615c72469a67b92"
   },
   "habitat:exploration": {
    "headline": "The exploration atmosphere sits beyond NASA's flown droplet tests",
    "sentences": [
     {
-     "text": "At 34% O2 and 8.2 psi, the FLEX model estimates only a 1% chance that a methanol droplet flame puts itself out (90% interval 0%–4%), but this is an extrapolation: no FLEX test was flown at such a low pressure.",
+     "text": "At 34% O2 and 8.2 psi, the FLEX model estimates only a 1% chance that a methanol droplet flame puts itself out (90% interval 0%–3%), but this is an extrapolation: no FLEX test was flown at such a low pressure.",
      "cites": [
       "E1",
       "E2"
@@ -125,17 +127,18 @@
     {
      "text": "Above 30% O₂, flames stop putting themselves out, so a fire here has to be detected and actively suppressed.",
      "cites": [
-      "E12"
+      "E13"
      ]
     },
     {
-     "text": "No solid-material test has been flown inside the lunar-base envelope, so cabin materials for this atmosphere still need flight data.",
+     "text": "No solid-material test in PSI's tables has been flown inside the lunar-base envelope, and the published Saffire burns reached at most 31.0% O2 and went no lower than 0.53 atm, so cabin materials for this atmosphere still need flight data.",
      "cites": [
-      "E7"
+      "E7",
+      "E8"
      ]
     }
    ],
-   "pack_hash": "7e756ef05c67b222"
+   "pack_hash": "5017d8972a8cc6ba"
   },
   "habitat:suit": {
    "headline": "Spacesuit oxygen is outside all flight data",
@@ -162,7 +165,7 @@
      ]
     }
    ],
-   "pack_hash": "0f993500b5b506c6"
+   "pack_hash": "30c9a068ca3644cf"
   },
   "investigation:PSI-69": {
    "headline": "",
@@ -670,17 +673,23 @@
    "pack_hash": "80055f0c79729d74"
   },
   "module:habitat": {
-   "headline": "The habitat's air outruns every solid fire NASA has flown",
+   "headline": "The habitat's air outruns every solid fire limit NASA has mapped",
    "sentences": [
     {
-     "text": "The surface habitat runs at 30% O2 and 10.2 psi, but no solid has burned in orbit above 22.7% O2, so the BASS-II boundary (19.4% in still air) is stretched well beyond its data here.",
+     "text": "The surface habitat runs at 30% O2 and 10.2 psi, while no solid in NASA PSI's tables has burned above 22.7% O2, so the BASS-II boundary (19.4% in still air) is stretched well beyond its data here.",
      "cites": [
       "E1",
       "E2"
      ]
     },
     {
-     "text": "A methanol droplet fire would put itself out only 6% of the time in this air (90% range 2–14%), against 72% in ISS cabin air, so a fire has to be found and fought.",
+     "text": "Outside PSI, NASA's Saffire VI burned cotton-fiberglass fabric and PMMA at up to 31.0% O2 and 0.53 atm, which shows these materials burn in this air but not where they stop burning.",
+     "cites": [
+      "E3"
+     ]
+    },
+    {
+     "text": "A methanol droplet fire would put itself out only 8% of the time in this air (90% range 1–16%), against 75% in ISS cabin air, so a fire has to be found and fought.",
      "cites": [
       "E4"
      ]
@@ -699,20 +708,20 @@
      ]
     }
    ],
-   "pack_hash": "874ba90dd5bfc1f5"
+   "pack_hash": "eba5fdd05c3023aa"
   },
   "module:airlock": {
-   "headline": "EVA-prep air: richer than any solid fire flown in orbit",
+   "headline": "EVA-prep air: richer than any solid fire in NASA's PSI tables",
    "sentences": [
     {
-     "text": "The airlock runs at 26.5% O2 and 10.2 psi, above the 22.7% where any solid has burned in orbit, so materials answers here are extrapolations of the BASS-II boundary.",
+     "text": "The airlock runs at 26.5% O2 and 10.2 psi, above the 22.7% reached by any solid in NASA PSI's tables, so materials answers here are extrapolations of the BASS-II boundary.",
      "cites": [
       "E1",
       "E2"
      ]
     },
     {
-     "text": "A methanol droplet fire would put itself out 21% of the time (90% range 8–37%), and a heptane fire 7%, against 72% in ISS cabin air.",
+     "text": "A methanol droplet fire would put itself out 26% of the time (90% range 11–42%), and a heptane fire 2%, against 75% in ISS cabin air.",
      "cites": [
       "E4"
      ]
@@ -725,13 +734,13 @@
      ]
     },
     {
-     "text": "With 30% CO2 added, the model gives the methanol fire a 32% chance of going out (90% range 14–55%), an extrapolation because no FLEX test combined this much oxygen with CO2.",
+     "text": "With 30% CO2 added, the model gives the methanol fire a 38% chance of going out (90% range 19–59%), an extrapolation because no FLEX test combined this much oxygen with CO2.",
      "cites": [
       "E7"
      ]
     }
    ],
-   "pack_hash": "1ac3b21994869c5b"
+   "pack_hash": "a6c4cc6fe1d63910"
   },
   "module:rover": {
    "headline": "In a 9 m³ rover, a small fire fills the air fast",
@@ -749,19 +758,19 @@
      ]
     },
     {
-     "text": "A methanol droplet fire would put itself out only 6% of the time (90% range 2–14%), so suppression has to be on board.",
+     "text": "A methanol droplet fire would put itself out only 8% of the time (90% range 1–16%), so suppression has to be on board.",
      "cites": [
       "E4"
      ]
     },
     {
-     "text": "Fabric fires spread at 2.1 and 2.6 mm/s in orbit at about 22% O2, and no fabric has burned in orbit at 30.0% O2.",
+     "text": "Fabric fires spread at 2.1 and 2.6 mm/s in orbit at about 22% O2, and NASA's Saffire VI burned the same fabric at up to 31.0% O2 and 0.53 atm, outside PSI.",
      "cites": [
       "E3"
      ]
     }
    ],
-   "pack_hash": "7530d86015d1af62"
+   "pack_hash": "5f20d5f687516b48"
   },
   "base:report": {
    "headline": "The base can be audited today; lunar gravity cannot",
@@ -774,13 +783,13 @@
      ]
     },
     {
-     "text": "Of 57 numbers in this fire audit, 27 are NASA measurements; the rest are derived, model, assumed or extrapolated values, and each is labelled.",
+     "text": "Of 60 numbers in this fire audit, 30 are NASA measurements; the rest are derived, model, assumed or extrapolated values, and each is labelled.",
      "cites": [
       "E3"
      ]
     },
     {
-     "text": "In every module a methanol droplet fire would rarely put itself out: 6% in the habitat and rover, 21% in the airlock.",
+     "text": "In every module a methanol droplet fire would rarely put itself out: 8% in the habitat and rover, 26% in the airlock.",
      "cites": [
       "E4",
       "E5",
@@ -788,7 +797,7 @@
      ]
     },
     {
-     "text": "Three flights would close the biggest gaps: solid-material flammability at ≥30% O2 and ≤10.2 psi, a methanol droplet at 27% O2 with 30% CO2, and any flame at lunar gravity.",
+     "text": "Three flights would close the biggest gaps: flammability limits of habitat materials at ≥30% O2 and ≤10.2 psi, a methanol droplet at 28% O2 with 30% CO2, and any flame at lunar gravity.",
      "cites": [
       "E7",
       "E8",
@@ -796,7 +805,7 @@
      ]
     }
    ],
-   "pack_hash": "f563602d60ee035b"
+   "pack_hash": "6efdfd08625ae970"
   }
  }
 }

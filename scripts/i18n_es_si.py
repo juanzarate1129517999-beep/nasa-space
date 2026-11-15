@@ -268,3 +268,52 @@ for _k, _v in list(SI_ES.items()):
         if _k.startswith(_pk) and _v.startswith(_pv):
             _r = _v[len(_pv):]
             SI_ES[_k[len(_pk):]] = _r[0].upper() + _r[1:]
+
+# Three-ending FLEX model and published Saffire IV-VI burns (numbers are filled from the verified English text, in order)
+SI_ES.update({
+    "In spacecraft cabin air, the FLEX model gives a methanol droplet flame a #% chance of putting itself out (#% interval #%–#%); in #% of cases the droplet breaks apart and in #% it burns to completion.":
+        "En aire de cabina de nave, el modelo FLEX da a una llama de gota de metanol un #% de probabilidad de apagarse sola (intervalo del #%: #%–#%); en el #% de los casos la gota se rompe y en el #% arde hasta consumirse.",
+    "Heptane, a heavier fuel, puts itself out less often: #% (#% interval #%–#%), and it breaks apart #% of the time.":
+        "El heptano, un combustible más pesado, se apaga solo con menos frecuencia: #% (intervalo del #%: #%–#%), y se rompe el #% de las veces.",
+    "More often the droplet breaks apart (#% for methanol, #% for heptane), and heptane goes out on its own only #% of the time, so a fire in this atmosphere has to be detected and suppressed.":
+        "Lo más frecuente es que la gota se rompa (#% en metanol, #% en heptano), y el heptano se apaga solo apenas el #% de las veces, así que un incendio en esta atmósfera hay que detectarlo y suprimirlo.",
+    "In lunar-base air (#% O# at # psi), the FLEX model gives a methanol droplet flame only an #% chance of putting itself out (#% interval #%–#%), against #% in spacecraft cabin air.":
+        "En el aire de la base lunar (#% O# a # psi), el modelo FLEX da a una llama de gota de metanol solo un #% de probabilidad de apagarse sola (intervalo del #%: #%–#%), frente al #% en aire de cabina de nave.",
+    "Most of these droplets are predicted to break apart (#%) and #% to burn to completion, so almost every fire ends by scattering or burning out its fuel rather than by going out.":
+        "Se predice que la mayoría de estas gotas se rompe (#%) y que el #% arde hasta consumirse, así que casi todo incendio termina esparciendo o agotando su combustible, no apagándose.",
+    "Only # of # flight records with a known atmosphere sit inside the lunar-base envelope, none of them solids; outside PSI, NASA's Saffire V and VI burned # large fabric and PMMA samples at #–#% O# without mapping a limit.":
+        "Solo # de # registros de vuelo con atmósfera conocida caen dentro de la envolvente de la base lunar, ninguno de sólidos; fuera de PSI, Saffire V y VI de la NASA quemaron # muestras grandes de tela y PMMA a #–#% O# sin medir un límite.",
+    "Material screening done at #% / # atm cannot be carried over without re-testing, and the highest-value next flight experiment maps the flammability limits of habitat materials at ≥#% O₂ and ≤# psi.":
+        "La selección de materiales hecha a #% / # atm no puede trasladarse sin volver a probar, y el próximo experimento de vuelo de mayor valor mide los límites de inflamabilidad de los materiales del hábitat a ≥#% de O₂ y ≤# psi.",
+    "The highest-value next flight experiment maps the flammability limits of habitat materials at ≥#% O₂ and ≤# psi.":
+        "El próximo experimento de vuelo de mayor valor mide los límites de inflamabilidad de los materiales del hábitat a ≥#% de O₂ y ≤# psi.",
+    "Finding (Prevention, evidence score #/#): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment maps the flammability limits of habitat materials at ≥#% O₂ and ≤# psi.":
+        "Hallazgo (Prevención, puntaje de evidencia #/#): Casi no hay datos de vuelo donde vivirá la base lunar. Implicación: el próximo experimento de vuelo de mayor valor mide los límites de inflamabilidad de los materiales del hábitat a ≥#% de O₂ y ≤# psi.",
+    "No solid-material test in PSI's tables has been flown inside the lunar-base envelope, and the published Saffire burns reached at most #% O# and went no lower than # atm, so cabin materials for this atmosphere still need flight data.":
+        "Ninguna prueba de material sólido de las tablas de PSI se ha volado dentro de la envolvente de la base lunar, y las quemas publicadas de Saffire llegaron como máximo a #% O# y no bajaron de # atm, así que los materiales de cabina para esta atmósfera aún necesitan datos de vuelo.",
+    "The habitat's air outruns every solid fire limit NASA has mapped": "El aire del hábitat supera todo límite de fuego en sólidos que la NASA ha medido",
+    "The surface habitat runs at #% O# and # psi, while no solid in NASA PSI's tables has burned above #% O#, so the BASS-II boundary (#% in still air) is stretched well beyond its data here.":
+        "El hábitat de superficie funciona a #% O# y # psi, mientras que ningún sólido de las tablas de PSI de la NASA ha ardido por encima de #% O#, así que el límite de BASS-II (#% en aire quieto) se estira aquí mucho más allá de sus datos.",
+    "Outside PSI, NASA's Saffire VI burned cotton-fiberglass fabric and PMMA at up to #% O# and # atm, which shows these materials burn in this air but not where they stop burning.":
+        "Fuera de PSI, Saffire VI de la NASA quemó tela de algodón y fibra de vidrio y PMMA hasta #% O# y # atm, lo que muestra que estos materiales arden en este aire, pero no dónde dejan de arder.",
+    "NASA's BASS-II flammability boundary: a PMMA rod keeps burning in still air above #% O# (measured at # atm). This module runs at #% O#, while the highest O# any solid has burned at in NASA PSI's tables is #%, so this answer is an extrapolation.":
+        "Límite de inflamabilidad de BASS-II de la NASA: una barra de PMMA sigue ardiendo en aire quieto por encima de #% O# (medido a # atm). Este módulo funciona a #% O#, mientras que el O# más alto al que ha ardido un sólido en las tablas de PSI de la NASA es #%, así que esta respuesta es una extrapolación.",
+    "Saffire-II measured flame spread of # and # mm/s over cotton-fiberglass fabric at about #% O# in a # cm/s airflow. Outside PSI, NASA's Saffire VI burned the same fabric and PMMA at up to #% at # atm (published), without mapping where they stop burning.":
+        "Saffire-II midió una propagación de llama de # y # mm/s sobre tela de algodón y fibra de vidrio a cerca de #% O# con un flujo de aire de # cm/s. Fuera de PSI, Saffire VI de la NASA quemó la misma tela y PMMA hasta #% a # atm (publicado), sin medir dónde dejan de arder.",
+    "EVA-prep air: richer than any solid fire in NASA's PSI tables": "Aire de preparación de EVA: más rico que cualquier fuego de sólido en las tablas de PSI de la NASA",
+    "The airlock runs at #% O# and # psi, above the #% reached by any solid in NASA PSI's tables, so materials answers here are extrapolations of the BASS-II boundary.":
+        "La esclusa funciona a #% O# y # psi, por encima del #% al que llegó cualquier sólido en las tablas de PSI de la NASA, así que las respuestas sobre materiales aquí son extrapolaciones del límite de BASS-II.",
+    "Fabric fires spread at # and # mm/s in orbit at about #% O#, and NASA's Saffire VI burned the same fabric at up to #% O# and # atm, outside PSI.":
+        "Los fuegos de tela se propagaron a # y # mm/s en órbita con cerca de #% O#, y Saffire VI de la NASA quemó la misma tela hasta #% O# y # atm, fuera de PSI.",
+    "Three flights would close the biggest gaps: flammability limits of habitat materials at ≥#% O# and ≤# psi, a methanol droplet at #% O# with #% CO#, and any flame at lunar gravity.":
+        "Tres vuelos cerrarían los mayores vacíos: límites de inflamabilidad de los materiales del hábitat a ≥#% O# y ≤# psi, una gota de metanol a #% O# con #% CO#, y cualquier llama a gravedad lunar.",
+    "# ppm": "# ppm",
+})
+for _where, _es in (("spacecraft cabin air", "aire de cabina de nave"), ("EVA-prep air", "aire de preparación de EVA"),
+                    ("lunar-base air", "aire de la base lunar")):
+    for _fuel, _fes, _art in (("methanol", "metanol", "la"), ("heptane", "heptano", "la")):
+        SI_ES[f"FLEX model, {_fuel} droplet (# mm, no diluent): #% chance the flame puts itself out in {_where} (#% interval #%–#%), #% that the droplet breaks apart and #% that it burns to completion; this input is inside the range of flown ISS tests."] = (
+            f"Modelo FLEX, gota de {_fes} (# mm, sin diluyente): #% de probabilidad de que la llama se apague sola en {_es} (intervalo del #%: #%–#%), #% de que la gota se rompa y #% de que arda hasta consumirse; esta entrada está dentro del rango de pruebas volado en la ISS.")
+for _fuel, _fes in (("methanol", "metanol"), ("heptane", "heptano")):
+    SI_ES[f"FLEX model, {_fuel} droplet (# mm, no diluent): #% chance the flame puts itself out in the exploration atmosphere (#% interval #%–#%), #% that the droplet breaks apart and #% that it burns to completion; this input is beyond the flown ISS tests (extrapolation, use with caution) because its pressure lies outside every flown FLEX test."] = (
+        f"Modelo FLEX, gota de {_fes} (# mm, sin diluyente): #% de probabilidad de que la llama se apague sola en la atmósfera de exploración (intervalo del #%: #%–#%), #% de que la gota se rompa y #% de que arda hasta consumirse; esta entrada está más allá de las pruebas voladas en la ISS (extrapolación, usar con cautela) porque su presión queda fuera de toda prueba de FLEX volada.")
