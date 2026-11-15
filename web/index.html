@@ -24,6 +24,7 @@
       <span class="brand__word">SKYLAB PHOENIX</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Sections">
+      <a href="#/base" data-v="base">Moon base</a>
       <a href="#/learn" data-v="learn">Learn 3D</a>
       <a href="#/flames" data-v="flames">Flames</a>
       <a href="#/lab" data-v="lab">Fire Lab</a>
@@ -53,8 +54,8 @@
           </h1>
           <p class="hero__lead load" style="--i:2" id="hero-lead"></p>
           <div class="hero__ctas load" style="--i:3">
-            <a class="btn btn--fire" href="#/flames">Watch fire in orbit <span aria-hidden="true">→</span></a>
-            <a class="btn btn--line" href="#/learn">Learn in 3D</a>
+            <a class="btn btn--fire" href="#/base">Enter the Moon base <span aria-hidden="true">→</span></a>
+            <a class="btn btn--line" href="#/flames">Watch fire in orbit</a>
           </div>
         </div>
       </div>
@@ -83,40 +84,67 @@
     </section>
   </section>
 
+  <section class="view" id="v-base" data-view="base" hidden>
+    <div class="mb">
+      <div class="mb__stage" id="moon3d">
+        <div class="mb__top">
+          <p class="eyebrow">Moon base · fire audit</p>
+          <h2 class="mb__title">The first lunar base, <span class="fire">audited for fire.</span></h2>
+          <p class="mb__sub">Real terrain from NASA's laser altimeter, the real Sun from JPL, and every answer from NASA flight data.</p>
+          <div class="seg mb__steps" id="mb-steps" role="group" aria-label="View"><button type="button" data-s="moon" aria-pressed="true">1 · The Moon</button><button type="button" data-s="base" aria-pressed="false">2 · The base</button></div>
+        </div>
+        <div class="mb__time" id="mb-time"></div>
+        <span class="lab3d__tag mb__hint" id="mb-hint">Drag to turn · scroll to zoom</span>
+      </div>
+      <aside class="mb__panel" id="mb-panel" aria-live="polite"></aside>
+    </div>
+    <div class="sec">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">The audit</p>
+          <h2>Every module, every layer of fire safety. <span class="mute">And what the data cannot tell yet.</span></h2>
+          <p class="sec__lead">Each cell is answered from NASA data and labelled by where its number comes from. Click a row to open the module in 3D.</p>
+        </header>
+        <div class="mb-legend" id="mb-legend"></div>
+        <div class="tbl-wrap"><table class="mb-matrix" id="mb-matrix"></table></div>
+        <h3 class="sub-h" style="margin-top:clamp(40px,5vw,64px)">Three flights that would close the gaps.</h3>
+        <div class="mb-flights" id="mb-flights"></div>
+        <details class="card card--gap more">
+          <summary><span><span class="label">Sources</span><b>Where the Moon, the Sun and every number come from</b></span></summary>
+          <div class="more__body"><ul class="mb-sources" id="mb-sources"></ul></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <section class="view" id="v-learn" data-view="learn" hidden>
     <div class="sec sec--first">
       <div class="wrap">
         <header class="sec__head">
           <p class="eyebrow">00 · Learn in 3D</p>
-          <h2>How fire behaves without gravity. <span class="mute">Seven steps, every number from NASA flight data.</span></h2>
+          <h2>How fire behaves off Earth. <span class="mute">Three short modules, every number from NASA flight data.</span></h2>
         </header>
-        <div class="learn">
-          <div class="learn__view" id="learn3d"><span class="lab3d__tag">Drag to turn · scroll to zoom</span></div>
-          <aside class="learn__panel" id="learn-panel" aria-live="polite"></aside>
+        <div class="lmods" id="learn-mods" role="tablist" aria-label="Learning modules">
+          <button type="button" role="tab" data-m="1" aria-selected="true"><span>Module 1</span><b>Fire on Earth and in orbit</b><small>Why a flame becomes a sphere, and what oxygen, pressure and airflow do</small></button>
+          <button type="button" role="tab" data-m="2" aria-selected="false"><span>Module 2</span><b>Four worlds</b><small>One flame in the gravity of the ISS, the Moon, Mars and Earth</small></button>
+          <button type="button" role="tab" data-m="3" aria-selected="false"><span>Module 3</span><b>Inside the cabin</b><small>How air, smoke, detectors and extinguishers work in a spacecraft</small></button>
         </div>
-      </div>
-    </div>
-    <div class="sec sec--dark">
-      <div class="wrap">
-        <header class="sec__head">
-          <p class="eyebrow">Lab 2 · Four worlds</p>
-          <h2>One flame, four gravities. <span class="mute">Same fuel, same air, side by side.</span></h2>
-          <p class="sec__lead">Change the oxygen, the airflow or the fuel and watch all four flames answer at once. Drag any of them to turn it.</p>
-        </header>
-        <div class="worlds-ctl" id="worlds-ctl"></div>
-        <div class="worlds" id="worlds"></div>
-        <p class="note">Only the ISS flame comes from flight data: the model was trained on ISS droplet fires. The Moon, Mars and Earth shapes show how rising hot gas stretches a flame as gravity grows; they are illustrations, not predictions. No partial-gravity fire data is in NASA PSI yet.</p>
-      </div>
-    </div>
-    <div class="sec">
-      <div class="wrap">
-        <header class="sec__head">
-          <p class="eyebrow">Lab 3 · The fire landscape</p>
-          <h2>When does a fire go out by itself? <span class="mute">The whole model as a 3D landscape, with every NASA droplet test.</span></h2>
-        </header>
-        <div class="land">
-          <div class="card land__plot"><div class="chart land__chart" id="land3d" role="img" aria-label="3D surface of the chance a droplet fire goes out on its own, by oxygen and pressure"></div></div>
-          <aside class="card land__side" id="land-side"></aside>
+        <div class="lpane" id="lpane-1" role="tabpanel">
+          <div class="learn">
+            <div class="learn__view" id="learn3d"><span class="lab3d__tag">Drag to turn · scroll to zoom</span></div>
+            <aside class="learn__panel" id="learn-panel" aria-live="polite"></aside>
+          </div>
+        </div>
+        <div class="lpane" id="lpane-2" role="tabpanel" hidden>
+          <div class="worlds-ctl" id="worlds-ctl"></div>
+          <div class="worlds" id="worlds"></div>
+          <p class="note">Only the ISS flame comes from flight data: the model was trained on ISS droplet fires. The Moon, Mars and Earth shapes show how rising hot gas stretches a flame as gravity grows; they are illustrations, not predictions. No partial-gravity fire data is in NASA PSI yet.</p>
+        </div>
+        <div class="lpane" id="lpane-3" role="tabpanel" hidden>
+          <div class="learn">
+            <div class="learn__view" id="cabin3d"><span class="lab3d__tag">Inside a station module · drag to look around</span></div>
+            <aside class="learn__panel" id="cabin-panel" aria-live="polite"></aside>
+          </div>
         </div>
       </div>
     </div>
@@ -574,6 +602,8 @@
 <script src="vendor/satellite-5.0.0.min.js"></script>
 <script>document.write('<script src="globe.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="lab3d.js?v=' + window.__V + '"><\/script>');</script>
+<script>document.write('<script src="moonbase.js?v=' + window.__V + '"><\/script>');</script>
+<script>document.write('<script src="cabin3d.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="app.js?v=' + window.__V + '"><\/script>');</script>
 </body>
 </html>

@@ -59,7 +59,7 @@ A 200-model bootstrap (resampling whole test days) gives the 90% interval of eve
 
 ## 6. SI layer
 
-For each habitat and investigation the pipeline writes a numbered evidence pack. An SI model (Anthropic Claude) writes a 2–4 sentence briefing; each sentence lists the items it relies on. A verification firewall publishes the briefing only if every sentence cites existing evidence, every number appears in the cited evidence, there is no safety verdict, and the evidence is unchanged since the draft (hash). 29 of 29 briefings pass; any that fail are replaced by a labelled deterministic brief. “Ask the archive” is a BM25 search over NASA's own text, which quotes rather than generates.
+For each habitat and investigation the pipeline writes a numbered evidence pack. An SI model (Anthropic Claude) writes a 2–4 sentence briefing; each sentence lists the items it relies on. A verification firewall publishes the briefing only if every sentence cites existing evidence, every number appears in the cited evidence, there is no safety verdict, and the evidence is unchanged since the draft (hash). 33 of 33 briefings pass; any that fail are replaced by a labelled deterministic brief. “Ask the archive” is a BM25 search over NASA's own text, which quotes rather than generates.
 
 ## 7. Findings (ranked by evidence score)
 

@@ -27,5 +27,9 @@
  "investigation:PSI-62": [],
  "investigation:PSI-60": [],
  "investigation:PSI-117": [],
- "investigation:PSI-115": []
+ "investigation:PSI-115": [],
+ "module:habitat": [],
+ "module:airlock": [],
+ "module:rover": [],
+ "base:report": []
 }

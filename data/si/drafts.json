@@ -4,7 +4,7 @@
   "input": "data/si/evidence_packs.json",
   "regenerate": "python scripts/si_generate.py (needs ANTHROPIC_API_KEY)",
   "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash",
-  "note": "After the November 2026 data audit (34 duplicate SPICE rows removed), 6 briefs were updated in a Claude Code session with the same rules: 2 sentences rewritten with the new numbers (1,613 records; SPICE 435 records, EVA prep 60.0) and all 6 re-verified by pipeline/si.py against the new evidence packs."
+  "note": "After the November 2026 data audit (34 duplicate SPICE rows removed), 6 briefs were updated in a Claude Code session with the same rules: 2 sentences rewritten with the new numbers (1,613 records; SPICE 435 records, EVA prep 60.0) and all 6 re-verified by pipeline/si.py against the new evidence packs. The four lunar-base briefs (three modules and the base report) were written in a Claude Code session with the same rules and verified by pipeline/si.py."
  },
  "drafts": {
   "habitat:cabin": {
@@ -668,6 +668,135 @@
     }
    ],
    "pack_hash": "80055f0c79729d74"
+  },
+  "module:habitat": {
+   "headline": "The habitat's air outruns every solid fire NASA has flown",
+   "sentences": [
+    {
+     "text": "The surface habitat runs at 30% O2 and 10.2 psi, but no solid has burned in orbit above 22.7% O2, so the BASS-II boundary (19.4% in still air) is stretched well beyond its data here.",
+     "cites": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "text": "A methanol droplet fire would put itself out only 6% of the time in this air (90% range 2–14%), against 72% in ISS cabin air, so a fire has to be found and fought.",
+     "cites": [
+      "E4"
+     ]
+    },
+    {
+     "text": "Mixed into 106 m³, one BASS-II rod burn adds only about 0.14 ppm of CO, so carbon-monoxide sensing works best close to likely sources.",
+     "cites": [
+      "E1",
+      "E5"
+     ]
+    },
+    {
+     "text": "How much CO2 stops a fire in this air is not yet measured: FLEX put out 22 of 22 fires with more than 30% CO2, but only at 15–20% O2.",
+     "cites": [
+      "E6"
+     ]
+    }
+   ],
+   "pack_hash": "874ba90dd5bfc1f5"
+  },
+  "module:airlock": {
+   "headline": "EVA-prep air: richer than any solid fire flown in orbit",
+   "sentences": [
+    {
+     "text": "The airlock runs at 26.5% O2 and 10.2 psi, above the 22.7% where any solid has burned in orbit, so materials answers here are extrapolations of the BASS-II boundary.",
+     "cites": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "text": "A methanol droplet fire would put itself out 21% of the time (90% range 8–37%), and a heptane fire 7%, against 72% in ISS cabin air.",
+     "cites": [
+      "E4"
+     ]
+    },
+    {
+     "text": "In 34 m³, one BASS-II rod burn adds about 0.43 ppm of CO and a slab burn about 2.46 ppm once mixed.",
+     "cites": [
+      "E1",
+      "E5"
+     ]
+    },
+    {
+     "text": "With 30% CO2 added, the model gives the methanol fire a 32% chance of going out (90% range 14–55%), an extrapolation because no FLEX test combined this much oxygen with CO2.",
+     "cites": [
+      "E7"
+     ]
+    }
+   ],
+   "pack_hash": "1ac3b21994869c5b"
+  },
+  "module:rover": {
+   "headline": "In a 9 m³ rover, a small fire fills the air fast",
+   "sentences": [
+    {
+     "text": "The pressurized rover breathes the same 30% O2 at 10.2 psi as the habitat in only 9 m³ of free volume.",
+     "cites": [
+      "E1"
+     ]
+    },
+    {
+     "text": "One BASS-II rod burn would add about 1.64 ppm of CO here and a slab burn about 9.31 ppm once mixed, so detection is easier but the crew is exposed sooner.",
+     "cites": [
+      "E5"
+     ]
+    },
+    {
+     "text": "A methanol droplet fire would put itself out only 6% of the time (90% range 2–14%), so suppression has to be on board.",
+     "cites": [
+      "E4"
+     ]
+    },
+    {
+     "text": "Fabric fires spread at 2.1 and 2.6 mm/s in orbit at about 22% O2, and no fabric has burned in orbit at 30.0% O2.",
+     "cites": [
+      "E3"
+     ]
+    }
+   ],
+   "pack_hash": "7530d86015d1af62"
+  },
+  "base:report": {
+   "headline": "The base can be audited today; lunar gravity cannot",
+   "sentences": [
+    {
+     "text": "The base sits on the Connecting ridge at 89.4388°S, 222.857°E and 1,959 m, where JPL Horizons puts the Sun between -2.086° and 2.074° above the local horizontal plane.",
+     "cites": [
+      "E1",
+      "E2"
+     ]
+    },
+    {
+     "text": "Of 57 numbers in this fire audit, 27 are NASA measurements; the rest are derived, model, assumed or extrapolated values, and each is labelled.",
+     "cites": [
+      "E3"
+     ]
+    },
+    {
+     "text": "In every module a methanol droplet fire would rarely put itself out: 6% in the habitat and rover, 21% in the airlock.",
+     "cites": [
+      "E4",
+      "E5",
+      "E6"
+     ]
+    },
+    {
+     "text": "Three flights would close the biggest gaps: solid-material flammability at ≥30% O2 and ≤10.2 psi, a methanol droplet at 27% O2 with 30% CO2, and any flame at lunar gravity.",
+     "cites": [
+      "E7",
+      "E8",
+      "E9"
+     ]
+    }
+   ],
+   "pack_hash": "f563602d60ee035b"
   }
  }
 }
