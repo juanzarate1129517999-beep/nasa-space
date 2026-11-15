@@ -126,3 +126,7 @@ table.tiny th:nth-child(7), table.tiny td:nth-child(7) { width: 30%; }
 table.tiny td { word-break: break-word; }
 table.tiny td.mono { white-space: normal; }
 h2 { break-inside: avoid; page-break-inside: avoid; break-after: avoid; page-break-after: avoid; }
+
+.t-measured { background: #0f9d8f; } .t-derived { background: #0b93d6; } .t-model { background: #8b5cf6; }
+.t-assumed { background: #64748b; } .t-extrapolated { background: #d97706; } .t-gap { background: #dc2626; }
+table.audit td { vertical-align: top; font-size: 7.6pt; } table.audit .impl { margin-top: 1mm; color: #334155; }
