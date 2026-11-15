@@ -1577,6 +1577,77 @@
     if (!b) return "";
     return `<div class="si-sum">${badge(b)}${b.headline ? `<p class="mb-hl">${esc(b.headline)}</p>` : ""}<p>${sentencesHtml(b, scope)}</p>${evidenceHtml(b, scope)}</div>`;
   }
+  const mbDrill = { source: "droplet", fans: true, co2: false, run: null };
+  const pctOf = (v) => { const m = /^(\d+(?:\.\d+)?)%/.exec(v || ""); return m ? +m[1] / 100 : null; };
+  function drillHtml(m) {
+    const D = m.drill;
+    if (!D) return "";
+    const src = D.sources[mbDrill.source];
+    return `
+      <section class="drill" id="drill">
+        <p class="label">Fire drill · run it in 3D</p>
+        <div class="seg seg--wrap drill__src">${Object.entries(D.sources).map(([k, s]) => `<button type="button" data-src="${k}" aria-pressed="${k === mbDrill.source}">${esc(s.name)}</button>`).join("")}</div>
+        <div class="drill__opts">
+          <label><input type="checkbox" id="dr-fans" ${mbDrill.fans ? "checked" : ""}> Switch the fans off at the alarm</label>
+          <label><input type="checkbox" id="dr-co2" ${mbDrill.co2 ? "checked" : ""}> Flood with CO₂ (30%)</label>
+        </div>
+        <button type="button" class="btn btn--fire btn--sm" id="dr-run">${mbDrill.run ? "Run again" : "Start the fire"} <span aria-hidden="true">▶</span></button>
+        <div class="drill__bar"><i id="dr-fill"></i><span id="dr-clock">t = 0 s</span></div>
+        <ol class="drill__log" id="dr-log"></ol>
+      </section>`;
+  }
+  function drillSteps(m) {
+    const D = m.drill, s = D.sources[mbDrill.source];
+    const steps = [{ at: 0, t: "Ignition", f: null, txt: `A hot wire lights the ${s.name.toLowerCase()} in ${o2pct(m.x_o2)} O₂ at ${m.psi} psi.` }];
+    s.events.forEach((f, i) => steps.push({ at: 0.12 + i * 0.08, f }));
+    steps.push({ at: 0.36, t: "Alarm", f: null, txt: s.events.find((f) => /CO/.test(f.label)) && !/not measured/.test(s.events.find((f) => /CO/.test(f.label)).value) ? "The CO sensor near the source sees the rise; the module mixes it down quickly." : "Detection depends on smoke reaching the sensor: no CO data exists for this kind of fire." });
+    if (mbDrill.fans) steps.push({ at: 0.46, f: D.fans_off.fact }, { at: 0.5, f: D.fans_off.iss });
+    if (mbDrill.co2) steps.push({ at: 0.62, f: s.co2 }, { at: 0.66, f: D.co2_measured });
+    return steps;
+  }
+  function drillOutcome(m, r) {
+    const D = m.drill, s = D.sources[mbDrill.source];
+    if (mbDrill.source === "droplet") {
+      if (r.co2Out) return `This run: the CO₂ put it out. The model gives that only ${s.co2.value} in this air, and no flight has tested it.`;
+      if (r.out) return `This run: the flame went out on its own, an event the model gives ${s.events[1].value}.`;
+      return `This run: it burned until the fuel was gone, about ${D.sources.droplet.duration_s} s for a single droplet. It went out on its own only ${s.events[1].value} of the time in this air.`;
+    }
+    const still = D.fans_off.solid_keeps_burning;
+    return `${mbDrill.fans ? (still ? "Switching the fans off did not stop it: this air sits above the still-air limit for PMMA. " : "Switching the fans off starved it. ") : ""}${mbDrill.co2 ? "Whether CO₂ would put out a burning solid in this air is unknown: no flight has tested it." : "It kept burning until the material was consumed."}`;
+  }
+  function runDrill(m) {
+    const D = m.drill, s = D.sources[mbDrill.source];
+    const pOut = mbDrill.source === "droplet" ? pctOf(s.events[1].value) || 0 : 0;
+    const pCo2 = mbDrill.source === "droplet" ? pctOf(s.co2.value) || 0 : 0;
+    const r = { out: Math.random() < pOut, co2Out: mbDrill.co2 && Math.random() < pCo2, t0: performance.now(), dur: 11000 };
+    mbDrill.run = r;
+    const steps = drillSteps(m);
+    const log = $("#dr-log"); log.innerHTML = "";
+    let shown = 0;
+    const tick = (now) => {
+      if (mbDrill.run !== r || !$("#dr-log")) return;
+      const p = Math.min(1, (now - r.t0) / r.dur);
+      $("#dr-fill").style.width = `${100 * p}%`;
+      $("#dr-clock").textContent = mbDrill.source === "plastic" ? `illustrative time` : `t ≈ ${Math.round(p * s.duration_s)} s of ${Math.round(s.duration_s)} s`;
+      while (shown < steps.length && steps[shown].at <= p) {
+        const st = steps[shown++];
+        const li = document.createElement("li");
+        li.innerHTML = st.f ? `<span>${esc(st.f.label)}</span><b>${esc(st.f.value)}</b>${tagHtml(st.f.tag)}<small>${esc(st.f.source)}</small>` : `<span><b>${esc(st.t)}</b> ${esc(st.txt)}</span>`;
+        log.appendChild(li);
+      }
+      if (moon3d) moon3d.drill({ source: mbDrill.source, p, fans: mbDrill.fans, co2: mbDrill.co2, out: r.out, co2Out: r.co2Out });
+      if (p < 1) requestAnimationFrame(tick);
+      else { const li = document.createElement("li"); li.className = "drill__end"; li.innerHTML = `<b>Result</b> ${esc(drillOutcome(m, r))}`; log.appendChild(li); }
+    };
+    requestAnimationFrame(tick);
+  }
+  function wireDrill(m) {
+    if (!m.drill || !$("#drill")) return;
+    document.querySelectorAll("#drill [data-src]").forEach((b) => b.addEventListener("click", () => { mbDrill.source = b.dataset.src; mbDrill.run = null; if (moon3d) moon3d.drill(null); $("#drill").outerHTML = drillHtml(m); wireDrill(m); }));
+    $("#dr-fans").addEventListener("change", (e) => { mbDrill.fans = e.target.checked; });
+    $("#dr-co2").addEventListener("change", (e) => { mbDrill.co2 = e.target.checked; });
+    $("#dr-run").addEventListener("click", () => { $("#dr-run").innerHTML = 'Run again <span aria-hidden="true">▶</span>'; runDrill(m); });
+  }
   function renderBasePanel() {
     const el = $("#mb-panel");
     const m = MB.modules.find((x) => x.id === mbState.sel);
@@ -1596,6 +1667,7 @@
         <p class="label">Module · cut open in 3D</p>
         <h3 class="mb-p__t">${esc(m.name)}</h3>
         <div class="mb-chips"><span>${o2pct(m.x_o2)} O₂</span><span>${m.psi} psi</span><span>${m.volume_m3} m³</span><span>${m.gravity.g} g</span></div>
+        ${drillHtml(m)}
         ${SI && SI.module && SI.module[m.id] ? mbBrief(SI.module[m.id], "mbm-" + m.id) : ""}
         <div class="mb-tests">${LAYERS.map(([k, n], i) => { const t = m.tests[k]; return `
           <details class="mb-test" ${i === 0 ? "open" : ""}>
@@ -1606,12 +1678,15 @@
           <div class="mb-test mb-test--gap"><span class="mb-test__n">05</span><span class="mb-test__q"><small>Lunar gravity</small>${esc(m.gravity.text)}</span>${tagHtml("gap")}</div>
         </div>`;
       $("#mb-back").addEventListener("click", () => selectModule(null));
+      wireDrill(m);
     }
     el.querySelectorAll("[data-m]").forEach((b) => b.addEventListener("click", () => selectModule(b.dataset.m)));
     wireCites(el);
   }
   function selectModule(id) {
     mbState.sel = id;
+    mbDrill.run = null;
+    if (moon3d) moon3d.drill(null);
     if (moon3d) {
       if (id && moon3d.mode() !== "base") { moon3d.descend(); setTimeout(() => moon3d.select(id), 3400); }
       else moon3d.select(id);
@@ -1661,7 +1736,7 @@
       start: QS.get("land") ? "base" : null,
     });
     if (!moon3d) { $("#moon3d").classList.add("lab3d__view--off"); return; }
-    moon3d.onSelect((id) => { if (id !== mbState.sel) { mbState.sel = id; renderBasePanel(); } });
+    moon3d.onSelect((id) => { if (id !== mbState.sel) { mbState.sel = id; mbDrill.run = null; moon3d.drill(null); renderBasePanel(); } });
   }
 
   const VIEWS = ["home", "base", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];

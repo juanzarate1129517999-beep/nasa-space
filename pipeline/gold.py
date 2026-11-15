@@ -244,7 +244,7 @@ def write(ens, saffire2, saffire1, invs, sim, models, gas, solid):
         "flex": flex, "cfig": models["cfig"], "habitat_check": models["habitat_check"], "next": models["next"],
         "solids": solid, "findings": F, "qc": qc.to_dict(orient="records"), "survival": survival(ens),
     }
-    payload["moonbase"] = moonbase.build(payload)
+    payload["moonbase"] = moonbase.build(payload, ens)
     payload = _jsonable(payload)
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     (WEB_DATA / "ember.json").write_text(blob, encoding="utf-8")
