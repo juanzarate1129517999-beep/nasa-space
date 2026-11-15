@@ -112,7 +112,7 @@
       [auc.toFixed(2), "<small>AUC</small>", "self-extinction model, scored on ISS test days it never saw"],
     ];
     $("#kpis").innerHTML = k.map(([v, s, l]) => `<div><dt>${l}</dt><dd>${v}${s}</dd></div>`).join("");
-    $("#hero-lead").innerHTML = `NASA's archive holds ${S.ambient.toLocaleString("en-US")} flight fires with a known atmosphere. Only <b>${S.moon_envelope}</b> came near that air, and no solid material has burned in orbit above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
+    $("#hero-lead").innerHTML = `NASA's flight archive holds ${S.ambient.toLocaleString("en-US")} fire-test records with an atmosphere: ${D.coverage.n_measured.toLocaleString("en-US")} with measured oxygen and pressure, the rest run in ordinary cabin air. Only <b>${S.moon_envelope}</b> came near Moon-base air, and no solid material has burned in orbit above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
   }
   function renderHabitats() {
     $("#habitats").innerHTML = HUI.map((hb) => {
@@ -1227,7 +1227,7 @@
 
   function destDetail(id) {
     const x = destInfo(id);
-    return `<span class="glabel__v${x.muted ? " muted" : ""}">${x.v}</span><span class="glabel__l">${esc(x.l)}</span><a href="#/lab" class="glabel__a" data-hab="${DEST[id].hab}">Open in the Fire Lab →</a>`;
+    return `<span class="glabel__v${x.muted ? " muted" : ""}">${x.v}</span><span class="glabel__l">${esc(x.l)}</span>${id === "moon" ? '<a href="#/base" class="glabel__b">Enter the Moon base →</a>' : ""}<a href="#/lab" class="glabel__a" data-hab="${DEST[id].hab}">Open in the Fire Lab →</a>`;
   }
   function initGlobe() {
     if (!window.PhoenixGlobe || !window.THREE) { $("#globe").classList.add("globe--fallback"); return; }
@@ -1437,13 +1437,7 @@
       { t: "A gentle breeze feeds the fire.", b: `In orbit a fan does what buoyancy does on Earth. NASA's BASS-II experiment found that plastics keep burning at the lowest oxygen with a breeze of only about 2 cm/s: down to ${SO.min_o2_pct}% O₂, below the ${SO.g1_upward_limit_pct}% limit of the Earth test used to approve materials.`, set: { g: 0, o2: 0.21, p: 1, flow: 0.55, co2: 0 },
         stat: `<div class="lstat"><span><b>${SO.min_o2_pct}%</b> lowest O₂ for a lasting flame in orbit</span><span><b>${SO.g1_upward_limit_pct}%</b> limit of the upward test on Earth</span></div>` },
       { t: "Put it out: dilute the air.", b: `Adding CO₂ takes oxygen and heat away from the flame. But near lunar-base air NASA has almost no data: for a methanol droplet at ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi and ${(100 * k.x_co2).toFixed(0)}% CO₂ the model can only say it goes out on its own ${pct(k.interval[0])} to ${pct(k.interval[1])} of the time. That is the flight test we recommend.`, set: { g: 0, o2: k.x_o2, p: k.p_atm, flow: 0, co2: k.x_co2 }, link: ["#/next", "See the recommended flight →"] },
-      { t: "Your turn.", quiz: true, set: { g: 0, o2: 0.30, p: 0.694, flow: 0, co2: 0 },
-        qs: [
-          { q: "In which air is a droplet fire least likely to go out on its own?", opts: [["cabin", "Spacecraft cabin"], ["eva", "EVA prep"], ["moon", "Lunar base & rover"]], a: "moon",
-            why: `Model: ${pct(cab.p)} in cabin air, ${pct(eva.p)} in EVA prep, ${pct(moon.p)} in lunar-base air.` },
-          { q: "On Earth, a plastic rod needs 15.4% O₂ to keep burning in the upward test. In orbit, with a gentle breeze, the lowest NASA measured was…", opts: [["a", "18%"], ["b", "15.4%"], ["c", `${SO.min_o2_pct}%`]], a: "c",
-            why: `BASS-II: ${SO.min_o2_pct}% at about 2 cm/s of airflow. Earth screening can understate the risk in orbit.` },
-        ] },
+      { t: "Where it all comes together: the Moon base.", b: `The base will breathe 30% O₂ at 10.2 psi, where a droplet fire puts itself out only ${pct(moon.p)} of the time, against ${pct(cab.p)} in cabin air. Open the Moon base to see each of these ideas tested against NASA flight data, module by module.`, set: { g: 0, o2: 0.30, p: 0.694, flow: 0, co2: 0 }, link: ["#/base", "Enter the Moon base →"] },
     ];
   }
   function renderLearn() {
@@ -1517,62 +1511,167 @@
     worlds.forEach((w, i) => { if (!w) $(`#world-${i}`).classList.add("lab3d__view--off"); });
     syncWorlds(); renderWorldCtl();
   }
-  const landState = { fuel: "Methanol", co2: 0 };
-  function renderLand() {
-    const go2 = [], gp = [];
-    for (let v = 0.12; v <= 0.40 + 1e-9; v += 0.01) go2.push(+v.toFixed(3));
-    for (let j = 0; j <= 28; j++) gp.push(Math.exp(Math.log(0.3) + (j * (Math.log(3.2) - Math.log(0.3))) / 28));
-    const d0 = M.d0_median, hep = landState.fuel === "Heptane" ? 1 : 0, c = landState.co2;
-    const z = gp.map((pp) => go2.map((oo) => (oo + c > 0.97 ? null : predict([hep, oo, Math.log(pp), c, 0, d0]).p)));
-    const T = (M.train || []).filter((t) => (t.combustible === landState.fuel) && Math.abs((t.x_co2 || 0) - c) <= 0.075 && (t.x_he || 0) < 0.05);
-    const out = T.filter((t) => t.autoextincion === 1), kept = T.filter((t) => t.autoextincion !== 1);
-    const habs = D.habitats.filter((h) => h.x_o2 <= 0.4 && h.p_atm >= 0.3);
-    const rng = M.ranges, oLo = rng.x_o2[0], oHi = rng.x_o2[1], pLo = Math.exp(rng.log_p[0]), pHi = Math.exp(rng.log_p[1]);
-    const box = { x: [oLo, oHi, oHi, oLo, oLo].map((v) => 100 * v), y: [pLo, pLo, pHi, pHi, pLo], z: [0, 0, 0, 0, 0] };
-    const pts = (L, zv, col, name) => ({ type: "scatter3d", mode: "markers", name, x: L.map((t) => 100 * t.x_o2), y: L.map((t) => t.p_atm), z: L.map(() => zv), marker: { size: 4.6, color: col, line: { width: 0 }, opacity: 0.95 },
-      hovertemplate: `${name}<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>` });
-    plot("land3d", [
-      { type: "surface", x: go2.map((v) => 100 * v), y: gp, z, cmin: 0, cmax: 1, opacity: 0.92, showscale: false,
-        colorscale: [[0, "#f97316"], [0.35, "#f43f5e"], [0.65, "#8b5cf6"], [1, "#38bdf8"]],
-        contours: { z: { show: true, usecolormap: false, color: "rgba(255,255,255,0.25)", width: 1, start: 0.1, end: 0.9, size: 0.1 } },
-        hovertemplate: "O₂ %{x:.0f}% · %{y:.2f} atm<br>goes out on its own %{z:.0%}<extra></extra>", lighting: { ambient: 0.75, diffuse: 0.5, specular: 0.15 } },
-      pts(out, 1.04, "#7dd3fc", "NASA test · went out on its own"),
-      pts(kept, -0.04, "#fdba74", "NASA test · kept burning"),
-      { type: "scatter3d", mode: "lines", x: box.x, y: box.y, z: box.z, line: { color: "rgba(255,255,255,0.55)", width: 3, dash: "dash" }, hoverinfo: "skip", name: "flight data range" },
-      { type: "scatter3d", mode: "markers+text", x: habs.map((h) => 100 * h.x_o2), y: habs.map((h) => h.p_atm), z: habs.map((h) => (h.x_o2 + c > 0.97 ? 0 : predict([hep, h.x_o2, Math.log(h.p_atm), c, 0, d0]).p) + 0.06), text: habs.map((h) => h.name), textposition: "top center", textfont: { color: "#fff", size: 11 },
-        marker: { size: 6, symbol: "diamond", color: "#fff" }, hoverinfo: "skip", name: "crew air" },
-    ], layout({ height: 560, margin: { l: 0, r: 0, t: 0, b: 0 },
-      scene: { dragmode: "turntable", bgcolor: "rgba(0,0,0,0)", camera: { eye: { x: 1.55, y: -1.55, z: 0.85 } }, aspectratio: { x: 1.2, y: 1.2, z: 0.75 },
-        xaxis: { title: { text: "Oxygen %" }, range: [12, 40], gridcolor: C.line2, color: C.ink3, backgroundcolor: "rgba(0,0,0,0)" },
-        yaxis: { title: { text: "Pressure, atm" }, type: "log", tickvals: [0.3, 0.5, 0.7, 1, 2, 3], ticktext: ["0.3", "0.5", "0.7", "1", "2", "3"], gridcolor: C.line2, color: C.ink3 },
-        zaxis: { title: { text: "Goes out on its own" }, range: [-0.08, 1.12], tickformat: ".0%", tickvals: [0, 0.5, 1], gridcolor: C.line2, color: C.ink3 } } }));
-    const moon = habs.find((h) => h.id === "moon_base"), cab = habs.find((h) => h.id === "cabin");
-    const pm = predict([hep, moon.x_o2, Math.log(moon.p_atm), c, 0, d0]).p, pc = predict([hep, cab.x_o2, Math.log(cab.p_atm), c, 0, d0]).p;
-    $("#land-side").innerHTML = `
-      <p class="label">Controls</p>
-      <div class="seg" id="land-fuel">${["Methanol", "Heptane"].map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === landState.fuel}">${f}</button>`).join("")}</div>
-      <div class="lslider"><div class="top"><label for="land-co2">CO₂ added as suppressant</label><output>${(100 * c).toFixed(0)}%</output></div><input type="range" id="land-co2" min="0" max="0.5" step="0.05" value="${c}"></div>
-      <div class="land__read"><div><b>${pct(pc)}</b><span>${esc(cab.name)}</span></div><div><b>${pct(pm)}</b><span>${esc(moon.name)}</span></div></div>
-      <p class="label">How to read it</p>
-      <ul class="land__how">
-        <li><i style="background:#38bdf8"></i>High and blue: the fire usually dies by itself.</li>
-        <li><i style="background:#f97316"></i>Low and orange: it keeps burning until someone acts.</li>
-        <li><i style="background:#7dd3fc;border-radius:50%"></i>Dots on top: real ISS fires that went out (${out.length}).</li>
-        <li><i style="background:#fdba74;border-radius:50%"></i>Dots below: real ISS fires that kept burning (${kept.length}).</li>
-        <li><i style="border:1px dashed #fff"></i>Dashed box: the oxygen and pressure NASA flew. Outside it the surface is a guess.</li>
-      </ul>
-      <p class="note">Drag to turn, scroll to zoom. Notice how the surface drops as oxygen rises: richer air makes fires harder to stop. Adding CO₂ lifts it back up.</p>`;
-    document.querySelectorAll("#land-fuel button").forEach((b) => b.addEventListener("click", () => { landState.fuel = b.dataset.f; renderLand(); }));
-    $("#land-co2").addEventListener("change", (e) => { landState.co2 = +e.target.value; renderLand(); });
-    $("#land-co2").addEventListener("input", (e) => { e.target.closest(".lslider").querySelector("output").textContent = `${Math.round(100 * e.target.value)}%`; });
+
+  let cabin3d = null;
+  const cabState = { i: 0 };
+  function cabinSteps() {
+    const S = D.solids, cab = pAt(0.21, 1), moon = pAt(0.30, 0.694);
+    const red = Object.fromEntries(D.suppression.co2.filter((r) => r.pressure.startsWith("Reduced")).map((r) => [r.co2, r]));
+    const hi = red[">30%"];
+    return [
+      { t: "Air moves only because fans push it.", b: "On the ISS nothing rises, so the cabin air would sit still without fans. Ventilation pushes fresh air in at one end of the module and pulls it out through a return grille at the other. That airflow is what feeds a fire in orbit, and what carries its smoke." },
+      { t: "A fire in orbit: a dome of flame, smoke that follows the fan.", b: `Without buoyancy the flame is small and round, and the smoke drifts with the airflow instead of rising. NASA's BASS-II tests found that solids keep burning down to ${S.min_o2_pct}% O₂ in a breeze of only about 2 cm/s, below the ${S.g1_upward_limit_pct}% limit of the test used on Earth.` },
+      { t: "Detectors sit where the air goes.", b: `A smoke detector works only if smoke reaches it, so it sits in the return air path. NASA's SAME experiments measured how smoke from different cabin materials changes as it ages, and BASS-II measured the carbon monoxide each burn released (median ${S.co_rods_high_o2_median_ppm} ppm for a plastic rod in the 250 L glovebox). Cool flames, confirmed in orbit, give off almost no light, so chemical sensing complements optical detectors.` },
+      { t: "Respond: stop the air, then put it out.", b: `The crew first switches off the fans: without airflow an orbital flame loses its oxygen supply. Then comes the CO₂ extinguisher, with oxygen masks for the crew. In FLEX, more than 30% CO₂ put out ${hi.k} of ${hi.n} droplet fires at reduced pressure, but only at ${Math.round(100 * hi.o2_range[0])}–${Math.round(100 * hi.o2_range[1])}% O₂.` },
+      { t: "The same cabin on the Moon.", b: `A lunar-base module breathes 30% O₂ at 10.2 psi, and lunar gravity (0.17 g) brings back a weak updraft. There a droplet fire puts itself out only ${pct(moon.p)} of the time, against ${pct(cab.p)} in ISS cabin air, and NASA has no fire data at lunar gravity yet.`, link: ["#/base", "Enter the Moon base →"] },
+    ];
   }
-  const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
+  function renderCabin() {
+    const S = cabinSteps(), i = cabState.i, st = S[i];
+    $("#cabin-panel").innerHTML = `
+      <div class="learn__dots">${S.map((_, n) => `<button type="button" data-n="${n}" aria-label="Step ${n + 1}" class="${n === i ? "is-on" : n < i ? "is-done" : ""}"></button>`).join("")}</div>
+      <p class="label">Step ${i + 1} of ${S.length}</p>
+      <h3 class="learn__t">${esc(st.t)}</h3>
+      <p class="learn__b">${esc(st.b)}</p>
+      ${st.link ? `<a class="src-link" href="${st.link[0]}">${st.link[1]}</a>` : ""}
+      <div class="learn__nav"><button type="button" class="btn btn--line btn--sm" id="c-prev" ${i === 0 ? "disabled" : ""}>← Back</button><button type="button" class="btn btn--fire btn--sm" id="c-next" ${i === S.length - 1 ? "hidden" : ""}>Next <span aria-hidden="true">→</span></button></div>`;
+    document.querySelectorAll("#cabin-panel .learn__dots button").forEach((b) => b.addEventListener("click", () => { cabState.i = +b.dataset.n; renderCabin(); }));
+    $("#c-prev").addEventListener("click", () => { cabState.i = Math.max(0, i - 1); renderCabin(); });
+    $("#c-next").addEventListener("click", () => { cabState.i = Math.min(S.length - 1, i + 1); renderCabin(); });
+    if (cabin3d) cabin3d.go(i);
+  }
+  const lmState = { m: "1", done: {} };
+  function showLearnMod(m) {
+    lmState.m = m;
+    document.querySelectorAll("#learn-mods button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.m === m)));
+    ["1", "2", "3"].forEach((k) => { $(`#lpane-${k}`).hidden = k !== m; });
+    if (m === "2" && !lmState.done[2]) { lmState.done[2] = true; safe(initWorlds, "worlds"); }
+    if (m === "3" && !lmState.done[3]) {
+      lmState.done[3] = true;
+      if (window.PhoenixCabin && window.THREE) cabin3d = window.PhoenixCabin.init($("#cabin3d"));
+      if (!cabin3d) $("#cabin3d").classList.add("lab3d__view--off");
+      renderCabin();
+    }
+    if (learn3d) { if (m === "1") learn3d.resume(); else learn3d.pause(); }
+    worlds.forEach((w) => w && (m === "2" ? w.resume() : w.pause()));
+    if (cabin3d) { if (m === "3") cabin3d.resume(); else cabin3d.pause(); }
+  }
+  function initLearnMods() {
+    document.querySelectorAll("#learn-mods button").forEach((b) => b.addEventListener("click", () => showLearnMod(b.dataset.m)));
+  }
+
+  const MB = D.moonbase;
+  const TAG = {
+    measured: ["Measured", "Measured by NASA in flight or in its report"],
+    derived: ["Derived", "Computed from NASA measurements (scaled or combined)"],
+    model: ["Model", "Prediction of the FLEX model inside the flown range"],
+    assumed: ["Assumed", "Input we chose: the challenge atmosphere or a stand-in volume"],
+    extrapolated: ["Extrapolated", "Beyond anything NASA has tested; treat as a guess"],
+    gap: ["No data", "NASA has no data that answers this yet"],
+  };
+  const tagHtml = (t) => `<span class="ptag ptag--${t}" title="${esc(TAG[t][1])}">${TAG[t][0]}</span>`;
+  const LAYERS = [["materials", "Materials"], ["liquids", "Liquid fires"], ["detection", "Detection"], ["suppression", "Suppression"]];
+  let moon3d = null;
+  const mbState = { sel: null, off: 0 };
+  function mbBrief(b, scope) {
+    if (!b) return "";
+    return `<div class="si-sum">${badge(b)}${b.headline ? `<p class="mb-hl">${esc(b.headline)}</p>` : ""}<p>${sentencesHtml(b, scope)}</p>${evidenceHtml(b, scope)}</div>`;
+  }
+  function renderBasePanel() {
+    const el = $("#mb-panel");
+    const m = MB.modules.find((x) => x.id === mbState.sel);
+    if (!m) {
+      const s = MB.site;
+      el.innerHTML = `
+        <p class="label">Base site · NASA LOLA 5 m terrain</p>
+        <h3 class="mb-p__t">${esc(s.name)}</h3>
+        <div class="mb-chips"><span>${Math.abs(s.lat).toFixed(2)}°S ${s.lon.toFixed(2)}°E</span><span>${Math.round(s.z).toLocaleString("en-US")} m high</span><span>${s.slope_deg}° slope</span></div>
+        ${SI && SI.base && SI.base.report ? mbBrief(SI.base.report, "mbr") : ""}
+        <p class="label" style="margin-top:20px">Open a module</p>
+        <div class="mb-mods">${MB.modules.map((x) => `<button type="button" class="mb-mod" data-m="${x.id}"><b>${esc(x.name)}</b><span>${o2pct(x.x_o2)} O₂ · ${x.psi} psi · ${x.volume_m3} m³</span><em>Methanol fire goes out on its own: ${esc(x.tests.liquids.facts[0].value.split(" ")[0])}</em></button>`).join("")}</div>
+        <p class="note">Modules use the challenge's lunar-base air; volumes are stand-ins taken from ISS Destiny, the Quest airlock and Orion.</p>`;
+    } else {
+      el.innerHTML = `
+        <button type="button" class="mb-back" id="mb-back">← Whole base</button>
+        <p class="label">Module · cut open in 3D</p>
+        <h3 class="mb-p__t">${esc(m.name)}</h3>
+        <div class="mb-chips"><span>${o2pct(m.x_o2)} O₂</span><span>${m.psi} psi</span><span>${m.volume_m3} m³</span><span>${m.gravity.g} g</span></div>
+        ${SI && SI.module && SI.module[m.id] ? mbBrief(SI.module[m.id], "mbm-" + m.id) : ""}
+        <div class="mb-tests">${LAYERS.map(([k, n], i) => { const t = m.tests[k]; return `
+          <details class="mb-test" ${i === 0 ? "open" : ""}>
+            <summary><span class="mb-test__n">${String(i + 1).padStart(2, "0")}</span><span class="mb-test__q"><small>${t.layer === n ? n : `${esc(t.layer)} · ${n}`}</small>${esc(t.question)}</span>${tagHtml(t.status)}</summary>
+            <p class="mb-test__a">${esc(t.answer)}</p>
+            <ul class="mb-facts">${t.facts.map((f) => `<li><span>${esc(f.label)}</span><b>${esc(f.value)}</b>${tagHtml(f.tag)}<small>${esc(f.source)}</small></li>`).join("")}</ul>
+          </details>`; }).join("")}
+          <div class="mb-test mb-test--gap"><span class="mb-test__n">05</span><span class="mb-test__q"><small>Lunar gravity</small>${esc(m.gravity.text)}</span>${tagHtml("gap")}</div>
+        </div>`;
+      $("#mb-back").addEventListener("click", () => selectModule(null));
+    }
+    el.querySelectorAll("[data-m]").forEach((b) => b.addEventListener("click", () => selectModule(b.dataset.m)));
+    wireCites(el);
+  }
+  function selectModule(id) {
+    mbState.sel = id;
+    if (moon3d) {
+      if (id && moon3d.mode() !== "base") { moon3d.descend(); setTimeout(() => moon3d.select(id), 3400); }
+      else moon3d.select(id);
+    }
+    renderBasePanel();
+    document.querySelectorAll("#mb-matrix tr[data-m]").forEach((r) => r.classList.toggle("is-on", r.dataset.m === id));
+  }
+  function renderBaseReport() {
+    $("#mb-legend").innerHTML = Object.keys(TAG).map((t) => `<span>${tagHtml(t)} ${esc(TAG[t][1])}</span>`).join("");
+    $("#mb-matrix").innerHTML = `<thead><tr><th>Module</th>${LAYERS.map(([, n]) => `<th>${n}</th>`).join("")}<th>Lunar gravity</th></tr></thead><tbody>${MB.modules.map((m) => `
+      <tr data-m="${m.id}"><th scope="row"><b>${esc(m.name)}</b><small>${o2pct(m.x_o2)} O₂ · ${m.psi} psi · ${m.volume_m3} m³</small></th>${LAYERS.map(([k]) => `<td>${tagHtml(m.tests[k].status)}<span>${esc(m.tests[k].answer)}</span></td>`).join("")}<td>${tagHtml("gap")}<span>No test at 0.17 g</span></td></tr>`).join("")}</tbody>`;
+    document.querySelectorAll("#mb-matrix tr[data-m]").forEach((r) => r.addEventListener("click", () => { selectModule(r.dataset.m); document.getElementById("moon3d").scrollIntoView({ behavior: "smooth", block: "start" }); }));
+    $("#mb-flights").innerHTML = MB.report.flight_tests_needed.map((f, i) => `<article class="mb-flight"><span class="mb-flight__n">${String(i + 1).padStart(2, "0")}</span><b>${esc(f.what)}</b><p>${esc(f.why)}</p></article>`).join("");
+    const s = MB.site;
+    $("#mb-sources").innerHTML = [
+      ["Terrain", s.dem, "https://pgda.gsfc.nasa.gov/products/78"],
+      ["Moon globe", "NASA SVS CGI Moon Kit: LROC color and LOLA elevation", "https://svs.gsfc.nasa.gov/4720"],
+      ["Sun and Earth position", "JPL Horizons API, observer on the Moon at the base site, every 3 hours from November 2026 to November 2027", "https://ssd.jpl.nasa.gov/horizons/"],
+      ["Atmospheres", "Challenge brief: 30% O₂ at 10.2 psi for the base and rover; 26.5% O₂ at 10.2 psi for EVA prep", CHALLENGE_URL],
+      ["Fire data", "BASS-II (PSI-25) boundary and gas sensors, Saffire-II (PSI-99) spread, FLEX (PSI-69) droplets and CO₂", "#/data"],
+      ["Volumes", MB.modules.map((m) => `${m.name}: ${m.volume_ref}`).join(" · "), ""],
+    ].map(([k, t, u]) => `<li><b>${k}</b><span>${esc(t)}</span>${u ? `<a href="${u}" ${u.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${u.startsWith("http") ? "Open ↗" : "See"}</a>` : ""}</li>`).join("");
+  }
+  function renderBaseTime(t) {
+    const d = t.date;
+    const up = t.sun[1] > 0;
+    $("#mb-time").innerHTML = `
+      <div class="mb-time__row"><span class="mono-sm">${d.toISOString().slice(0, 16).replace("T", " ")} UTC</span>
+        <span class="mb-sun ${up ? "up" : ""}">Sun ${t.sun[1] >= 0 ? "+" : ""}${t.sun[1].toFixed(2)}° · az ${t.sun[0].toFixed(0)}°</span>
+        <span class="mb-earth">Earth ${t.earth[1] >= 0 ? "+" : ""}${t.earth[1].toFixed(1)}°</span></div>
+      <input type="range" id="mb-slider" min="0" max="364" step="1" value="${Math.round(mbState.off / 86400000)}" aria-label="Days from today">
+      <div class="mb-time__l"><span>Today</span><span>Drag through the next year · JPL Horizons</span><span>+1 year</span></div>`;
+    $("#mb-slider").addEventListener("input", (e) => { mbState.off = +e.target.value * 86400000; if (moon3d) moon3d.setTimeOffset(mbState.off); });
+  }
+  let timeT = 0;
+  function initBase() {
+    if (!MB) return;
+    renderBasePanel(); renderBaseReport();
+    document.querySelectorAll("#mb-steps button").forEach((b) => b.addEventListener("click", () => {
+      if (!moon3d) return;
+      if (b.dataset.s === "base") moon3d.descend(); else { mbState.sel = null; moon3d.showMoon(); renderBasePanel(); }
+    }));
+    if (!window.PhoenixMoon || !window.THREE) { $("#moon3d").classList.add("lab3d__view--off"); return; }
+    moon3d = window.PhoenixMoon.init($("#moon3d"), {
+      onMode: (m) => { document.querySelectorAll("#mb-steps button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.s === m))); $("#mb-hint").textContent = m === "moon" ? "Drag to turn · click the orange marker to land" : "Drag to turn · scroll to zoom · click a module to cut it open"; },
+      onTime: (t) => { const now = performance.now(); if (now - timeT > 900 || !$("#mb-slider") || document.activeElement !== $("#mb-slider")) { timeT = now; if (document.activeElement !== $("#mb-slider")) renderBaseTime(t); else { const r = $("#mb-time .mb-time__row"); if (r) r.innerHTML = `<span class="mono-sm">${t.date.toISOString().slice(0, 16).replace("T", " ")} UTC</span><span class="mb-sun ${t.sun[1] > 0 ? "up" : ""}">Sun ${t.sun[1] >= 0 ? "+" : ""}${t.sun[1].toFixed(2)}° · az ${t.sun[0].toFixed(0)}°</span><span class="mb-earth">Earth ${t.earth[1] >= 0 ? "+" : ""}${t.earth[1].toFixed(1)}°</span>`; } } },
+      start: QS.get("land") ? "base" : null,
+    });
+    if (!moon3d) { $("#moon3d").classList.add("lab3d__view--off"); return; }
+    moon3d.onSelect((id) => { if (id !== mbState.sel) { mbState.sel = id; renderBasePanel(); } });
+  }
+
+  const VIEWS = ["home", "base", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
   const ALIAS = { scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
     home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(initGlobe, "globe"); },
-    learn: () => { safe(initLearn, "learn"); safe(initWorlds, "worlds"); safe(renderLand, "landscape"); },
+    base: () => { safe(initBase, "moon base"); },
+    learn: () => { safe(initLearn, "learn"); safe(initLearnMods, "learn modules"); },
     flames: () => { safe(renderStage, "stage"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
     findings: () => { safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
@@ -1607,8 +1706,10 @@
     document.body.dataset.view = v;
     if (globe) { if (v === "home") globe.resume(); else globe.pause(); }
     if (lab3d) { if (v === "lab") lab3d.resume(); else lab3d.pause(); }
-    if (learn3d) { if (v === "learn") learn3d.resume(); else learn3d.pause(); }
-    worlds.forEach((w) => w && (v === "learn" ? w.resume() : w.pause()));
+    if (learn3d) { if (v === "learn" && lmState.m === "1") learn3d.resume(); else learn3d.pause(); }
+    if (moon3d) { if (v === "base") moon3d.resume(); else moon3d.pause(); }
+    worlds.forEach((w) => w && (v === "learn" && lmState.m === "2" ? w.resume() : w.pause()));
+    if (cabin3d) { if (v === "learn" && lmState.m === "3") cabin3d.resume(); else cabin3d.pause(); }
     const view = document.querySelector(`.view[data-view="${v}"]`);
     view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
     requestAnimationFrame(() => {

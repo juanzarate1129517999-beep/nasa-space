@@ -125,6 +125,46 @@ def investigation_pack(r, P, rank_moon):
             "items": {f"E{k + 1}": t for k, t in enumerate(items)}}
 
 
+def module_pack(m, P):
+    t = m["tests"]
+    f = lambda k, i: t[k]["facts"][i]["value"]
+    mats, liq, det, sup = t["materials"]["facts"], t["liquids"]["facts"], t["detection"]["facts"], t["suppression"]["facts"]
+    items = [
+        f"{m['name']} of the Skylab Phoenix lunar base: {o2(m['x_o2'])} O2 at {m['psi']} psi ({m['p_atm']:.2f} atm), "
+        f"{m['volume_m3']} m³ of free volume ({m['volume_ref']}). Lunar gravity is 0.166 g, and NASA PSI holds no combustion test at that gravity.",
+        f"NASA's BASS-II flammability boundary: a PMMA rod keeps burning in still air above {f('materials', 0)} O2 (measured at 1 atm). "
+        f"This module runs at {f('materials', 1)} O2, while the highest O2 any solid has burned at in orbit is {f('materials', 2)}, so this answer is an extrapolation.",
+        f"Saffire-II measured flame spread of {f('materials', 4)} over cotton-fiberglass fabric at about 22% O2 in a 20 cm/s airflow; no fabric has burned in orbit at {f('materials', 1)} O2.",
+        f"FLEX model in this air: a methanol droplet flame goes out on its own {f('liquids', 0)}; a heptane droplet flame {f('liquids', 1)}; "
+        f"the same methanol fire in ISS cabin air goes out {f('liquids', 2)} of the time.",
+        f"BASS-II: one PMMA rod burn added a median {f('detection', 0)} of CO to the 250 L glovebox; mixed into this module that is about {f('detection', 4)} "
+        f"(a scaled estimate assuming well-mixed air), and a PMMA slab burn about {f('detection', 5)}.",
+        f"FLEX at 0.7 atm: more than 30% CO2 put out {f('suppression', 2)} fires, but at {sup[2]['source'].split('O2 ')[-1]} O2; with no CO2, {f('suppression', 0)} went out on their own.",
+        f"FLEX model in this air with 30% CO2 added: the methanol fire goes out {f('suppression', 3)}, an extrapolation because no FLEX test combined this much oxygen with CO2.",
+    ]
+    for k, need in enumerate(P["moonbase"]["report"]["flight_tests_needed"][:2]):
+        items.append(f"Flight test the data asks for: {need['what']}. Why: {need['why']}")
+    return {"kind": "module", "id": m["id"], "title": m["name"], "items": {f"E{i + 1}": x for i, x in enumerate(items)}}
+
+
+def base_pack(P):
+    B = P["moonbase"]
+    s, r = B["site"], B["report"]
+    items = [
+        f"Base site: {s['name']} at {abs(s['lat'])}°S, {s['lon']}°E and {s['z']:,.0f} m elevation, on a {s['slope_deg']}° slope, picked from the NASA "
+        f"LOLA 5 m/pix elevation map of the lunar south pole (PGDA). The base has a surface habitat, an airlock for EVA prep and a pressurized rover.",
+        f"Sun seen from the base (JPL Horizons, November 2026 to November 2027): elevation between {s['sun_elev_range'][0]}° and "
+        f"{s['sun_elev_range'][1]}° above the local horizontal plane, above it {100 * s['sun_above_plane_share']:.0f}% of the time.",
+        f"Of {r['total_facts']} numbers in the base fire audit, {r['measured_layers']} are NASA measurements; the others are derived, model, assumed or extrapolated values.",
+    ]
+    for m in B["modules"]:
+        items.append(f"{m['name']} ({o2(m['x_o2'])} O2, {m['psi']} psi, {m['volume_m3']} m³): methanol droplet fire goes out on its own "
+                     f"{m['tests']['liquids']['facts'][0]['value']}; one rod burn adds about {m['tests']['detection']['facts'][4]['value']} of CO once mixed.")
+    for need in r["flight_tests_needed"]:
+        items.append(f"Flight test the data asks for: {need['what']}. Why: {need['why']}")
+    return {"kind": "base", "id": "report", "title": "Lunar base fire audit", "items": {f"E{i + 1}": x for i, x in enumerate(items)}}
+
+
 def pack_hash(pack):
     return hashlib.sha256(json.dumps(pack["items"], sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
 
@@ -133,6 +173,8 @@ def build_packs(P):
     ranked = sorted(P["investigations"], key=lambda r: -r["relevance"]["moon_base"]["score"])
     rank = {r["psi_id"]: i + 1 for i, r in enumerate(ranked)}
     packs = [habitat_pack(h, P) for h in HABITATS] + [investigation_pack(r, P, rank[r["psi_id"]]) for r in ranked]
+    if P.get("moonbase"):
+        packs += [module_pack(m, P) for m in P["moonbase"]["modules"]] + [base_pack(P)]
     for p in packs:
         p["hash"] = pack_hash(p)
     return packs
@@ -240,7 +282,7 @@ def build(P):
     packs = build_packs(P)
     PACKS.write_text(json.dumps(packs, ensure_ascii=False, indent=1), encoding="utf-8")
     store = json.loads(DRAFTS.read_text(encoding="utf-8")) if DRAFTS.exists() else {"meta": {}, "drafts": {}}
-    out = {"meta": store.get("meta", {}), "habitat": {}, "investigation": {}}
+    out = {"meta": store.get("meta", {}), "habitat": {}, "investigation": {}, "module": {}, "base": {}}
     report, n_ok = {}, 0
     for p in packs:
         key = f"{p['kind']}:{p['id']}"

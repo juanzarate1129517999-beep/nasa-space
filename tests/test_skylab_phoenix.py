@@ -183,3 +183,17 @@ def test_extended_audit():
     assert rule("PSI-69", "cannot be independent")[0]["registro"] == "70, 73"
     spice = next(r for r in EMBER["investigations"] if r["psi_id"] == "PSI-107")
     assert spice["n_tests"] == 435
+
+
+def test_moonbase_audit():
+    mb = EMBER["moonbase"]
+    assert [m["id"] for m in mb["modules"]] == ["habitat", "airlock", "rover"]
+    tags = {"measured", "derived", "model", "extrapolated", "assumed", "gap"}
+    for m in mb["modules"]:
+        assert set(m["tests"]) == {"materials", "liquids", "detection", "suppression"}
+        for t in m["tests"].values():
+            assert t["status"] in tags and t["facts"] and all(f["tag"] in tags and f["source"] for f in t["facts"])
+    hab = mb["modules"][0]
+    assert hab["x_o2"] == 0.30 and hab["volume_m3"] == 106
+    assert mb["site"]["name"] == "Connecting ridge" and -90 < mb["site"]["lat"] < -89
+    assert len(mb["report"]["flight_tests_needed"]) == 3
