@@ -52,8 +52,7 @@
       el.innerHTML = '<p class="note" style="padding:20px">Charts could not load (web/vendor/plotly-2.35.2.min.js is missing). All values are also available in the tables and downloads.</p>';
       return;
     }
-    const L = window.I18N;
-    Plotly.react(el, L ? L.deep(data) : data, L ? L.deep(lay) : lay, CFG);
+    Plotly.react(el, data, lay, CFG);
     return el;
   }
   const legendItem = (shape, color, label, open = false) => {
@@ -562,7 +561,7 @@
     $("#map-chart").innerHTML = `<div class="fires">
         <div class="fires__grid">${cells.map((c) => `<i class="${c}"></i>`).join("")}</div>
         <div class="fires__txt"><span class="fires__o">${nOut}</span><span>go out on their own</span>
-          <span class="fires__b">${nD}</span><span>break apart, scattering burning fuel</span>
+          <span class="fires__b">${nD}</span><span>break apart before the flame ends</span>
           <span class="fires__k">${nC}</span><span>burn until the fuel is gone</span>
           <span class="mono-sm">Only the first group puts itself out; the rest must be detected and put out. The model is ${stt === "within" ? "inside" : "near the edge of"} NASA's flight data: the share that goes out on its own could be anywhere from ${lo} to ${hi} in 100.</span></div>
       </div>${ladder}`;
@@ -993,7 +992,6 @@
     if (sc.co2) p.set("co2", sc.co2.toFixed(2));
     if (sc.he) p.set("he", sc.he.toFixed(2));
     p.set("d0", sc.d0.toFixed(2));
-    if (audState.id) p.set("view", audState.id);
     return p;
   }
   function syncUrl() {
@@ -1046,17 +1044,6 @@
       if (li) { li.classList.remove("flash"); void li.offsetWidth; li.classList.add("flash"); li.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
     }));
   }
-  function renderBrief() {
-    if (!SI) { $("#brief").innerHTML = '<p class="note">SI data not found — run python -m pipeline.run.</p>'; return; }
-    $("#brief-hab").innerHTML = HUI.map((x) => `<button aria-pressed="${x.id === briefState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
-    document.querySelectorAll("#brief-hab button").forEach((b) => b.addEventListener("click", () => { briefState.hab = b.dataset.h; renderBrief(); }));
-    const b = SI.habitat[briefState.hab];
-    const hb = D.habitats.find((x) => x.id === briefState.hab);
-    $("#brief").innerHTML = `<div class="brief-meta">${badge(b)}<span class="mono-sm">${o2pct(hb.x_o2)} O₂ · ${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>
-      ${b.headline ? `<h3 class="brief-h">${esc(b.headline)}</h3>` : ""}
-      <p class="brief-p">${sentencesHtml(b, "hab")}</p>${evidenceHtml(b, "hab")}`;
-    wireCites($("#brief"));
-  }
   function briefMarkdown() {
     const b = SI.habitat[briefState.hab], hb = D.habitats.find((x) => x.id === briefState.hab);
     const lines = [`# Fire-safety briefing: ${hb.name}`, "", `${o2pct(hb.x_o2)} O2 at ${num(hb.p_atm * ATM_PSI, 1)} psi (${num(hb.p_atm, 2)} atm). ${hb.source}.`, "",
@@ -1083,16 +1070,8 @@
   const CORPUS = (window.CORPUS || []).map((d) => ({ ...d, tf: (() => { const m = new Map(); for (const w of [...toks(d.title), ...toks(d.title), ...toks(d.text)]) m.set(w, (m.get(w) || 0) + 1); return m; })(), len: toks(d.title).length * 2 + toks(d.text).length }));
   const AVGLEN = CORPUS.reduce((s, d) => s + d.len, 0) / Math.max(1, CORPUS.length);
   const DF = (() => { const m = new Map(); CORPUS.forEach((d) => d.tf.forEach((_, w) => m.set(w, (m.get(w) || 0) + 1))); return m; })();
-  const ES_Q = { supresor: "suppressant", supresores: "suppressant", suprimir: "suppress", extintor: "extinguish", extintores: "extinguish", apagar: "extinguish", apaga: "extinguish", apago: "extinguish",
-    fuego: "fire", fuegos: "fire", incendio: "fire", incendios: "fire", llama: "flame", llamas: "flame", fria: "cool", frias: "cool", humo: "smoke", hollin: "soot", gota: "droplet", gotas: "droplet",
-    oxigeno: "oxygen", presion: "pressure", gravedad: "gravity", microgravedad: "microgravity", luna: "moon", lunar: "lunar", marte: "mars", base: "base", cabina: "cabin", traje: "suit",
-    material: "material", materiales: "material", solido: "solid", solidos: "solid", tela: "fabric", telas: "fabric", plastico: "pmma", acrilico: "pmma", ardido: "burn", arde: "burn", arder: "burn", quema: "burn",
-    helio: "helium", nitrogeno: "nitrogen", ventilacion: "ventilation", ventiladores: "ventilation", flujo: "flow", aire: "air", propagacion: "spread", propaga: "spread", deteccion: "detection", detector: "detector", detectores: "detector",
-    seleccion: "screening", conservadora: "conservative", combustible: "fuel", liquido: "liquid", gas: "gas", direccion: "direction", importa: "matter", cambia: "change", probo: "test", prueba: "test", pruebas: "test",
-    experimento: "experiment", experimentos: "experiment", riesgo: "risk", seguridad: "safety", habitat: "habitat", rover: "rover", esclusa: "airlock", vuelo: "flight" };
-  const toEnQuery = (q) => String(q).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/[^a-z0-9₂]+/).map((w) => ES_Q[w] || w).join(" ");
   function search(q, k = 5) {
-    const base = toks(toEnQuery(q));
+    const base = toks(q);
     const terms = new Map(base.map((w) => [w, 1]));
     base.forEach((w) => (SYN[w] || []).forEach((s) => { const t = stem(s); if (!terms.has(t)) terms.set(t, 0.5); }));
     const N = CORPUS.length;
@@ -1116,53 +1095,47 @@
     const re = new RegExp(`\\b(${terms.filter((w) => w.length > 2).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\w*`, "gi");
     return esc(out).replace(re, "<mark>$&</mark>");
   }
-  const SUGGEST = ["Which suppressants did NASA test?", "What is a cool flame?", "Has any material burned in lunar-base air?", "Why might 1 g material screening not be conservative?",
-    "How does smoke change in microgravity?", "Does airflow direction matter?"];
-  function renderAsk(q) {
-    $("#ask-sug").innerHTML = SUGGEST.map((s) => `<button class="chip" type="button" data-q="${esc(s)}">${esc(s)}</button>`).join("");
-    document.querySelectorAll("#ask-sug .chip").forEach((b) => b.addEventListener("click", () => { $("#ask-q").value = b.textContent; renderAsk(b.dataset.q); }));
-    if (!q) { $("#ask-out").innerHTML = `<p class="note">${CORPUS.length} passages indexed from NASA PSI investigation records, Skylab Phoenix findings, habitat definitions and a short glossary.</p>`; return; }
-    const { hits, terms } = search(q);
-    if (!hits.length || hits[0].s < 1.2) {
-      $("#ask-out").innerHTML = `<p class="note"><b>No passage in the archive answers this well.</b> The archive covers the 24 PSI combustion investigations; try naming a fire type (droplet, solid, gas flame, smoke), a habitat, or a suppressant.</p>`;
-      return;
-    }
-    $("#ask-out").innerHTML = hits.map(({ d }) => `<article class="hit">
-        <div class="hit-top"><span class="tag">${esc(d.kind)}</span>${d.psi ? `<span class="mono-sm">${esc(d.psi)}</span>` : ""}</div>
-        <h4>${esc(d.title)}</h4><p>${snippet(d.text, terms)}</p>
-        ${d.url ? `<a class="src-link" href="${esc(d.url)}" ${d.url.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${d.url.startsWith("http") ? "Open the NASA PSI record ↗" : "Open in dashboard →"}</a>` : ""}
-      </article>`).join("") + `<p class="note">Ranked by BM25 relevance over NASA's own text. Passages are quoted, not generated.</p>`;
-  }
-
-  // Floating "Ask the archive" chat: verified SI briefings + quoted NASA passages. Nothing is generated.
-  const HAB_WORDS = [["moon_base", /\b(moon|lunar|luna|base|rover)\b/i], ["exploration", /\b(exploration|exploraci[oó]n|8\.2|34 ?%)/i],
-    ["eva_prep", /\b(eva|airlock|esclusa|campout|26\.5)/i], ["suit", /\b(suit|traje|spacesuit)\b/i], ["cabin", /\b(cabin|cabina|iss|station|estaci[oó]n)\b/i]];
-  const CHAT_SUG = ["Has any material burned in lunar-base air?", "Which suppressants did NASA test?", "What is a cool flame?", "Does airflow direction matter?", "How does smoke change in microgravity?"];
+  // Floating "Ask SI" chat: the verified SI briefings, and passages quoted from NASA's own text. Nothing is generated.
+  const HAB_WORDS = [["moon_base", /\b(moon|lunar|base|rover)\b/i], ["exploration", /\b(exploration|8\.2 ?psi|34 ?%)/i],
+    ["eva_prep", /\b(eva|airlock|campout|26\.5)/i], ["suit", /\b(suit|spacesuit)\b/i], ["cabin", /\b(cabin|iss|station)\b/i]];
+  const CHAT_SUG = ["What happens to fire in lunar-base air?", "Has any material burned in lunar-base air?", "Which suppressants did NASA test?", "What is a cool flame?", "Does airflow direction matter?"];
   const chat = { open: false, n: 0 };
+  function briefCard(hab) {
+    const b = SI.habitat[hab], hb = D.habitats.find((x) => x.id === hab), sc = `cb${++chat.n}`;
+    return `<div class="cb-brief" data-hab="${hab}"><div class="brief-meta">${badge(b)}<span class="mono-sm">${esc(hb.name)} · ${o2pct(hb.x_o2)} O₂ · ${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>
+      ${b.headline ? `<b>${esc(b.headline)}</b>` : ""}<p class="brief-p">${sentencesHtml(b, sc)}</p>${evidenceHtml(b, sc)}
+      <div class="cb-acts"><button type="button" class="chip" data-act="dl">Download briefing (.md)</button>${hb.x_o2 < 1 ? `<button type="button" class="chip" data-act="lab">Open in the Fire Lab →</button>` : ""}</div></div>`;
+  }
   function chatAnswer(q) {
     const hab = (HAB_WORDS.find(([, re]) => re.test(q)) || [])[0];
     const parts = [];
-    if (hab && SI && SI.habitat[hab]) {
-      const b = SI.habitat[hab], hb = D.habitats.find((x) => x.id === hab);
-      parts.push(`<div class="cb-brief"><div class="brief-meta">${badge(b)}<span class="mono-sm">${esc(hb.name)} · ${o2pct(hb.x_o2)} O₂ · ${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>
-        ${b.headline ? `<b>${esc(b.headline)}</b>` : ""}<p>${b.sentences.slice(0, 3).map((x) => `<span>${esc(x.text)}</span>`).join(" ")}</p>
-        <a class="src-link" href="#/ask" data-hab="${hab}">Full briefing with its evidence →</a></div>`);
-    }
+    if (hab && SI && SI.habitat[hab]) parts.push(briefCard(hab));
     const { hits, terms } = search(q, 3);
     const good = hits.filter((h) => h.s >= 1.2);
     good.forEach(({ d }) => parts.push(`<div class="cb-hit"><span class="tag">${esc(d.kind)}</span>${d.psi ? ` <span class="mono-sm">${esc(d.psi)}</span>` : ""}
       <b>${esc(d.title)}</b><p>${snippet(d.text, terms, 260)}</p>${d.url ? `<a class="src-link" href="${esc(d.url)}" ${d.url.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${d.url.startsWith("http") ? "NASA PSI record ↗" : "Open in the dashboard →"}</a>` : ""}</div>`));
     if (!parts.length) return `<p>No passage in NASA's archive answers this well. Try naming a fire type (droplet, solid, gas flame, smoke), a crew atmosphere or a suppressant.</p>`;
-    return parts.join("") + `<p class="cb-foot">${good.length ? "Passages are quoted from NASA's own text and ranked by relevance, not generated." : ""}</p>`;
+    return parts.join("") + (good.length ? `<p class="cb-foot">Passages are quoted from NASA's own text and ranked by relevance (BM25), not generated.</p>` : "");
+  }
+  function chatPost(meHtml, botHtml) {
+    const log = $("#cb-log");
+    log.insertAdjacentHTML("beforeend", `<div class="cb-msg cb-msg--me">${meHtml}</div><div class="cb-msg cb-msg--bot">${botHtml}</div>`);
+    const last = log.lastElementChild;
+    wireCites(last);
+    last.querySelectorAll(".cb-brief").forEach((card) => card.querySelectorAll("[data-act]").forEach((btn) => btn.addEventListener("click", () => {
+      const hab = card.dataset.hab;
+      if (btn.dataset.act === "dl") { briefState.hab = hab; download(`skylab-phoenix-briefing-${hab}.md`, briefMarkdown()); }
+      else { chatToggle(false); ensure("lab"); setPreset(hab); location.hash = "#/lab"; }
+    })));
+    requestAnimationFrame(() => { log.scrollTop = last.offsetTop - 70; });
   }
   function chatAsk(q, shown) {
     q = String(q || "").trim();
-    if (!q) return;
-    const log = $("#cb-log");
-    log.insertAdjacentHTML("beforeend", `<div class="cb-msg cb-msg--me">${esc(shown || q)}</div><div class="cb-msg cb-msg--bot">${chatAnswer(q)}</div>`);
-    log.querySelectorAll('.cb-brief a[data-hab]').forEach((a) => a.addEventListener("click", () => { briefState.hab = a.dataset.hab; safe(renderBrief, "brief"); chatToggle(false); }));
-    const last = log.lastElementChild; requestAnimationFrame(() => { log.scrollTop = last.offsetTop - 12; });
-    $("#cb-sug").hidden = true;
+    if (q) chatPost(esc(shown || q), chatAnswer(q));
+  }
+  function chatBrief(hab) {
+    if (!SI || !SI.habitat[hab]) return;
+    chatPost(`Briefing: ${esc(D.habitats.find((x) => x.id === hab).name)}`, briefCard(hab));
   }
   function chatToggle(open = !chat.open) {
     chat.open = open;
@@ -1174,48 +1147,16 @@
   function initChat() {
     $("#cb-sug").innerHTML = CHAT_SUG.map((x) => `<button class="chip" type="button" data-q="${esc(x)}">${esc(x)}</button>`).join("");
     document.querySelectorAll("#cb-sug .chip").forEach((b) => b.addEventListener("click", () => chatAsk(b.dataset.q, b.textContent)));
+    $("#cb-briefs").innerHTML = HUI.map((h) => `<button type="button" data-h="${h.id}">${esc(h.name)}</button>`).join("");
+    document.querySelectorAll("#cb-briefs button").forEach((b) => b.addEventListener("click", () => chatBrief(b.dataset.h)));
+    document.querySelectorAll('[data-open-chat]').forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); chatToggle(true); if (b.dataset.openChat) chatBrief(b.dataset.openChat); }));
     $("#cb-btn").addEventListener("click", () => chatToggle());
     $("#cb-close").addEventListener("click", () => chatToggle(false));
     $("#cb-form").addEventListener("submit", (e) => { e.preventDefault(); const q = $("#cb-q").value; $("#cb-q").value = ""; safe(() => chatAsk(q), "chat"); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && chat.open) chatToggle(false); });
   }
 
-  const AUD = [
-    { id: "undergrad", name: "Undergraduate", intro: "New to microgravity fire? Three steps, about five minutes.", link: ["Or start with NASA's 4-minute video: The Power of Studying Combustion on the ISS ↗", "https://www.youtube.com/watch?v=W1oXykoz9zg"], steps: [
-      ["Read the lunar-base briefing", "Each sentence has a citation; click one to see the number behind it.", { brief: "moon_base", go: "#briefing" }],
-      ["Raise the oxygen yourself", "Start from cabin air and move the oxygen slider to 30%: watch the chance that the flame puts itself out collapse.", { preset: "cabin", go: "#scenario" }],
-      ["Look up a term", "Ask the archive “What is a cool flame?”: a flame you can barely see.", { ask: "What is a cool flame?", go: "#briefing" }]] },
-    { id: "grad", name: "Graduate student", intro: "Find the investigation and data that fit your thesis question.", steps: [
-      ["Rank investigations for your habitat", "Relevance is a transparent formula; every score shows its parts.", { go: "#investigations" }],
-      ["Compare side by side", "Hardware, conditions, variables and outcomes of up to three investigations.", { go: "#compare" }],
-      ["Download the unified tables", `${D.summary.records.toLocaleString("en-US")} tests in SI units with a logged correction trail.`, { go: "#quality" }]] },
-    { id: "professor", name: "Professor", intro: "Teaching material with the evidence attached.", steps: [
-      ["Coverage map", "Where NASA has flown fire versus where crews will live: a one-slide lecture.", { go: "#coverage" }],
-      ["Raw evidence charts", "Outcomes with sample sizes and intervals, ready for a problem set.", { go: "#evidence" }],
-      ["Findings ranked by evidence", "Each with its source investigation and an evidence score you can discuss.", { go: "#findings" }]] },
-    { id: "researcher", name: "Aerospace researcher", intro: "Methods, validation and the open questions.", steps: [
-      ["Validation and calibration", "Grouped by test day, against gradient boosting and baselines.", { go: "#quality" }],
-      ["What NASA should fly next", "Active learning on the bootstrap ensemble near lunar-base air.", { go: "#next" }],
-      ["Search NASA's text", "Objectives, hypotheses and publications of all 24 investigations.", { ask: "Which suppressants did NASA test?", go: "#briefing" }]] },
-    { id: "engineer", name: "Aerospace engineer", intro: "A design-review view of your cabin atmosphere.", steps: [
-      ["Brief for the exploration atmosphere", "8.2 psi, 34% O₂: what the data says and where it stops. Download it as Markdown.", { brief: "exploration", go: "#briefing" }],
-      ["Run your own atmosphere", "Set O₂, pressure and diluents; copy a link that reopens the exact case.", { preset: "exploration", go: "#scenario" }],
-      ["Design implications", "Detection, suppression and ventilation implications, each traced to a source.", { go: "#findings" }]] },
-  ];
-  const audState = { id: QS.get("view") && AUD.some((a) => a.id === QS.get("view")) ? QS.get("view") : "undergrad" };
-  function renderAudience() {
-    $("#aud-seg").innerHTML = AUD.map((a) => `<button aria-pressed="${a.id === audState.id}" data-a="${a.id}">${a.name}</button>`).join("");
-    document.querySelectorAll("#aud-seg button").forEach((b) => b.addEventListener("click", () => { audState.id = b.dataset.a; renderAudience(); syncUrl(); }));
-    const a = AUD.find((x) => x.id === audState.id);
-    $("#aud-path").innerHTML = `<p class="aud-intro">${esc(a.intro)}${a.link ? ` <a class="src-link" href="${a.link[1]}" target="_blank" rel="noopener">${esc(a.link[0])}</a>` : ""}</p><ol class="steps">${a.steps.map(([t, d], i) => `<li><button type="button" class="step" data-i="${i}"><span class="n">${i + 1}</span><span><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="arrow">→</span></button></li>`).join("")}</ol>`;
-    document.querySelectorAll("#aud-path .step").forEach((b) => b.addEventListener("click", () => {
-      const act = a.steps[+b.dataset.i][2];
-      if (act.brief) { briefState.hab = act.brief; renderBrief(); }
-      if (act.preset) { ensure("lab"); setPreset(act.preset); }
-      if (act.ask) { $("#ask-q").value = act.ask; renderAsk(act.ask); }
-      go(act.go);
-    }));
-  }
+
 
   const cmpState = { ids: ["PSI-69", "PSI-25", "PSI-99"] };
   const CMPC = ["#f97316", "#38bdf8", "#a78bfa"];
@@ -1452,7 +1393,7 @@
     const ts = tick(tmax), ys = tick(ymax);
     for (let v = 0; v <= tmax; v += ts) { g.beginPath(); g.moveTo(X(v), Tp); g.lineTo(X(v), H - B); g.stroke(); g.fillText(String(v), X(v) - 6, H - B + 24); }
     for (let v = 0; v <= ymax; v += ys) { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(W - R, Y(v)); g.stroke(); g.fillText(String(v), 6, Y(v) + 7); }
-    g.fillText(I18N_T("s"), W - R - 14, H - B - 8); g.fillText(I18N_T("d², mm²"), L + 6, Tp + 18);
+    g.fillText("s", W - R - 14, H - B - 8); g.fillText("d², mm²", L + 6, Tp + 18);
     phys.tests.forEach((t) => {
       g.strokeStyle = t.out ? "rgba(125,211,252,.55)" : "rgba(200,205,215,.4)"; g.lineWidth = 2; g.setLineDash([]);
       g.beginPath(); g.moveTo(X(0), Y(t.d0 ** 2)); g.lineTo(X(t.tb), Y(t.dEnd2)); g.stroke();
@@ -1465,9 +1406,8 @@
       g.strokeStyle = "#ff8a3d"; g.lineWidth = 4; g.beginPath(); g.moveTo(X(0), Y(s.d0 ** 2)); g.lineTo(X(te), Y(Math.max(s.dEnd ** 2, s.d0 ** 2 - s.K * te))); g.stroke();
       g.fillStyle = "#ffb36b"; g.beginPath(); g.arc(X(te), Y(s.d * s.d), 7, 0, 7); g.fill();
     }
-    $("#lab-read").innerHTML = `<span><b>${Math.max(0, s.e - s.ign).toFixed(1)} s</b>${I18N_T("since ignition")}</span><span><b>${s.d.toFixed(2)} mm</b>${I18N_T("droplet now")}</span><span><b>${s.K.toFixed(2)} mm²/s</b>${I18N_T("burning rate K")}</span><span><b>${(s.dEnd).toFixed(2)} mm</b>${s.out ? I18N_T("goes out at") : I18N_T("burns down to")}</span>`;
+    $("#lab-read").innerHTML = `<span><b>${Math.max(0, s.e - s.ign).toFixed(1)} s</b>${"since ignition"}</span><span><b>${s.d.toFixed(2)} mm</b>${"droplet now"}</span><span><b>${s.K.toFixed(2)} mm²/s</b>${"burning rate K"}</span><span><b>${(s.dEnd).toFixed(2)} mm</b>${s.out ? "goes out at" : "burns down to"}</span>`;
   }
-  const I18N_T = (t) => (window.I18N ? window.I18N.t(t) : t);
   function syncLab3d(r, show, st) {
     if (!lab3d) return;
     phys = labPhys(featVec(sc));
@@ -1499,7 +1439,7 @@
     const path = (c) => `assets/video/${c.dir ? c.dir + "/" : ""}${c.f}`;
     const stTag = { Solid: "Solid", Liquid: "Liquid", Gas: "Gas" };
     $("#arch").innerHTML = shown.map((c) => `<figure class="ac ac--${c.state.toLowerCase()}"><div class="ac__v"><video data-src="${path(c)}.mp4" poster="${path(c)}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span><span class="ac__st">${stTag[c.state]}</span></div>
-      <figcaption><span class="ac__o2">${c.o2 == null ? "—" : `${c.approx ? "≈" : ""}${c.o2}`}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm"><span>${esc(FAM_LABEL[c.family] || c.family)} · ${c.psi ? `${c.psi} · ` : ""}test</span> <span data-no-i18n>${esc(c.test)}</span></span><span class="ac__m">${c.m ? esc(c.m) : `<span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}`}</span></figcaption></figure>`).join("");
+      <figcaption><span class="ac__o2">${c.o2 == null ? "—" : `${c.approx ? "≈" : ""}${c.o2}`}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · ${c.psi ? `${c.psi} · ` : ""}test ${esc(c.test)}</span><span class="ac__m">${c.m ? esc(c.m) : `<span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}`}</span></figcaption></figure>`).join("");
     $("#arch-more").hidden = list.length <= PAGE;
     $("#arch-more").textContent = archState.all ? "Show fewer" : `Show all ${list.length}`;
     lazyVideos("#arch video");
@@ -1533,7 +1473,7 @@
     $("#reel-main").classList.toggle("is-auto", reel.auto);
     $("#reel-list").innerHTML = REEL.map((c, i) => `<li><button type="button" class="reel__it" data-i="${i}" aria-pressed="${i === reel.i}">
       <span class="reel__th"><img src="assets/video/${c.f}.jpg" alt="" loading="lazy"></span>
-      <span class="reel__tx"><span class="reel__n"><span>${String(i + 1).padStart(2, "0")}</span> <span data-no-i18n>${esc(invOf(c.psi).name)}</span></span><b>${esc(c.t)}</b><span class="reel__m">${c.approx ? "≈" : ""}${c.o2}% O₂ · ×${c.x}</span></span>
+      <span class="reel__tx"><span class="reel__n"><span>${String(i + 1).padStart(2, "0")}</span> <span>${esc(invOf(c.psi).name)}</span></span><b>${esc(c.t)}</b><span class="reel__m">${c.approx ? "≈" : ""}${c.o2}% O₂ · ×${c.x}</span></span>
       <i class="reel__bar" aria-hidden="true"></i></button></li>`).join("");
     document.querySelectorAll(".reel__it").forEach((b) => b.addEventListener("click", () => { reel.user = true; reel.auto = false; $("#reel-main").classList.remove("is-auto"); showReel(+b.dataset.i); }));
     document.querySelectorAll(".reel__bar").forEach((bar) => bar.addEventListener("animationend", () => { if (reel.auto) showReel((reel.i + 1) % REEL.length); }));
@@ -1561,7 +1501,7 @@
         <span class="ig__top"><span>${esc(r.family)}</span><span>${r.psi_id}</span></span>
         <span class="vi__clips">${n} clips</span></span>
       <span class="vi__body">
-        <span class="vi__hd"><b data-no-i18n>${esc(r.name)}</b><span class="vi__rk">#${k}<small>Moon base rank</small></span></span>
+        <span class="vi__hd"><b>${esc(r.name)}</b><span class="vi__rk">#${k}<small>Moon base rank</small></span></span>
         <span class="ig__t">${esc(r.title)}</span>
         <span class="ig__meta"><span>${r.n_tests.toLocaleString("en-US")} records</span><span>${r.o2_min == null ? "" : r.o2_min === r.o2_max ? `${pct(r.o2_min)}% O₂` : `${pct(r.o2_min)}–${pct(r.o2_max)}% O₂`}</span></span>
         <span class="ig__open">Open file →</span>
@@ -1582,12 +1522,12 @@
     v.src = `assets/video/${c.f}.mp4`;
     v.playbackRate = 1;
     if (reel.vis) v.play().catch(() => {});
-    $("#reel-tag").innerHTML = `<span data-no-i18n>ISS · ${esc(r.name)} · </span><span>×${c.x} speed</span>`;
+    $("#reel-tag").innerHTML = `<span>ISS · ${esc(r.name)} · </span><span>×${c.x} speed</span>`;
     const st = { Solid: "Solid", Liquid: "Liquid", Gas: "Gas" }[c.state];
     $("#reel-info").innerHTML = `
       <div class="reel__o2">${c.approx ? "≈" : ""}${c.o2}<small>% O₂</small></div>
       <div class="reel__txt">
-        <p class="label"><span>${st}</span> · <span data-no-i18n>${esc(r.name)} · ${c.psi} · ${esc(c.test)}</span></p>
+        <p class="label"><span>${st}</span> · <span>${esc(r.name)} · ${c.psi} · ${esc(c.test)}</span></p>
         <h3>${esc(c.t)}</h3>
         <p>${esc(c.cap)}</p>
         <div class="reel__links"><a class="btn btn--fire btn--sm" href="#/ranking" data-inv="${c.psi}">Open the investigation <span aria-hidden="true">→</span></a><a class="btn btn--line btn--sm" href="${r.psi_url}" target="_blank" rel="noopener">NASA PSI ↗</a></div>
@@ -1611,7 +1551,7 @@
     const near = (r) => Math.abs(r.o2_mean - hb.x_o2) <= 0.05 && Math.abs(Math.log(r.p_mean / hb.p_atm)) <= Math.log(1.35);
     const list = SV.filter((r) => r.kind !== "Inverse gas flame" && (survState.kind === "All" || r.kind === survState.kind));
     const shown = survState.all ? list : list.slice(0, 10);
-    $("#surv-legend").innerHTML = [legendItem("bar", C.orange, "Kept burning until the fuel was cut or gone"), legendItem("bar", C.amber, "Droplet broke apart, still burning"), legendItem("bar", "#cbd5e1", "Went out on its own"), legendItem("bar", "rgba(242,96,15,.25)", `Near ${hb.name} air`)].join("");
+    $("#surv-legend").innerHTML = [legendItem("bar", C.orange, "Kept burning until the fuel was cut or gone"), legendItem("bar", C.amber, "Droplet broke apart (NASA does not record what the fragments did)"), legendItem("bar", "#cbd5e1", "Went out on its own"), legendItem("bar", "rgba(242,96,15,.25)", `Near ${hb.name} air`)].join("");
     $("#surv-list").innerHTML = `<div class="surv__h"><span></span><span>Fuel and air</span><span>How the flames ended</span><span class="num">Did not go out</span><span class="num">90% range</span></div>` + shown.map((r, i) => {
       const w = (k) => `${(100 * k) / r.n}%`;
       return `<div class="surv__r${near(r) ? " is-near" : ""}"><span class="surv__i">${String(i + 1).padStart(2, "0")}</span>
@@ -1621,7 +1561,7 @@
     }).join("");
     $("#surv-more").hidden = list.length <= 10;
     $("#surv-more").textContent = survState.all ? "Show fewer" : `Show all ${list.length} groups`;
-    $("#surv-note").textContent = `Groups need at least 5 flames that ran to an end (no-ignition and flash tests are left out). A droplet that broke apart is counted as not going out on its own: its fragments were still burning. Near = within 5 points of O₂ and about 35% of the pressure of ${hb.name} air.`;
+    $("#surv-note").textContent = `Groups need at least 5 flames that ran to an end (no-ignition and flash tests are left out). A droplet that broke apart is counted as not going out on its own: the flame did not end by itself, though NASA does not record what the fragments did. Near = within 5 points of O₂ and about 35% of the pressure of ${hb.name} air.`;
   }
 
 
@@ -1988,8 +1928,8 @@
       ["Volumes", MB.modules.map((m) => `${m.name}: ${m.volume_ref}`).join(" · "), ""],
     ].map(([k, t, u]) => `<li><b>${k}</b><span>${esc(t)}</span>${u ? `<a href="${u}" ${u.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${u.startsWith("http") ? "Open ↗" : "See"}</a>` : ""}</li>`).join("");
   }
-  const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
-  const ALIAS = { method: "data", base: "learn", scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
+  const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "data"];
+  const ALIAS = { method: "data", base: "learn", scenario: "lab", atmospheres: "lab", problem: "lab", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
@@ -2000,7 +1940,6 @@
     findings: () => { safe(renderDash, "dashboard"); if (MB) safe(renderBaseReport, "base audit"); safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
     ranking: () => { safe(renderSurvival, "survival"); safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
-    ask: () => { safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing"); },
     data: () => { safe(renderQuality, "quality"); safe(renderDownloads, "downloads"); safe(renderEarth, "resources"); },
   };
   function ensure(v) { if (!done[v] && INIT[v]) { done[v] = true; INIT[v](); } }
@@ -2067,10 +2006,7 @@
   });
 
   function safe(fn, name) { try { fn(); } catch (e) { console.error(`[Skylab Phoenix] ${name} failed`, e); } }
-  $("#ask-form").addEventListener("submit", (e) => { e.preventDefault(); safe(() => renderAsk($("#ask-q").value), "ask"); });
   safe(initChat, "chat");
-  $("#brief-dl").addEventListener("click", () => download(`skylab-phoenix-briefing-${briefState.hab}.md`, briefMarkdown()));
-  $("#brief-sim").addEventListener("click", () => { ensure("lab"); setPreset(briefState.hab); location.hash = "#/lab"; });
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
   document.querySelectorAll("#inv-mode button").forEach((b) => b.addEventListener("click", () => { invMode.m = b.dataset.m; renderInvList(); }));
   safe(() => { const dlg = $("#inv-modal"); dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); }); }, "modal");
@@ -2082,7 +2018,6 @@
   document.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) resizeIn(d); }));
   $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly · three.js`;
   if (QS.has("o2") || QS.has("hab")) { if (!location.hash || location.hash === "#" || location.hash === "#scenario") history.replaceState(null, "", `${location.search}#/lab`); }
-  if (window.I18N) safe(() => window.I18N.start(), "i18n");
   route();
   addEventListener("hashchange", route);
   safe(() => {
