@@ -76,7 +76,7 @@
 
     const ANCH = {
       drop: () => drop.position.clone(),
-      flame: () => new T.Vector3(cur.R * (1 + cur.flow * 0.6), cur.R * 0.15 + cur.g * cur.R * 1.4, 0),
+      flame: () => new T.Vector3(cur.R * 0.72 * (1 + cur.flow * 0.6), cur.R * 0.72 + cur.g * cur.R * 1.4, 0),
       igniter: () => tip.getWorldPosition(new T.Vector3()),
       needle: () => new T.Vector3(1.55, -0.85, 0),
       gravity: () => new T.Vector3(-1.65, 1.6, 0.3),
@@ -99,13 +99,18 @@
 
     const tgt = { o2: 0.21, p: 1, co2: 0, he: 0, g: 0, flow: 0 };
     const cur = { ...tgt, R: 0.5 };
-    const st = { fuel: "Methanol", pOut: 0.5, steady: false };
-    const run = { t: 0, dur: 10, out: false, outAt: 1, n: 0, status: "", phase: "deploy" };
+    const st = { fuel: "Methanol", pOut: 0.5, steady: false, d0: 3, K: 0.6, rext: 0.72 };
+    const DEP = 0.8, IGN_S = 1.2, TAIL = 1.8, U = 0.075;
+    const run = { t: 0, e: 0, total: 10, tBurn: 7, dEnd: 0.3, out: false, outAt: 1, n: 0, status: "", phase: "deploy", d: 3 };
     let onRun = null;
     function newRun() {
-      run.t = 0; run.n++;
+      run.e = 0; run.n++;
       run.out = !st.steady && Math.random() < st.pOut;
-      run.outAt = 0.3 + Math.random() * 0.45;
+      run.dEnd = run.out ? st.d0 * st.rext : st.d0 * 0.1;
+      run.tBurn = Math.max(1.5, (st.d0 * st.d0 - run.dEnd * run.dEnd) / Math.max(0.05, st.K));
+      run.total = IGN_S + run.tBurn + TAIL;
+      run.outAt = (IGN_S + run.tBurn) / run.total;
+      run.t = 0; run.d = st.d0;
       run.status = run.out ? "went out on its own" : "burned until the fuel was gone";
       if (onRun) onRun(run);
     }
@@ -118,7 +123,7 @@
     if (window.ResizeObserver) new ResizeObserver(resize).observe(host);
     let running = true, visible = true, last = performance.now();
     newRun();
-    if (opts.lit) run.t = 0.2;
+    if (opts.lit) run.e = IGN_S + 0.4;
     const proj = new T.Vector3();
     function frame(now) {
       if (!running) return;
@@ -127,18 +132,27 @@
       if (!visible) return;
       const a = Math.min(1, dt * 2.2);
       KEYS.forEach((k) => { cur[k] += (tgt[k] - cur[k]) * a; });
-      if (st.steady) { run.t = Math.min(run.t + dt / run.dur, 0.35); }
-      else run.t += dt / run.dur;
-      if (!st.steady && (run.t >= 1.05 || (run.out && run.t > run.outAt + 0.18))) newRun();
-      const IGN = 0.07, LIT = 0.11;
-      run.phase = run.t < IGN ? "deploy" : run.t < LIT ? "ignite" : run.out && run.t > run.outAt ? "out" : run.t >= 1 ? "end" : "burn";
-      const burn = Math.max(0, Math.min(1, (run.t - LIT) / (1 - LIT)));
-      const dFrac = Math.sqrt(Math.max(0, 1 - burn));
-      let k = run.t < IGN ? 0 : run.t < LIT ? (run.t - IGN) / (LIT - IGN) : run.t < 1 ? 1 : Math.max(0, 1 - (run.t - 1) * 10);
-      if (run.out && run.t > run.outAt) k = Math.max(0, 1 - (run.t - run.outAt) * 7);
-      tipMat.color.setRGB(run.phase === "ignite" || (run.t < IGN && run.t > IGN * 0.6) ? 1 : 0.2, run.phase === "ignite" ? 0.45 : 0.1, 0.06);
+      if (st.steady) run.e = Math.min(run.e + dt, IGN_S + 0.35 * run.tBurn);
+      else run.e += dt;
+      if (!st.steady && run.e >= run.total) newRun();
+      run.t = run.e / run.total;
+      const bEnd = IGN_S + run.tBurn;
+      run.phase = run.e < DEP ? "deploy" : run.e < IGN_S ? "ignite" : run.e < bEnd ? "burn" : run.out ? "out" : "end";
+      const tb = Math.max(0, Math.min(run.e, bEnd) - IGN_S);
+      let d = Math.sqrt(Math.max(run.dEnd * run.dEnd, st.d0 * st.d0 - st.K * tb));
+      if (!run.out && run.e > bEnd) d = Math.max(0, run.dEnd * (1 - (run.e - bEnd) * 3));
+      run.d = d;
+      const prog = tb / run.tBurn;
+      let k = run.e < DEP ? 0 : run.e < IGN_S ? (run.e - DEP) / (IGN_S - DEP) : run.e < bEnd ? 1 : Math.max(0, 1 - (run.e - bEnd) * 6);
+      if (run.out && run.e < bEnd && prog > 0.8) k *= 1 - 0.55 * (prog - 0.8) / 0.2;
+      const hot = run.e > DEP * 0.5 && run.e < IGN_S;
+      tipMat.color.setRGB(hot ? 1 : 0.2, hot ? 0.45 : 0.1, 0.06);
+      const pull = Math.min(1, run.e / DEP);
+      n1.position.x = -0.55 - 0.4 * pull; n2.position.x = 0.55 + 0.4 * pull;
+      igniter.position.y = 1.05 - 0.45 * Math.max(0, 1 - Math.abs(run.e - IGN_S * 0.8) / 0.6) + 0.35 * Math.min(1, Math.max(0, run.e - IGN_S) * 1.5);
       const dil = 1 - 0.9 * cur.co2 - 0.7 * cur.he;
-      const R = Math.max(0.15, (0.32 + 2.3 * (cur.o2 - 0.12)) * Math.pow(1 / Math.max(0.25, cur.p), 0.25) * (0.55 + 0.45 * dFrac) * Math.max(0.35, dil));
+      const fsr = (2.6 + 0.7 / Math.max(0.1, cur.o2)) * Math.pow(1 / Math.max(0.25, cur.p), 0.12) * (1 + 0.35 * prog) * (run.out ? 1 + 0.25 * Math.max(0, prog - 0.7) : 1);
+      const R = Math.max(0.06, fsr * 0.5 * Math.max(d, st.d0 * 0.25) * U * Math.max(0.55, dil));
       cur.R = R;
       const soot = Math.min(1, (st.fuel === "Heptane" ? 0.85 : 0.18) * (0.5 + 2.4 * (cur.o2 - 0.12)) * (0.6 + 0.4 * cur.g) * Math.max(0.2, dil));
       const tt = now / 1000, glow = k * (0.35 + 0.65 * Math.min(1, cur.o2 / 0.3)) * Math.max(0.3, dil);
@@ -147,8 +161,8 @@
         u.uG.value = cur.g; u.uFlow.value = cur.flow;
         u.uT.value = tt; u.uR.value = R * f.userData.k; u.uSoot.value = soot; u.uGlow.value = glow * (idx ? 0.9 : 1); u.uCam.value.copy(camera.position);
       });
-      drop.scale.setScalar(Math.max(0.05, dFrac));
-      drop.visible = dFrac > 0.05;
+      drop.scale.setScalar(Math.max(0.01, d * U * 0.5 / 0.16));
+      drop.visible = d > 0.05;
       key.intensity = 2.6 * k * (0.3 + soot);
       sMat.opacity = Math.min(0.55, cur.flow * 0.9);
       for (let i = 0; i < NS; i++) {
@@ -180,11 +194,14 @@
         KEYS.forEach((k) => { if (s[k] != null) tgt[k] = s[k]; });
         if (s.fuel) st.fuel = s.fuel;
         if (s.pOut != null) st.pOut = s.pOut;
+        let phys = false;
+        ["d0", "K", "rext"].forEach((k) => { if (s[k] != null && Math.abs(s[k] - st[k]) > 1e-6) { st[k] = s[k]; phys = true; } });
+        if (phys && !st.steady) newRun();
         if (s.steady != null) { const was = st.steady; st.steady = s.steady; if (was && !s.steady) newRun(); }
       },
       replay() { newRun(); },
       onRun(fn) { onRun = fn; fn(run); },
-      state() { return { t: run.t, phase: run.phase, out: run.out, outAt: run.out ? run.outAt : null, n: run.n }; },
+      state() { return { t: run.t, phase: run.phase, out: run.out, outAt: run.out ? run.outAt : null, n: run.n, e: run.e, d: run.d, d0: st.d0, K: st.K, dEnd: run.dEnd, ign: IGN_S, tBurn: run.tBurn, total: run.total }; },
       labels(map) { setLabels(map); },
       showLabels(v) { showLabels = v; },
       pause() { running = false; },

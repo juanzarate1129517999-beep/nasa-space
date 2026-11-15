@@ -1306,6 +1306,7 @@
     let lastPh = "";
     setInterval(() => {
       if (current !== "lab") return;
+      drawD2();
       const s = lab3d.state();
       fill.style.width = `${Math.min(100, 100 * s.t)}%`;
       fill.classList.toggle("is-out", s.phase === "out");
@@ -1326,9 +1327,56 @@
         <div class="mono-sm">${t.length ? `${outN} of the last ${t.length} went out on its own` : "collecting replays…"}</div>`;
     });
   }
+  function labPhys(x) {
+    const T = M.train, xs = stdz(x), idx = M.train_std.map((t, i) => ({ i, d: Math.sqrt(t.reduce((s, v, j) => s + (v - xs[j]) ** 2, 0)) }))
+      .filter((o) => T[o.i].tasa_quemado > 0).sort((a, b) => a.d - b.d).slice(0, 5);
+    let wk = 0, k = 0, wr = 0, rr = 0;
+    const tests = idx.map((o) => {
+      const t = T[o.i], w = 1 / (o.d + 0.3);
+      k += w * t.tasa_quemado; wk += w;
+      if (t.autoextincion && t.d_ext_mm > 0 && t.d0_mm > 0) { rr += w * t.d_ext_mm / t.d0_mm; wr += w; }
+      const tb = t.tiempo_quemado_s > 0 ? t.tiempo_quemado_s : (t.d0_mm ** 2) / t.tasa_quemado;
+      const dEnd2 = t.autoextincion && t.d_ext_mm > 0 ? t.d_ext_mm ** 2 : Math.max(0, t.d0_mm ** 2 - t.tasa_quemado * tb);
+      return { d0: t.d0_mm, K: t.tasa_quemado, tb: Math.max(0.2, (t.d0_mm ** 2 - dEnd2) / t.tasa_quemado), dEnd2, out: !!t.autoextincion, date: t.fecha, fuel: t.combustible, o2: t.x_o2, p: t.p_atm };
+    });
+    if (!wr) {
+      const fuel = x[0] ? "Heptane" : "Methanol", r = T.filter((t) => t.autoextincion && t.d_ext_mm > 0 && t.combustible === fuel).map((t) => t.d_ext_mm / t.d0_mm).sort((a, b) => a - b);
+      if (r.length) { rr = r[Math.floor(r.length / 2)]; wr = 1; }
+    }
+    return { K: wk ? k / wk : 0.6, rext: wr ? Math.min(0.95, Math.max(0.2, rr / wr)) : 0.72, tests };
+  }
+  let phys = null;
+  function drawD2() {
+    const c = $("#lab-d2"); if (!c || !lab3d || !phys) return;
+    const s = lab3d.state(), g = c.getContext("2d"), W = c.width, H = c.height, L = 54, B = 40, R = 14, Tp = 14;
+    const tmax = Math.max(s.tBurn, ...phys.tests.map((t) => t.tb)) * 1.08, ymax = Math.max(s.d0 ** 2, ...phys.tests.map((t) => t.d0 ** 2)) * 1.08;
+    const X = (t) => L + (W - L - R) * t / tmax, Y = (v) => H - B - (H - B - Tp) * v / ymax;
+    g.clearRect(0, 0, W, H);
+    g.font = "20px ui-monospace, monospace"; g.fillStyle = "rgba(160,170,190,.85)"; g.strokeStyle = "rgba(255,255,255,.08)"; g.lineWidth = 1;
+    const tick = (m) => { const st = [1, 2, 5, 10, 20, 50][[1, 2, 5, 10, 20, 50].findIndex((v) => m / v <= 5)] || 100; return st; };
+    const ts = tick(tmax), ys = tick(ymax);
+    for (let v = 0; v <= tmax; v += ts) { g.beginPath(); g.moveTo(X(v), Tp); g.lineTo(X(v), H - B); g.stroke(); g.fillText(String(v), X(v) - 6, H - B + 24); }
+    for (let v = 0; v <= ymax; v += ys) { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(W - R, Y(v)); g.stroke(); g.fillText(String(v), 6, Y(v) + 7); }
+    g.fillText(I18N_T("s"), W - R - 14, H - B - 8); g.fillText(I18N_T("d², mm²"), L + 6, Tp + 18);
+    phys.tests.forEach((t) => {
+      g.strokeStyle = t.out ? "rgba(125,211,252,.55)" : "rgba(200,205,215,.4)"; g.lineWidth = 2; g.setLineDash([]);
+      g.beginPath(); g.moveTo(X(0), Y(t.d0 ** 2)); g.lineTo(X(t.tb), Y(t.dEnd2)); g.stroke();
+      if (t.out) { g.fillStyle = "rgba(125,211,252,.9)"; g.beginPath(); g.arc(X(t.tb), Y(t.dEnd2), 5, 0, 7); g.fill(); }
+    });
+    g.setLineDash([8, 7]); g.strokeStyle = "rgba(255,138,61,.55)"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(X(0), Y(s.d0 ** 2)); g.lineTo(X(s.tBurn), Y(s.dEnd ** 2)); g.stroke(); g.setLineDash([]);
+    const te = Math.max(0, Math.min(s.e - s.ign, s.tBurn));
+    if (s.e > s.ign) {
+      g.strokeStyle = "#ff8a3d"; g.lineWidth = 4; g.beginPath(); g.moveTo(X(0), Y(s.d0 ** 2)); g.lineTo(X(te), Y(Math.max(s.dEnd ** 2, s.d0 ** 2 - s.K * te))); g.stroke();
+      g.fillStyle = "#ffb36b"; g.beginPath(); g.arc(X(te), Y(s.d * s.d), 7, 0, 7); g.fill();
+    }
+    $("#lab-read").innerHTML = `<span><b>${Math.max(0, s.e - s.ign).toFixed(1)} s</b>${I18N_T("since ignition")}</span><span><b>${s.d.toFixed(2)} mm</b>${I18N_T("droplet now")}</span><span><b>${s.K.toFixed(2)} mm²/s</b>${I18N_T("burning rate K")}</span><span><b>${(s.dEnd).toFixed(2)} mm</b>${s.out ? I18N_T("goes out at") : I18N_T("burns down to")}</span>`;
+  }
+  const I18N_T = (t) => (window.I18N ? window.I18N.t(t) : t);
   function syncLab3d(r, show, st) {
     if (!lab3d) return;
-    lab3d.set({ o2: sc.o2, p: sc.p, fuel: sc.fuel, co2: sc.co2, he: sc.he, pOut: show ? r.p : 0.5 });
+    phys = labPhys(featVec(sc));
+    lab3d.set({ o2: sc.o2, p: sc.p, fuel: sc.fuel, co2: sc.co2, he: sc.he, pOut: show ? r.p : 0.5, d0: sc.d0, K: phys.K, rext: phys.rext });
     $("#lab3d-sc").textContent = `${sc.fuel} droplet · ${(100 * sc.o2).toFixed(1)}% O₂ · ${(sc.p * ATM_PSI).toFixed(1)} psi${sc.co2 ? ` · ${(100 * sc.co2).toFixed(0)}% CO₂` : ""}${sc.he ? ` · ${(100 * sc.he).toFixed(0)}% He` : ""}`;
     $("#lab3d-p").innerHTML = show
       ? `<span class="lab3d__big">${pct(r.p)}</span><span>chance it goes out on its own${st === "extrapolating" ? " · extrapolating" : ""}</span>`

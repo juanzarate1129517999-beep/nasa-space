@@ -235,3 +235,10 @@ UI_ES.update({
     "#%–#% O₂ · #–# atm (cabin air assumed). White ticks: crew atmospheres; the bright one is ⟨H⟩.": "#%–#% O₂ · #–# atm (se asume aire de cabina). Marcas blancas: atmósferas de tripulación; la brillante es ⟨H⟩.",
     "Oxygen and pressure are not reported per test. White ticks: crew atmospheres; the bright one is ⟨H⟩.": "El oxígeno y la presión no se informan por prueba. Marcas blancas: atmósferas de tripulación; la brillante es ⟨H⟩.",
 })
+
+UI_ES.update({
+    "Live physics · d² law": "Física en vivo · ley d²",
+    "s": "s", "d², mm²": "d², mm²", "since ignition": "desde la ignición", "droplet now": "gota ahora", "burning rate K": "tasa de combustión K",
+    "goes out at": "se apaga en", "burns down to": "se consume hasta",
+    "Each replay runs in real time. The droplet shrinks by the d² law, d² = d₀² − K·t, with the burning rate K and the extinction diameter taken from the five closest FLEX flight tests (grey curves). Whether it goes out on its own is drawn with the model's probability, so many replays show how often a fire like this survives. Flame size uses typical flame-to-droplet ratios from droplet theory and is illustrative; on the Moon, Mars and Earth the stretched flame is an illustration, not a prediction.": "Cada repetición corre en tiempo real. La gota se encoge según la ley d², d² = d₀² − K·t, con la tasa de combustión K y el diámetro de extinción tomados de los cinco ensayos de vuelo FLEX más cercanos (curvas grises). Si se apaga sola se sortea con la probabilidad del modelo, así que muchas repeticiones muestran con qué frecuencia sobrevive un fuego así. El tamaño de la llama usa proporciones típicas llama-gota de la teoría de gotas y es ilustrativo; en la Luna, Marte y la Tierra la llama estirada es una ilustración, no una predicción.",
+})

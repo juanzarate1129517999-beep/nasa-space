@@ -207,9 +207,12 @@
             <p class="label">Your scenario</p>
             <p class="lab3d__sc" id="lab3d-sc"></p>
             <div class="lab3d__p" id="lab3d-p"></div>
+            <p class="label">Live physics · d² law</p>
+            <div class="d2"><canvas id="lab-d2" width="560" height="300" role="img" aria-label="Droplet diameter squared against time for this fire and the five closest NASA flight tests"></canvas></div>
+            <div class="d2-read" id="lab-read"></div>
             <p class="label">Replays</p>
             <div class="lab3d__runs" id="lab3d-runs" aria-live="polite"></div>
-            <p class="note">Every few seconds the chamber replays one fire, drawn with the model's own probability, so over many replays you see how often a fire like this goes out on its own. The model is trained on ISS flights only; the Moon, Mars and Earth shapes show how buoyancy would stretch the flame and are an illustration, not a prediction.</p>
+            <p class="note">Each replay runs in real time. The droplet shrinks by the d² law, d² = d₀² − K·t, with the burning rate K and the extinction diameter taken from the five closest FLEX flight tests (grey curves). Whether it goes out on its own is drawn with the model's probability, so many replays show how often a fire like this survives. Flame size uses typical flame-to-droplet ratios from droplet theory and is illustrative; on the Moon, Mars and Earth the stretched flame is an illustration, not a prediction.</p>
           </div>
         </div>
         <div class="habitats card--gap" id="habitats"></div>
