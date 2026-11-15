@@ -3,7 +3,8 @@
   "generator": "Anthropic Claude (SI), in the Claude Code session that built this layer",
   "input": "data/si/evidence_packs.json",
   "regenerate": "python scripts/si_generate.py (needs ANTHROPIC_API_KEY)",
-  "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash"
+  "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash",
+  "note": "After the November 2026 data audit (34 duplicate SPICE rows removed), 6 briefs were updated in a Claude Code session with the same rules: 2 sentences rewritten with the new numbers (1,613 records; SPICE 435 records, EVA prep 60.0) and all 6 re-verified by pipeline/si.py against the new evidence packs."
  },
  "drafts": {
   "habitat:cabin": {
@@ -35,7 +36,7 @@
      ]
     }
    ],
-   "pack_hash": "979ef04d07e33bfe"
+   "pack_hash": "62913b682f1ec1d7"
   },
   "habitat:eva_prep": {
    "headline": "Raising oxygen to 26.5% already changes how fires behave",
@@ -69,7 +70,7 @@
      ]
     }
    ],
-   "pack_hash": "5a422522423bf542"
+   "pack_hash": "7289787eeb8ce348"
   },
   "habitat:moon_base": {
    "headline": "In lunar-base air, fires stop putting themselves out, and the data runs thin",
@@ -83,7 +84,7 @@
      ]
     },
     {
-     "text": "Only 37 of 1,647 flight records with a known atmosphere sit inside the lunar-base envelope, and no solid material has been burned there.",
+     "text": "Only 37 of 1,613 flight records with a known atmosphere sit inside the lunar-base envelope, and no solid material has been burned there.",
      "cites": [
       "E7"
      ]
@@ -102,7 +103,7 @@
      ]
     }
    ],
-   "pack_hash": "cef7ff4ecfd8cc27"
+   "pack_hash": "2b3279c7a6189248"
   },
   "habitat:exploration": {
    "headline": "The exploration atmosphere sits beyond NASA's flown droplet tests",
@@ -134,7 +135,7 @@
      ]
     }
    ],
-   "pack_hash": "af414b95dcb003df"
+   "pack_hash": "7e756ef05c67b222"
   },
   "habitat:suit": {
    "headline": "Spacesuit oxygen is outside all flight data",
@@ -161,7 +162,7 @@
      ]
     }
    ],
-   "pack_hash": "45cedf6b09fcb81d"
+   "pack_hash": "0f993500b5b506c6"
   },
   "investigation:PSI-69": {
    "headline": "",
@@ -447,7 +448,7 @@
      ]
     },
     {
-     "text": "Its 469 records were run in cabin air (21% O2), which makes it relevant for the cabin (65.0) and EVA prep (60.8) but not for the exploration atmosphere (15.0).",
+     "text": "Its 435 records were run in cabin air (21% O2), which makes it relevant for the cabin (65.0) and EVA prep (60.0) but not for the exploration atmosphere (15.0).",
      "cites": [
       "E3",
       "E4",
@@ -455,7 +456,7 @@
      ]
     }
    ],
-   "pack_hash": "dda6d76df41c1016"
+   "pack_hash": "45e38f1bee4789dc"
   },
   "investigation:PSI-23": {
    "headline": "",

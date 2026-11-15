@@ -9,14 +9,14 @@
    "E3": "FLEX model, heptane droplet (3.00 mm, no diluent): 44% chance the flame puts itself out in spacecraft cabin air (90% interval 30%–59%); this input is inside the range of flown ISS tests.",
    "E4": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 99.7); BASS (PSI-26, 94.3); ACME CFI-G (PSI-159, 92.1).",
    "E5": "FLEX has about 109.1 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
-   "E6": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E6": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,613 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
    "E7": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
    "E8": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
    "E9": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
    "E10": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
    "E11": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option."
   },
-  "hash": "979ef04d07e33bfe"
+  "hash": "62913b682f1ec1d7"
  },
  {
   "kind": "habitat",
@@ -29,7 +29,7 @@
    "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
    "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 99.2); BASS (PSI-26, 71.1); ACME CFI-G (PSI-159, 68.4).",
    "E6": "FLEX has about 36.8 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
-   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,613 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
    "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
    "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
    "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
@@ -37,7 +37,7 @@
    "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
    "E13": "Highest-value next flight test near lunar-base air: methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model's 90% interval is 10%–51%."
   },
-  "hash": "5a422522423bf542"
+  "hash": "7289787eeb8ce348"
  },
  {
   "kind": "habitat",
@@ -50,7 +50,7 @@
    "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
    "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 95.1); ACME CFI-G (PSI-159, 66.8); ACME BRE (PSI-20, 48.1).",
    "E6": "FLEX has about 19.0 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
-   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,613 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
    "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
    "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
    "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
@@ -58,7 +58,7 @@
    "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
    "E13": "Highest-value next flight test near lunar-base air: methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model's 90% interval is 10%–51%."
   },
-  "hash": "cef7ff4ecfd8cc27"
+  "hash": "2b3279c7a6189248"
  },
  {
   "kind": "habitat",
@@ -71,7 +71,7 @@
    "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
    "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): ACME CFI-G (PSI-159, 86.0); FLEX (PSI-69, 82.3); ACME BRE (PSI-20, 52.7).",
    "E6": "ACME CFI-G has about 16.4 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
-   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,613 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
    "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
    "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
    "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
@@ -79,7 +79,7 @@
    "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option.",
    "E13": "Highest-value next flight test near lunar-base air: methanol droplet at 27% O2, 0.60 atm and 30% CO2, where the model's 90% interval is 10%–51%."
   },
-  "hash": "af414b95dcb003df"
+  "hash": "7e756ef05c67b222"
  },
  {
   "kind": "habitat",
@@ -92,14 +92,14 @@
    "E4": "For comparison, the same model gives a methanol droplet flame a 72% chance of putting itself out in spacecraft cabin air (21% O2, 14.7 psi).",
    "E5": "Most relevant PSI investigations for this habitat (relevance score out of 100): FLEX (PSI-69, 49.7); BASS (PSI-26, 44.3); ACME CFI-G (PSI-159, 42.5).",
    "E6": "FLEX has about 0.0 test-equivalents within about 3 points of O2 and 30% of the pressure of this habitat.",
-   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,647 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
+   "E7": "Across all PSI flight tests with an ambient O2 and pressure, 37 of 1,613 records sit inside the lunar-base envelope (at least 28% O2, at most 0.75 atm), and no solid-material test was flown there.",
    "E8": "The FLEX model was validated on held-out ISS test days: AUC 0.88 and Brier score 0.125 (n = 261), better than an oxygen-only baseline.",
    "E9": "Finding (Prevention, evidence score 100/100): Almost no flight data where the Moon base will live. Implication: The highest-value next flight experiment is solid-material flammability at ≥30% O₂ and ≤10.2 psi.",
    "E10": "Finding (Prevention, evidence score 85/100): Lunar-base air makes self-extinction ~11× less likely than cabin air. Implication: Material screening done for 21% / 1 atm cannot be reused for the Moon base without re-testing.",
    "E11": "Finding (Prevention, evidence score 76/100): Solid-material data is dominated by one plastic. Implication: Cabin fabrics and polymers other than PMMA need flight data before any envelope can be trusted.",
    "E12": "Finding (Prevention, evidence score 76/100): Above 30% O₂, flames stop putting themselves out. Implication: A fire on a lunar base must be detected and actively suppressed; waiting for it to die out is not an option."
   },
-  "hash": "45cedf6b09fcb81d"
+  "hash": "0f993500b5b506c6"
  },
  {
   "kind": "investigation",
@@ -326,15 +326,15 @@
   "items": {
    "E1": "SPICE (PSI-107): Smoke Point In Co-flow Experiment. Flight investigation, platform: International Space Station (ISS); hardware: MSG fan-driven flow duct.",
    "E2": "Objective, from NASA PSI: The objective of SPICE is to better understand the complex process of combustion by observing flames in a microgravity environment aboard the International Space Station (ISS) and analogous ground experiments. Specific objectives were: (1) Identify the laminar smoke-point properties of non-buoyant jet diffusion flames under various co-flow conditions in microgravity.",
-   "E3": "469 records in its PSI experimental tables, 0 with a labeled outcome.",
+   "E3": "435 records in its PSI experimental tables, 0 with a labeled outcome.",
    "E4": "Conditions tested: 21% O2, 1.00 atm (cabin air assumed where not reported).",
    "E5": "Varied: Fuel, Nozzle (mm). Measured: Fuel Rate (sccm), Fuel Rate (mg/s), HC Fuel Rate (mg/s), Air Rate (cm/s).",
-   "E6": "Relevance score out of 100 by habitat: cabin 65.0, EVA prep 60.8, lunar base 21.9, exploration atmosphere 15.0, spacesuit 15.0. Rank 14 of 24 for the lunar base.",
+   "E6": "Relevance score out of 100 by habitat: cabin 65.0, EVA prep 60.0, lunar base 21.4, exploration atmosphere 15.0, spacesuit 15.0. Rank 14 of 24 for the lunar base.",
    "E7": "Benefit on Earth, from NASA PSI: (1) Will improve our understanding of soot formation mechanisms and help design safer spacecraft environments. (2) Will contribute to refining our computational models for predicting flame behaviors under non-buoyant conditions.",
    "E8": "Most similar investigations (similarity 0 to 1): SLICE (0.70) and SPICE analysis (0.49).",
    "E9": "Layers of fire safety it informs: Prevention. Publications listed in PSI: 9."
   },
-  "hash": "dda6d76df41c1016"
+  "hash": "45e38f1bee4789dc"
  },
  {
   "kind": "investigation",

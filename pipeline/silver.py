@@ -49,10 +49,23 @@ def flex():
     psi, exp = "PSI-69", "FLEX"
     r = _csv(psi, "FLEX")
     r.columns = ["n", "ident", "fecha", "gmt", "fuel", "p_mmhg", "xo2", "xn2", "xco2", "xhe", "d0", "dext", "k", "tb", "end"]
+    for c, field in (("d0", "Droplet initial diameter; mm"), ("dext", "Visible flame extinction diameter; mm")):
+        dash = r[c].astype(str).str.strip().isin(["\x96", "\u2013", "-"])
+        if dash.any():
+            QC.add(psi, exp, ", ".join(r.loc[dash, "n"].astype(str)), field, "\u2013 (byte 0x96)", "NaN",
+                   f"Windows-1252 en dash used as an empty value in a numeric column ({int(dash.sum())} cells)")
+    approx = r["tb"].astype(str).str.strip().str.startswith("~")
+    for i in r.index[approx]:
+        QC.add(psi, exp, r.loc[i, "n"], "Burn time; s", r.loc[i, "tb"], str(r.loc[i, "tb"]).strip()[1:],
+               "Approximate value written with '~' in a numeric column; number kept and flagged")
+    short_year = r["fecha"].astype(str).str.match(r"^\d+/\d+/\d\d$")
+    if short_year.any():
+        QC.add(psi, exp, f"{int(short_year.sum())} rows", "Test Date", "m/d/yy", "m/d/yyyy",
+               "Two date formats mixed in one column; normalized")
     df = pd.DataFrame({
         "test_uid": r["n"], "combustible": r["fuel"].str.strip(), "x_o2": _num(r["xo2"]),
         "p_atm": _num(r["p_mmhg"]) / MMHG_PER_ATM, "x_co2": _num(r["xco2"]), "x_he": _num(r["xhe"]),
-        "d0_mm": _num(r["d0"]), "tasa_quemado": _num(r["k"]), "tiempo_quemado_s": _num(r["tb"]),
+        "d0_mm": _num(r["d0"]), "tasa_quemado": _num(r["k"]), "tiempo_quemado_s": _num(r["tb"].astype(str).str.replace("~", "", regex=False)),
         "resultado": r["end"].astype(str).str.strip().str.lower().map(
             {"extinction": "extincion", "disruption": "disrupcion", "completion": "completo"}),
         "fecha": pd.to_datetime(r["fecha"], format="%m/%d/%Y", errors="coerce").fillna(
@@ -61,6 +74,18 @@ def flex():
     })
     df["autoextincion"] = (df["resultado"] == "extincion").astype(float)
     df["con_resultado"] = df["resultado"].notna()
+    df.loc[approx, "qc_flags"] = "tiempo_aproximado"
+    big = _num(r["dext"]) > _num(r["d0"])
+    for i in r.index[big]:
+        QC.add(psi, exp, r.loc[i, "n"], "Visible flame extinction diameter; mm", r.loc[i, "dext"], "flagged",
+               f"Droplet diameter at extinction larger than the initial diameter ({r.loc[i, 'd0']} mm); flagged")
+    df.loc[big, "qc_flags"] = (df.loc[big, "qc_flags"].fillna("") + " diametro_extincion_mayor").str.strip()
+    key = r["ident"].astype(str).str.strip() + "|" + r["fecha"].astype(str) + "|" + r["gmt"].astype(str).str.strip()
+    same = key.duplicated(keep=False)
+    for k, g in r[same].groupby(key[same]):
+        QC.add(psi, exp, ", ".join(g["n"].astype(str)), "FLEX Identifier + Test GMT", f"{g['ident'].iloc[0]} at {g['gmt'].iloc[0]}",
+               "flagged", "Two records share identifier, date and GMT second, so they cannot be independent tests; both kept and flagged")
+    df.loc[same, "qc_flags"] = (df.loc[same, "qc_flags"].fillna("") + " identificador_repetido").str.strip()
     bad_p = df["p_atm"] < 0.1
     for i in df.index[bad_p]:
         QC.add(psi, exp, r.loc[i, "n"], "Ambient pressure; mmHg", r.loc[i, "p_mmhg"], "NaN",
@@ -81,10 +106,19 @@ def cfi():
     r = _csv(psi, "CFI")
     r.columns = [c.strip() for c in r.columns]
     dup = r.duplicated()
-    if dup.any():
-        QC.add(psi, exp, ", ".join(r.loc[dup, "Flex Number"].astype(str)), "row", "exact duplicate", "dropped",
+    for k in r.index[dup]:
+        QC.add(psi, exp, r.loc[k, "Flex Number"], "row", "exact duplicate", "dropped",
                "Identical row repeated in the source table")
-        r = r[~dup]
+    r = r[~dup]
+    for c in ("Pressure", "Fuel"):
+        pad = r[c].astype(str).ne(r[c].astype(str).str.strip()) & r[c].notna()
+        if pad.any():
+            QC.add(psi, exp, f"{int(pad.sum())} rows", c, "trailing spaces", "stripped",
+                   "Whitespace-padded labels split one category into two; normalized")
+    tot = r[["Oxygen", "Nitrogen", "Helium"]].apply(pd.to_numeric, errors="coerce").sum(axis=1)
+    for k in r.index[(tot - 1).abs() > 0.02]:
+        QC.add(psi, exp, r.loc[k, "Flex Number"], "Oxygen + Nitrogen + Helium", round(tot[k], 3), "flagged",
+               "Mole fractions do not sum to 1 (±0.02)")
     df = pd.DataFrame({
         "test_uid": r["Flex Number"], "combustible": r["Fuel"].astype(str).str.strip(),
         "x_o2": _num(r["Oxygen"]), "x_he": _num(r["Helium"]),
@@ -113,6 +147,14 @@ def cfig():
     n = _csv(psi, "CFI-G_Normal Flames")
     n.columns = [c.strip() for c in n.columns]
     ign, _ = _yesno(n["Hot ignition"], psi, "CFI-G normal", "Hot ignition")
+    ign = ign.copy()
+    contra = ign.eq(0) & n["Self-ext or flow term"].astype(str).str.strip().isin(["SE", "FT"]) & _num(n["burn time (sec)"]).gt(0)
+    for k in n.index[contra]:
+        QC.add(psi, "CFI-G normal", n.loc[k, "Test"], "Hot ignition", n.loc[k, "Hot ignition"], "Yes",
+               "Marked not ignited, yet the same row reports a burn time, a flow-termination outcome and 'hot flame'; set to ignited")
+        ign[k] = 1.0
+    for k in n.index[n.apply(lambda row: row.astype(str).str.contains("#DIV/0!", regex=False).any(), axis=1)]:
+        QC.add(psi, "CFI-G normal", n.loc[k, "Test"], "Tad (K), Zst", "#DIV/0!", "NaN", "Spreadsheet error value exported as data")
     se = n["Self-ext or flow term"].astype(str).str.strip().map({"SE": 1.0, "FT": 0.0})
     normal = pd.DataFrame({
         "test_uid": "N-" + n["Test"].astype(str), "combustible": n["Fuel"].astype(str).str.strip(),
@@ -128,7 +170,19 @@ def cfig():
 
     i = _csv(psi, "CFI-G_Inverse Flames")
     i.columns = [c.strip() for c in i.columns]
+    blank = i["Test"].isna()
+    if blank.any():
+        QC.add(psi, "CFI-G inverse", f"{int(blank.sum())} rows", "row", "empty", "dropped", "Empty rows exported below the table")
     i = i[i["Test"].notna()]
+    for k in i.index[i.apply(lambda row: row.astype(str).str.contains("#VALUE!", regex=False).any(), axis=1)]:
+        QC.add(psi, "CFI-G inverse", i.loc[k, "Test"], "Peak burner temp (K)", "#VALUE!", "NaN", "Spreadsheet error value exported as data")
+    for c in ("Flame Type", "Color"):
+        v = i[c].dropna().astype(str).str.strip()
+        groups = v.groupby(v.str.lower()).agg(lambda x: sorted(set(x)))
+        mixed = groups[groups.map(len) > 1]
+        if len(mixed):
+            QC.add(psi, "CFI-G inverse", f"{int(v.str.lower().isin(mixed.index).sum())} rows", c,
+                   " / ".join("|".join(x) for x in mixed), "lowercase", "Inconsistent capitalization normalized")
     ign, flash = _yesno(i["Hot ignition"], psi, "CFI-G inverse", "Hot ignition")
     se = i["Self -ext or flow term"].astype(str).str.strip().map({"SE": 1.0, "FT": 0.0})
     inv = pd.DataFrame({
@@ -152,10 +206,21 @@ def flame_design():
     for name, o2col, loc, tag in (("Flame Design_Normal Flame", "XO2 (init)", "ambiente", "N"),
                                   ("Flame Design_Inverse Flame", "XO2", "quemador", "I")):
         r = _csv(psi, name)
-        ramped = r.apply(lambda row: row.astype(str).str.upper().eq("RAMPED").any(), axis=1)
+        up = r.apply(lambda col: col.astype(str).str.strip().str.upper())
+        ramped = up.isin(["RAMPED", "RAMP"]).any(axis=1)
         if ramped.any():
-            QC.add(psi, "Flame Design", f"{int(ramped.sum())} rows ({tag})", "multiple", "RAMPED", "NaN",
+            QC.add(psi, "Flame Design", f"{int(ramped.sum())} rows ({tag})", "multiple", " / ".join(sorted(set(up[ramped].stack()) & {"RAMPED", "RAMP"})), "NaN",
                    "Flow ramped during test: no single operating point, numeric fields set to NaN")
+        for k in r.index[up.eq("LOW O2").any(axis=1)]:
+            QC.add(psi, "Flame Design", r.loc[k, "Test"], "XO2 and derived fields", "LOW O2", "NaN",
+                   "Text note written into numeric fields; set to NaN")
+        day = r["Test"].astype(str).str.extract(r"^(\d{5})")[0]
+        mode = day.groupby(r["Day"]).agg(lambda x: x.mode().iloc[0] if len(x.mode()) else None)
+        for k in r.index:
+            m = mode.get(r.loc[k, "Day"])
+            if m and isinstance(day[k], str) and day[k] != m and sorted(day[k]) == sorted(m):
+                QC.add(psi, "Flame Design", r.loc[k, "Test"], "Test", r.loc[k, "Test"], r.loc[k, "Test"].replace(day[k], m, 1),
+                       f"Test day code has transposed digits ({day[k]} vs {m} for every other test of experiment day {r.loc[k, 'Day']}); flagged")
         fuel = r["Fuel"] if "Fuel" in r.columns else pd.Series("C2H4", index=r.index)
         df = pd.DataFrame({
             "test_uid": tag + "-" + r["Test"].astype(str), "combustible": fuel.astype(str),
@@ -230,19 +295,61 @@ def acme_daily():
 
 
 def spice_slice():
-    sp = _csv("PSI-107", "Spice")
+    psi, exp = "PSI-107", "SPICE"
+    sp = _csv(psi, "Spice")
+    dup = sp.duplicated()
+    for k in sp.index[dup]:
+        QC.add(psi, exp, f"line {k + 2}", "row", "exact duplicate of an earlier row", "dropped", "Identical row repeated in the source table")
+    sp = sp[~dup].copy()
+    fuel = sp["Fuel"].astype(str).str.strip().str.replace(r"(\d+)\s*%", r"\1 %", regex=True)
+    ch = fuel.ne(sp["Fuel"].astype(str).str.strip())
+    if ch.any():
+        QC.add(psi, exp, f"{int(ch.sum())} rows", "Fuel", "75% Propylene", "75 % Propylene", "Same fuel written two ways; normalized")
+    ratio = _num(sp["Fuel Rate (mg/s)"]) / _num(sp["Fuel Rate (sccm)"])
+    med = ratio.groupby(fuel).transform("median")
+    off = (ratio / med - 1).abs() > 0.2
+    for d, g in sp[off].groupby("GMT date"):
+        QC.add(psi, exp, f"GMT day {d} ({len(g)} rows)", "Fuel Rate (mg/s)", f"{ratio[g.index].median() * 60:.2f} mg per cm³",
+               "flagged", f"Mass flow implies a gas density {ratio[g.index].median() / med[g.index].median():.0%} of the other {fuel[g.index].iloc[0]} rows (close to methane); mass rates flagged")
+    air = _num(sp["Air Rate (cm/s)"])
+    for k in sp.index[air < 0]:
+        new = 0.0 if air[k] > -1 else np.nan
+        QC.add(psi, exp, f"line {k + 2}", "Air Rate (cm/s)", air[k], "0" if new == 0 else "NaN",
+               "Negative air speed: zero offset of the sensor, set to 0" if new == 0 else "Negative air speed is impossible; set to NaN")
+        air[k] = new
+    los = sp["GMT ignition"].astype(str).str.strip().eq("LOS")
+    if los.any():
+        QC.add(psi, exp, f"{int(los.sum())} rows", "GMT ignition", "LOS", "NaN", "Loss-of-signal note written in a time column")
+    t_on = pd.to_timedelta(sp["GMT ignition"].astype(str).str.strip(), errors="coerce")
+    t_off = pd.to_timedelta(sp["GMT  Flame Off"].astype(str).str.strip(), errors="coerce")
+    for k in sp.index[t_off < t_on]:
+        QC.add(psi, exp, f"line {k + 2}", "GMT Flame Off", f"{sp.loc[k, 'GMT  Flame Off']} < ignition {sp.loc[k, 'GMT ignition']}", "flagged",
+               "Flame-off time earlier than the ignition time (likely an hour typo); duration not used")
     spice = _finish(pd.DataFrame({
-        "test_uid": sp.index.astype(str), "combustible": sp["Fuel"].astype(str), "x_o2": 0.21, "o2_supuesto": True,
-        "p_atm": 1.0, "p_supuesta": True, "flujo_cm_s": _num(sp["Air Rate (cm/s)"])}), "PSI-107", "SPICE", "gas")
+        "test_uid": sp.index.astype(str), "combustible": fuel, "x_o2": 0.21, "o2_supuesto": True,
+        "p_atm": 1.0, "p_supuesta": True, "flujo_cm_s": air}), "PSI-107", "SPICE", "gas")
     sl = _csv("PSI-106", "Slice")
+    pad = sl["Fuel Type"].astype(str).ne(sl["Fuel Type"].astype(str).str.strip())
+    if pad.any():
+        QC.add("PSI-106", "SLICE", f"{int(pad.sum())} rows", "Fuel Type", "leading space", "stripped",
+               "Leading spaces made the same fuel appear as two fuels; normalized")
     slice_ = _finish(pd.DataFrame({
-        "test_uid": sl.index.astype(str), "combustible": sl["Fuel Type"].astype(str).str.slice(0, 40), "x_o2": 0.21,
+        "test_uid": sl.index.astype(str), "combustible": sl["Fuel Type"].astype(str).str.strip().str.slice(0, 40), "x_o2": 0.21,
         "o2_supuesto": True, "p_atm": 1.0, "p_supuesta": True}), "PSI-106", "SLICE", "gas")
     return pd.concat([spice, slice_], ignore_index=True)
 
 
 def smoke():
     r = _csv("PSI-101", "SAME-R")
+    v = r["Description"].dropna().astype(str).str.strip()
+    groups = v.groupby(v.str.lower()).agg(lambda x: sorted(set(x)))
+    mixed = groups[groups.map(len) > 1]
+    if len(mixed):
+        QC.add("PSI-101", "SAME-R", f"{int(v.str.lower().isin(mixed.index).sum())} rows", "Description",
+               " / ".join("|".join(x) for x in mixed), "one spelling", "Inconsistent capitalization normalized")
+    na = r["Net aging time (sec)"].astype(str).str.strip().str.lower().eq("n/a")
+    if na.any():
+        QC.add("PSI-101", "SAME-R", f"{int(na.sum())} rows", "Net aging time (sec)", "n/a", "NaN", "Text placeholder in a numeric column")
     same_r = _finish(pd.DataFrame({
         "test_uid": r["SAME Test #"].astype(str) + "-" + r.index.astype(str), "combustible": r["Sample Type"].astype(str),
         "x_o2": 0.21, "o2_supuesto": True, "p_atm": 1.0, "p_supuesta": True,
@@ -337,6 +444,60 @@ def saffire_one():
                          "material": r["Material"]})
 
 
+def table_checks():
+    b = _csv("PSI-26", "BASS")
+    b = b[b["Fuel Sample Material"].notna()]
+    d = pd.to_datetime(b["Date"], format="%m/%d/%Y", errors="coerce")
+    g = _num(b["GMT"])
+    for k in b.index[(d.dt.dayofyear != g) & d.notna() & g.notna()]:
+        QC.add("PSI-26", "BASS", f"as-run {b.loc[k, 'As Run Test #']:g} (test {b.loc[k, 'Test #']})", "Date vs GMT day",
+               f"{b.loc[k, 'Date']} is day {d[k].dayofyear}, GMT column says {g[k]:g}", "flagged",
+               "Calendar date and GMT day-of-year disagree")
+    ar = _num(b["As Run Test #"])
+    for v, grp in b[ar.duplicated(keep=False) & ar.notna()].groupby(ar):
+        if grp["Date"].nunique() > 1:
+            QC.add("PSI-26", "BASS", f"as-run {v:g}", "As Run Test #", " and ".join(f"test {t} on {dt}" for t, dt in zip(grp["Test #"], grp["Date"])),
+                   "flagged", "One as-run number used for two different tests on different days")
+    mat = b["Fuel Sample Material"].astype(str).str.strip()
+    shape = mat.str.lower().str.contains("sphere")
+    for (t, smp), grp in b.groupby([b["Test #"].astype(str), b["Sample #"]]):
+        if len(grp) > 1 and shape[grp.index].nunique() > 1:
+            QC.add("PSI-26", "BASS", f"test {t}, sample {smp:g}", "Fuel Sample Material", " vs ".join(mat[grp.index]), "flagged",
+                   "Same test and sample number described as a sphere in one row and a flat sample in another")
+    groups = mat.groupby(mat.str.lower().str.replace(r"\s+", " ", regex=True)).agg(lambda x: sorted(set(x)))
+    mixed = groups[groups.map(len) > 1]
+    if len(mixed):
+        QC.add("PSI-26", "BASS", f"{int(mat.str.lower().str.replace(r'\\s+', ' ', regex=True).isin(mixed.index).sum())} rows", "Fuel Sample Material",
+               " / ".join("|".join(x) for x in mixed), "one spelling", "Same material written with different capitalization or spacing")
+    for wrong, right in (("parrafin", "paraffin"), ("oppsed", "opposed")):
+        hit = mat.str.lower().str.contains(wrong)
+        if hit.any():
+            QC.add("PSI-26", "BASS", f"{int(hit.sum())} rows", "Fuel Sample Material", wrong, right, "Spelling error in a material label")
+
+    b2 = _csv("PSI-25", "BASS-II")
+    b2 = b2[b2["Test #"].notna()]
+    d2 = pd.to_datetime(b2["Date"], format="%m/%d/%Y", errors="coerce")
+    g2 = _num(b2["GMT"])
+    vids = {"O10": 203}
+    for k in b2.index[(d2.dt.dayofyear != g2) & d2.notna() & g2.notna()]:
+        t = str(b2.loc[k, "Test #"]).strip()
+        doy = d2[k].dayofyear
+        ok = vids.get(t) == doy
+        QC.add("PSI-25", "BASS-II", t, "GMT", f"{g2[k]:g}", f"{doy}" if ok else "flagged",
+               f"GMT day disagrees with the date {b2.loc[k, 'Date']} (day {doy})" + (f"; NASA's raw video for this test is 'BASS_GMT{doy}_SAMPLE_210_TEST_{t}', so the GMT column is the typo (also in the test matrix)" if ok else ""))
+    m2 = b2["Fuel Sample Material"].astype(str)
+    fixes = [(r'^(?:\d/\d)"(?:\S)', "missing space after the inch mark"), (r'^(?:\d/\d) (?:clear|black)', "missing inch mark"), (r"\s+$", "trailing space")]
+    for pat, why in fixes:
+        hit = m2.str.contains(pat, regex=True)
+        if hit.any():
+            QC.add("PSI-25", "BASS-II", ", ".join(b2.loc[hit, "Test #"].astype(str).str.strip()), "Fuel Sample Material",
+                   " | ".join(sorted(set(m2[hit].str.strip()))), "normalized", f"Material label written inconsistently ({why})")
+    both = m2.str.contains(r"mm thick", regex=True) & m2.str.contains(r"cm thick", regex=True)
+    for k in b2.index[both]:
+        QC.add("PSI-25", "BASS-II", str(b2.loc[k, "Test #"]).strip(), "Fuel Sample Material", m2[k].strip(), "flagged",
+               "Two thicknesses in one label ('mm thick' and 'cm thick'); the second is probably the width")
+
+
 def build():
     parts = [flex(), cfi(), cfig(), flame_design(), acme_daily(), spice_slice(), smoke(), solids()]
     ens = pd.concat(parts, ignore_index=True)
@@ -344,4 +505,5 @@ def build():
     assert not ens["test_uid"].duplicated().any(), "duplicate test_uid after cleaning"
     assert ens["x_o2"].dropna().between(0, 1).all(), "O2 mole fraction outside [0, 1]"
     assert ens["p_atm"].dropna().between(0.1, 6).all(), "pressure outside [0.1, 6] atm"
+    table_checks()
     return ens, saffire_gravity(), saffire_one()

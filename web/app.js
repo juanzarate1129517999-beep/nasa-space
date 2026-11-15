@@ -891,6 +891,26 @@
     $("#earth-list").innerHTML = items.map(([t, d, r, go]) => `<article class="earth__item"><h4>${esc(t)}</h4><p>${esc(d)}</p><div class="earth__links"><a class="src-link" href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])} ↗</a>${go ? `<a class="src-link" href="${go}">See the data →</a>` : ""}</div></article>`).join("");
     $("#resources").innerHTML = Object.values(RES).map(([t, u, how]) => `<a class="dl dl--stack" href="${u}" target="_blank" rel="noopener"><span><span class="mono-sm">${esc(t)}</span><small>${esc(how)}</small></span><span class="arrow">↗</span></a>`).join("");
   }
+  const QC_CATS = [
+    ["dup", "Duplicate or empty rows", /duplicate|repeated|share identifier|Empty rows/i, "#f97316"],
+    ["phys", "Physically impossible values", /impossible|cannot|Negative|far (below|above)|fell during|larger than|do not sum|sensor range|zero offset/i, "#f43f5e"],
+    ["sheet", "Spreadsheet artifacts", /auto-increment|Spreadsheet error|percent of a percent|en dash|placeholder|written with '~'|note written|Loss-of-signal|Text note|ramped|decimal point/i, "#a78bfa"],
+    ["contra", "Contradictions inside a record", /yet the same row|implies a gas density|earlier than the ignition|Composite sample|Two thicknesses/i, "#fbbf24"],
+    ["label", "Labels, IDs and dates", /capitalization|spaces|written two ways|Spelling|label|date formats|transposed|disagree|as-run|sphere|same fuel|non-sample|not a recognizable/i, "#38bdf8"],
+  ];
+  const qcState = { cat: "all" };
+  const qcCat = (q) => (QC_CATS.find((c) => c[2].test(q.regla)) || ["other"])[0];
+  const qcCells = (q) => { if (/Empty rows/.test(q.regla)) return 0; const m = /^(\d+) rows/.exec(q.registro) || /\((\d+) (?:rows|cells)\)/.exec(q.regla + " " + q.registro); if (m) return +m[1]; return q.registro.includes(",") ? q.registro.split(",").length : 1; };
+  function renderQC() {
+    const all = D.qc, cells = all.reduce((s, q) => s + qcCells(q), 0);
+    const psis = new Set(all.map((q) => q.psi_id.split("/")[0])).size;
+    $("#qc-sub").textContent = `${all.length} logged corrections and flags · about ${cells.toLocaleString("en-US")} records or cells affected · ${psis} NASA tables. Each row keeps the original value.`;
+    const cnt = (k) => all.filter((q) => qcCat(q) === k).length;
+    $("#qc-cats").innerHTML = `<button type="button" data-c="all" aria-pressed="${qcState.cat === "all"}"><b>${all.length}</b>All</button>` + QC_CATS.map(([k, n, , col]) => `<button type="button" data-c="${k}" aria-pressed="${qcState.cat === k}" style="--c:${col}"><b>${cnt(k)}</b>${n}</button>`).join("") + (cnt("other") ? `<button type="button" data-c="other" aria-pressed="${qcState.cat === "other"}"><b>${cnt("other")}</b>Other</button>` : "");
+    document.querySelectorAll("#qc-cats button").forEach((b) => b.addEventListener("click", () => { qcState.cat = b.dataset.c; renderQC(); }));
+    const rows = all.filter((q) => qcState.cat === "all" || qcCat(q) === qcState.cat);
+    $("#qc-table").innerHTML = `<thead><tr><th>PSI</th><th>Experiment</th><th>Record</th><th>Field</th><th>Original</th><th>New</th><th>Rule</th></tr></thead><tbody>${rows.map((q) => `<tr><td class="mono">${esc(q.psi_id)}</td><td>${esc(q.experimento)}</td><td class="mono">${esc(q.registro)}</td><td>${esc(q.campo)}</td><td class="mono">${esc(q.valor_original)}</td><td class="mono">${esc(q.valor_nuevo)}</td><td>${esc(q.regla)}</td></tr>`).join("")}</tbody>`;
+  }
   function renderQuality() {
     const S = D.summary;
     const steps = [
@@ -913,8 +933,7 @@
         hovertemplate: "predicted %{x:.0%} → observed %{y:.0%}<br>n = %{customdata}<extra></extra>" },
     ], layout({ margin: { l: 52, r: 14, t: 6, b: 44 }, xaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Predicted P(self-extinction)" } }, yaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Observed rate" } },
       annotations: [{ x: 0.25, y: 0.25, ax: 30, ay: -34, text: "perfect calibration", showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink4, xanchor: "left", font: { size: 10, color: C.ink3, family: "Geist Mono, JetBrains Mono, monospace" } }] }));
-    $("#qc-sub").textContent = `${D.qc.length} entries · spreadsheet auto-fill errors, impossible values, duplicate rows, inconsistent labels`;
-    $("#qc-table").innerHTML = `<thead><tr><th>PSI</th><th>Experiment</th><th>Record</th><th>Field</th><th>Original</th><th>New</th><th>Rule</th></tr></thead><tbody>${D.qc.map((q) => `<tr><td class="mono">${esc(q.psi_id)}</td><td>${esc(q.experimento)}</td><td class="mono">${esc(q.registro)}</td><td>${esc(q.campo)}</td><td class="mono">${esc(q.valor_original)}</td><td class="mono">${esc(q.valor_nuevo)}</td><td>${esc(q.regla)}</td></tr>`).join("")}</tbody>`;
+    renderQC();
     $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly`;
   }
 
@@ -1068,7 +1087,7 @@
     { id: "grad", name: "Graduate student", intro: "Find the investigation and data that fit your thesis question.", steps: [
       ["Rank investigations for your habitat", "Relevance is a transparent formula; every score shows its parts.", { go: "#investigations" }],
       ["Compare side by side", "Hardware, conditions, variables and outcomes of up to three investigations.", { go: "#compare" }],
-      ["Download the unified tables", "1,989 tests in SI units with a logged correction trail.", { go: "#quality" }]] },
+      ["Download the unified tables", `${D.summary.records.toLocaleString("en-US")} tests in SI units with a logged correction trail.`, { go: "#quality" }]] },
     { id: "professor", name: "Professor", intro: "Teaching material with the evidence attached.", steps: [
       ["Coverage map", "Where NASA has flown fire versus where crews will live: a one-slide lecture.", { go: "#coverage" }],
       ["Raw evidence charts", "Outcomes with sample sizes and intervals, ready for a problem set.", { go: "#evidence" }],
@@ -1152,7 +1171,7 @@
 
   function renderDownloads() {
     const files = [
-      ["ensayos.csv", "All 1,989 test records in one schema, SI units (CSV)"],
+      ["ensayos.csv", `All ${D.summary.records.toLocaleString("en-US")} test records in one schema, SI units (CSV)`],
       ["investigaciones.csv", "Profile of the 24 investigations (CSV)"],
       ["qc_log.csv", "Every correction to NASA's tables, with the original value (CSV)"],
       ["findings.json", "Findings with evidence scores (JSON)"],

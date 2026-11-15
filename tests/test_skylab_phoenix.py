@@ -18,8 +18,8 @@ HC = {h["habitat"]: h["fuels"] for h in EMBER["habitat_check"]}
 def test_summary_counts():
     s = EMBER["summary"]
     assert s["investigations"] == 24 and s["flight"] == 19
-    assert s["records"] == 1989 and s["with_outcome"] == 688
-    assert s["qc_fixes"] == len(EMBER["qc"]) == 53
+    assert s["records"] == 1955 and s["with_outcome"] == 688
+    assert s["qc_fixes"] == len(EMBER["qc"]) == 180
 
 
 def test_every_investigation_has_a_score_for_every_habitat():
@@ -167,6 +167,19 @@ def test_solid_gas_data_is_clean():
     pts = EMBER["solids"]["points"]
     assert len(pts) == EMBER["solids"]["n_tests"] == 129
     assert all(p["o2_final_pct"] is None or p["o2_final_pct"] > 10 for p in pts)
-    assert sum(1 for q in EMBER["qc"] if q["psi_id"] == "PSI-25" and "final O2" in q["campo"]) == 3
+    assert sum(1 for q in EMBER["qc"] if q["psi_id"] == "PSI-25" and "final O2" in q["campo"]) == 5
     S = EMBER["solids"]
     assert S["co_rods_low_o2_median_ppm"] > S["co_rods_high_o2_median_ppm"]
+
+
+def test_extended_audit():
+    qc = EMBER["qc"]
+    rule = lambda psi, text: [q for q in qc if q["psi_id"] == psi and text in q["regla"]]
+    assert len(rule("PSI-107", "Identical row repeated")) == 34
+    assert len(rule("PSI-39", "Identical row repeated")) == 8
+    assert rule("PSI-159", "set to ignited")[0]["registro"] == "21106 F4"
+    assert rule("PSI-25", "GMT day disagrees")[0]["valor_nuevo"] == "203"
+    assert len(rule("PSI-25", "Negative concentration")) == 13
+    assert rule("PSI-69", "cannot be independent")[0]["registro"] == "70, 73"
+    spice = next(r for r in EMBER["investigations"] if r["psi_id"] == "PSI-107")
+    assert spice["n_tests"] == 435

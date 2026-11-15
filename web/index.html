@@ -514,6 +514,7 @@
           <p class="label">Data-quality log</p>
           <h3>Every correction to NASA's tables.</h3>
           <p class="sub" id="qc-sub"></p>
+          <div class="qc-cats" id="qc-cats" role="group" aria-label="Filter corrections by type"></div>
           <div class="tbl-wrap scroll"><table id="qc-table"></table></div>
           <p class="note">Reproduce: <code>python scripts/fetch_psi.py data/psi PSI-…</code> then <code>python -m pipeline.run</code></p>
         </div>

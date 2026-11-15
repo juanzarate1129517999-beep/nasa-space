@@ -27,7 +27,7 @@ Skylab Phoenix
 
 ## High-level summary (paste as is)
 
-Artemis surface habitats and pressurized rovers will run at about 30% oxygen and 10.2 psi, where materials burn more readily, yet NASA's microgravity fire data is scattered across 24 investigations in different formats. Skylab Phoenix turns the NASA Physical Sciences Informatics combustion archive into an SI-powered dashboard. It cleans 1,989 flight-test records into one schema (logging 53 corrections to NASA's tables), ranks and compares the investigations for five crewed atmospheres, and runs a validated model live in the browser. The model shows that a fuel-droplet flame puts itself out 72% of the time in cabin air but only 6% in lunar-base air, while just 37 of 1,647 flight records sit near that atmosphere and no solid material has ever burned there. An SI layer writes plain-language briefings for each habitat and investigation; code publishes a briefing only if every sentence cites the data and every number is verified. The result tells crews and engineers what the evidence says, how sure it is, and what NASA should test next.
+Artemis surface habitats and pressurized rovers will run at about 30% oxygen and 10.2 psi, where materials burn more readily, yet NASA's microgravity fire data is scattered across 24 investigations in different formats. Skylab Phoenix turns the NASA Physical Sciences Informatics combustion archive into an SI-powered dashboard. It cleans 1,955 flight-test records into one schema (logging 180 corrections to NASA's tables), ranks and compares the investigations for five crewed atmospheres, and runs a validated model live in the browser. The model shows that a fuel-droplet flame puts itself out 72% of the time in cabin air but only 6% in lunar-base air, while just 37 of 1,613 flight records sit near that atmosphere and no solid material has ever burned there. An SI layer writes plain-language briefings for each habitat and investigation; code publishes a briefing only if every sentence cites the data and every number is verified. The result tells crews and engineers what the evidence says, how sure it is, and what NASA should test next.
 
 ## Links
 
@@ -81,7 +81,7 @@ AI tools were used in two places. (1) **In the product:** an SI model (Anthropic
 |---|---|---|
 | 0–4 s | Team names over the hero | “We are Skylab Phoenix, from Barranquilla, Colombia.” |
 | 4–10 s | Habitat cards: 72% → 6% | “NASA's own flight data shows a fire that puts itself out 72% of the time in cabin air does so only 6% of the time in Moon-base air.” |
-| 10–16 s | Coverage map, empty lunar envelope | “And only 37 of 1,647 flight tests were run anywhere near that air. No solid material, ever.” |
+| 10–16 s | Coverage map, empty lunar envelope | “And only 37 of 1,613 flight tests were run anywhere near that air. No solid material, ever.” |
 | 16–23 s | SI briefing, click a citation | “Our SI writes the briefing; our code checks every number against the data before you see it.” |
 | 23–30 s | Next-experiment map | “Skylab Phoenix tells crews what the data says, how sure it is, and what NASA should fly next.” |
 
