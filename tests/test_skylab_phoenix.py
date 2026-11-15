@@ -197,3 +197,23 @@ def test_moonbase_audit():
     assert hab["x_o2"] == 0.30 and hab["volume_m3"] == 106
     assert mb["site"]["name"] == "Connecting ridge" and -90 < mb["site"]["lat"] < -89
     assert len(mb["report"]["flight_tests_needed"]) == 3
+
+
+def test_records_and_flex_physics():
+    import json
+    from pathlib import Path
+    P = json.loads((Path(__file__).resolve().parents[1] / "web" / "data" / "ember.json").read_text(encoding="utf-8"))
+    R = P["records"]
+    assert len(R["rows"]) == P["summary"]["records"]
+    assert all(len(r) == len(R["cols"]) for r in R["rows"])
+    assert {r[1] for r in R["rows"]} <= {"S", "L", "G", "M"}
+    E = R["moon_envelope"]
+    moon = [r for r in R["rows"] if r[2] is not None and r[3] is not None and r[2] >= E["x_o2_min"] and r[3] <= E["p_atm_max"]]
+    assert len(moon) == P["coverage"]["n_moon_envelope"]
+    measured = [r for r in R["rows"] if r[2] is not None and r[3] is not None and not r[4]]
+    assert len(measured) == P["coverage"]["n_measured"]
+    T = P["flex"]["train"]
+    k = [t["tasa_quemado"] for t in T if t.get("tasa_quemado") is not None]
+    assert len(k) > 200 and all(0 < v < 2 for v in k)
+    ext = [t for t in T if t.get("d_ext_mm") is not None]
+    assert ext and all(t["d_ext_mm"] <= t["d0_mm"] for t in ext)

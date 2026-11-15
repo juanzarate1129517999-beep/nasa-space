@@ -107,7 +107,7 @@ def flex_model(ens):
                 "lo": float(coef_ci[0, i]), "hi": float(coef_ci[1, i])} for i, f in enumerate(FLEX_FEATURES)]
     drivers.sort(key=lambda r: -abs(r["coef"]))
     train = d.assign(p_oof=oof_lr)[["test_uid", "combustible", "x_o2", "p_atm", "x_co2", "x_he", "d0_mm",
-                                   "resultado", "autoextincion", "p_oof", "fecha"]]
+                                   "resultado", "autoextincion", "p_oof", "fecha", "tasa_quemado", "tiempo_quemado_s", "d_ext_mm"]]
     train["fecha"] = train["fecha"].dt.strftime("%Y-%m-%d")
     return {
         "features": FLEX_FEATURES, "labels": FLEX_LABELS, "mu": mu.tolist(), "sd": sd.tolist(),

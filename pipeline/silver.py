@@ -15,7 +15,7 @@ SCHEMA = [
     "x_o2", "o2_ubicacion", "o2_supuesto", "p_atm", "p_supuesta", "x_co2", "x_he",
     "flujo_cm_s", "barrido_flujo", "direccion_flujo", "d0_mm", "gravedad",
     "ignicion", "autoextincion", "resultado", "llama_fria", "tad_k", "zst",
-    "tasa_quemado", "tiempo_quemado_s", "n_eventos", "con_resultado", "fecha", "qc_flags",
+    "tasa_quemado", "tiempo_quemado_s", "d_ext_mm", "n_eventos", "con_resultado", "fecha", "qc_flags",
 ]
 
 
@@ -65,7 +65,7 @@ def flex():
     df = pd.DataFrame({
         "test_uid": r["n"], "combustible": r["fuel"].str.strip(), "x_o2": _num(r["xo2"]),
         "p_atm": _num(r["p_mmhg"]) / MMHG_PER_ATM, "x_co2": _num(r["xco2"]), "x_he": _num(r["xhe"]),
-        "d0_mm": _num(r["d0"]), "tasa_quemado": _num(r["k"]), "tiempo_quemado_s": _num(r["tb"].astype(str).str.replace("~", "", regex=False)),
+        "d0_mm": _num(r["d0"]), "d_ext_mm": _num(r["dext"]), "tasa_quemado": _num(r["k"]), "tiempo_quemado_s": _num(r["tb"].astype(str).str.replace("~", "", regex=False)),
         "resultado": r["end"].astype(str).str.strip().str.lower().map(
             {"extinction": "extincion", "disruption": "disrupcion", "completion": "completo"}),
         "fecha": pd.to_datetime(r["fecha"], format="%m/%d/%Y", errors="coerce").fillna(
@@ -80,6 +80,7 @@ def flex():
         QC.add(psi, exp, r.loc[i, "n"], "Visible flame extinction diameter; mm", r.loc[i, "dext"], "flagged",
                f"Droplet diameter at extinction larger than the initial diameter ({r.loc[i, 'd0']} mm); flagged")
     df.loc[big, "qc_flags"] = (df.loc[big, "qc_flags"].fillna("") + " diametro_extincion_mayor").str.strip()
+    df.loc[big, "d_ext_mm"] = np.nan
     key = r["ident"].astype(str).str.strip() + "|" + r["fecha"].astype(str) + "|" + r["gmt"].astype(str).str.strip()
     same = key.duplicated(keep=False)
     for k, g in r[same].groupby(key[same]):

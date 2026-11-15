@@ -79,7 +79,7 @@
 
     let M = null, terrain = null, baseP = null, frameN = { north: null, east: null };
     const modules = {}, labels = {};
-    let mode = "moon", selected = null, onSel = null, dateOff = 0, running = true, visible = true;
+    let mode = "moon", selected = null, onSel = null, dateOff = 0, running = true, visible = true, drillSt = null;
 
     function label(id, text, cls = "") {
       const el = document.createElement("button");
@@ -201,7 +201,21 @@
       g.add(flame);
       const glow = new T.PointLight(0x7aa2ff, 0, 1.2);
       glow.position.copy(flame.position); g.add(glow);
-      g.userData = { flame, glow };
+      const char = new T.Mesh(new T.BoxGeometry(len * 0.18, r * 0.5, 0.012), new T.MeshStandardMaterial({ color: 0x1a1410, roughness: 1 }));
+      char.position.copy(fabric.position); char.scale.x = 0.001; g.add(char);
+      const NS = 70, sp = new Float32Array(NS * 3), seed = [];
+      for (let i = 0; i < NS; i++) seed.push([Math.random(), Math.random() - 0.5, Math.random() - 0.5]);
+      const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.BufferAttribute(sp, 3));
+      const sm = new T.PointsMaterial({ color: 0x9ca3af, size: 0.03, transparent: true, opacity: 0, depthWrite: false });
+      const smoke = new T.Points(sg, sm); g.add(smoke);
+      const fog = new T.Mesh(new T.SphereGeometry(1, 24, 16), new T.MeshBasicMaterial({ color: 0xe5f3ff, transparent: true, opacity: 0, depthWrite: false }));
+      fog.scale.setScalar(0.001); g.add(fog);
+      const src = {
+        droplet: flame.position.clone(),
+        fabric: fabric.position.clone().add(new T.Vector3(-len * 0.09, 0, -0.02)),
+        plastic: new T.Vector3(-len * 0.36 + 2 * len * 0.24, r * 0.38, -r * 0.3),
+      };
+      g.userData = { flame, glow, char, fabric, smoke, sg, sm, seed, fog, sensor, src, len, r };
       g.visible = false;
       return g;
     }
@@ -396,9 +410,45 @@
       }
       if (now - lastTime > 1000) { lastTime = now; applyTime(); }
       if (selected && modules[selected]) {
-        const it = modules[selected].interior.userData;
-        it.flame.scale.setScalar(0.85 + 0.25 * Math.sin(now / 160) + 0.1 * Math.sin(now / 37));
-        it.glow.intensity = 0.9 + 0.4 * Math.sin(now / 120);
+        const it = modules[selected].interior.userData, D = drillSt;
+        const flick = 0.85 + 0.25 * Math.sin(now / 160) + 0.1 * Math.sin(now / 37);
+        if (!D) {
+          it.flame.position.copy(it.src.droplet); it.flame.visible = true;
+          it.flame.scale.setScalar(flick); it.glow.intensity = 0.9 + 0.4 * Math.sin(now / 120);
+          it.char.scale.x = 0.001; it.sm.opacity = 0; it.fog.material.opacity = 0; it.sensor.material.emissive.setHex(0x22d3ee);
+        } else {
+          const p = D.p;
+          let size = 1;
+          if (D.source === "fabric") {
+            it.char.scale.x = Math.max(0.001, Math.min(1, p)); it.char.position.x = it.fabric.position.x - (it.len * 0.18 * (1 - it.char.scale.x)) / 2;
+            it.flame.position.copy(it.src.fabric).add(new T.Vector3(it.len * 0.18 * Math.min(1, p), 0, 0));
+            it.flame.scale.set(0.8, 2.2, 0.6);
+          } else {
+            it.flame.position.copy(it.src[D.source]); size = D.source === "plastic" ? 1.3 : 1;
+          }
+          let alive = p < 1 || D.source !== "droplet";
+          if (D.out && p > 0.55) alive = false;
+          if (D.co2 && p > 0.7 && D.co2Out) alive = false;
+          const k = alive ? flick * size : 0;
+          if (D.source !== "fabric") it.flame.scale.setScalar(Math.max(0.001, k));
+          else it.flame.scale.multiplyScalar(alive ? flick : 0.001);
+          it.flame.visible = alive;
+          it.glow.intensity = alive ? 1.1 : 0;
+          const drift = D.fans && p > 0.45 ? 0.15 : 1;
+          const n = it.seed.length, pos = it.sg.attributes.position;
+          for (let i = 0; i < n; i++) {
+            const s0 = it.seed[i]; s0[0] = (s0[0] + 0.004 * drift) % 1;
+            const t = s0[0];
+            pos.setXYZ(i, it.flame.position.x + t * it.len * 0.45 * drift + s0[1] * 0.08, it.flame.position.y + t * it.r * 0.6 + s0[2] * 0.06, it.flame.position.z + s0[2] * 0.12);
+          }
+          pos.needsUpdate = true;
+          it.sm.opacity = Math.min(0.6, p * 1.5);
+          it.sensor.material.emissive.setHex(p > 0.3 && Math.sin(now / 150) > 0 ? 0xef4444 : 0x22d3ee);
+          const fogOn = D.co2 && p > 0.6;
+          it.fog.material.opacity = fogOn ? 0.18 : 0;
+          it.fog.scale.setScalar(fogOn ? Math.min(it.r * 1.2, (p - 0.6) * it.r * 4) : 0.001);
+          it.fog.position.copy(it.flame.position);
+        }
       }
       controls.update();
       renderer.render(mode === "moon" ? moonScene : terrScene, camera);
@@ -432,6 +482,7 @@
       descend, showMoon, select,
       onSelect(fn) { onSel = fn; },
       setTimeOffset(ms) { dateOff = ms; applyTime(); },
+      drill(st) { drillSt = st; },
       mode: () => mode,
       pause() { running = false; },
       resume() { resize(); if (!running) { running = true; requestAnimationFrame(frame); } },

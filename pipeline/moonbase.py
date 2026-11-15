@@ -50,7 +50,75 @@ def _co2_needed(F, fuel, x_o2, p_atm, d0):
             "curve": [[float(c), round(float(m), 3), round(float(l), 3), round(float(h), 3)] for c, m, l, h in zip(grid, mean, lo, hi)]}
 
 
-def build(P):
+PANEL_CM = 40
+
+
+def _flex_burn(ens, fuel):
+    f = ens[(ens["experimento"] == "FLEX") & (ens["combustible"] == fuel) & ens["tiempo_quemado_s"].notna() & (ens["x_o2"] >= 0.25)]
+    t = f["tiempo_quemado_s"]
+    return {"n": int(len(t)), "median": round(float(t.median()), 1), "q25": round(float(t.quantile(0.25)), 1), "q75": round(float(t.quantile(0.75)), 1)}
+
+
+def drill(m, P, ens, spread, red):
+    S = P["solids"]
+    x = m["x_o2"]
+    dil = GLOVEBOX_M3 / m["volume_m3"]
+    sib = next(b for b in S["by_family"] if b["family"] == "SIBAL fabric")
+    burn = _flex_burn(ens, "Methanol")
+    lo_s, hi_s = min(spread["sibal_mm_s"]), max(spread["sibal_mm_s"])
+    t_fast, t_slow = PANEL_CM * 10 / hi_s, PANEL_CM * 10 / lo_s
+    hm = m["tests"]["liquids"]["facts"][0]["value"]
+    c30 = m["tests"]["suppression"]["facts"][3]["value"]
+    still = x * 100 > S["zero_flow_o2_pct"]
+    gap_co2 = fact("CO2 flood on a burning solid", "no flight data", "gap", "No PSI test flooded a burning solid with CO2")
+    return {
+        "panel_cm": PANEL_CM,
+        "sources": {
+            "droplet": {
+                "name": "Fuel droplet or small spill", "duration_s": burn["median"], "grows": False,
+                "events": [
+                    fact("A droplet flame burns for", f"{burn['median']:g} s (middle half {burn['q25']:g}–{burn['q75']:g} s)", "measured",
+                         f"FLEX methanol tests at ≥25% O2, n = {burn['n']}"),
+                    fact("Chance it goes out on its own in this air", hm, m["tests"]["liquids"]["status"], "FLEX model"),
+                    fact("CO signal", "not measured for droplets", "gap", "FLEX did not log CO"),
+                ],
+                "co2": fact("Methanol fire with 30% CO2 added: chance it goes out", c30, "extrapolated", "FLEX model"),
+            },
+            "fabric": {
+                "name": f"Cabin fabric panel ({PANEL_CM} cm)", "duration_s": round(t_slow), "grows": True,
+                "events": [
+                    fact("Flame spread over the fabric in orbit", f"{lo_s:g}–{hi_s:g} mm/s", "measured", "Saffire-II SIBAL samples at about 22% O2, 20 cm/s air"),
+                    fact(f"Time to cross a {PANEL_CM} cm panel", f"{t_fast:.0f}–{t_slow:.0f} s", "derived",
+                         f"{PANEL_CM} cm ÷ measured spread; at {100 * x:.1f}% O2 it would be faster, by an amount no flight has measured"),
+                    fact("CO from one fabric burn, mixed into this module", f"{sib['co_median'] * dil:.2f} ppm", "derived",
+                         f"BASS-II SIBAL median {sib['co_median']:g} ppm in the 0.25 m³ glovebox × 0.25 / {m['volume_m3']} m³"),
+                ],
+                "co2": gap_co2,
+            },
+            "plastic": {
+                "name": "Plastic part (PMMA)", "duration_s": 60, "grows": False,
+                "events": [
+                    fact("Lowest O2 that keeps a PMMA flame alive in still air", f"{S['zero_flow_o2_pct']}%", "measured", "BASS-II boundary, 1 atm"),
+                    fact("This module's oxygen", f"{100 * x:.1f}%", "assumed", "Challenge atmosphere"),
+                    fact("CO from one rod burn, mixed into this module", f"{S['co_rods_high_o2_median_ppm'] * dil:.2f} ppm", "derived",
+                         f"BASS-II median {S['co_rods_high_o2_median_ppm']:g} ppm × 0.25 / {m['volume_m3']} m³"),
+                ],
+                "co2": gap_co2,
+            },
+        },
+        "fans_off": {
+            "solid_keeps_burning": bool(still),
+            "fact": fact("With the fans off (still air)", "keeps burning" if still else "goes out", "extrapolated",
+                         f"BASS-II still-air limit {S['zero_flow_o2_pct']}% is below this module's {100 * x:.1f}% O2; measured only up to {S['tested_o2_pct'][1]}% O2"),
+            "iss": fact("Same step on the ISS (21% O2)", f"{21 - S['zero_flow_o2_pct']:.1f} points above the limit", "derived",
+                        "Cabin air sits just above the still-air limit, which is why stopping the fans helps there"),
+        },
+        "co2_measured": fact("FLEX, more than 30% CO2 at 0.7 atm", f"{red['>30%']['k']} of {red['>30%']['n']} droplet fires went out", "measured",
+                             f"only at {100 * red['>30%']['o2_range'][0]:.0f}–{100 * red['>30%']['o2_range'][1]:.0f}% O2"),
+    }
+
+
+def build(P, ens=None):
     F, S = P["flex"], P["solids"]
     hab = {h["id"]: h for h in HABITATS}
     hc = {x["habitat"]: x for x in P["habitat_check"]}
@@ -153,6 +221,9 @@ def build(P):
                      "x_o2": x, "p_atm": p, "psi": round(p / PSI_TO_ATM, 1), "tests": tests,
                      "gravity": {"g": LUNAR_G, "tag": "gap",
                                  "text": "No combustion test at lunar gravity is in NASA PSI yet; every answer above comes from microgravity or 1 g."}})
+    if ens is not None:
+        for mm in mods:
+            mm["drill"] = drill(mm, P, ens, spread, red)
     report = {
         "measured_layers": sum(f["tag"] == "measured" for mm in mods for t in mm["tests"].values() for f in t["facts"]),
         "total_facts": sum(len(t["facts"]) for mm in mods for t in mm["tests"].values()),

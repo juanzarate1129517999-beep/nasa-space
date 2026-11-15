@@ -941,6 +941,21 @@
     ], layout({ margin: { l: 52, r: 14, t: 6, b: 44 }, xaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Predicted P(self-extinction)" } }, yaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Observed rate" } },
       annotations: [{ x: 0.25, y: 0.25, ax: 30, ay: -34, text: "perfect calibration", showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink4, xanchor: "left", font: { size: 10, color: C.ink3, family: "Geist Mono, JetBrains Mono, monospace" } }] }));
     renderQC();
+    const nClips = (window.CLIPS || []).length;
+    $("#mth-src").innerHTML = [
+      ["NASA PSI", `${S.investigations} combustion investigations · ${S.records.toLocaleString("en-US")} records`, "Experimental tables and metadata from the Physical Sciences Informatics public API.", "https://psi.nasa.gov/physci/repo/search?q=combustion&data_source=psi&data_type=investigation"],
+      ["PSI flight video", `${nClips} clips`, "Raw ISS and Cygnus flight video, cropped to the flame for the archive in Flames.", "https://psi.nasa.gov/"],
+      ["LOLA terrain", "5 m per pixel", "South-pole elevation maps from NASA GSFC PGDA product 78 (Barker et al. 2021) for the landing site.", "https://pgda.gsfc.nasa.gov/products/78"],
+      ["CGI Moon Kit", "LROC color · LOLA relief", "NASA SVS textures for the 3D Moon.", "https://svs.gsfc.nasa.gov/4720"],
+      ["JPL Horizons", "Sun and Earth every 3 h", "Where the Sun and Earth sit in the sky of the base, November 2026 to November 2027.", "https://ssd.jpl.nasa.gov/horizons/"],
+      ["NASA reports", "BASS-II summary · exploration atmospheres", "Flammability boundary (NASA/TM-20210011385) and the exploration habitat atmosphere.", "https://ntrs.nasa.gov/"],
+    ].map(([k, n, d, u]) => `<a class="mth-s" href="${u}" target="_blank" rel="noopener"><b>${k}</b><span>${esc(n)}</span><small>${esc(d)}</small></a>`).join("");
+    $("#mth-solid").textContent = D.solids.max_o2_any_solid_pct;
+    const toc = [...document.querySelectorAll("#mth-toc a")];
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) toc.forEach((a) => a.classList.toggle("is-on", a.getAttribute("href").endsWith(e.target.id))); }), { rootMargin: "-40% 0px -55% 0px" });
+      document.querySelectorAll(".mth-step").forEach((x) => io.observe(x));
+    }
     $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly`;
   }
 
@@ -1227,7 +1242,7 @@
 
   function destDetail(id) {
     const x = destInfo(id);
-    return `<span class="glabel__v${x.muted ? " muted" : ""}">${x.v}</span><span class="glabel__l">${esc(x.l)}</span>${id === "moon" ? '<a href="#/base" class="glabel__b">Enter the Moon base →</a>' : ""}<a href="#/lab" class="glabel__a" data-hab="${DEST[id].hab}">Open in the Fire Lab →</a>`;
+    return `<span class="glabel__v${x.muted ? " muted" : ""}">${x.v}</span><span class="glabel__l">${esc(x.l)}</span>${id === "moon" ? '<a href="#/learn" class="glabel__b">Fly to the Moon base →</a>' : ""}<a href="#/lab" class="glabel__a" data-hab="${DEST[id].hab}">Open in the Fire Lab →</a>`;
   }
   function initGlobe() {
     if (!window.PhoenixGlobe || !window.THREE) { $("#globe").classList.add("globe--fallback"); return; }
@@ -1306,6 +1321,7 @@
     let lastPh = "";
     setInterval(() => {
       if (current !== "lab") return;
+      drawD2();
       const s = lab3d.state();
       fill.style.width = `${Math.min(100, 100 * s.t)}%`;
       fill.classList.toggle("is-out", s.phase === "out");
@@ -1326,9 +1342,56 @@
         <div class="mono-sm">${t.length ? `${outN} of the last ${t.length} went out on its own` : "collecting replays…"}</div>`;
     });
   }
+  function labPhys(x) {
+    const T = M.train, xs = stdz(x), idx = M.train_std.map((t, i) => ({ i, d: Math.sqrt(t.reduce((s, v, j) => s + (v - xs[j]) ** 2, 0)) }))
+      .filter((o) => T[o.i].tasa_quemado > 0).sort((a, b) => a.d - b.d).slice(0, 5);
+    let wk = 0, k = 0, wr = 0, rr = 0;
+    const tests = idx.map((o) => {
+      const t = T[o.i], w = 1 / (o.d + 0.3);
+      k += w * t.tasa_quemado; wk += w;
+      if (t.autoextincion && t.d_ext_mm > 0 && t.d0_mm > 0) { rr += w * t.d_ext_mm / t.d0_mm; wr += w; }
+      const tb = t.tiempo_quemado_s > 0 ? t.tiempo_quemado_s : (t.d0_mm ** 2) / t.tasa_quemado;
+      const dEnd2 = t.autoextincion && t.d_ext_mm > 0 ? t.d_ext_mm ** 2 : Math.max(0, t.d0_mm ** 2 - t.tasa_quemado * tb);
+      return { d0: t.d0_mm, K: t.tasa_quemado, tb: Math.max(0.2, (t.d0_mm ** 2 - dEnd2) / t.tasa_quemado), dEnd2, out: !!t.autoextincion, date: t.fecha, fuel: t.combustible, o2: t.x_o2, p: t.p_atm };
+    });
+    if (!wr) {
+      const fuel = x[0] ? "Heptane" : "Methanol", r = T.filter((t) => t.autoextincion && t.d_ext_mm > 0 && t.combustible === fuel).map((t) => t.d_ext_mm / t.d0_mm).sort((a, b) => a - b);
+      if (r.length) { rr = r[Math.floor(r.length / 2)]; wr = 1; }
+    }
+    return { K: wk ? k / wk : 0.6, rext: wr ? Math.min(0.95, Math.max(0.2, rr / wr)) : 0.72, tests };
+  }
+  let phys = null;
+  function drawD2() {
+    const c = $("#lab-d2"); if (!c || !lab3d || !phys) return;
+    const s = lab3d.state(), g = c.getContext("2d"), W = c.width, H = c.height, L = 54, B = 40, R = 14, Tp = 14;
+    const tmax = Math.max(s.tBurn, ...phys.tests.map((t) => t.tb)) * 1.08, ymax = Math.max(s.d0 ** 2, ...phys.tests.map((t) => t.d0 ** 2)) * 1.08;
+    const X = (t) => L + (W - L - R) * t / tmax, Y = (v) => H - B - (H - B - Tp) * v / ymax;
+    g.clearRect(0, 0, W, H);
+    g.font = "20px ui-monospace, monospace"; g.fillStyle = "rgba(160,170,190,.85)"; g.strokeStyle = "rgba(255,255,255,.08)"; g.lineWidth = 1;
+    const tick = (m) => { const st = [1, 2, 5, 10, 20, 50][[1, 2, 5, 10, 20, 50].findIndex((v) => m / v <= 5)] || 100; return st; };
+    const ts = tick(tmax), ys = tick(ymax);
+    for (let v = 0; v <= tmax; v += ts) { g.beginPath(); g.moveTo(X(v), Tp); g.lineTo(X(v), H - B); g.stroke(); g.fillText(String(v), X(v) - 6, H - B + 24); }
+    for (let v = 0; v <= ymax; v += ys) { g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(W - R, Y(v)); g.stroke(); g.fillText(String(v), 6, Y(v) + 7); }
+    g.fillText(I18N_T("s"), W - R - 14, H - B - 8); g.fillText(I18N_T("d², mm²"), L + 6, Tp + 18);
+    phys.tests.forEach((t) => {
+      g.strokeStyle = t.out ? "rgba(125,211,252,.55)" : "rgba(200,205,215,.4)"; g.lineWidth = 2; g.setLineDash([]);
+      g.beginPath(); g.moveTo(X(0), Y(t.d0 ** 2)); g.lineTo(X(t.tb), Y(t.dEnd2)); g.stroke();
+      if (t.out) { g.fillStyle = "rgba(125,211,252,.9)"; g.beginPath(); g.arc(X(t.tb), Y(t.dEnd2), 5, 0, 7); g.fill(); }
+    });
+    g.setLineDash([8, 7]); g.strokeStyle = "rgba(255,138,61,.55)"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(X(0), Y(s.d0 ** 2)); g.lineTo(X(s.tBurn), Y(s.dEnd ** 2)); g.stroke(); g.setLineDash([]);
+    const te = Math.max(0, Math.min(s.e - s.ign, s.tBurn));
+    if (s.e > s.ign) {
+      g.strokeStyle = "#ff8a3d"; g.lineWidth = 4; g.beginPath(); g.moveTo(X(0), Y(s.d0 ** 2)); g.lineTo(X(te), Y(Math.max(s.dEnd ** 2, s.d0 ** 2 - s.K * te))); g.stroke();
+      g.fillStyle = "#ffb36b"; g.beginPath(); g.arc(X(te), Y(s.d * s.d), 7, 0, 7); g.fill();
+    }
+    $("#lab-read").innerHTML = `<span><b>${Math.max(0, s.e - s.ign).toFixed(1)} s</b>${I18N_T("since ignition")}</span><span><b>${s.d.toFixed(2)} mm</b>${I18N_T("droplet now")}</span><span><b>${s.K.toFixed(2)} mm²/s</b>${I18N_T("burning rate K")}</span><span><b>${(s.dEnd).toFixed(2)} mm</b>${s.out ? I18N_T("goes out at") : I18N_T("burns down to")}</span>`;
+  }
+  const I18N_T = (t) => (window.I18N ? window.I18N.t(t) : t);
   function syncLab3d(r, show, st) {
     if (!lab3d) return;
-    lab3d.set({ o2: sc.o2, p: sc.p, fuel: sc.fuel, co2: sc.co2, he: sc.he, pOut: show ? r.p : 0.5 });
+    phys = labPhys(featVec(sc));
+    lab3d.set({ o2: sc.o2, p: sc.p, fuel: sc.fuel, co2: sc.co2, he: sc.he, pOut: show ? r.p : 0.5, d0: sc.d0, K: phys.K, rext: phys.rext });
     $("#lab3d-sc").textContent = `${sc.fuel} droplet · ${(100 * sc.o2).toFixed(1)}% O₂ · ${(sc.p * ATM_PSI).toFixed(1)} psi${sc.co2 ? ` · ${(100 * sc.co2).toFixed(0)}% CO₂` : ""}${sc.he ? ` · ${(100 * sc.he).toFixed(0)}% He` : ""}`;
     $("#lab3d-p").innerHTML = show
       ? `<span class="lab3d__big">${pct(r.p)}</span><span>chance it goes out on its own${st === "extrapolating" ? " · extrapolating" : ""}</span>`
@@ -1390,38 +1453,12 @@
         <span class="surv__bar"><i class="k" style="width:${w(r.kept)}"></i><i class="b" style="width:${w(r.broke)}"></i><i class="o" style="width:${w(r.out)}"></i></span>
         <span class="num"><b>${r.kept + r.broke}</b> of ${r.n}</span><span class="num mono-sm">${pct(r.ci[0])}–${pct(r.ci[1])}</span></div>`;
     }).join("");
-    $("#surv-view").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === survState.view)));
-    $("#surv-list").hidden = survState.view !== "list";
-    $("#surv-chart-wrap").hidden = survState.view !== "chart";
-    if (survState.view === "chart") safe(() => renderSurvChart(shown, near, hb), "survival chart");
     $("#surv-more").hidden = list.length <= 10;
     $("#surv-more").textContent = survState.all ? "Show fewer" : `Show all ${list.length} groups`;
     $("#surv-note").textContent = `Groups need at least 5 flames that ran to an end (no-ignition and flash tests are left out). A droplet that broke apart is counted as not going out on its own: its fragments were still burning. Near = within 5 points of O₂ and about 35% of the pressure of ${hb.name} air.`;
   }
 
-  const TT = (s) => (window.I18N ? window.I18N.t(s) : s);
-  const KIND_C = { Droplet: C.blue, "Gas flame": C.violet, "Inverse gas flame": "#e879f9" };
-  function renderSurvChart(shown, near, hb) {
-    const narrow = innerWidth < 700;
-    const R = shown.map((r, i) => ({ ...r, i, lab: narrow ? `${String(i + 1).padStart(2, "0")} ${TT(r.fuel)}` : `${String(i + 1).padStart(2, "0")}  ${TT(r.kind === "Droplet" ? `${r.fuel} droplets` : `${r.fuel} ${r.kind.toLowerCase()}s`)} · ${TT(`${r.o2} O₂`)} · ${TT(r.p)}` })).reverse();
-    const col = (r) => KIND_C[r.kind] || C.ink2;
-    $("#surv-legend").innerHTML = [legendItem("circle", C.blue, "Droplets"), legendItem("circle", C.violet, "Gas flames"), legendItem("bar", "rgba(242,96,15,.35)", `Near ${hb.name} air`)].join("");
-    plot("surv-chart", [
-      { type: "scatter", mode: "markers", x: R.map((r) => r.rate), y: R.map((r) => r.lab), customdata: R.map((r) => [r.kept + r.broke, r.n, r.ci[0], r.ci[1], r.dil, r.psi.join(", ")]),
-        marker: { size: R.map((r) => Math.min(26, 8 + Math.sqrt(r.n) * 2.2)), color: R.map(col), line: { color: R.map((r) => (near(r) ? "#fff" : C.bg)), width: R.map((r) => (near(r) ? 2.5 : 1.5)) } },
-        hovertemplate: "<b>%{y}</b><br>did not go out: %{customdata[0]} of %{customdata[1]}<br>90% range %{customdata[2]:.0%}–%{customdata[3]:.0%}<br>%{customdata[4]} · %{customdata[5]}<extra></extra>" },
-    ], layout({
-      height: Math.max(300, 34 * R.length + 70), margin: { l: narrow ? 70 : 330, r: 14, t: 8, b: 46 },
-      shapes: [
-        ...R.map((r) => ({ type: "line", xref: "x", yref: "y", x0: r.ci[0], x1: r.ci[1], y0: r.lab, y1: r.lab, line: { color: col(r), width: 6 }, opacity: 0.35, layer: "below" })),
-        ...R.filter(near).map((r) => ({ type: "rect", xref: "paper", yref: "y", x0: 0, x1: 1, y0: R.indexOf(r) - 0.45, y1: R.indexOf(r) + 0.45, fillcolor: "rgba(242,96,15,0.10)", line: { width: 0 }, layer: "below" })),
-        { type: "line", xref: "x", yref: "paper", x0: 0.5, x1: 0.5, y0: 0, y1: 1, line: { color: C.line2, width: 1, dash: "dot" } },
-      ],
-      xaxis: { range: [0, 1.02], tickformat: ".0%", tickvals: [0, 0.25, 0.5, 0.75, 1], title: { text: "Share of flames that did NOT go out on their own" } },
-      yaxis: { type: "category", tickfont: { family: "Geist Mono, monospace", size: 11, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
-    }));
-    $("#surv-how").innerHTML = `How to read it: the dot is what NASA saw; its size is the number of flames; the faint bar is the 90% range. Groups are ranked by the left end of the bar, so a small lucky group cannot jump to the top. Blue: droplets · violet: gas flames. White ring and orange band: near ${esc(hb.name)} air.`;
-  }
+
   let learn3d = null;
   const learnState = { i: 0, o2: 0.30, answers: {} };
   const pAt = (o2, p, extra = {}) => { const x = featVec({ fuel: "Methanol", o2, p, co2: 0, he: 0, d0: M.d0_median, ...extra }); return { ...predict(x), st: dataStatus(x).s }; };
@@ -1437,7 +1474,7 @@
       { t: "A gentle breeze feeds the fire.", b: `In orbit a fan does what buoyancy does on Earth. NASA's BASS-II experiment found that plastics keep burning at the lowest oxygen with a breeze of only about 2 cm/s: down to ${SO.min_o2_pct}% O₂, below the ${SO.g1_upward_limit_pct}% limit of the Earth test used to approve materials.`, set: { g: 0, o2: 0.21, p: 1, flow: 0.55, co2: 0 },
         stat: `<div class="lstat"><span><b>${SO.min_o2_pct}%</b> lowest O₂ for a lasting flame in orbit</span><span><b>${SO.g1_upward_limit_pct}%</b> limit of the upward test on Earth</span></div>` },
       { t: "Put it out: dilute the air.", b: `Adding CO₂ takes oxygen and heat away from the flame. But near lunar-base air NASA has almost no data: for a methanol droplet at ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi and ${(100 * k.x_co2).toFixed(0)}% CO₂ the model can only say it goes out on its own ${pct(k.interval[0])} to ${pct(k.interval[1])} of the time. That is the flight test we recommend.`, set: { g: 0, o2: k.x_o2, p: k.p_atm, flow: 0, co2: k.x_co2 }, link: ["#/next", "See the recommended flight →"] },
-      { t: "Where it all comes together: the Moon base.", b: `The base will breathe 30% O₂ at 10.2 psi, where a droplet fire puts itself out only ${pct(moon.p)} of the time, against ${pct(cab.p)} in cabin air. Open the Moon base to see each of these ideas tested against NASA flight data, module by module.`, set: { g: 0, o2: 0.30, p: 0.694, flow: 0, co2: 0 }, link: ["#/base", "Enter the Moon base →"] },
+      { t: "Where it all comes together: the Moon base.", b: `The base will breathe 30% O₂ at 10.2 psi, where a droplet fire puts itself out only ${pct(moon.p)} of the time, against ${pct(cab.p)} in cabin air. Open the Moon base to see each of these ideas tested against NASA flight data, module by module.`, set: { g: 0, o2: 0.30, p: 0.694, flow: 0, co2: 0 }, link: ["#/findings/audit", "See the Moon base audit →"] },
     ];
   }
   function renderLearn() {
@@ -1512,54 +1549,6 @@
     syncWorlds(); renderWorldCtl();
   }
 
-  let cabin3d = null;
-  const cabState = { i: 0 };
-  function cabinSteps() {
-    const S = D.solids, cab = pAt(0.21, 1), moon = pAt(0.30, 0.694);
-    const red = Object.fromEntries(D.suppression.co2.filter((r) => r.pressure.startsWith("Reduced")).map((r) => [r.co2, r]));
-    const hi = red[">30%"];
-    return [
-      { t: "Air moves only because fans push it.", b: "On the ISS nothing rises, so the cabin air would sit still without fans. Ventilation pushes fresh air in at one end of the module and pulls it out through a return grille at the other. That airflow is what feeds a fire in orbit, and what carries its smoke." },
-      { t: "A fire in orbit: a dome of flame, smoke that follows the fan.", b: `Without buoyancy the flame is small and round, and the smoke drifts with the airflow instead of rising. NASA's BASS-II tests found that solids keep burning down to ${S.min_o2_pct}% O₂ in a breeze of only about 2 cm/s, below the ${S.g1_upward_limit_pct}% limit of the test used on Earth.` },
-      { t: "Detectors sit where the air goes.", b: `A smoke detector works only if smoke reaches it, so it sits in the return air path. NASA's SAME experiments measured how smoke from different cabin materials changes as it ages, and BASS-II measured the carbon monoxide each burn released (median ${S.co_rods_high_o2_median_ppm} ppm for a plastic rod in the 250 L glovebox). Cool flames, confirmed in orbit, give off almost no light, so chemical sensing complements optical detectors.` },
-      { t: "Respond: stop the air, then put it out.", b: `The crew first switches off the fans: without airflow an orbital flame loses its oxygen supply. Then comes the CO₂ extinguisher, with oxygen masks for the crew. In FLEX, more than 30% CO₂ put out ${hi.k} of ${hi.n} droplet fires at reduced pressure, but only at ${Math.round(100 * hi.o2_range[0])}–${Math.round(100 * hi.o2_range[1])}% O₂.` },
-      { t: "The same cabin on the Moon.", b: `A lunar-base module breathes 30% O₂ at 10.2 psi, and lunar gravity (0.17 g) brings back a weak updraft. There a droplet fire puts itself out only ${pct(moon.p)} of the time, against ${pct(cab.p)} in ISS cabin air, and NASA has no fire data at lunar gravity yet.`, link: ["#/base", "Enter the Moon base →"] },
-    ];
-  }
-  function renderCabin() {
-    const S = cabinSteps(), i = cabState.i, st = S[i];
-    $("#cabin-panel").innerHTML = `
-      <div class="learn__dots">${S.map((_, n) => `<button type="button" data-n="${n}" aria-label="Step ${n + 1}" class="${n === i ? "is-on" : n < i ? "is-done" : ""}"></button>`).join("")}</div>
-      <p class="label">Step ${i + 1} of ${S.length}</p>
-      <h3 class="learn__t">${esc(st.t)}</h3>
-      <p class="learn__b">${esc(st.b)}</p>
-      ${st.link ? `<a class="src-link" href="${st.link[0]}">${st.link[1]}</a>` : ""}
-      <div class="learn__nav"><button type="button" class="btn btn--line btn--sm" id="c-prev" ${i === 0 ? "disabled" : ""}>← Back</button><button type="button" class="btn btn--fire btn--sm" id="c-next" ${i === S.length - 1 ? "hidden" : ""}>Next <span aria-hidden="true">→</span></button></div>`;
-    document.querySelectorAll("#cabin-panel .learn__dots button").forEach((b) => b.addEventListener("click", () => { cabState.i = +b.dataset.n; renderCabin(); }));
-    $("#c-prev").addEventListener("click", () => { cabState.i = Math.max(0, i - 1); renderCabin(); });
-    $("#c-next").addEventListener("click", () => { cabState.i = Math.min(S.length - 1, i + 1); renderCabin(); });
-    if (cabin3d) cabin3d.go(i);
-  }
-  const lmState = { m: "1", done: {} };
-  function showLearnMod(m) {
-    lmState.m = m;
-    document.querySelectorAll("#learn-mods button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.m === m)));
-    ["1", "2", "3"].forEach((k) => { $(`#lpane-${k}`).hidden = k !== m; });
-    if (m === "2" && !lmState.done[2]) { lmState.done[2] = true; safe(initWorlds, "worlds"); }
-    if (m === "3" && !lmState.done[3]) {
-      lmState.done[3] = true;
-      if (window.PhoenixCabin && window.THREE) cabin3d = window.PhoenixCabin.init($("#cabin3d"));
-      if (!cabin3d) $("#cabin3d").classList.add("lab3d__view--off");
-      renderCabin();
-    }
-    if (learn3d) { if (m === "1") learn3d.resume(); else learn3d.pause(); }
-    worlds.forEach((w) => w && (m === "2" ? w.resume() : w.pause()));
-    if (cabin3d) { if (m === "3") cabin3d.resume(); else cabin3d.pause(); }
-  }
-  function initLearnMods() {
-    document.querySelectorAll("#learn-mods button").forEach((b) => b.addEventListener("click", () => showLearnMod(b.dataset.m)));
-  }
-
   const MB = D.moonbase;
   const TAG = {
     measured: ["Measured", "Measured by NASA in flight or in its report"],
@@ -1571,59 +1560,231 @@
   };
   const tagHtml = (t) => `<span class="ptag ptag--${t}" title="${esc(TAG[t][1])}">${TAG[t][0]}</span>`;
   const LAYERS = [["materials", "Materials"], ["liquids", "Liquid fires"], ["detection", "Detection"], ["suppression", "Suppression"]];
-  let moon3d = null;
-  const mbState = { sel: null, off: 0 };
   function mbBrief(b, scope) {
     if (!b) return "";
     return `<div class="si-sum">${badge(b)}${b.headline ? `<p class="mb-hl">${esc(b.headline)}</p>` : ""}<p>${sentencesHtml(b, scope)}</p>${evidenceHtml(b, scope)}</div>`;
   }
-  function renderBasePanel() {
-    const el = $("#mb-panel");
-    const m = MB.modules.find((x) => x.id === mbState.sel);
-    if (!m) {
-      const s = MB.site;
-      el.innerHTML = `
-        <p class="label">Base site · NASA LOLA 5 m terrain</p>
-        <h3 class="mb-p__t">${esc(s.name)}</h3>
-        <div class="mb-chips"><span>${Math.abs(s.lat).toFixed(2)}°S ${s.lon.toFixed(2)}°E</span><span>${Math.round(s.z).toLocaleString("en-US")} m high</span><span>${s.slope_deg}° slope</span></div>
-        ${SI && SI.base && SI.base.report ? mbBrief(SI.base.report, "mbr") : ""}
-        <p class="label" style="margin-top:20px">Open a module</p>
-        <div class="mb-mods">${MB.modules.map((x) => `<button type="button" class="mb-mod" data-m="${x.id}"><b>${esc(x.name)}</b><span>${o2pct(x.x_o2)} O₂ · ${x.psi} psi · ${x.volume_m3} m³</span><em>Methanol fire goes out on its own: ${esc(x.tests.liquids.facts[0].value.split(" ")[0])}</em></button>`).join("")}</div>
-        <p class="note">Modules use the challenge's lunar-base air; volumes are stand-ins taken from ISS Destiny, the Quest airlock and Orion.</p>`;
-    } else {
-      el.innerHTML = `
-        <button type="button" class="mb-back" id="mb-back">← Whole base</button>
-        <p class="label">Module · cut open in 3D</p>
-        <h3 class="mb-p__t">${esc(m.name)}</h3>
-        <div class="mb-chips"><span>${o2pct(m.x_o2)} O₂</span><span>${m.psi} psi</span><span>${m.volume_m3} m³</span><span>${m.gravity.g} g</span></div>
-        ${SI && SI.module && SI.module[m.id] ? mbBrief(SI.module[m.id], "mbm-" + m.id) : ""}
-        <div class="mb-tests">${LAYERS.map(([k, n], i) => { const t = m.tests[k]; return `
-          <details class="mb-test" ${i === 0 ? "open" : ""}>
-            <summary><span class="mb-test__n">${String(i + 1).padStart(2, "0")}</span><span class="mb-test__q"><small>${t.layer === n ? n : `${esc(t.layer)} · ${n}`}</small>${esc(t.question)}</span>${tagHtml(t.status)}</summary>
-            <p class="mb-test__a">${esc(t.answer)}</p>
-            <ul class="mb-facts">${t.facts.map((f) => `<li><span>${esc(f.label)}</span><b>${esc(f.value)}</b>${tagHtml(f.tag)}<small>${esc(f.source)}</small></li>`).join("")}</ul>
-          </details>`; }).join("")}
-          <div class="mb-test mb-test--gap"><span class="mb-test__n">05</span><span class="mb-test__q"><small>Lunar gravity</small>${esc(m.gravity.text)}</span>${tagHtml("gap")}</div>
-        </div>`;
-      $("#mb-back").addEventListener("click", () => selectModule(null));
-    }
-    el.querySelectorAll("[data-m]").forEach((b) => b.addEventListener("click", () => selectModule(b.dataset.m)));
-    wireCites(el);
+  let xpMoon = null, xpSrc = null;
+  const xpState = { src: null, step: 0, worlds: false };
+  function xpCards() {
+    const SO = D.solids, cab = pAt(0.21, 1), moon = pAt(0.30, 0.694), s = (MB && MB.site) || {};
+    return [
+      { act: "moon", e: "Chapter 1 · The mission", t: "NASA is going back to the Moon, this time to stay.", b: "With Artemis, NASA plans crewed landings near the lunar south pole and, later, a base camp where crews live and work for weeks. In 2026 Artemis II flew four astronauts around the Moon, and a smoke alarm went off on the way: fire safety travels with every crew." },
+      { act: "moon", e: "Where", t: "The lunar south pole.", b: "Ridges near the pole see sunlight most of the time, for solar power and warmth, while nearby craters keep water ice in permanent shadow. NASA's laser altimeter has mapped the candidate sites at 5 m per pixel; the orange marker is ours." },
+      { act: "moon", e: "The air", t: "Richer air, lower pressure.", b: "To save mass and shorten the preparation for each spacewalk, the base is planned at about 30% oxygen and 10.2 psi. The ISS keeps Earth-like air: 21% oxygen at 14.7 psi." },
+      { act: "base", e: "Landing", t: `The ${s.name || "Connecting ridge"}.`, b: `This is real terrain from NASA's LOLA altimeter, ${Math.round(s.z || 1959).toLocaleString("en-US")} m above the lunar datum, lit by the Sun where JPL Horizons puts it today: barely above the horizon, so shadows run for kilometres. A habitat, an airlock and a pressurized rover. Drag to look around, or click a module to cut it open.` },
+      { act: "base", e: "The problem", t: "In this air, fires stop putting themselves out.", b: `A droplet fire puts itself out ${pct(cab.p)} of the time in ISS air, but only ${pct(moon.p)} in the base's air, and no solid material has ever burned in orbit above ${SO.max_o2_any_solid_pct}% oxygen. The next chapters show why.`, link: ["#/findings/audit", "See the full base audit →"] },
+    ];
   }
-  function selectModule(id) {
-    mbState.sel = id;
-    if (moon3d) {
-      if (id && moon3d.mode() !== "base") { moon3d.descend(); setTimeout(() => moon3d.select(id), 3400); }
-      else moon3d.select(id);
-    }
-    renderBasePanel();
-    document.querySelectorAll("#mb-matrix tr[data-m]").forEach((r) => r.classList.toggle("is-on", r.dataset.m === id));
+  function xpSources() {
+    const SO = D.solids, cab = pAt(0.21, 1), moon = pAt(0.30, 0.694);
+    const inv = (id) => INV.find((r) => r.psi_id === id) || { n_tests: 0 };
+    const sp = (MB && MB.sources && MB.sources.spread && MB.sources.spread.sibal_mm_s) || [2.1, 2.6];
+    const s1 = (D.saffire1 || []).find((x) => /oncurrent/.test(x.direccion)) || { tiempo_quemado_s: 420 };
+    return [
+      { id: "wiring", label: "Wiring and cable bundles", inv: "SAME · SAME-R", psi: "PSI-101", steps: [
+        ["It starts with heat, not a flame.", "A wire overheats or arcs, and its insulation (Teflon, Kapton) smoulders long before anything burns."],
+        ["In orbit, smoke does not rise.", "Without buoyancy the smoke goes where the fans push it, and its particles grow as they age on the way."],
+        ["What NASA measured.", `SAME and SAME-R heated Teflon, Kapton, silicone, cotton lampwick and Pyrell foam on the ISS in ${inv("PSI-101").n_tests + inv("PSI-102").n_tests} runs to measure the smoke a detector has to see.`],
+        ["Catch it and stop it.", "The detector sits in the return air. The crew cuts power to the circuit, stops the fans and isolates the module."]] },
+      { id: "fabric", label: "Fabric and stowage bags", inv: "Saffire · BASS-II", psi: "PSI-99", steps: [
+        ["A soft target.", "Stowage bags, clothing and towels fill every module, and a hot surface or a spark can light their fibres."],
+        ["The flame creeps along the fabric.", "With the fans on, the flame spreads along the cloth in the direction of the airflow."],
+        ["What NASA measured.", `On Cygnus cargo ships after leaving the ISS, Saffire burned large fabric samples: flames spread at ${sp.join(" and ")} mm/s at about 22% O₂, and a 94 cm sample burned for ${s1.tiempo_quemado_s} s. No fabric has burned in orbit above ${SO.max_o2_any_solid_pct}% O₂.`],
+        ["Catch it and stop it.", "Smoke reaches the detector within the airflow. The crew stops the fans and uses the CO₂ extinguisher; at 30% O₂ nobody has measured how much faster fabric burns."]] },
+      { id: "liquid", label: "Fuel or alcohol leak", inv: "FLEX", psi: "PSI-69", steps: [
+        ["A leak becomes floating droplets.", "In orbit a spilled liquid does not pool: it breaks into droplets that drift through the cabin."],
+        ["Each droplet burns as a sphere.", "Oxygen reaches the fuel only by diffusion, so each droplet wears a round blue flame that shrinks as it burns."],
+        ["What NASA measured.", `FLEX burned ${M.n} droplets on the ISS. The validated model says a methanol droplet fire puts itself out ${pct(cab.p)} of the time in ISS air, but only ${pct(moon.p)} in the planned lunar-base air.`],
+        ["Catch it and stop it.", "Droplet flames give little smoke, so detection is hard. CO₂ helps, but FLEX tested it only at lower oxygen than the base will have."]] },
+      { id: "plastic", label: "Plastic parts and panels", inv: "BASS-II", psi: "PSI-25", steps: [
+        ["Plastics are everywhere.", "Panels, handles, covers and labels are polymers; an electrical fault next to one can light it."],
+        ["A gentle breeze keeps it alive.", "In orbit the flame hugs the plastic; the airflow from the fans brings it the oxygen it needs."],
+        ["What NASA measured.", `BASS-II found acrylic (PMMA) flames survive down to ${SO.min_o2_pct}% O₂ with a breeze of about 2 cm/s, below the ${SO.g1_upward_limit_pct}% limit of the Earth test used to approve materials. In still air the limit is ${SO.zero_flow_o2_pct}%.`],
+        ["Catch it and stop it.", `On the ISS (21% O₂) stopping the fans pushes the flame toward its limit. At the base's 30% O₂ it would keep burning even in still air.`]] },
+      { id: "gas", label: "Gas leak", inv: "ACME CFI-G", psi: "PSI-159", steps: [
+        ["A leaking gas line.", "Fuel or process gases from a leaking line or valve mix with the cabin air."],
+        ["A flame you cannot see.", "In microgravity some gas flames settle into cool flames: a few hundred degrees, with almost no light."],
+        ["What NASA measured.", `ACME CFI-G burned gas fuels in ${inv("PSI-159").n_tests} recorded tests on the ISS, confirmed cool flames in orbit and measured when each flame put itself out.`],
+        ["Catch it and stop it.", "Optical detectors can miss a cool flame, so chemical sensing (CO, hydrocarbons) complements them. Isolating the line stops the fuel."]] },
+    ];
   }
+  function renderXpPanel() {
+    const S = xpSources(), s = S.find((x) => x.id === xpState.src), el = $("#xp-src-panel");
+    document.querySelectorAll("#xp-chips button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.s === xpState.src)));
+    if (!s) { el.innerHTML = `<p class="label">Choose a source</p><p class="xp-src__b">Every glowing point is a real way fires start in spacecraft. Each one is tied to a NASA investigation that measured it in orbit.</p>`; return; }
+    const i = xpState.step, [t, b] = s.steps[i];
+    el.innerHTML = `
+      <p class="label">${esc(s.label)}<span> · ${esc(s.inv)}</span></p>
+      <div class="xp-steps">${s.steps.map((_, n) => `<button type="button" data-n="${n}" class="${n === i ? "is-on" : n < i ? "is-done" : ""}" aria-label="Step ${n + 1}"></button>`).join("")}</div>
+      <h3 class="xp-src__t"><span>${i + 1}/4</span> ${esc(t)}</h3>
+      <p class="xp-src__b">${esc(b)}</p>
+      <div class="xp-src__nav"><button type="button" class="btn btn--line btn--sm" id="xp-prev" ${i === 0 ? "disabled" : ""}>←</button><button type="button" class="btn btn--fire btn--sm" id="xp-next">${i === 3 ? "Replay ↻" : "Next →"}</button><a class="src-link" href="${(INV.find((r) => r.psi_id === s.psi) || {}).psi_url || "#"}" target="_blank" rel="noopener">${esc(s.psi)} in NASA PSI ↗</a></div>`;
+    el.querySelectorAll(".xp-steps button").forEach((bt) => bt.addEventListener("click", () => setXp(s.id, +bt.dataset.n)));
+    $("#xp-prev").addEventListener("click", () => setXp(s.id, Math.max(0, i - 1)));
+    $("#xp-next").addEventListener("click", () => setXp(s.id, i === 3 ? 0 : i + 1));
+  }
+  function setXp(id, step) {
+    xpState.src = id; xpState.step = step;
+    if (xpSrc) xpSrc.show(id, step);
+    renderXpPanel();
+  }
+  function initXP() {
+    const C = xpCards();
+    $("#xp-cards").innerHTML = C.map((c, i) => `<article class="xp-card" data-i="${i}" data-act="${c.act}"><div class="xp-card__in"><p class="eyebrow">${esc(c.e)}</p><h2>${esc(c.t)}</h2><p>${esc(c.b)}</p>${c.link ? `<a class="src-link" href="${c.link[0]}">${c.link[1]}</a>` : ""}</div></article>`).join("");
+    if (window.PhoenixMoon && window.THREE && MB) xpMoon = window.PhoenixMoon.init($("#xp-moon"), {});
+    if (!xpMoon) $("#xp-moon").classList.add("lab3d__view--off");
+    const S = xpSources();
+    $("#xp-chips").innerHTML = S.map((s) => `<button type="button" data-s="${s.id}" aria-pressed="false"><i></i>${esc(s.label)}</button>`).join("");
+    document.querySelectorAll("#xp-chips button").forEach((b) => b.addEventListener("click", () => setXp(b.dataset.s, 0)));
+    if (window.PhoenixSources && window.THREE) xpSrc = window.PhoenixSources.init($("#xp-sources"), { sources: S.map((s) => ({ id: s.id, label: s.label })), onPick: (id) => setXp(id, 0) });
+    if (!xpSrc) $("#xp-sources").classList.add("lab3d__view--off");
+    renderXpPanel();
+    if (!("IntersectionObserver" in window)) { safe(initWorlds, "worlds"); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      document.querySelectorAll(".xp-card").forEach((c) => c.classList.toggle("is-on", c === e.target));
+      if (!xpMoon) return;
+      if (e.target.dataset.act === "base" && xpMoon.mode() !== "base") xpMoon.descend();
+      if (e.target.dataset.act === "moon" && xpMoon.mode() === "base") xpMoon.showMoon();
+    }), { threshold: 0.55 });
+    document.querySelectorAll(".xp-card").forEach((c) => io.observe(c));
+    const rail = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) document.querySelectorAll("#xp-rail a").forEach((a) => a.classList.toggle("is-on", a.dataset.c === e.target.id));
+      if (e.isIntersecting && e.target.id === "xp-4" && !xpState.worlds) { xpState.worlds = true; safe(initWorlds, "worlds"); }
+    }), { rootMargin: "-45% 0px -45% 0px" });
+    document.querySelectorAll(".xp-ch").forEach((c) => rail.observe(c));
+  }
+
+  const RC = D.records;
+  const DSTATE = [["All", "All"], ["S", "Solids"], ["L", "Liquids"], ["G", "Gases"], ["M", "Smoke & dust"]];
+  const DCOL = { S: C.orange, L: C.blue, G: C.violet, M: C.teal };
+  const OUTS = [["1", "Went out on its own", C.blue], ["0", "Kept burning", C.orange], ["u", "No outcome label", C.ink4]];
+  const BANDS = [[0, 0.16, "<16%"], [0.16, 0.19, "16–19%"], [0.19, 0.22, "19–22%"], [0.22, 0.26, "22–26%"], [0.26, 0.30, "26–30%"], [0.30, 0.40, "30–40%"], [0.40, 1.01, "≥40%"]];
+  const dash = { state: "All", exp: new Set(), out: new Set(), band: null, box: null, moon: false };
+  const rec = (r) => ({ exp: RC.experiments[r[0]], st: r[1], o2: r[2], p: r[3], assumed: !!r[4], out: r[5] == null ? "u" : String(r[5]), fuel: RC.fuels[r[6]], co2: r[7] });
+  const RECS = RC ? RC.rows.map(rec) : [];
+  const MOON = RC ? { o2: RC.moon_envelope.x_o2_min, p: RC.moon_envelope.p_atm_max } : { o2: 0.28, p: 0.744 };
+  function dashPass(r, skip) {
+    if (skip !== "state" && dash.state !== "All" && r.st !== dash.state) return false;
+    if (skip !== "exp" && dash.exp.size && !dash.exp.has(r.exp)) return false;
+    if (skip !== "out" && dash.out.size && !dash.out.has(r.out)) return false;
+    if (skip !== "band" && dash.band != null) { const b = BANDS[dash.band]; if (r.o2 == null || r.o2 < b[0] || r.o2 >= b[1]) return false; }
+    if (skip !== "box" && dash.box) { const [x0, x1, y0, y1] = dash.box; if (r.o2 == null || r.p == null || 100 * r.o2 < x0 || 100 * r.o2 > x1 || r.p < y0 || r.p > y1) return false; }
+    if (skip !== "moon" && dash.moon && !(r.o2 != null && r.p != null && r.o2 >= MOON.o2 && r.p <= MOON.p)) return false;
+    return true;
+  }
+  function renderDash() {
+    if (!RC) { $("#dash").hidden = true; return; }
+    $("#dash-state").innerHTML = DSTATE.map(([k, l]) => `<button type="button" data-s="${k}" aria-pressed="${dash.state === k}">${l} <small>${k === "All" ? RECS.length.toLocaleString("en-US") : RECS.filter((r) => r.st === k).length.toLocaleString("en-US")}</small></button>`).join("");
+    document.querySelectorAll("#dash-state button").forEach((b) => b.addEventListener("click", () => { dash.state = b.dataset.s; dash.exp.clear(); renderDash(); }));
+    $("#dash-quick").innerHTML = `<button type="button" class="chip" id="dash-moon" aria-pressed="${dash.moon}">Only Moon-base air</button>`;
+    $("#dash-moon").addEventListener("click", () => { dash.moon = !dash.moon; renderDash(); });
+    const F = RECS.filter((r) => dashPass(r));
+    const pills = [];
+    if (dash.state !== "All") pills.push(["state", DSTATE.find((s) => s[0] === dash.state)[1]]);
+    dash.exp.forEach((e) => pills.push(["exp:" + e, e]));
+    dash.out.forEach((o) => pills.push(["out:" + o, OUTS.find((x) => x[0] === o)[1]]));
+    if (dash.band != null) pills.push(["band", `O₂ ${BANDS[dash.band][2]}`]);
+    if (dash.box) pills.push(["box", `O₂ ${dash.box[0].toFixed(0)}–${dash.box[1].toFixed(0)}% · ${dash.box[2].toFixed(2)}–${dash.box[3].toFixed(2)} atm`]);
+    if (dash.moon) pills.push(["moon", "Moon-base air"]);
+    $("#dash-active").innerHTML = pills.length ? `<span class="label">Filters</span>${pills.map(([k, l]) => `<button type="button" class="pill" data-k="${esc(k)}">${esc(l)} ✕</button>`).join("")}` : `<span class="note">No filter yet: showing all ${RECS.length.toLocaleString("en-US")} records.</span>`;
+    document.querySelectorAll("#dash-active .pill").forEach((b) => b.addEventListener("click", () => {
+      const k = b.dataset.k;
+      if (k === "state") dash.state = "All"; else if (k.startsWith("exp:")) dash.exp.delete(k.slice(4)); else if (k.startsWith("out:")) dash.out.delete(k.slice(4));
+      else if (k === "band") dash.band = null; else if (k === "box") dash.box = null; else if (k === "moon") dash.moon = false;
+      renderDash();
+    }));
+    const lab = F.filter((r) => r.out !== "u"), outN = lab.filter((r) => r.out === "1").length;
+    const meas = F.filter((r) => r.o2 != null && r.p != null && !r.assumed);
+    const moonN = F.filter((r) => r.o2 != null && r.p != null && r.o2 >= MOON.o2 && r.p <= MOON.p).length;
+    const o2s = F.filter((r) => r.o2 != null).map((r) => r.o2).sort((a, b) => a - b);
+    const kp = [
+      [F.length.toLocaleString("en-US"), "records match"],
+      [new Set(F.map((r) => r.exp)).size, "investigations"],
+      [lab.length ? pct(outN / lab.length) : "—", `went out on its own (${outN} of ${lab.length} labelled)`],
+      [o2s.length ? `${(100 * o2s[0]).toFixed(0)}–${(100 * o2s[o2s.length - 1]).toFixed(0)}%` : "—", "oxygen range covered"],
+      [moonN, "inside the Moon-base envelope"],
+      [meas.length.toLocaleString("en-US"), "with measured O₂ and pressure"],
+    ];
+    $("#dash-kpis").innerHTML = kp.map(([v, l]) => `<div><dd>${v}</dd><dt>${l}</dt></div>`).join("");
+    if (!hasPlotly) return;
+    const bandBase = RECS.filter((r) => dashPass(r, "band"));
+    const bc = BANDS.map((b) => bandBase.filter((r) => r.o2 != null && r.o2 >= b[0] && r.o2 < b[1]));
+    const el1 = plot("dash-o2", [{
+      type: "bar", x: BANDS.map((b) => b[2]), y: bc.map((x) => x.length), customdata: BANDS.map((_, i) => i),
+      marker: { color: BANDS.map((_, i) => dash.band == null || dash.band === i ? (i >= 5 ? C.orange : C.blue) : "rgba(148,163,184,.25)") },
+      hovertemplate: "%{x} O₂: %{y} records<extra></extra>", text: bc.map((x) => x.length), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 11 },
+    }], layout({ margin: { l: 40, r: 10, t: 18, b: 36 }, yaxis: { title: { text: "Records" } }, bargap: 0.25 }));
+    const outBase = RECS.filter((r) => dashPass(r, "out"));
+    const el2 = plot("dash-out", [{
+      type: "bar", orientation: "h", y: OUTS.map((o) => o[1]), x: OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), customdata: OUTS.map((o) => o[0]),
+      marker: { color: OUTS.map((o) => !dash.out.size || dash.out.has(o[0]) ? o[2] : "rgba(148,163,184,.25)") },
+      text: OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 11 },
+      hovertemplate: "%{y}: %{x} records<extra></extra>",
+    }], layout({ margin: { l: 150, r: 40, t: 10, b: 30 }, yaxis: { autorange: "reversed" }, bargap: 0.35 }));
+    const expBase = RECS.filter((r) => dashPass(r, "exp"));
+    const ex = [...new Set(expBase.map((r) => r.exp))].map((e) => ({ e, n: expBase.filter((r) => r.exp === e).length, st: expBase.find((r) => r.exp === e).st })).sort((a, b) => b.n - a.n);
+    const el3 = plot("dash-exp", [{
+      type: "bar", orientation: "h", y: ex.map((x) => x.e), x: ex.map((x) => x.n), customdata: ex.map((x) => x.e),
+      marker: { color: ex.map((x) => !dash.exp.size || dash.exp.has(x.e) ? DCOL[x.st] : "rgba(148,163,184,.25)") },
+      text: ex.map((x) => x.n), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 10.5 },
+      hovertemplate: "%{y} (" + "%{customdata}" + "): %{x} records<extra></extra>",
+    }], layout({ margin: { l: 130, r: 40, t: 6, b: 24 }, yaxis: { autorange: "reversed", tickfont: { size: 10.5 } }, bargap: 0.3, height: Math.max(150, 24 * ex.length + 44) }));
+    const mapBase = RECS.filter((r) => dashPass(r, "box") && r.o2 != null && r.p != null);
+    const tr = [];
+    const moonH = D.habitats.find((x) => x.id === "moon_base");
+    tr.push({ x: [30, 100, 100, 30, 30], y: [0.2, 0.2, moonH.p_atm, moonH.p_atm, 0.2], type: "scatter", mode: "lines", fill: "toself", fillcolor: "rgba(242,96,15,0.10)", line: { color: "rgba(251,146,60,0.6)", width: 1 }, hoverinfo: "skip" });
+    ["S", "L", "G", "M"].forEach((k) => {
+      const pts = mapBase.filter((r) => r.st === k);
+      if (!pts.length) return;
+      tr.push({ type: "scattergl", mode: "markers", x: pts.map((r) => 100 * r.o2), y: pts.map((r) => r.p), name: DSTATE.find((s) => s[0] === k)[1],
+        text: pts.map((r) => `${r.exp} · ${r.fuel}`),
+        marker: { size: 6, color: pts.map((r) => r.assumed ? "rgba(0,0,0,0)" : DCOL[k]), line: { color: DCOL[k], width: 1 }, opacity: 0.8 },
+        hovertemplate: "%{text}<br>O₂ %{x:.1f}% · %{y:.2f} atm<extra></extra>" });
+    });
+    tr.push({ type: "scatter", mode: "markers+text", x: HUI.map((h) => 100 * h.x_o2), y: HUI.map((h) => h.p_atm), text: HUI.map((h) => h.name), textposition: "top right", textfont: { color: C.ink, size: 10.5 },
+      marker: { symbol: "cross-thin-open", size: 14, color: C.ink, line: { color: C.ink, width: 2 } }, hovertemplate: "%{text}<extra></extra>" });
+    const el4 = plot("dash-map", tr, layout({ dragmode: "select", margin: { l: 56, r: 16, t: 10, b: 46 }, xaxis: { title: { text: "Oxygen, % of the air" }, range: [8, 90] }, yaxis: { title: { text: "Pressure, atm" }, type: "log", range: [Math.log10(0.3), Math.log10(4)] },
+      shapes: dash.box ? [{ type: "rect", x0: dash.box[0], x1: dash.box[1], y0: dash.box[2], y1: dash.box[3], line: { color: C.amber, width: 1.5, dash: "dot" }, fillcolor: "rgba(251,191,36,.06)" }] : [] }));
+    const wire = (el, fn) => { if (!el || !el.on) return; el.removeAllListeners && el.removeAllListeners("plotly_click"); el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p) fn(p); }); };
+    wire(el1, (p) => { dash.band = dash.band === p.customdata ? null : p.customdata; renderDash(); });
+    wire(el2, (p) => { const k = p.customdata; dash.out.has(k) ? dash.out.delete(k) : dash.out.add(k); renderDash(); });
+    wire(el3, (p) => { const k = p.customdata; dash.exp.has(k) ? dash.exp.delete(k) : dash.exp.add(k); renderDash(); });
+    if (el4 && el4.on) {
+      el4.removeAllListeners && el4.removeAllListeners("plotly_selected");
+      el4.on("plotly_selected", (ev) => {
+        if (!ev || !ev.range) return;
+        const [x0, x1] = ev.range.x, [ly0, ly1] = ev.range.y;
+        dash.box = [x0, x1, Math.pow(10, Math.min(ly0, ly1)), Math.pow(10, Math.max(ly0, ly1))];
+        renderDash();
+      });
+    }
+    $("#dash-tbl-cap").textContent = `${F.length.toLocaleString("en-US")} records · first ${Math.min(12, F.length)} shown`;
+    $("#dash-table").innerHTML = `<thead><tr><th>Investigation</th><th>Fuel or material</th><th class="num">O₂</th><th class="num">atm</th><th>Outcome</th></tr></thead><tbody>${F.slice(0, 12).map((r) => `<tr><td>${esc(r.exp)}</td><td>${esc(r.fuel)}</td><td class="num">${r.o2 == null ? "—" : (100 * r.o2).toFixed(1) + "%"}${r.assumed ? "*" : ""}</td><td class="num">${r.p == null ? "—" : r.p.toFixed(2)}</td><td>${esc(OUTS.find((o) => o[0] === r.out)[1])}</td></tr>`).join("")}</tbody>`;
+    $("#dash-csv").onclick = () => {
+      const rows = [["investigation", "psi_id", "state", "fuel_or_material", "x_o2", "p_atm", "x_co2", "conditions_assumed", "went_out_on_its_own"]].concat(F.map((r) => [r.exp, RC.psi[r.exp], r.st, r.fuel, r.o2 ?? "", r.p ?? "", r.co2 ?? "", r.assumed ? 1 : 0, r.out === "u" ? "" : r.out]));
+      const blob = new Blob([rows.map((r) => r.map((v) => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v).join(",")).join("\n")], { type: "text/csv" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "skylab_phoenix_filtered_records.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
+  }
+  $("#dash-reset") && $("#dash-reset").addEventListener("click", () => { dash.state = "All"; dash.exp.clear(); dash.out.clear(); dash.band = null; dash.box = null; dash.moon = false; renderDash(); });
+
   function renderBaseReport() {
     $("#mb-legend").innerHTML = Object.keys(TAG).map((t) => `<span>${tagHtml(t)} ${esc(TAG[t][1])}</span>`).join("");
     $("#mb-matrix").innerHTML = `<thead><tr><th>Module</th>${LAYERS.map(([, n]) => `<th>${n}</th>`).join("")}<th>Lunar gravity</th></tr></thead><tbody>${MB.modules.map((m) => `
       <tr data-m="${m.id}"><th scope="row"><b>${esc(m.name)}</b><small>${o2pct(m.x_o2)} O₂ · ${m.psi} psi · ${m.volume_m3} m³</small></th>${LAYERS.map(([k]) => `<td>${tagHtml(m.tests[k].status)}<span>${esc(m.tests[k].answer)}</span></td>`).join("")}<td>${tagHtml("gap")}<span>No test at 0.17 g</span></td></tr>`).join("")}</tbody>`;
-    document.querySelectorAll("#mb-matrix tr[data-m]").forEach((r) => r.addEventListener("click", () => { selectModule(r.dataset.m); document.getElementById("moon3d").scrollIntoView({ behavior: "smooth", block: "start" }); }));
+    document.querySelectorAll("#mb-matrix tr[data-m]").forEach((r) => r.addEventListener("click", () => {
+      const next = r.nextElementSibling, open = next && next.classList.contains("mb-detail");
+      document.querySelectorAll("#mb-matrix .mb-detail").forEach((d) => d.remove());
+      document.querySelectorAll("#mb-matrix tr[data-m]").forEach((x) => x.classList.remove("is-on"));
+      if (open) return;
+      const m = MB.modules.find((x) => x.id === r.dataset.m);
+      r.classList.add("is-on");
+      r.insertAdjacentHTML("afterend", `<tr class="mb-detail"><td colspan="6"><div class="mb-detail__g">${LAYERS.map(([k, n]) => `<div><p class="label">${n}</p><ul class="mb-facts">${m.tests[k].facts.map((f) => `<li><span>${esc(f.label)}</span><b>${esc(f.value)}</b>${tagHtml(f.tag)}<small>${esc(f.source)}</small></li>`).join("")}</ul></div>`).join("")}</div>${SI && SI.module && SI.module[m.id] ? mbBrief(SI.module[m.id], "mbm-" + m.id) : ""}</td></tr>`);
+      wireCites(r.nextElementSibling);
+    }));
+    if (SI && SI.base && SI.base.report) { $("#mb-brief").innerHTML = mbBrief(SI.base.report, "mbr"); wireCites($("#mb-brief")); } else $("#mb-brief").hidden = true;
     $("#mb-flights").innerHTML = MB.report.flight_tests_needed.map((f, i) => `<article class="mb-flight"><span class="mb-flight__n">${String(i + 1).padStart(2, "0")}</span><b>${esc(f.what)}</b><p>${esc(f.why)}</p></article>`).join("");
     const s = MB.site;
     $("#mb-sources").innerHTML = [
@@ -1635,46 +1796,16 @@
       ["Volumes", MB.modules.map((m) => `${m.name}: ${m.volume_ref}`).join(" · "), ""],
     ].map(([k, t, u]) => `<li><b>${k}</b><span>${esc(t)}</span>${u ? `<a href="${u}" ${u.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${u.startsWith("http") ? "Open ↗" : "See"}</a>` : ""}</li>`).join("");
   }
-  function renderBaseTime(t) {
-    const d = t.date;
-    const up = t.sun[1] > 0;
-    $("#mb-time").innerHTML = `
-      <div class="mb-time__row"><span class="mono-sm">${d.toISOString().slice(0, 16).replace("T", " ")} UTC</span>
-        <span class="mb-sun ${up ? "up" : ""}">Sun ${t.sun[1] >= 0 ? "+" : ""}${t.sun[1].toFixed(2)}° · az ${t.sun[0].toFixed(0)}°</span>
-        <span class="mb-earth">Earth ${t.earth[1] >= 0 ? "+" : ""}${t.earth[1].toFixed(1)}°</span></div>
-      <input type="range" id="mb-slider" min="0" max="364" step="1" value="${Math.round(mbState.off / 86400000)}" aria-label="Days from today">
-      <div class="mb-time__l"><span>Today</span><span>Drag through the next year · JPL Horizons</span><span>+1 year</span></div>`;
-    $("#mb-slider").addEventListener("input", (e) => { mbState.off = +e.target.value * 86400000; if (moon3d) moon3d.setTimeOffset(mbState.off); });
-  }
-  let timeT = 0;
-  function initBase() {
-    if (!MB) return;
-    renderBasePanel(); renderBaseReport();
-    document.querySelectorAll("#mb-steps button").forEach((b) => b.addEventListener("click", () => {
-      if (!moon3d) return;
-      if (b.dataset.s === "base") moon3d.descend(); else { mbState.sel = null; moon3d.showMoon(); renderBasePanel(); }
-    }));
-    if (!window.PhoenixMoon || !window.THREE) { $("#moon3d").classList.add("lab3d__view--off"); return; }
-    moon3d = window.PhoenixMoon.init($("#moon3d"), {
-      onMode: (m) => { document.querySelectorAll("#mb-steps button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.s === m))); $("#mb-hint").textContent = m === "moon" ? "Drag to turn · click the orange marker to land" : "Drag to turn · scroll to zoom · click a module to cut it open"; },
-      onTime: (t) => { const now = performance.now(); if (now - timeT > 900 || !$("#mb-slider") || document.activeElement !== $("#mb-slider")) { timeT = now; if (document.activeElement !== $("#mb-slider")) renderBaseTime(t); else { const r = $("#mb-time .mb-time__row"); if (r) r.innerHTML = `<span class="mono-sm">${t.date.toISOString().slice(0, 16).replace("T", " ")} UTC</span><span class="mb-sun ${t.sun[1] > 0 ? "up" : ""}">Sun ${t.sun[1] >= 0 ? "+" : ""}${t.sun[1].toFixed(2)}° · az ${t.sun[0].toFixed(0)}°</span><span class="mb-earth">Earth ${t.earth[1] >= 0 ? "+" : ""}${t.earth[1].toFixed(1)}°</span>`; } } },
-      start: QS.get("land") ? "base" : null,
-    });
-    if (!moon3d) { $("#moon3d").classList.add("lab3d__view--off"); return; }
-    moon3d.onSelect((id) => { if (id !== mbState.sel) { mbState.sel = id; renderBasePanel(); } });
-  }
-
-  const VIEWS = ["home", "base", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
-  const ALIAS = { scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
+  const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
+  const ALIAS = { method: "data", base: "learn", scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
     home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(initGlobe, "globe"); },
-    base: () => { safe(initBase, "moon base"); },
-    learn: () => { safe(initLearn, "learn"); safe(initLearnMods, "learn modules"); },
+    learn: () => { safe(initLearn, "learn"); safe(initXP, "learn experience"); },
     flames: () => { safe(renderStage, "stage"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
-    findings: () => { safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
+    findings: () => { safe(renderDash, "dashboard"); if (MB) safe(renderBaseReport, "base audit"); safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
     ranking: () => { safe(renderSurvival, "survival"); safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
     ask: () => { safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing"); },
@@ -1706,10 +1837,9 @@
     document.body.dataset.view = v;
     if (globe) { if (v === "home") globe.resume(); else globe.pause(); }
     if (lab3d) { if (v === "lab") lab3d.resume(); else lab3d.pause(); }
-    if (learn3d) { if (v === "learn" && lmState.m === "1") learn3d.resume(); else learn3d.pause(); }
-    if (moon3d) { if (v === "base") moon3d.resume(); else moon3d.pause(); }
-    worlds.forEach((w) => w && (v === "learn" && lmState.m === "2" ? w.resume() : w.pause()));
-    if (cabin3d) { if (v === "learn" && lmState.m === "3") cabin3d.resume(); else cabin3d.pause(); }
+    if (learn3d) { if (v === "learn") learn3d.resume(); else learn3d.pause(); }
+    [xpMoon, xpSrc].forEach((x) => x && (v === "learn" ? x.resume() : x.pause()));
+    worlds.forEach((w) => w && (v === "learn" ? w.resume() : w.pause()));
     const view = document.querySelector(`.view[data-view="${v}"]`);
     view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
     requestAnimationFrame(() => {
@@ -1750,7 +1880,6 @@
   $("#find-more").addEventListener("click", () => { findAll = !findAll; renderFindings(); });
   $("#inv-more").addEventListener("click", () => { invState.all = !invState.all; renderInvGallery(invState.rows || filteredInv()); });
   $("#arch-more").addEventListener("click", () => { archState.all = !archState.all; renderArchive(); });
-  document.querySelectorAll("#surv-view button").forEach((b) => b.addEventListener("click", () => { survState.view = b.dataset.v; renderSurvival(); }));
   $("#surv-more").addEventListener("click", () => { survState.all = !survState.all; renderSurvival(); });
   $("#share-btn").addEventListener("click", (e) => copyText(shareUrl(), e.currentTarget));
   $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
