@@ -248,6 +248,7 @@ def index():
         if not r.get("ok") or (r.get("psi"), r["test"]) in have:
             continue
         c = {k: r.get(k) for k in ("test", "f", "material", "family", "o2", "air", "x", "state", "dir", "psi")}
+        c["material"] = c["material"][:1].upper() + c["material"][1:]
         c["co"] = None if r.get("co") is None else int(round(r["co"]))
         if r.get("m"):
             c["m"] = r["m"]

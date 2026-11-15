@@ -1,0 +1,26 @@
+{
+ "id": "cfig-21174f4",
+ "source": "PSI-159_Raw Data_vlc-record-2021-06-23-21h14m46s-udp____21174F4.ts",
+ "test": "21174F4",
+ "material": "30% butane from a spherical burner",
+ "family": "Spherical gas flame",
+ "state": "Gas",
+ "psi": "PSI-159",
+ "o2": 38.4,
+ "m": "2.0 atm \u00b7 ACME CFI-G \u00b7 still burning when the fuel was cut",
+ "out": 0,
+ "burn_s": 35.0,
+ "ok": true,
+ "x": 2.5,
+ "dir": "cfig",
+ "f": "cfig-21174f4",
+ "t0": 73.63333333333333,
+ "t1": 98.531767,
+ "crop": [
+  614,
+  346,
+  24,
+  65
+ ],
+ "peak_area": 0.0552
+}

@@ -477,3 +477,40 @@ UI_ES.update({
     "Does airflow direction matter?": "¿Importa la dirección del flujo de aire?",
     "How does smoke change in microgravity?": "¿Cómo cambia el humo en microgravedad?",
 })
+
+UI_ES.update({
+    "#% butane from a spherical burner": "#% de butano en un quemador esférico",
+    "#% propane from a spherical burner": "#% de propano en un quemador esférico",
+    "#% ethane from a spherical burner": "#% de etano en un quemador esférico",
+    "Ethane (inverse flame)": "Etano (llama inversa)",
+    "Butane (inverse flame)": "Butano (llama inversa)",
+    "Propane (inverse flame)": "Propano (llama inversa)",
+    "# atm · ACME CFI-G · went out on its own": "# atm · ACME CFI-G · se apagó sola",
+    "# atm · ACME CFI-G · still burning when the fuel was cut": "# atm · ACME CFI-G · seguía ardiendo cuando se cortó el combustible",
+    "# atm · ACME CFI-G · flashed and went out": "# atm · ACME CFI-G · destelló y se apagó",
+    "Japan Wax candle": "Vela de cera japonesa",
+    "⟨H⟩ (NASA note)": "⟨H⟩ (nota de la NASA)",
+})
+
+UI_ES.update({
+    "Acrylic rods · PSI-# · test": "Barras de acrílico · PSI-# · prueba",
+    "Acrylic rods · test": "Barras de acrílico · prueba",
+    "Cotton-fiberglass fabric · PSI-# · test": "Tela de algodón y fibra de vidrio · PSI-# · prueba",
+    "Cotton-fiberglass fabric · test": "Tela de algodón y fibra de vidrio · prueba",
+    "Thin films · PSI-# · test": "Películas delgadas · PSI-# · prueba",
+    "Thin films · test": "Películas delgadas · prueba",
+    "Slabs · PSI-# · test": "Placas · PSI-# · prueba",
+    "Slabs · test": "Placas · prueba",
+    "Spheres · PSI-# · test": "Esferas · PSI-# · prueba",
+    "Spheres · test": "Esferas · prueba",
+    "Nomex · PSI-# · test": "Nomex · PSI-# · prueba",
+    "Nomex · test": "Nomex · prueba",
+    "Fuel droplets · PSI-# · test": "Gotas de combustible · PSI-# · prueba",
+    "Fuel droplets · test": "Gotas de combustible · prueba",
+    "Gas spheres · PSI-# · test": "Esferas de gas · PSI-# · prueba",
+    "Gas spheres · test": "Esferas de gas · prueba",
+    "Gas jets · PSI-# · test": "Chorros de gas · PSI-# · prueba",
+    "Gas jets · test": "Chorros de gas · prueba",
+    "Wax candle · PSI-# · test": "Vela de cera · PSI-# · prueba",
+    "Wax candle · test": "Vela de cera · prueba",
+})

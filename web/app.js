@@ -1499,7 +1499,7 @@
     const path = (c) => `assets/video/${c.dir ? c.dir + "/" : ""}${c.f}`;
     const stTag = { Solid: "Solid", Liquid: "Liquid", Gas: "Gas" };
     $("#arch").innerHTML = shown.map((c) => `<figure class="ac ac--${c.state.toLowerCase()}"><div class="ac__v"><video data-src="${path(c)}.mp4" poster="${path(c)}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span><span class="ac__st">${stTag[c.state]}</span></div>
-      <figcaption><span class="ac__o2">${c.o2 == null ? "—" : `${c.approx ? "≈" : ""}${c.o2}`}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · ${c.psi ? `${c.psi} · ` : ""}test ${esc(c.test)}</span><span class="ac__m">${c.m ? esc(c.m) : `<span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}`}</span></figcaption></figure>`).join("");
+      <figcaption><span class="ac__o2">${c.o2 == null ? "—" : `${c.approx ? "≈" : ""}${c.o2}`}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm"><span>${esc(FAM_LABEL[c.family] || c.family)} · ${c.psi ? `${c.psi} · ` : ""}test</span> <span data-no-i18n>${esc(c.test)}</span></span><span class="ac__m">${c.m ? esc(c.m) : `<span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}`}</span></figcaption></figure>`).join("");
     $("#arch-more").hidden = list.length <= PAGE;
     $("#arch-more").textContent = archState.all ? "Show fewer" : `Show all ${list.length}`;
     lazyVideos("#arch video");
