@@ -474,6 +474,39 @@ def table_checks():
         if hit.any():
             QC.add("PSI-26", "BASS", f"{int(hit.sum())} rows", "Fuel Sample Material", wrong, right, "Spelling error in a material label")
 
+
+    s1 = _csv("PSI-98", "SAFFIRE-1")
+    s1 = s1[s1.iloc[:, 0].astype(str).str.match(r"^S\d")]
+    for k in s1.index:
+        smp = str(s1.loc[k, s1.columns[0]]).strip()
+        QC.add("PSI-98", "Saffire-I", smp, "Sample Thickness (cm)", f"{s1.loc[k, 'Sample Thickness (cm)']} cm", "0.37 mm",
+               "Unit error: SIBAL fabric is 0.37 mm thick (Saffire-II lists the same fabric as 0.37 mm); 0.37 cm would be ten times thicker")
+        if _num(pd.Series([s1.loc[k, "Sample Length (cm)"]]))[0] < _num(pd.Series([s1.loc[k, "Sample Width (cm)"]]))[0]:
+            QC.add("PSI-98", "Saffire-I", smp, "Sample Length / Width (cm)", f"{s1.loc[k, 'Sample Length (cm)']} / {s1.loc[k, 'Sample Width (cm)']}",
+                   f"{s1.loc[k, 'Sample Width (cm)']} / {s1.loc[k, 'Sample Length (cm)']}", "Length and width swapped: the Saffire sample is 94 cm long and 40.6 cm wide (as in the Saffire-III table)")
+    s3 = _csv("PSI-100", "SAFFIRE-3")
+    for k in s3.index:
+        v = str(s3.loc[k, "Sample Thickness"]).strip()
+        if v.endswith("cm"):
+            QC.add("PSI-100", "Saffire-III", str(s3.loc[k, s3.columns[0]]).strip(), "Sample Thickness", v, ("0" + v if v.startswith(".") else v).replace("cm", "mm"),
+                   "Unit error: a SIBAL fabric sample a third of a centimeter thick is ten times the fabric's thickness; read as mm")
+    s2 = _csv("PSI-99", "SAFFIRE-2")
+    s2 = s2[s2.iloc[:, 0].astype(str).str.match(r"^2-\d")]
+    for k in s2.index:
+        smp, c1, c2 = str(s2.loc[k, s2.columns[0]]).strip(), str(s2.loc[k, "Camera 1"]).strip(), str(s2.loc[k, "Camera 2"]).strip()
+        n = smp.split("-")[1]
+        if c2 not in ("nan", f"S{n}C2"):
+            QC.add("PSI-99", "Saffire-II", smp, "Camera 2", c2, f"S{n}C2", "Camera file name does not match the sample (pattern S<n>C2)")
+    blank = s2["Material"].isna()
+    if blank.any():
+        QC.add("PSI-99", "Saffire-II", ", ".join(s2.loc[blank, s2.columns[0]].astype(str)), "Material", "blank (merged cell)", "filled from the row above",
+               "Merged spreadsheet cell exported as an empty value")
+    raw_head = (RAW / "PSI-99" / "PSI-99_Experimental table_SAFFIRE-2.csv").read_bytes().split(b"\n")[0].decode("latin-1")
+    if "?-g" in raw_head:
+        QC.add("PSI-99", "Saffire-II", "header", "?-g Burn Length, ?-g Spread Length", "?-g", "μ-g", "Character lost in export: the Greek letter μ (micro-gravity) became '?'")
+    if "Samle" in raw_head:
+        QC.add("PSI-99", "Saffire-II", "header", "Samle Thickness", "Samle", "Sample", "Spelling error in a column name")
+
     b2 = _csv("PSI-25", "BASS-II")
     b2 = b2[b2["Test #"].notna()]
     d2 = pd.to_datetime(b2["Date"], format="%m/%d/%Y", errors="coerce")

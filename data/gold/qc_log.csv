@@ -148,6 +148,17 @@ PSI-26,BASS,"test 114, sample 25",Fuel Sample Material,pmma sphere vs PMMA 2 cm,
 PSI-26,BASS,26 rows,Fuel Sample Material,PMMA 1 cm|pmma 1 cm / PMMA 2 cm|pmma 2 cm / PMMA slab|pmma slab,one spelling,Same material written with different capitalization or spacing
 PSI-26,BASS,2 rows,Fuel Sample Material,parrafin,paraffin,Spelling error in a material label
 PSI-26,BASS,1 rows,Fuel Sample Material,oppsed,opposed,Spelling error in a material label
+PSI-98,Saffire-I,S1,Sample Thickness (cm),0.37 cm,0.37 mm,Unit error: SIBAL fabric is 0.37 mm thick (Saffire-II lists the same fabric as 0.37 mm); 0.37 cm would be ten times thicker
+PSI-98,Saffire-I,S1,Sample Length / Width (cm),40.6 / 94.0,94.0 / 40.6,Length and width swapped: the Saffire sample is 94 cm long and 40.6 cm wide (as in the Saffire-III table)
+PSI-98,Saffire-I,S2,Sample Thickness (cm),0.37 cm,0.37 mm,Unit error: SIBAL fabric is 0.37 mm thick (Saffire-II lists the same fabric as 0.37 mm); 0.37 cm would be ten times thicker
+PSI-98,Saffire-I,S2,Sample Length / Width (cm),40.6 / 94.0,94.0 / 40.6,Length and width swapped: the Saffire sample is 94 cm long and 40.6 cm wide (as in the Saffire-III table)
+PSI-100,Saffire-III,S1,Sample Thickness,.33 cm,0.33 mm,Unit error: a SIBAL fabric sample a third of a centimeter thick is ten times the fabric's thickness; read as mm
+PSI-100,Saffire-III,S2,Sample Thickness,.33 cm,0.33 mm,Unit error: a SIBAL fabric sample a third of a centimeter thick is ten times the fabric's thickness; read as mm
+PSI-99,Saffire-II,2-4,Camera 2,S4C1,S4C2,Camera file name does not match the sample (pattern S<n>C2)
+PSI-99,Saffire-II,2-6,Camera 2,S56C2,S6C2,Camera file name does not match the sample (pattern S<n>C2)
+PSI-99,Saffire-II,"2-6, 2-9",Material,blank (merged cell),filled from the row above,Merged spreadsheet cell exported as an empty value
+PSI-99,Saffire-II,header,"?-g Burn Length, ?-g Spread Length",?-g,μ-g,Character lost in export: the Greek letter μ (micro-gravity) became '?'
+PSI-99,Saffire-II,header,Samle Thickness,Samle,Sample,Spelling error in a column name
 PSI-25,BASS-II,O10,GMT,213,203,"GMT day disagrees with the date 7/22/2014 (day 203); NASA's raw video for this test is 'BASS_GMT203_SAMPLE_210_TEST_O10', so the GMT column is the typo (also in the test matrix)"
 PSI-25,BASS-II,"O4, O16",Fuel Sample Material,"3/8""clear rod",normalized,Material label written inconsistently (missing space after the inch mark)
 PSI-25,BASS-II,"P3b, P15, P21a",Fuel Sample Material,1/4 black rod | 1/4 clear rod,normalized,Material label written inconsistently (missing inch mark)

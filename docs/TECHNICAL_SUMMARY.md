@@ -13,7 +13,7 @@ Artemis surface habitats and pressurized rovers are expected to run at **30% O�
 - **Source:** PSI public API, 24 Combustion Science investigations (19 flight, 5 ground), CC0.
 - **Silver layer:** one parser per experiment maps every table to a common schema in SI units (O₂ mole fraction, pressure in atm, flow in cm/s, droplet diameter in mm), with flags for assumed cabin air and for O₂ measured at the burner rather than in the room.
 - **Result:** 1,955 test records, 688 with a labeled outcome.
-- **Quality:** 180 corrections and flags, each logged with the original value and the rule applied (`data/gold/qc_log.csv`): spreadsheet auto-fill errors (CH4 → CH5, CH6…), “3400%” instead of 34%, an impossible 0 mmHg pressure, mole fractions that do not sum to 1, duplicate rows, inconsistent labels.
+- **Quality:** 191 corrections and flags, each logged with the original value and the rule applied (`data/gold/qc_log.csv`): spreadsheet auto-fill errors (CH4 → CH5, CH6…), “3400%” instead of 34%, an impossible 0 mmHg pressure, mole fractions that do not sum to 1, duplicate rows, inconsistent labels.
 
 ## 3. Summaries, ranking and similarity
 

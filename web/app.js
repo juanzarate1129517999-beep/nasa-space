@@ -115,7 +115,7 @@
     $("#hero-lead").innerHTML = `NASA's archive holds ${S.ambient.toLocaleString("en-US")} flight fires with a known atmosphere. Only <b>${S.moon_envelope}</b> came near that air, and no solid material has burned in orbit above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
   }
   function renderHabitats() {
-    $("#habitats").innerHTML = D.habitats.map((hb) => {
+    $("#habitats").innerHTML = HUI.map((hb) => {
       const x = featVec({ fuel: "Methanol", o2: hb.x_o2, p: hb.p_atm, co2: 0, he: 0, d0: M.d0_median });
       const st = dataStatus(x);
       const r = { ...predict(x), ood: st.s === "outside" };
@@ -232,6 +232,7 @@
 
   const invState = { hab: "moon_base", layer: "All", q: "", sel: null };
   const INV = D.investigations;
+  const HUI = D.habitats.filter((h) => h.id !== "suit");
   const habName = (id) => D.habitats.find((x) => x.id === id).name;
   const WPRESET = [["Default", [0.5, 0.2, 0.3]], ["Atmosphere first", [0.7, 0.1, 0.2]], ["Safety relevance first", [0.3, 0.1, 0.6]], ["Data volume first", [0.3, 0.5, 0.2]]];
   const wt = { w: [0.5, 0.2, 0.3], vol: "outcomes" };
@@ -281,7 +282,7 @@
   }
   function rerank() { renderCriteria(); renderInvList(); safe(renderCompare, "compare"); }
   function renderInvControls() {
-    $("#inv-habitat").innerHTML = D.habitats.map((x) => `<button aria-pressed="${x.id === invState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
+    $("#inv-habitat").innerHTML = HUI.map((x) => `<button aria-pressed="${x.id === invState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
     $("#inv-layer").innerHTML = ["All", "Prevention", "Detection", "Suppression"].map((l) => `<button aria-pressed="${l === invState.layer}" data-l="${l}">${l}</button>`).join("");
     document.querySelectorAll("#inv-habitat button").forEach((b) => b.addEventListener("click", () => { invState.hab = b.dataset.h; invState.sel = null; computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); safe(renderCompare, "compare"); }));
     document.querySelectorAll("#inv-layer button").forEach((b) => b.addEventListener("click", () => { invState.layer = b.dataset.l; renderInvControls(); renderInvList(); }));
@@ -435,7 +436,7 @@
   ];
   const sc = { fuel: "Methanol", o2: 0.30, p: 0.694, co2: 0, he: 0, d0: M.d0_median, preset: "moon_base" };
   function renderScenarioControls() {
-    $("#presets").innerHTML = D.habitats.map((x) => `<button data-h="${x.id}" aria-pressed="${sc.preset === x.id}">${esc(x.name)}<span>${o2pct(x.x_o2)} · ${num(x.p_atm * ATM_PSI, 1)} psi</span></button>`).join("");
+    $("#presets").innerHTML = HUI.map((x) => `<button data-h="${x.id}" aria-pressed="${sc.preset === x.id}">${esc(x.name)}<span>${o2pct(x.x_o2)} · ${num(x.p_atm * ATM_PSI, 1)} psi</span></button>`).join("");
     document.querySelectorAll("#presets button").forEach((b) => b.addEventListener("click", () => setPreset(b.dataset.h)));
     $("#fuel-seg").innerHTML = ["Methanol", "Heptane"].map((f) => `<button aria-pressed="${sc.fuel === f}" data-f="${f}">${f}</button>`).join("");
     document.querySelectorAll("#fuel-seg button").forEach((b) => b.addEventListener("click", () => { sc.fuel = b.dataset.f; renderScenarioControls(); updateScenario(true); }));
@@ -962,7 +963,7 @@
   }
   function applyUrlScenario() {
     const g = (k, lo, hi) => { const v = parseFloat(QS.get(k)); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null; };
-    if (QS.get("hab") && D.habitats.some((x) => x.id === QS.get("hab"))) setPreset(QS.get("hab"));
+    if (QS.get("hab") && HUI.some((x) => x.id === QS.get("hab"))) setPreset(QS.get("hab"));
     if (["Methanol", "Heptane"].includes(QS.get("fuel"))) sc.fuel = QS.get("fuel");
     const vals = { o2: g("o2", 0.10, 1), p: g("p", 0.25, 3.2), co2: g("co2", 0, 0.7), he: g("he", 0, 0.45), d0: g("d0", 1.1, 4.7) };
     let changed = false;
@@ -1007,7 +1008,7 @@
   }
   function renderBrief() {
     if (!SI) { $("#brief").innerHTML = '<p class="note">SI data not found — run python -m pipeline.run.</p>'; return; }
-    $("#brief-hab").innerHTML = D.habitats.map((x) => `<button aria-pressed="${x.id === briefState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
+    $("#brief-hab").innerHTML = HUI.map((x) => `<button aria-pressed="${x.id === briefState.hab}" data-h="${x.id}">${esc(x.name)}</button>`).join("");
     document.querySelectorAll("#brief-hab button").forEach((b) => b.addEventListener("click", () => { briefState.hab = b.dataset.h; renderBrief(); }));
     const b = SI.habitat[briefState.hab];
     const hb = D.habitats.find((x) => x.id === briefState.hab);
@@ -1372,14 +1373,14 @@
   const survState = { kind: "All", hab: "moon_base", all: false, view: "chart" };
   function renderSurvival() {
     const SV = D.survival || [];
-    const kinds = ["All", "Droplet", "Gas flame", "Inverse gas flame"];
+    const kinds = ["All", "Droplet", "Gas flame"];
     $("#surv-kind").innerHTML = kinds.map((k) => `<button type="button" data-k="${k}" aria-pressed="${k === survState.kind}">${k === "All" ? "All flames" : k === "Droplet" ? "Droplets" : k === "Gas flame" ? "Gas flames" : "Inverse flames"}</button>`).join("");
     document.querySelectorAll("#surv-kind button").forEach((b) => b.addEventListener("click", () => { survState.kind = b.dataset.k; renderSurvival(); }));
     $("#surv-hab").innerHTML = D.habitats.filter((h) => h.x_o2 < 1).map((h) => `<button type="button" data-h="${h.id}" aria-pressed="${h.id === survState.hab}">${esc(h.name)}</button>`).join("");
     document.querySelectorAll("#surv-hab button").forEach((b) => b.addEventListener("click", () => { survState.hab = b.dataset.h; renderSurvival(); }));
     const hb = D.habitats.find((h) => h.id === survState.hab);
     const near = (r) => Math.abs(r.o2_mean - hb.x_o2) <= 0.05 && Math.abs(Math.log(r.p_mean / hb.p_atm)) <= Math.log(1.35);
-    const list = SV.filter((r) => survState.kind === "All" || r.kind === survState.kind);
+    const list = SV.filter((r) => r.kind !== "Inverse gas flame" && (survState.kind === "All" || r.kind === survState.kind));
     const shown = survState.all ? list : list.slice(0, 10);
     $("#surv-legend").innerHTML = [legendItem("bar", C.orange, "Kept burning until the fuel was cut or gone"), legendItem("bar", C.amber, "Droplet broke apart, still burning"), legendItem("bar", "#cbd5e1", "Went out on its own"), legendItem("bar", "rgba(242,96,15,.25)", `Near ${hb.name} air`)].join("");
     $("#surv-list").innerHTML = `<div class="surv__h"><span></span><span>Fuel and air</span><span>How the flames ended</span><span class="num">Did not go out</span><span class="num">90% range</span></div>` + shown.map((r, i) => {
@@ -1404,7 +1405,7 @@
     const narrow = innerWidth < 700;
     const R = shown.map((r, i) => ({ ...r, i, lab: narrow ? `${String(i + 1).padStart(2, "0")} ${TT(r.fuel)}` : `${String(i + 1).padStart(2, "0")}  ${TT(r.kind === "Droplet" ? `${r.fuel} droplets` : `${r.fuel} ${r.kind.toLowerCase()}s`)} · ${TT(`${r.o2} O₂`)} · ${TT(r.p)}` })).reverse();
     const col = (r) => KIND_C[r.kind] || C.ink2;
-    $("#surv-legend").innerHTML = [legendItem("circle", C.blue, "Droplets"), legendItem("circle", C.violet, "Gas flames"), legendItem("circle", "#e879f9", "Inverse flames"), legendItem("bar", "rgba(242,96,15,.35)", `Near ${hb.name} air`)].join("");
+    $("#surv-legend").innerHTML = [legendItem("circle", C.blue, "Droplets"), legendItem("circle", C.violet, "Gas flames"), legendItem("bar", "rgba(242,96,15,.35)", `Near ${hb.name} air`)].join("");
     plot("surv-chart", [
       { type: "scatter", mode: "markers", x: R.map((r) => r.rate), y: R.map((r) => r.lab), customdata: R.map((r) => [r.kept + r.broke, r.n, r.ci[0], r.ci[1], r.dil, r.psi.join(", ")]),
         marker: { size: R.map((r) => Math.min(26, 8 + Math.sqrt(r.n) * 2.2)), color: R.map(col), line: { color: R.map((r) => (near(r) ? "#fff" : C.bg)), width: R.map((r) => (near(r) ? 2.5 : 1.5)) } },
@@ -1419,7 +1420,7 @@
       xaxis: { range: [0, 1.02], tickformat: ".0%", tickvals: [0, 0.25, 0.5, 0.75, 1], title: { text: "Share of flames that did NOT go out on their own" } },
       yaxis: { type: "category", tickfont: { family: "Geist Mono, monospace", size: 11, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
     }));
-    $("#surv-how").innerHTML = `How to read it: the dot is what NASA saw; its size is the number of flames; the faint bar is the 90% range. Groups are ranked by the left end of the bar, so a small lucky group cannot jump to the top. Blue: droplets · violet: gas flames · pink: inverse flames. White ring and orange band: near ${esc(hb.name)} air.`;
+    $("#surv-how").innerHTML = `How to read it: the dot is what NASA saw; its size is the number of flames; the faint bar is the 90% range. Groups are ranked by the left end of the bar, so a small lucky group cannot jump to the top. Blue: droplets · violet: gas flames. White ring and orange band: near ${esc(hb.name)} air.`;
   }
   let learn3d = null;
   const learnState = { i: 0, o2: 0.30, answers: {} };

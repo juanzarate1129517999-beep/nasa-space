@@ -19,7 +19,7 @@ def test_summary_counts():
     s = EMBER["summary"]
     assert s["investigations"] == 24 and s["flight"] == 19
     assert s["records"] == 1955 and s["with_outcome"] == 688
-    assert s["qc_fixes"] == len(EMBER["qc"]) == 180
+    assert s["qc_fixes"] == len(EMBER["qc"]) == 191
 
 
 def test_every_investigation_has_a_score_for_every_habitat():
