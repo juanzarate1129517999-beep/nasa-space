@@ -1261,6 +1261,13 @@ ES.update({
 
 ES.update({"Sun +#° · az #°": "Sol +#° · az #°", "Sun -#° · az #°": "Sol -#° · az #°", "Earth +#°": "Tierra +#°", "Earth -#°": "Tierra -#°", "Whole base": "Toda la base"})
 
+sys.path.insert(0, str(Path(__file__).parent))
+from i18n_es_si import SI_ES  # noqa: E402
+from i18n_es_ui import UI_ES  # noqa: E402
+
+ES.update(UI_ES)
+ES.update(SI_ES)
+
 NUM = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?")
 
 

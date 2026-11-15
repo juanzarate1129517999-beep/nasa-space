@@ -75,7 +75,7 @@
     if (brief && !document.getElementById("si-lang-note")) {
       const p = document.createElement("p");
       p.className = "note"; p.id = "si-lang-note"; p.setAttribute("data-no-i18n", "");
-      p.textContent = "Los resúmenes SI y los pasajes de la NASA se muestran en inglés: el firewall verifica cada número contra la evidencia original en inglés, y traducirlos rompería esa verificación.";
+      p.textContent = "Traducción del resumen verificado en inglés: el firewall comprueba el original contra la evidencia, y cada número de esta versión se copia automáticamente de ese original, así que no puede cambiar al traducir. Los textos citados de NASA PSI aparecen como traducción.";
       brief.after(p);
     }
     new MutationObserver((ms) => ms.forEach((m) => {
