@@ -494,7 +494,7 @@ def table_checks():
     s2 = _csv("PSI-99", "SAFFIRE-2")
     s2 = s2[s2.iloc[:, 0].astype(str).str.match(r"^2-\d")]
     for k in s2.index:
-        smp, c1, c2 = str(s2.loc[k, s2.columns[0]]).strip(), str(s2.loc[k, "Camera 1"]).strip(), str(s2.loc[k, "Camera 2"]).strip()
+        smp, c2 = str(s2.loc[k, s2.columns[0]]).strip(), str(s2.loc[k, "Camera 2"]).strip()
         n = smp.split("-")[1]
         if c2 not in ("nan", f"S{n}C2"):
             QC.add("PSI-99", "Saffire-II", smp, "Camera 2", c2, f"S{n}C2", "Camera file name does not match the sample (pattern S<n>C2)")
