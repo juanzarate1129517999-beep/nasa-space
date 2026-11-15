@@ -128,7 +128,7 @@ def investigation_pack(r, P, rank_moon):
 def module_pack(m, P):
     t = m["tests"]
     f = lambda k, i: t[k]["facts"][i]["value"]
-    mats, liq, det, sup = t["materials"]["facts"], t["liquids"]["facts"], t["detection"]["facts"], t["suppression"]["facts"]
+    sup = t["suppression"]["facts"]
     items = [
         f"{m['name']} of the Skylab Phoenix lunar base: {o2(m['x_o2'])} O2 at {m['psi']} psi ({m['p_atm']:.2f} atm), "
         f"{m['volume_m3']} m³ of free volume ({m['volume_ref']}). Lunar gravity is 0.166 g, and NASA PSI holds no combustion test at that gravity.",

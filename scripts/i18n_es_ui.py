@@ -337,3 +337,8 @@ UI_ES.update({
     "This is a research aid built for the challenge. It is not flight certification and is not endorsed by NASA.": "Es una ayuda de investigación hecha para el reto. No es certificación de vuelo y no está respaldada por la NASA.",
     "Run it yourself.": "Ejecútalo tú mismo.",
 })
+
+UI_ES.update({
+    "Every test record NASA published for the # PSI combustion investigations (# of them have test tables; ground studies and FLEX-# do not), cleaned into one table. Pick a state of matter, click a bar, drag a box on the map or jump to the Moon-base air: every number and chart recomputes from the filtered records.": "Cada registro de prueba que la NASA publicó para las # investigaciones de combustión de PSI (# de ellas tienen tablas de pruebas; los estudios en tierra y FLEX-# no), limpiado en una sola tabla. Elige un estado de la materia, haz clic en una barra, arrastra un recuadro en el mapa o salta al aire de la base lunar: cada número y cada gráfica se recalculan con los registros filtrados.",
+    "investigations with test records (# have no test table in PSI)": "investigaciones con registros de prueba (# no tienen tabla de pruebas en PSI)",
+})

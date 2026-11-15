@@ -901,7 +901,6 @@ ES.update({
     "Drag to turn, scroll to zoom. Notice how the surface drops as oxygen rises: richer air makes fires harder to stop. Adding CO₂ lifts it back up.": "Arrastra para girar, usa la rueda para acercar. Fíjate cómo la superficie baja cuando sube el oxígeno: un aire más rico hace que el fuego sea más difícil de detener. Añadir CO₂ la vuelve a subir.",
     "Oxygen %": "Oxígeno %",
     "Pressure, atm": "Presión, atm",
-    "Goes out on its own": "Se apaga solo",
     "O₂ %{x:.0f}% · %{y:.2f} atm<br>goes out on its own %{z:.0%}<extra></extra>": "O₂ %{x:.0f}% · %{y:.2f} atm<br>se apaga solo %{z:.0%}<extra></extra>",
     "NASA test · went out on its own": "Prueba NASA · se apagó sola",
     "NASA test · kept burning": "Prueba NASA · siguió ardiendo",

@@ -276,7 +276,7 @@
         <header class="sec__head">
           <p class="eyebrow">03 · Findings · Interactive dashboard</p>
           <h2>Explore every NASA fire test. <span class="mute">Click any chart and the others follow.</span></h2>
-          <p class="sec__lead">All records from the 24 PSI combustion investigations, cleaned into one table. Pick a state of matter, click a bar, drag a box on the map or jump to the Moon-base air: every number and chart recomputes from the filtered records.</p>
+          <p class="sec__lead">Every test record NASA published for the 24 PSI combustion investigations (18 of them have test tables; ground studies and FLEX-2 do not), cleaned into one table. Pick a state of matter, click a bar, drag a box on the map or jump to the Moon-base air: every number and chart recomputes from the filtered records.</p>
         </header>
         <div class="dash">
           <div class="dash-bar">
@@ -466,18 +466,18 @@
           <h2>How sure is the model today? <span class="mute">A long bar means it does not know yet.</span></h2>
         </header>
         <div class="cands" id="cands"></div>
-        <details class="card card--gap more" id="next-tbl-d">
-          <summary><span><span class="label">In plain numbers</span><b>Recommendation table</b></span></summary>
-          <div class="more__body"><div class="tbl-wrap"><table id="next-table"></table></div><p class="note" id="next-note"></p></div>
-        </details>
-        <details class="card card--gap more" id="unc-details">
-          <summary><span><span class="label">Map of doubt</span><b>Where the model is unsure, and why we chose this test</b></span></summary>
-          <div class="more__body">
-            <div class="controls-row"><span class="mono-sm">Background computed at</span><div class="seg" id="unc-co2" role="group" aria-label="CO2 level for the map"></div></div>
-            <p class="sub">Each spot is a possible cabin air. Brighter purple means the model is less sure what a methanol droplet fire would do there. The orange numbered dots are the recommended tests at the chosen CO₂ level; the outlined ones use another level. The best flight goes where it is brightest and close to the crews’ air.</p>
-            <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
-          </div>
-        </details>
+        <div class="card card--gap" id="next-tbl-d">
+          <p class="label">In plain numbers</p>
+          <h3>Recommendation table</h3>
+          <div class="tbl-wrap"><table id="next-table"></table></div><p class="note" id="next-note"></p>
+        </div>
+        <div class="card card--gap" id="unc-details">
+          <p class="label">Map of doubt</p>
+          <h3>Where the model is unsure, and why we chose this test</h3>
+          <div class="controls-row"><span class="mono-sm">Background computed at</span><div class="seg" id="unc-co2" role="group" aria-label="CO2 level for the map"></div></div>
+          <p class="sub">Each spot is a possible cabin air. Brighter purple means the model is less sure what a methanol droplet fire would do there. The orange numbered dots are the recommended tests at the chosen CO₂ level; the outlined ones use another level. The best flight goes where it is brightest and close to the crews’ air.</p>
+          <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
+        </div>
       </div>
     </div>
     <div class="sec">

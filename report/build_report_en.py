@@ -59,7 +59,7 @@ def fig(name, caption, num, wide=False):
 
 
 def shot(name, caption, num):
-    return (f'<figure class="shot"><img src="screens/{name}.jpg" alt="{E(caption)}">'
+    return (f'<figure class="shot"><img src="screens_en/{name}.jpg" alt="{E(caption)}">'
             f'<figcaption><b>Figure {num}.</b> {caption}</figcaption></figure>')
 
 
@@ -179,6 +179,33 @@ pk_o2 = sorted({k["x_o2"] for k in picks})
 pk_p = sorted({k["p_atm"] for k in picks})
 pk_co2 = sorted({k["x_co2"] for k in picks if k["x_co2"] > 0})
 si_ok, si_total = SI["meta"]["verified"], SI["meta"]["total"]
+MB = D["moonbase"]
+REC = D["records"]
+n_tab = len(set(REC["psi"].values()))
+
+
+def _med(v):
+    v = sorted(v)
+    return v[len(v) // 2] if v else float("nan")
+
+
+TR = F["train"]
+K_FUEL = {f: _med([t["tasa_quemado"] for t in TR if t["combustible"] == f and t.get("tasa_quemado")]) for f in ("Methanol", "Heptane")}
+K_ALL = [t["tasa_quemado"] for t in TR if t.get("tasa_quemado")]
+EXT_R = _med([t["d_ext_mm"] / t["d0_mm"] for t in TR if t["autoextincion"] and t.get("d_ext_mm")])
+N_EXT_D = sum(1 for t in TR if t["autoextincion"] and t.get("d_ext_mm"))
+N_CLIPS = len(re.findall(r'"test":', (ROOT / "web" / "data" / "clips.js").read_text(encoding="utf-8")))
+TAG_EN = {"measured": "measured", "derived": "derived", "model": "model", "assumed": "assumed", "extrapolated": "extrapolated", "gap": "no data"}
+
+
+def audit_table():
+    lay = [("materials", "Materials"), ("liquids", "Liquid fires"), ("detection", "Detection"), ("suppression", "Suppression")]
+    head = "".join(f"<th>{t}</th>" for _, t in lay)
+    body = ""
+    for m in MB["modules"]:
+        cells = "".join(f"<td><span class='tag t-{m['tests'][k]['status']}'>{TAG_EN[m['tests'][k]['status']]}</span><div class='impl'>{E(m['tests'][k]['answer'])}</div></td>" for k, _ in lay)
+        body += f"<tr><td><b>{E(m['name'])}</b><div class='dim'>{p(m['x_o2'], 1)} O₂ · {m['psi']} psi · {m['volume_m3']} m³</div></td>{cells}</tr>"
+    return f"<table class='compact audit'><thead><tr><th>Module</th>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
 def T():
@@ -230,7 +257,7 @@ doc = f"""<!doctype html>
 <p class="lead">Artemis lunar-surface habitats and pressurized rovers will run at <b>30% oxygen or more and 10.2 psi or less</b>. Skylab Phoenix answers, from NASA's own flight data, what happens to fire in that atmosphere and where that data runs out.</p>
 <p>We built a data-engineering pipeline that downloads, cleans and unifies the experimental tables of the 24 <i>Combustion Science</i> investigations in NASA's PSI repository. The result is {n(S['records'])} records in one schema, {S['with_outcome']} with a labeled outcome. We corrected {S['qc_fixes']} errors in the source tables and logged every correction. On top of that data we profile and rank each investigation per habitat and train interpretable models with explicit uncertainty.</p>
 <p>The main model predicts whether a flame puts itself out. Trained on {F['n']} droplet fires from the FLEX experiment on the ISS and validated by holding out whole test days, it reaches <b>AUC {n(LR['auc'], 2)}</b> and Brier {n(LR['brier'], 3)}, ahead of gradient boosting (AUC {n(GB['auc'], 2)}) and an oxygen-only baseline ({n(O2['auc'], 2)}). According to the model, the chance of self-extinction falls from <b>{p(cab['p'])} in a spacecraft cabin to {p(moon['p'])} in the lunar base</b> (90% interval {p(moon['lo'])}–{p(moon['hi'])}). Only {cov['n_moon_envelope']} of {n(cov['n_ambient'])} flight records lie near that atmosphere, and none is a solid material. For the spacesuit (100% O₂, 4.3 psi) there is no test at all, and the system refuses to predict.</p>
-<p>Active learning recommends the next experiment: CO₂ suppression ({p(pk_co2[0])}–{p(pk_co2[-1])} CO₂) at {p(pk_o2[0])}–{p(pk_o2[-1])} O₂ and {n(pk_p[0], 2)}–{n(pk_p[-1], 2)} atm, where the model is least certain. An SI layer writes plain-language briefings for every habitat and investigation; code publishes a briefing only if every sentence cites the data and every number is verified ({si_ok} of {si_total} pass). Everything is presented in an interactive web dashboard where the models run live in the browser.</p>
+<p>Active learning recommends the next experiment: CO₂ suppression ({p(pk_co2[0])}–{p(pk_co2[-1])} CO₂) at {p(pk_o2[0])}–{p(pk_o2[-1])} O₂ and {n(pk_p[0], 2)}–{n(pk_p[-1], 2)} atm, where the model is least certain. An SI layer writes plain-language briefings for every habitat and investigation; code publishes a briefing only if every sentence cites the data and every number is verified ({si_ok} of {si_total} pass). Everything is presented in a bilingual (English and Spanish) website where the models run live in the browser. It includes an immersive 3D story from NASA's Artemis plan to the lunar south pole, a Fire Lab where a droplet burns by the d² law with burning rates measured in FLEX, a cross-filtered dashboard over all {n(S['records'])} records, and a fire audit of a three-module lunar base in which every number is labelled by where it comes from.</p>
 <div class="callout">
 <b>The message in one sentence:</b> with more oxygen, fire in microgravity stops putting itself out, and NASA has almost no flight data in the atmosphere where astronauts will live on the Moon. Skylab Phoenix quantifies it, shows it and says what to test next.
 </div>
@@ -242,7 +269,7 @@ doc = f"""<!doctype html>
 <li>Introduction</li><li>The challenge and the research question</li><li>Conceptual framework: fire in microgravity</li>
 <li>Data: source, scope and inventory</li><li>Data engineering</li><li>Exploratory analysis</li>
 <li>Summaries, ranking and similarity of investigations</li><li>Machine learning</li><li>Next experiment: active learning</li>
-<li>Fire-safety findings ranked by evidence</li><li>The SI layer: briefings you can check</li><li>The Skylab Phoenix dashboard</li>
+<li>Fire-safety findings ranked by evidence</li><li>The SI layer: briefings you can check</li><li>The Skylab Phoenix website</li>
 <li>Discussion and limitations</li><li>Impact for exploration and on Earth</li><li>Conclusions</li><li>Future work</li><li>Reproducibility</li>
 </ol>
 <p class="toc-extra">References · Annex A: data dictionary · Annex B: formulas · Annex C: full quality log</p>
@@ -314,6 +341,7 @@ doc = f"""<!doctype html>
 <h2>Data: source, scope and inventory</h2>
 <p class="lead">We use a single data source, the one the challenge names: NASA's PSI repository (CC0 license). Of its 133 results for “combustion”, 24 belong to <i>Combustion Science</i>: 19 flight experiments and 5 ground investigations.</p>
 <p>The other 109 investigations (materials, fluids, biophysics) only mention the word and are discarded. Everything is retrieved without login from PSI's public API: metadata (objective, hypothesis, approach, team, publications, Earth benefit) and experimental tables in CSV or Excel. Videos and raw images weigh hundreds of GB and are not needed. The challenge's other resources (Researcher's Guide, NASA Combustion Science, Apollo, Mir and the spinoffs) served as context, not for training models.</p>
+<p>Not every investigation publishes a test table: {n_tab} of the 24 do. The five ground studies and FLEX-2 provide descriptions, publications and data products but no test-by-test table, so they enter the profiles and the ranking but contribute no records. The site's dashboard counts investigations by PSI id for this reason ({n_tab} of 24).</p>
 <p class="tcap"><b>Table {T()}.</b> Inventory of the 24 investigations, generated by the pipeline. “Records” in ACME's daily tables = flames lit.</p>
 {inv_table()}
 <p class="note">Hardware grouping as on the challenge page: the CIR combustion rack with ACME (gases) or MDCA (droplets), the fan-driven duct of the Microgravity Science Glovebox (MSG), and the Saffire module inside the Cygnus spacecraft.</p>
@@ -344,6 +372,8 @@ doc = f"""<!doctype html>
 <p>The pipeline fails on duplicate ids, mole fractions outside [0, 1] or pressures outside [0.1, 6] atm. It also applies correction rules: physically impossible values, mole fractions that do not sum to 1, spreadsheet auto-fill errors, duplicate rows and mis-formatted percentages. The full log is in Annex C.</p>
 {fig('f02_calidad', f'Corrections by type. {autofill} of the {S["qc_fixes"]} are spreadsheet auto-fill errors, such as “40% CH4” turning into CH5, CH6… CH14 row after row in ACME CLD, or “N2” turning into N3, N4… in ACME s-Flame.', Fn())}
 <p>Examples: a 0 mmHg pressure in FLEX (excluded from the models), “3400%” and “2100%” in ACME BRE (34% and 21%), 8 identical duplicate rows in CFI, a missing decimal point in Saffire-II (“037 mm” → 0.37 mm) and 19 lowercase “yes/no” labels in CFI-G. None was fixed silently: all can be audited.</p>
+<p>A second pass compared tables with each other and with NASA's own files. It found calendar dates that disagree with the GMT day of year in BASS, one as-run number used for two tests on different days, a BASS-II GMT day contradicted by the name of NASA's raw video for that test, Saffire thicknesses written in centimetres instead of millimetres, sample length and width swapped, camera file names that do not match the sample, and a Greek μ exported as “?”. In BASS-II gas data, final O₂ readings above the initial value and CO readings that fall during a burn are physically impossible in the sealed glovebox and are excluded. The quality log now holds {S['qc_fixes']} entries.</p>
+{shot('17_calidad', f'The quality log on the Method page: {S["qc_fixes"]} corrections grouped by type, each with the record, field, original value, new value and rule.', Fn())}
 </section>
 
 <section class="page">
@@ -423,6 +453,14 @@ doc = f"""<!doctype html>
 <h3>8.7 Hypothesis test: a limiting flame temperature? (ACME CFI-G)</h3>
 {fig('f13_temperatura_limite', f'P(self-extinction) versus adiabatic flame temperature, for tests that ignited (normal n = {nrm["n"]}, inverse n = {inv["n"]}). The relationship holds for normal flames (AUC {n(nrm["metrics"]["auc"], 2)}); for inverse flames it has no predictive power (AUC {n(inv["metrics"]["auc"], 2)}). Grey band: beyond the hottest flame tested.', Fn(), True)}
 <p>For normal flames, self-extinction becomes more likely as flame temperature falls. The 50% point (≈ {n(nrm['t50'])} K; 90% CI {n(nrm['t50_lo'])}–{n(nrm['t50_hi'])} K) lies <b>just above the hottest flame tested ({n(nrm['tad_max'])} K)</b>, so it is an extrapolation. For inverse flames, no single temperature explains extinction. Conclusion: flame temperature is not a universal criterion, and reporting this negative result is part of the project's scientific honesty.</p>
+<h3>8.8 Fire Lab: the d² law from flight data</h3>
+<p>The model says how often a fire goes out; the Fire Lab shows how it burns. A burning droplet in microgravity follows the classic d² law: the square of its diameter falls linearly in time, d² = d₀² − K·t, where K is the burning-rate constant. FLEX measured K for {len(K_ALL)} of its tests (median {n(K_FUEL['Methanol'], 2)} mm²/s for methanol and {n(K_FUEL['Heptane'], 2)} mm²/s for heptane, range {n(min(K_ALL), 2)}–{n(max(K_ALL), 2)}), and the diameter at which the visible flame went out.</p>
+<ul>
+<li>For any scenario the Fire Lab takes the five FLEX tests closest in the model's standardized inputs and uses their distance-weighted K.</li>
+<li>When a replay goes out on its own (drawn with the model's probability), it does so at the extinction ratio d<sub>ext</sub>/d₀ of the closest tests that self-extinguished. Across the {N_EXT_D} self-extinguished tests with that measurement the median ratio is {n(EXT_R, 2)}: the flame dies while about {p(EXT_R ** 3)} of the fuel volume is still left.</li>
+<li>The replay runs in real seconds next to a live d² chart that draws the five flight tests as reference curves, so the animation follows measured data. Flame size uses typical flame-to-droplet ratios from droplet theory and is labelled illustrative.</li>
+</ul>
+{shot('05_fire_lab', 'Fire Lab: the droplet between the retracting needles, the hot-wire igniter, and the live d² chart against the five closest FLEX tests (grey), with time since ignition, current diameter, burning rate K and the diameter at which this replay goes out.', Fn())}
 </section>
 
 <section class="page">
@@ -458,7 +496,14 @@ doc = f"""<!doctype html>
 <p class="tcap"><b>Table {T()}.</b> What the boundary implies for each habitat (PMMA rod, 1 atm).</p>
 {solid_table()}
 <p class="note">With no forced airflow the boundary sits at {SOL['zero_flow_o2_pct']}% O₂, below every habitat. No solid has burned in orbit above {SOL['max_o2_any_solid_pct']}% O₂ or at reduced pressure, so every habitat above cabin air is an extrapolation, which is why solid-material flammability at ≥30% O₂ and ≤10.2 psi is the flight test the data asks for.</p>
-{shot('11_solidos', 'Solid materials in the dashboard: NASA flammability boundary with habitat oxygen levels, CO released by each BASS-II test, and the implication per habitat.', Fn())}
+{shot('10_solidos', 'Solid materials on the website: NASA flammability boundary with habitat oxygen levels, CO released by each BASS-II test, and the implication per habitat.', Fn())}
+<h3>The lunar base, audited for fire</h3>
+<p>To make the findings concrete we placed a three-module base on NASA's 5 m per pixel LOLA terrain of the {E(MB['site']['name'])} near the south pole ({abs(MB['site']['lat']):.4f}°S, {MB['site']['lon']:.3f}°E, {n(MB['site']['z'])} m), where JPL Horizons puts the Sun between {MB['site']['sun_elev_range'][0]}° and {MB['site']['sun_elev_range'][1]}° above the local horizontal from November 2026 to November 2027. Each module is audited on four layers: materials, liquid fires, detection and suppression. Of {MB['report']['total_facts']} numbers in the audit, {MB['report']['measured_layers']} are NASA measurements; every other one is labelled derived, model, assumed, extrapolated or no data.</p>
+<p class="tcap"><b>Table {T()}.</b> Fire audit of the lunar base. Module volumes use ISS Destiny, ISS Quest and Orion as stand-ins.</p>
+{audit_table()}
+<p>The audit ends in three flights that would close the biggest gaps:</p>
+<ol>{''.join(f"<li><b>{E(f['what'])}.</b> {E(f['why'])}</li>" for f in MB['report']['flight_tests_needed'])}</ol>
+{shot('09_auditoria', 'The audit in Findings: each cell carries a provenance tag; clicking a module opens every number, its source and the module SI briefing.', Fn())}
 </section>
 
 <section class="page">
@@ -471,25 +516,42 @@ doc = f"""<!doctype html>
 <li><b>Verification firewall.</b> Code publishes a briefing only if every sentence cites existing evidence, every number appears in the evidence it cites, nothing reads as a safety verdict (“is safe”, “certified”, “guaranteed”…), and the evidence is unchanged since the draft was written (hash). Otherwise the dashboard shows the evidence itself, labelled “Evidence brief”.</li>
 </ol>
 <p>Result: <b>{si_ok} of {si_total}</b> briefings pass. The firewall was exercised during development: correcting the EVA-prep pressure (10.3 → 10.2 psi) changed the evidence of 14 packs, and the firewall blocked exactly those 14 drafts, naming the outdated numbers, until they were rewritten. The test suite checks that invented numbers, wrong citations, uncited sentences, verdicts and stale drafts are all rejected.</p>
+<p>Briefings cover the 5 habitats, the 24 investigations, the 3 lunar-base modules and the base as a whole. In Spanish, each briefing is a translation of the verified English text in which every number is copied automatically from the original, so translation cannot change a figure; quoted NASA passages are marked as translations.</p>
 <h3>11.2 Example: lunar-base briefing as published</h3>
 {si_example('moon_base')}
 <h3>11.3 Ask the archive</h3>
 <p>A BM25 keyword search, running in the browser, over NASA's own text for the 24 investigations (objectives, hypotheses, approach, Earth benefits, publication titles), our findings, the habitat definitions and a short glossary. It returns ranked passages with their source and a link to the PSI record. It quotes; it does not generate, so it cannot invent an answer, and it says so when no passage fits.</p>
-{shot('09_si_briefing', 'SI briefing with citations and the evidence behind each sentence (left), and Ask the archive answering “Which suppressants did NASA test?” with NASA passages (right).', Fn())}
+{shot('15_si', 'Ask SI: the lunar-base briefing with numbered citations, a habitat selector, and Ask the archive, which answers with NASA passages and their sources.', Fn())}
 </section>
 
 <section class="page">
-<h2>The Skylab Phoenix dashboard</h2>
-<p class="lead">A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. Plotly is bundled, so it also works without internet once loaded.</p>
-<p>Sections: home with indicators, habitat cards and lessons from history (Apollo 1, Apollo 13, Mir); SI briefing and Ask the archive, with guided views for undergraduates, graduate students, professors, researchers and engineers; coverage; investigations (ranking, profile, side-by-side comparison and similarity); scenario simulator with shareable links; solid materials; evidence; findings; next experiment; applications on Earth; and data and validation with downloads and links to all ten resources the challenge lists. It works on desktop and mobile and is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.</p>
-{shot('01_inicio', 'Home: headline, key indicators and self-extinction probability per habitat. The spacesuit appears as “outside the data”.', Fn())}
-{shot('02_cobertura', 'Coverage: every flight test against the habitat atmospheres, with filters by family.', Fn())}
-{shot('03_investigaciones', 'Investigations: ranking by habitat and safety layer, and a profile generated from the data (what varied, what was measured, score breakdown).', Fn())}
-{shot('10_comparar', 'Side-by-side comparison of up to three investigations; rows that differ are highlighted.', Fn())}
-{shot('04_simulador', 'Simulator: habitat presets and controls for O₂, pressure, CO₂, helium, droplet size and fuel. Result in plain words with its interval and data status, and a live curve of the chance that the fire goes out on its own, with the atmospheres no flight test reached shaded.', Fn())}
-{shot('05_evidencia', 'Evidence: outcome by O₂, CO₂ suppression, limiting temperature and microgravity versus 1 g.', Fn())}
-{shot('07_proximo', 'Next experiment: the recommended flight test in plain language, how sure the model is today for each candidate, and the test conditions.', Fn())}
-{shot('08_validacion', 'Data and validation: architecture, metrics against baselines, calibration and quality log.', Fn())}
+<h2>The Skylab Phoenix website</h2>
+<p class="lead">A static, bilingual website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. It is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.</p>
+<p class="tcap"><b>Table {T()}.</b> Sections of the website and the question each one answers.</p>
+<table class="compact"><thead><tr><th>Section</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><b>Home</b></td><td>The headline numbers and a 3D Earth with the live ISS orbit and 23 NASA satellites, the Moon and Mars</td></tr>
+<tr><td><b>Learn 3D</b></td><td>An immersive four-chapter story: NASA's Artemis plan over a real 3D Moon and the descent to the base site; five ways a fire starts inside an ISS module, each tied to the investigation that measured it; how one flame changes from Earth to orbit; the same fire in four gravities</td></tr>
+<tr><td><b>Flames</b></td><td>{N_CLIPS} clips of real flight video and the solid-material limits measured by BASS-II</td></tr>
+<tr><td><b>Fire Lab</b></td><td>The self-extinction model with its interval and out-of-data status, and the real-time d² replay</td></tr>
+<tr><td><b>Findings</b></td><td>The interactive dashboard over all records, coverage, the lunar-base audit and the findings ranked by evidence</td></tr>
+<tr><td><b>Ranking</b></td><td>The 24 investigations ranked per habitat, an adjustable score, a robustness test, files and side-by-side comparison</td></tr>
+<tr><td><b>Next flight</b></td><td>The recommended experiment, the six candidates, the recommendation table and the map of doubt</td></tr>
+<tr><td><b>Ask SI</b></td><td>Verified SI briefings and a search over NASA's own text</td></tr>
+<tr><td><b>Method</b></td><td>Nine steps from the question to reproduction, with the quality log, validation and the SI firewall</td></tr>
+</tbody></table>
+{shot('01_inicio', 'Home: the Moon base will breathe 30% oxygen; Earth with the ISS and NASA satellites on today\'s orbital elements, the Moon and Mars.', Fn())}
+{shot('02_aprende_mision', 'Learn 3D, chapter 1: NASA\'s Artemis plan over the Moon (LRO LROC colour and LOLA relief).', Fn())}
+{shot('03_aprende_base', 'Learn 3D, landing: the base on real LOLA terrain, lit by the Sun where JPL Horizons places it.', Fn())}
+{shot('04_aprende_fuentes', 'Learn 3D, chapter 2: five fire sources inside an ISS module. Here fabric, step 3: what Saffire measured.', Fn())}
+{shot('07_panel', 'Interactive dashboard filtered to liquids in lunar-base air: 17 FLEX records and none went out on its own.', Fn())}
+{shot('08_panel_mapa', 'The oxygen-pressure map of the dashboard; dragging a box filters every other chart.', Fn())}
+{shot('06_simulador', 'Fire Lab controls: habitat presets, oxygen, pressure, CO₂, helium, droplet size and fuel, with the answer in plain words and a 100-fire picture.', Fn())}
+{shot('11_ranking', 'Ranking: the 24 investigations as cards for the chosen habitat and safety layer.', Fn())}
+{shot('12_ficha', 'An investigation file: score breakdown, conditions against crew atmospheres, NASA objective and SI summary.', Fn())}
+{shot('13_proximo', 'Next flight: the recommended experiment and how sure the model is today.', Fn())}
+{shot('14_duda', 'Map of doubt: where the 200 bootstrap models disagree, with the recommended tests.', Fn())}
+{shot('16_metodo', 'Method: nine explained steps from the question to reproduction.', Fn())}
+<p><b>Why the method is on the website and in this report.</b> The Method page gives every visitor, including judges, a short and checkable account of how each number is made, next to the data it describes. This report holds the full detail: formulas, the complete quality log, the data dictionary and references.</p>
 </section>
 
 <section class="page">
@@ -504,6 +566,7 @@ doc = f"""<!doctype html>
 <li><b>No partial gravity.</b> PSI has no lunar or Martian data. Saffire-II bounds only the 20 cm/s regime.</li>
 <li><b>Assumed conditions.</b> In SPICE, SLICE, SAME, CLD and E-FIELD, O₂ and pressure are not reported per test and cabin air was assumed. They are flagged and down-weighted in the ranking.</li>
 <li><b>Extrapolated limiting temperature.</b> The 50% point in CFI-G lies above the hottest temperature tested.</li>
+<li><b>Illustrations are labelled.</b> Flame size in the Fire Lab and every partial-gravity flame are illustrations; module volumes of the lunar base are ISS and Orion stand-ins.</li>
 <li><b>SI text is interpretation, not evidence.</b> The firewall guarantees citations and numbers, not that an interpretation is the best one; the evidence behind every sentence is one click away.</li>
 </ul>
 <h3>What we did to mitigate it</h3>
@@ -539,6 +602,7 @@ doc = f"""<!doctype html>
 pip install -r requirements.txt
 python scripts/fetch_psi_catalog.py combustion
 python scripts/fetch_psi.py data/psi PSI-10 PSI-20 … PSI-159
+python scripts/build_moon_assets.py web/assets/moon   # LOLA terrain, Moon textures, JPL Horizons
 python -m pipeline.run              # silver → gold → models → SI firewall → web/data
 python -m pytest                    # tests
 python report/figures.py en         # English figures
@@ -549,7 +613,7 @@ python scripts/serve.py             # dashboard at http://127.0.0.1:8765</pre>
 <tr><td class="mono">scripts/</td><td>PSI download (bronze), SI draft generation and local dashboard server</td></tr>
 <tr><td class="mono">pipeline/</td><td>silver.py, investigations.py, models.py, gold.py, si.py, run.py</td></tr>
 <tr><td class="mono">data/gold/, data/si/</td><td>Tests, investigations, QC log, findings; evidence packs, SI drafts and verification</td></tr>
-<tr><td class="mono">web/</td><td>Dashboard (index.html, styles.css, app.js, data/, bundled Plotly)</td></tr>
+<tr><td class="mono">web/</td><td>Website: index.html, styles.css, app.js, i18n.js; 3D modules globe.js, moonbase.js, sources3d.js and lab3d.js; data/ and bundled Plotly and three.js</td></tr>
 <tr><td class="mono">tests/</td><td>pytest suite run in continuous integration</td></tr>
 <tr><td class="mono">report/</td><td>Figures, screenshots and the report generators (Spanish and English)</td></tr>
 </tbody></table>

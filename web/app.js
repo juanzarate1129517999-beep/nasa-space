@@ -735,7 +735,6 @@
   }
 
   const nextState = { co2: null };
-  function pickLabel(k) { return `${o2pct(k.x_o2)} O₂ · ${PSI(k.p_atm).toFixed(1)} psi · ${(100 * k.x_co2).toFixed(0)}% CO₂`; }
   function gauge(frac, big, label, color, sub = "") {
     const R = 34, L = 2 * Math.PI * R * 0.75, f = Math.max(0.02, Math.min(1, frac));
     return `<div class="gauge"><svg viewBox="0 0 90 90" aria-hidden="true"><circle cx="45" cy="45" r="${R}" fill="none" stroke="rgba(203,213,225,.12)" stroke-width="7" stroke-dasharray="${L} 999" stroke-linecap="round" transform="rotate(135 45 45)"/><circle cx="45" cy="45" r="${R}" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${L * f} 999" stroke-linecap="round" transform="rotate(135 45 45)"/></svg><b>${big}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ""}</div>`;
@@ -787,7 +786,7 @@
     if (nextState.co2 == null) nextState.co2 = k.x_co2;
     $("#unc-co2").innerHTML = levels.map((c) => `<button type="button" aria-pressed="${c === nextState.co2}" data-c="${c}">${(100 * c).toFixed(0)}% CO₂</button>`).join("");
     document.querySelectorAll("#unc-co2 button").forEach((b) => b.addEventListener("click", () => { nextState.co2 = +b.dataset.c; renderNext(); }));
-    if ($("#unc-details").open) renderUncMap();
+    renderUncMap();
   }
   function renderUncMap() {
     const N = D.next, c = nextState.co2, d0 = M.d0_median;
@@ -1701,7 +1700,7 @@
     const o2s = F.filter((r) => r.o2 != null).map((r) => r.o2).sort((a, b) => a - b);
     const kp = [
       [F.length.toLocaleString("en-US"), "records match"],
-      [new Set(F.map((r) => r.exp)).size, "investigations"],
+      [`${new Set(F.map((r) => RC.psi[r.exp])).size}<small> / ${D.summary.investigations}</small>`, `investigations with test records (${D.summary.investigations - new Set(Object.values(RC.psi)).size} have no test table in PSI)`],
       [lab.length ? pct(outN / lab.length) : "—", `went out on its own (${outN} of ${lab.length} labelled)`],
       [o2s.length ? `${(100 * o2s[0]).toFixed(0)}–${(100 * o2s[o2s.length - 1]).toFixed(0)}%` : "—", "oxygen range covered"],
       [moonN, "inside the Moon-base envelope"],
@@ -1882,7 +1881,6 @@
   $("#arch-more").addEventListener("click", () => { archState.all = !archState.all; renderArchive(); });
   $("#surv-more").addEventListener("click", () => { survState.all = !survState.all; renderSurvival(); });
   $("#share-btn").addEventListener("click", (e) => copyText(shareUrl(), e.currentTarget));
-  $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
   document.querySelectorAll("details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) resizeIn(d); }));
   $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly · three.js`;
   if (QS.has("o2") || QS.has("hab")) { if (!location.hash || location.hash === "#" || location.hash === "#scenario") history.replaceState(null, "", `${location.search}#/lab`); }

@@ -79,7 +79,7 @@
 
     let M = null, terrain = null, baseP = null, frameN = { north: null, east: null };
     const modules = {}, labels = {};
-    let mode = "moon", selected = null, onSel = null, dateOff = 0, running = true, visible = true, drillSt = null;
+    let mode = "moon", selected = null, onSel = null, dateOff = 0, running = true, visible = true;
 
     function label(id, text, cls = "") {
       const el = document.createElement("button");
@@ -410,45 +410,11 @@
       }
       if (now - lastTime > 1000) { lastTime = now; applyTime(); }
       if (selected && modules[selected]) {
-        const it = modules[selected].interior.userData, D = drillSt;
+        const it = modules[selected].interior.userData;
         const flick = 0.85 + 0.25 * Math.sin(now / 160) + 0.1 * Math.sin(now / 37);
-        if (!D) {
-          it.flame.position.copy(it.src.droplet); it.flame.visible = true;
-          it.flame.scale.setScalar(flick); it.glow.intensity = 0.9 + 0.4 * Math.sin(now / 120);
-          it.char.scale.x = 0.001; it.sm.opacity = 0; it.fog.material.opacity = 0; it.sensor.material.emissive.setHex(0x22d3ee);
-        } else {
-          const p = D.p;
-          let size = 1;
-          if (D.source === "fabric") {
-            it.char.scale.x = Math.max(0.001, Math.min(1, p)); it.char.position.x = it.fabric.position.x - (it.len * 0.18 * (1 - it.char.scale.x)) / 2;
-            it.flame.position.copy(it.src.fabric).add(new T.Vector3(it.len * 0.18 * Math.min(1, p), 0, 0));
-            it.flame.scale.set(0.8, 2.2, 0.6);
-          } else {
-            it.flame.position.copy(it.src[D.source]); size = D.source === "plastic" ? 1.3 : 1;
-          }
-          let alive = p < 1 || D.source !== "droplet";
-          if (D.out && p > 0.55) alive = false;
-          if (D.co2 && p > 0.7 && D.co2Out) alive = false;
-          const k = alive ? flick * size : 0;
-          if (D.source !== "fabric") it.flame.scale.setScalar(Math.max(0.001, k));
-          else it.flame.scale.multiplyScalar(alive ? flick : 0.001);
-          it.flame.visible = alive;
-          it.glow.intensity = alive ? 1.1 : 0;
-          const drift = D.fans && p > 0.45 ? 0.15 : 1;
-          const n = it.seed.length, pos = it.sg.attributes.position;
-          for (let i = 0; i < n; i++) {
-            const s0 = it.seed[i]; s0[0] = (s0[0] + 0.004 * drift) % 1;
-            const t = s0[0];
-            pos.setXYZ(i, it.flame.position.x + t * it.len * 0.45 * drift + s0[1] * 0.08, it.flame.position.y + t * it.r * 0.6 + s0[2] * 0.06, it.flame.position.z + s0[2] * 0.12);
-          }
-          pos.needsUpdate = true;
-          it.sm.opacity = Math.min(0.6, p * 1.5);
-          it.sensor.material.emissive.setHex(p > 0.3 && Math.sin(now / 150) > 0 ? 0xef4444 : 0x22d3ee);
-          const fogOn = D.co2 && p > 0.6;
-          it.fog.material.opacity = fogOn ? 0.18 : 0;
-          it.fog.scale.setScalar(fogOn ? Math.min(it.r * 1.2, (p - 0.6) * it.r * 4) : 0.001);
-          it.fog.position.copy(it.flame.position);
-        }
+        it.flame.position.copy(it.src.droplet); it.flame.visible = true;
+        it.flame.scale.setScalar(flick); it.glow.intensity = 0.9 + 0.4 * Math.sin(now / 120);
+        it.char.scale.x = 0.001; it.sm.opacity = 0; it.fog.material.opacity = 0; it.sensor.material.emissive.setHex(0x22d3ee);
       }
       controls.update();
       renderer.render(mode === "moon" ? moonScene : terrScene, camera);
@@ -482,7 +448,6 @@
       descend, showMoon, select,
       onSelect(fn) { onSel = fn; },
       setTimeOffset(ms) { dateOff = ms; applyTime(); },
-      drill(st) { drillSt = st; },
       mode: () => mode,
       pause() { running = false; },
       resume() { resize(); if (!running) { running = true; requestAnimationFrame(frame); } },
