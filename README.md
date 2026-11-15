@@ -1,97 +1,65 @@
-# Skylab Phoenix: fire-safety intelligence from NASA's microgravity combustion data
+# Skylab Phoenix
 
 **NASA Space Apps Challenge 2026 · Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data**
-Team **Skylab Phoenix** (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and Javier Medina · [Leer en español](README.es.md)
+Team Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and Javier Medina · [Leer en español](README.es.md)
 
-**Live dashboard:** https://juanzarate1129517999-beep.github.io/nasa-space/ (static site; models run in your browser, no login, works offline once loaded)
-**Technical report (English, 54 pages):** [report/Technical_Report_Skylab_Phoenix.pdf](report/Technical_Report_Skylab_Phoenix.pdf) · Spanish edition: [report/Informe_Skylab_Phoenix.pdf](report/Informe_Skylab_Phoenix.pdf) · Short summary: [docs/TECHNICAL_SUMMARY.md](docs/TECHNICAL_SUMMARY.md)
-**Submission texts and checklist:** [SUBMISSION.md](SUBMISSION.md) · **Use of AI/SI:** [docs/AI_USE.md](docs/AI_USE.md)
+> The Moon base will breathe 30% oxygen. Skylab Phoenix answers, from NASA's own flight data, what happens to fire there, how sure that answer is, and where the data runs out.
 
-> The Moon base will breathe 30% oxygen. Skylab Phoenix answers, from NASA's own flight data, what happens to fire there, and shows where that data runs out.
+- **Website:** https://juanzarate1129517999-beep.github.io/nasa-space/ (English and Spanish, no login, the models run in the browser)
+- **30-second video:** [docs/video/skylab_phoenix_30s.mp4](docs/video/skylab_phoenix_30s.mp4)
+- **Technical report:** [English](report/Technical_Report_Skylab_Phoenix.pdf) · [Spanish](report/Informe_Skylab_Phoenix.pdf)
+- **Submission texts:** [SUBMISSION.md](SUBMISSION.md) · **Use of AI:** [docs/AI_USE.md](docs/AI_USE.md)
 
-## What it does
+## The website
 
-| Challenge objective | What Skylab Phoenix delivers |
+| Section | What it shows |
 |---|---|
-| **Learn 3D**, an immersive story (flagship) | Four full-screen chapters: NASA's Artemis plan over a real 3D Moon (LRO LOLA/LROC) with the descent to NASA's 5 m/pix LOLA terrain of the Connecting ridge (PGDA), lit by the real Sun from JPL Horizons; five ways a fire starts inside an ISS module, each tied to the NASA investigation that measured it; how one flame changes from Earth to orbit; and the same fire in four gravities. |
-| **Interactive dashboard** | In Findings, a cross-filtered view of all 1,955 records: pick solids, liquids or gases, click a bar or drag a box on the oxygen-pressure map and every KPI, chart and table recomputes; download the filtered CSV. |
-| **Fire Lab** with real physics | The droplet shrinks in real time by the d² law, with the burning rate and extinction diameter of the five closest FLEX flight tests, next to a live d² chart of those tests; the validated model draws whether it goes out on its own. |
-| **Moon base fire audit** | A three-module base (habitat, airlock, pressurized rover) at the challenge's 30% O₂ / 10.2 psi, audited on materials, liquid fires, detection and suppression; every number is labelled measured, derived, model, assumed, extrapolated or no data, with an SI briefing per module. |
-| **SI-powered** summaries and interpretation | An SI (super intelligence, the challenge's term) layer writes a briefing for each habitat and each of the 24 investigations. A code **firewall** publishes it only if every sentence cites numbered evidence, every number appears in that evidence, and nothing reads as a safety verdict (33/33 pass). |
-| **Summarize, rank and compare** investigations | 24 PSI Combustion Science investigations profiled from their own tables (what varied, what was fixed, what was measured), ranked per habitat with a transparent score, and compared side by side. |
-| **Identify** investigations relevant to crew habitats | Coverage map of every flight test against five habitat atmospheres: cabin, EVA prep, lunar base, NASA's 8.2 psi / 34% O₂ exploration atmosphere and the spacesuit. |
-| Data for **predictive flammability modeling** | 1,955 test records in one schema with SI units, 191 logged corrections to NASA's tables, and a validated self-extinction model that runs live in the browser. |
-| **Next-generation fire-safety** insights | Findings ranked by strength of evidence (prevention, detection, suppression) and an active-learning pick of the next flight experiment. |
-| **Solid materials** (BASS, BASS-II, Saffire) | NASA's microgravity flammability boundary for PMMA against every habitat's oxygen level, CO and CO₂ released by 129 BASS-II tests, and what it implies per habitat |
-| **Fire safety on Earth** and the challenge resources | Lessons from Apollo 1, Apollo 13 and Mir; Earth applications (detectors, air tanks, clothing, water mist); all ten resources the challenge lists, linked where they are used |
-| Audiences named in the challenge | “Choose your view” paths for undergraduates, graduate students, professors, researchers and engineers; **Ask the archive** search over NASA's own text with sources. |
+| **Home** | The headline numbers and a 3D Earth with the live ISS orbit and 23 NASA satellites, the Moon and Mars |
+| **Learn 3D** | A four-chapter immersive story: NASA's Artemis plan over a real 3D Moon and the descent to a south-pole site on NASA's 5 m/pixel LOLA terrain, lit by the Sun where JPL Horizons places it; five ways a fire starts inside an ISS module, each tied to the NASA investigation that measured it; how one flame changes from Earth to orbit; the same fire in four gravities |
+| **Flames** | 43 clips of real flight video (solids, liquids, gases) and the solid-material limits measured by BASS-II |
+| **Fire Lab** | Will a fire go out on its own? A model trained on 261 FLEX droplet fires answers with a 90% interval and says when it is extrapolating. The droplet burns in real time by the d² law, with the burning rate and extinction diameter of the five closest flight tests |
+| **Findings** | An interactive dashboard over all 1,955 records (every chart filters the others), the coverage of crew atmospheres, a fire audit of a three-module lunar base and the findings ranked by evidence |
+| **Ranking** | The 24 PSI combustion investigations ranked for each crew atmosphere with an adjustable score, files and side-by-side comparison |
+| **Next flight** | The experiment that would teach the most, the six candidates and the map of where the model is unsure |
+| **Ask SI** | Plain-language briefings written by an SI model and published only after code checks every citation and number; a search over NASA's own text |
+| **Method** | Nine steps from the question to reproduction, with the 191 logged corrections to NASA's tables and the validation |
 
-## Key results (computed by the pipeline, not written by hand)
+## Key results
 
-- **Self-extinction model (FLEX):** AUC 0.88 and Brier 0.125 with whole ISS test days held out (80 days, n = 261), better than gradient boosting (0.84) and an oxygen-only baseline (0.80).
-- **Cabin vs Moon:** a methanol droplet flame puts itself out 72% of the time in cabin air (21% O₂, 1 atm) and 6% in lunar-base air (30% O₂, 10.2 psi), 90% interval 2–14%.
-- **Coverage gap:** of 1,613 flight records with an ambient O₂ and pressure, only 37 sit near lunar-base air, and **no solid material** has ever been burned there.
-- **Solid materials (BASS-II):** in orbit, PMMA flames survive down to about 13.5% O₂ in a gentle 2 cm/s breeze, below the 15.4% limit of the normal-gravity upward test (NASA's fitted boundary, NASA/TM-20210011385, PSI-25). Near the limit they release more than twice as much CO. No solid has burned in orbit above 22.7% O₂, so every habitat above cabin air is extrapolation.
-- **Honest limits:** the model says *extrapolating* when any input leaves the flown range (the 8.2 psi exploration atmosphere is below every FLEX test) and *withholds* a number far from the data (the spacesuit).
-- **Data quality:** 191 corrections and flags across 13 NASA tables, each logged with the original value: 34 duplicated SPICE rows, spreadsheet auto-fill errors (CH4 → CH5…), Excel error values (#DIV/0!, #VALUE!) exported as data, "3400%" for 34%, a 0 mmHg pressure, negative gas concentrations, a test marked "not ignited" that burned for 22 s, and a GMT-day typo confirmed by NASA's own video file name.
-
-## How the SI layer stays honest
-
-```
-gold data ──► evidence packs (E1, E2, … computed from PSI tables)
-                 │
-                 ├─► SI model writes a briefing; each sentence lists the items it cites
-                 │
-                 ▼
-          verification firewall (pipeline/si.py)
-           ✓ every sentence cites existing evidence
-           ✓ every number appears in the cited evidence
-           ✓ no safety verdicts ("is safe", "certified", …)
-           ✓ evidence unchanged since the draft (hash)
-                 │
-        pass ────┴──── fail
-         │               │
- "SI-written ·      "Evidence brief ·
-  verified ✓"        deterministic"
-```
-
-The SI interprets; it never decides. Rankings, predictions and the out-of-data guard are deterministic and tested. Regenerate the drafts with Claude: `python scripts/si_generate.py` (needs `ANTHROPIC_API_KEY`).
+- A methanol droplet fire puts itself out **72%** of the time in ISS cabin air (21% O₂, 14.7 psi) and only **6%** in lunar-base air (30% O₂, 10.2 psi), 90% interval 2–14%.
+- Only **37 of 1,613** flight records with a known atmosphere sit near lunar-base air, and **no solid material** has ever burned in orbit above 22.7% O₂.
+- The self-extinction model scores **AUC 0.88** and Brier 0.125 on ISS test days it never saw, ahead of gradient boosting (0.84) and an oxygen-only baseline (0.80).
+- **191** corrections to NASA's tables, each logged with the original value.
+- **33 of 33** SI briefings pass the verification firewall.
 
 ## Run it
 
 ```bash
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python scripts/fetch_psi_catalog.py combustion           # PSI catalog (public API, no login)
+python scripts/fetch_psi_catalog.py combustion
 python scripts/fetch_psi.py data/psi PSI-10 PSI-20 PSI-21 PSI-22 PSI-23 PSI-25 PSI-26 PSI-39 PSI-47 PSI-60 PSI-62 PSI-68 PSI-69 PSI-98 PSI-99 PSI-100 PSI-101 PSI-102 PSI-106 PSI-107 PSI-115 PSI-117 PSI-142 PSI-159
-python -m pipeline.run                                   # silver -> gold -> models -> SI firewall -> web/data (~4 s)
-python -m pytest                                         # tests
-python scripts/serve.py                                  # dashboard at http://127.0.0.1:8765
+python scripts/build_moon_assets.py web/assets/moon     # LOLA terrain, Moon textures, JPL Horizons
+python -m pipeline.run                                  # NASA tables -> clean data -> models -> SI firewall -> web/data
+python scripts/i18n_es.py web/data/i18n-es.js           # Spanish texts
+python -m pytest
+python scripts/serve.py                                 # website at http://127.0.0.1:8765
 ```
 
-Optional: `pip install anthropic` and `python scripts/si_generate.py` to regenerate the SI drafts.
+GitHub Pages publishes `web/` on every push to `main` (`.github/workflows/pages.yml`).
 
-The dashboard is a static site in `web/` (Plotly is bundled, no CDN). It also works by opening `web/index.html` from disk. GitHub Pages serves the `gh-pages` branch; the workflow in `.github/workflows/pages.yml` publishes `web/` there on every push to `main`.
-
-## Repository layout
+## Repository
 
 | Path | Role |
 |---|---|
-| `scripts/fetch_psi*.py` | **Bronze:** metadata and experimental tables from NASA PSI's public API |
-| `pipeline/silver.py` | **Silver:** one parser per experiment → common schema, SI units, quality rules and correction log |
-| `pipeline/investigations.py` | **Gold:** automatic profile of the 24 investigations, similarity and per-habitat ranking |
-| `pipeline/models.py` | **ML:** FLEX self-extinction model (logistic + 200-model bootstrap), CFI-G limiting-temperature test, out-of-data guard, next experiment |
-| `pipeline/gold.py` | Findings with evidence scores, analytic tables, web export and downloads |
-| `pipeline/si.py` | **SI layer:** evidence packs, verification firewall, deterministic fallback, search corpus |
-| `scripts/si_generate.py` | Regenerates SI drafts with Claude through the Anthropic API |
-| `data/gold/`, `data/si/` | Versioned outputs: tests, investigations, QC log, findings, evidence packs, SI drafts and verification |
-| `web/` | Dashboard (HTML/CSS/JS + bundled Plotly) |
-| `tests/` | Pytest suite: data integrity, model behaviour, out-of-data guard, SI firewall |
-| `report/` | Technical report PDFs in English and Spanish |
-| `docs/` | English summary, use of AI, comparison with other approaches |
+| `web/` | The website: `index.html`, `styles.css`, `app.js`, `i18n.js`, the 3D modules (`globe.js`, `moonbase.js`, `sources3d.js`, `lab3d.js`), data, flight video and bundled Plotly and three.js |
+| `pipeline/` | Cleaning, profiles and ranking, models, solids, lunar base audit, SI evidence and firewall, web export |
+| `scripts/` | Downloads from NASA PSI, lunar assets, SI drafts, Spanish texts, local server |
+| `data/` | Versioned outputs: clean tests, investigations, quality log, findings, SI evidence and verification |
+| `tests/` | Data, model, out-of-data guard and SI firewall tests |
+| `report/` | Technical report PDFs |
+| `docs/` | Use of AI and the 30-second video |
 
 ## Data and license
 
-Data: NASA Physical Sciences Informatics (PSI), Combustion Science investigations, public domain (CC0): [PSI search "combustion"](https://psi.nasa.gov/physci/repo/search?q=combustion&data_source=psi&data_type=investigation). Exploration atmosphere: NASA's 8.2 psia / 34% O₂ habitat standard ([NTRS 20240007817](https://ntrs.nasa.gov/citations/20240007817)).
-
-Code: [MIT License](LICENSE). The models are research aids, not flight certification. This project is not affiliated with or endorsed by NASA.
+Data: NASA Physical Sciences Informatics (PSI), Combustion Science investigations, public domain (CC0); NASA SVS, LRO LOLA (PGDA) and JPL Horizons for the Moon. Code: [MIT License](LICENSE). The models are research aids, not flight certification. This project is not affiliated with or endorsed by NASA.

@@ -1,47 +1,41 @@
-# Skylab Phoenix: inteligencia de seguridad contra incendios a partir de los datos de microgravedad de NASA
+# Skylab Phoenix
 
-**NASA Space Apps Challenge 2026 · "Flame in Freefall"** · Equipo **Skylab Phoenix**: Juan Sebastián Zárate (líder) y Javier Medina · [English](README.md)
+**NASA Space Apps Challenge 2026 · Flame in Freefall**
+Equipo Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (líder) y Javier Medina · [Read in English](README.md)
 
-- **Dashboard en vivo:** https://juanzarate1129517999-beep.github.io/nasa-space/
-- **Informe técnico:** en español [report/Informe_Skylab_Phoenix.pdf](report/Informe_Skylab_Phoenix.pdf) · en inglés [report/Technical_Report_Skylab_Phoenix.pdf](report/Technical_Report_Skylab_Phoenix.pdf) · resumen corto en inglés: [docs/TECHNICAL_SUMMARY.md](docs/TECHNICAL_SUMMARY.md)
-- **Textos y lista de verificación para la entrega:** [SUBMISSION.md](SUBMISSION.md) · **Uso de IA/SI:** [docs/AI_USE.md](docs/AI_USE.md)
+> La base lunar va a respirar 30 % de oxígeno. Skylab Phoenix responde, con los propios datos de vuelo de la NASA, qué le pasa al fuego allí, qué tan segura es esa respuesta y dónde se acaban los datos.
 
-Skylab Phoenix convierte los datos de combustión de vuelo del repositorio NASA PSI en hallazgos de seguridad contra incendios para la base lunar, las naves y los trajes espaciales:
+- **Sitio web:** https://juanzarate1129517999-beep.github.io/nasa-space/?lang=es (español e inglés, sin registro; los modelos corren en el navegador)
+- **Video de 30 segundos:** [docs/video/skylab_phoenix_30s.mp4](docs/video/skylab_phoenix_30s.mp4)
+- **Informe técnico:** [español](report/Informe_Skylab_Phoenix.pdf) · [inglés](report/Technical_Report_Skylab_Phoenix.pdf)
+- **Textos de la entrega:** [SUBMISSION.md](SUBMISSION.md) · **Uso de IA:** [docs/AI_USE.md](docs/AI_USE.md)
 
-- **Ingeniería de datos:** limpia las 24 investigaciones de *Combustion Science*, lleva todo a un esquema común en unidades SI y registra cada corrección (191 en total).
-- **Análisis:** perfila, rankea y compara cada investigación para cinco atmósferas: cabina, preparación de EVA, base lunar, atmósfera de exploración de NASA (8,2 psi y 34 % O₂) y traje espacial.
-- **Machine learning:** modelos validados con incertidumbre explícita, un detector de "fuera de los datos" que también revisa el rango volado de cada variable, y la recomendación del próximo experimento.
-- **Capa SI (lo que pide el título del reto):** una SI (Claude, de Anthropic) escribe resúmenes en lenguaje claro por hábitat y por investigación. El código los publica solo si cada frase cita su evidencia, cada número aparece en esa evidencia y no hay veredictos de seguridad. Pasan 33 de 33, y en español se muestran traducidos con los números copiados del original verificado.
-- **Materiales sólidos (BASS-II):** en órbita, las llamas sobre PMMA sobreviven hasta cerca de 13,5 % de O₂ con una brisa de 2 cm/s, por debajo del 15,4 % del ensayo ascendente en gravedad normal (límite ajustado por la NASA, NASA/TM-20210011385, PSI-25). Cerca del límite liberan más del doble de CO. Ningún sólido ha ardido en órbita por encima de 22,7 % de O₂.
-- **Aprende 3D inmersivo:** cuatro capítulos a pantalla completa: el plan Artemis sobre una Luna 3D real con el descenso al terreno LOLA de 5 m/píxel del polo sur, cinco formas en que empieza un fuego dentro de un módulo de la ISS (cada una ligada a la investigación de la NASA que la midió), cómo cambia una llama de la Tierra a la órbita y el mismo fuego en cuatro gravedades.
-- **Panel interactivo:** en Hallazgos, los 1.955 registros con filtros cruzados (estado, investigación, resultado, oxígeno, presión, aire de base lunar) y descarga del CSV filtrado.
-- **Fire Lab con física real:** la gota se encoge en tiempo real según la ley d² con la tasa de combustión y el diámetro de extinción de los cinco ensayos FLEX más cercanos, junto a una gráfica d² en vivo.
-- **Método:** nueve pasos explicados, de la pregunta a la reproducción, con el registro de correcciones, la validación y el firewall de la SI.
-- **Historia y Tierra:** lecciones de Apollo 1, Apollo 13 y Mir, aplicaciones en la Tierra y los diez recursos oficiales del reto enlazados.
-- **Para cada público:** vistas guiadas para pregrado, posgrado, profesores, investigadores e ingenieros; búsqueda "Ask the archive" sobre el texto de NASA; comparación lado a lado; enlaces compartibles; descargas.
+## El sitio
+
+| Sección | Qué muestra |
+|---|---|
+| **Inicio** | Las cifras principales y una Tierra 3D con la órbita en vivo de la ISS y 23 satélites de la NASA, la Luna y Marte |
+| **Aprende 3D** | Una historia inmersiva en cuatro capítulos: el plan Artemis sobre una Luna 3D real y el descenso a un sitio del polo sur sobre el terreno LOLA de la NASA (5 m por píxel), iluminado por el Sol donde lo sitúa JPL Horizons; cinco formas en que empieza un fuego dentro de un módulo de la ISS, cada una ligada a la investigación que la midió; cómo cambia una llama de la Tierra a la órbita; el mismo fuego en cuatro gravedades |
+| **Llamas** | 43 clips de video real de vuelo (sólidos, líquidos y gases) y los límites de materiales sólidos medidos por BASS-II |
+| **Fire Lab** | ¿Se apagará solo este fuego? Un modelo entrenado con 261 fuegos de gotas de FLEX responde con un intervalo del 90 % y avisa cuando extrapola. La gota arde en tiempo real según la ley d², con la tasa de combustión y el diámetro de extinción de los cinco ensayos de vuelo más cercanos |
+| **Hallazgos** | Un panel interactivo sobre los 1.955 registros (cada gráfica filtra a las demás), la cobertura de las atmósferas de tripulación, una auditoría de incendios de una base lunar de tres módulos y los hallazgos ordenados por evidencia |
+| **Ranking** | Las 24 investigaciones de combustión de PSI ordenadas para cada atmósfera, con puntaje ajustable, fichas y comparación |
+| **Próximo vuelo** | El experimento que más enseñaría, los seis candidatos y el mapa de dónde duda el modelo |
+| **Pregunta a la SI** | Resúmenes en lenguaje claro escritos por un modelo de SI y publicados solo si el código verifica cada cita y cada número; búsqueda sobre el propio texto de la NASA |
+| **Método** | Nueve pasos de la pregunta a la reproducción, con las 191 correcciones registradas a las tablas de la NASA y la validación |
+
+## Resultados clave
+
+- Un fuego de gota de metanol se apaga solo el **72 %** de las veces en aire de cabina de la ISS (21 % O₂, 14,7 psi) y apenas el **6 %** en aire de base lunar (30 % O₂, 10,2 psi), intervalo del 90 %: 2–14 %.
+- Solo **37 de 1.613** registros de vuelo con atmósfera conocida están cerca del aire de la base lunar, y **ningún material sólido** ha ardido en órbita por encima de 22,7 % de O₂.
+- El modelo de autoextinción logra **AUC 0,88** y Brier 0,125 en días de ensayo de la ISS que nunca vio.
+- **191** correcciones a las tablas de la NASA, cada una con su valor original.
+- **33 de 33** resúmenes SI pasan el firewall de verificación.
 
 ## Cómo correrlo
 
-```bash
-python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python scripts/fetch_psi_catalog.py combustion
-python scripts/fetch_psi.py data/psi PSI-10 PSI-20 PSI-21 PSI-22 PSI-23 PSI-25 PSI-26 PSI-39 PSI-47 PSI-60 PSI-62 PSI-68 PSI-69 PSI-98 PSI-99 PSI-100 PSI-101 PSI-102 PSI-106 PSI-107 PSI-115 PSI-117 PSI-142 PSI-159
-python -m pipeline.run                                   # silver -> gold -> modelos -> firewall SI -> web/data (~4 s)
-python -m pytest                                         # pruebas
-python scripts/serve.py                                  # dashboard en http://127.0.0.1:8765
-```
+Los comandos están en el [README en inglés](README.md#run-it). Un solo `python -m pipeline.run` reconstruye todos los datos del sitio en unos cuatro segundos.
 
-Para regenerar los resúmenes SI: `pip install anthropic`, define `ANTHROPIC_API_KEY` y corre `python scripts/si_generate.py`, y luego otra vez `python -m pipeline.run`.
+## Datos y licencia
 
-El dashboard es un sitio estático (`web/`) con Plotly incluido, así que funciona sin internet una vez cargado. El workflow `.github/workflows/pages.yml` lo publica en la rama `gh-pages` en cada push a `main`.
-
-## Resultados clave (salen del pipeline)
-
-- **Modelo FLEX:** AUC 0,88 y Brier 0,125 dejando fuera días completos de ensayo (80 días, n = 261). Supera a gradient boosting (0,84) y al baseline de solo O₂ (0,80).
-- **Probabilidad de que la llama de una gota se apague sola:** 72 % en aire de cabina contra 6 % en la base lunar (30 % O₂, 10,2 psi). En la atmósfera de exploración (34 %, 8,2 psi) el modelo marca **extrapolación**, porque ningún ensayo FLEX se voló a esa presión. Para el traje espacial **no predice**.
-- **Cobertura:** de 1.647 registros de vuelo con O₂ y presión ambiente, solo 37 caen cerca de la atmósfera lunar, y ninguno es de un material sólido.
-
-## Licencia
-
-Código bajo [licencia MIT](LICENSE). Datos de NASA PSI, dominio público (CC0). Los modelos son herramientas de investigación, no certificación de vuelo.
+Datos: NASA Physical Sciences Informatics (PSI), investigaciones de Combustion Science, dominio público (CC0); NASA SVS, LRO LOLA (PGDA) y JPL Horizons para la Luna. Código: [licencia MIT](LICENSE). Los modelos son ayudas de investigación, no certificación de vuelo. El proyecto no está afiliado ni respaldado por la NASA.

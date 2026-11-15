@@ -20,3 +20,4 @@ _interno/
 data/catalog/
 data/processed/
 .pytest_cache/
+brag-output/
