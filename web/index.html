@@ -30,10 +30,8 @@
       <a href="#/findings" data-v="findings">Findings</a>
       <a href="#/ranking" data-v="ranking">Ranking</a>
       <a href="#/next" data-v="next">Next flight</a>
-      <a href="#/ask" data-v="ask">Ask SI</a>
       <a href="#/data" data-v="data">Method</a>
     </nav>
-    <button class="lang" id="lang" type="button" aria-label="Ver en español">ES</button>
     <a class="btn btn--fire btn--sm nav__cta" href="https://github.com/juanzarate1129517999-beep/nasa-space" target="_blank" rel="noopener">Source <span aria-hidden="true">↗</span></a>
     <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
   </div>
@@ -518,51 +516,12 @@
     </div>
   </section>
 
-  <section class="view" id="v-ask" data-view="ask" hidden>
-    <div class="sec sec--first">
-      <div class="wrap">
-        <header class="sec__head">
-          <p class="eyebrow">06 · Ask SI</p>
-          <h2>Ask the archive. <span class="mute">Get an answer you can check, sentence by sentence.</span></h2>
-          <p class="sec__lead">An SI (super intelligence, as the challenge calls it) model writes each briefing from numbered evidence computed by the pipeline. Code publishes it only if every sentence cites evidence, every number appears in that evidence and nothing reads as a safety verdict.</p>
-        </header>
-        <div class="grid-brief" id="briefing">
-          <div class="card">
-            <div class="seg seg--wrap" id="brief-hab" role="group" aria-label="Briefing habitat"></div>
-            <div id="brief" aria-live="polite"></div>
-            <div class="links">
-              <button class="btn btn--line btn--sm" id="brief-dl" type="button">Download briefing (.md)</button>
-              <button class="btn btn--line btn--sm" id="brief-sim" type="button">Open in the Fire Lab <span aria-hidden="true">→</span></button>
-            </div>
-          </div>
-          <div class="card">
-            <p class="label">Search NASA's own text</p>
-            <h3>Ask a question.</h3>
-            <p class="sub">Answers are passages from the 24 investigations and our findings, with their source. Nothing is generated, so nothing is made up.</p>
-            <form id="ask-form" class="ask" role="search">
-              <input type="search" id="ask-q" placeholder="e.g. Which suppressants did NASA test?" aria-label="Ask the archive">
-              <button class="btn btn--fire btn--sm" type="submit">Search</button>
-            </form>
-            <div class="chips" id="ask-sug"></div>
-            <div id="ask-out" class="ask-out" aria-live="polite"></div>
-          </div>
-        </div>
-        <div class="audience card--gap">
-          <div class="audience__top">
-            <p class="label">Guided paths</p>
-            <div class="seg" id="aud-seg" role="group" aria-label="Audience"></div>
-          </div>
-          <div id="aud-path" aria-live="polite"></div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section class="view" id="v-data" data-view="data" hidden>
     <div class="sec sec--first">
       <div class="wrap">
         <header class="sec__head">
-          <p class="eyebrow">07 · Method</p>
+          <p class="eyebrow">06 · Method</p>
           <h2>How every number on this site is made. <span class="mute">From NASA's raw tables to an answer you can check.</span></h2>
           <p class="sec__lead">Nine steps, in the order the code runs them. Each one says what we did, why, and where you can see the result. One command rebuilds all of it from NASA's public servers in about four seconds.</p>
         </header>
@@ -676,6 +635,7 @@
                 <p class="label">SI with a firewall</p>
                 <h3>The SI writes; code decides what gets published.</h3>
                 <p>The briefings are drafted by an SI model (Anthropic Claude) from an evidence pack the pipeline computes. The model never sees the raw data and never decides anything: rankings, predictions and the out-of-data guard are plain code. Before a briefing is shown, code checks every sentence:</p>
+                <p><button type="button" class="btn btn--line btn--sm" data-open-chat="moon_base">Read the verified lunar-base briefing in the chat →</button></p>
                 <ol class="mth-checks">
                   <li>It cites at least one evidence item that exists.</li>
                   <li>Every number in it appears in the items it cites.</li>
@@ -739,7 +699,10 @@ python -m pytest</code></pre>
       <button class="cb-x" id="cb-close" type="button" aria-label="Close">✕</button>
     </header>
     <div class="cb-log" id="cb-log" aria-live="polite">
-      <div class="cb-msg cb-msg--bot"><p>Ask about fire in space. I answer with the verified SI briefings and with passages quoted from NASA's 24 combustion investigations, each with its source. I never make up text.</p></div>
+      <div class="cb-msg cb-msg--bot"><p>Ask about fire in space. Answers are the SI briefings, published only after code checks every citation and number, and passages quoted from NASA's 24 combustion investigations with their source. Nothing here is generated on the fly.</p></div>
+      <p class="label cb-l">Verified SI briefings</p>
+      <div class="seg seg--wrap cb-briefs" id="cb-briefs" role="group" aria-label="Verified SI briefings"></div>
+      <p class="label cb-l">Or ask about NASA's archive</p>
       <div class="chips cb-sug" id="cb-sug"></div>
     </div>
     <form class="cb-form" id="cb-form" role="search">
@@ -782,8 +745,6 @@ python -m pytest</code></pre>
 <script>document.write('<script src="data/si.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="data/corpus.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="data/clips.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="data/i18n-es.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="i18n.js?v=' + window.__V + '"><\/script>');</script>
 <script src="vendor/plotly-2.35.2.min.js"></script>
 <script src="vendor/three-0.147.0.min.js"></script>
 <script src="vendor/OrbitControls-0.147.0.js"></script>
