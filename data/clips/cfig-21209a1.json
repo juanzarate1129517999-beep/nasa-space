@@ -1,0 +1,26 @@
+{
+ "id": "cfig-21209a1",
+ "source": "PSI-159_Raw Data_vlc-record-2021-07-28-15h54m19s-udp____21209A1.ts",
+ "test": "21209A1",
+ "material": "ethane (inverse flame)",
+ "family": "Spherical gas flame",
+ "state": "Gas",
+ "psi": "PSI-159",
+ "o2": 85.0,
+ "m": "0.5 atm \u00b7 ACME CFI-G \u00b7 still burning when the fuel was cut",
+ "out": 0,
+ "burn_s": 26.0,
+ "ok": true,
+ "x": 2.9,
+ "dir": "cfig",
+ "f": "cfig-21209a1",
+ "t0": 64.3,
+ "t1": 93.2,
+ "crop": [
+  420,
+  236,
+  147,
+  115
+ ],
+ "peak_area": 0.2409
+}
