@@ -63,10 +63,33 @@
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(38, 1, 0.01, 200);
     const loader = new T.TextureLoader();
-    const tex = (f) => { const t = loader.load(base + f); t.encoding = T.sRGBEncoding; t.anisotropy = 4; return t; };
+    const maxAniso = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4;
+    const tex = (f) => { const t = loader.load(base + f); t.encoding = T.sRGBEncoding; t.anisotropy = maxAniso; return t; };
 
-    const stars = new T.Mesh(new T.SphereGeometry(90, 48, 24), new T.MeshBasicMaterial({ map: tex("starmap_4k.jpg"), side: T.BackSide, depthWrite: false }));
+    // NASA star map as a dim Milky Way glow, plus its bright stars drawn as crisp points (scripts/build_stars.py).
+    const stars = new T.Group();
+    stars.add(new T.Mesh(new T.SphereGeometry(90, 64, 32), new T.MeshBasicMaterial({ map: tex("starmap_4k.jpg"), side: T.BackSide, depthWrite: false, color: 0x8a8f99 })));
     scene.add(stars);
+    fetch(base + "stars.json").then((r) => r.json()).then((S) => {
+      const n = S.b.length, pos = new Float32Array(3 * n), col = new Float32Array(3 * n), size = new Float32Array(n), tw = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        for (let k = 0; k < 3; k++) { pos[3 * i + k] = S.xyz[3 * i + k] * 88; col[3 * i + k] = 0.55 + 0.45 * S.c[3 * i + k]; }
+        size[i] = 0.9 + 3.4 * Math.pow(S.b[i], 0.7); tw[i] = Math.random() * 6.283;
+      }
+      const g = new T.BufferGeometry();
+      g.setAttribute("position", new T.BufferAttribute(pos, 3)); g.setAttribute("color", new T.BufferAttribute(col, 3));
+      g.setAttribute("size", new T.BufferAttribute(size, 1)); g.setAttribute("tw", new T.BufferAttribute(tw, 1));
+      const m = new T.ShaderMaterial({
+        uniforms: { t: { value: 0 }, pr: { value: renderer.getPixelRatio() } }, transparent: true, depthWrite: false, blending: T.AdditiveBlending,
+        vertexShader: "attribute float size; attribute float tw; attribute vec3 color; uniform float t; uniform float pr; varying vec3 vC; varying float vA;" +
+          "void main(){ vC = color; vA = 0.78 + 0.22 * sin(t * 1.3 + tw); gl_PointSize = size * pr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+        fragmentShader: "varying vec3 vC; varying float vA; void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d); float a = smoothstep(0.5, 0.0, r); a = a * a; gl_FragColor = vec4(vC * a * vA, a * vA); }",
+      });
+      const pts = new T.Points(g, m);
+      pts.frustumCulled = false;
+      stars.add(pts);
+      stars.userData.mat = m;
+    }).catch(() => {});
 
     const earthGroup = new T.Group();
     scene.add(earthGroup);
@@ -85,7 +108,9 @@
 
     const bodies = {};
     function planet(id, file, r, pos, tint) {
-      const m = new T.Mesh(new T.SphereGeometry(r, 64, 48), new T.MeshStandardMaterial({ map: tex(file), roughness: 1, metalness: 0 }));
+      const mat = new T.MeshStandardMaterial({ map: tex(file), roughness: 1, metalness: 0 });
+      if (id === "moon") { const bm = loader.load("assets/moon/ldem_3_8bit.jpg"); bm.anisotropy = maxAniso; mat.bumpMap = bm; mat.bumpScale = 0.12; mat.map = tex("../moon/lroc_color_2k.jpg"); }
+      const m = new T.Mesh(new T.SphereGeometry(r, 96, 64), mat);
       m.position.copy(pos);
       m.userData.id = id;
       scene.add(m);
@@ -317,6 +342,7 @@
         camera.position.add(tmp);
       }
       controls.update();
+      if (stars.userData.mat) stars.userData.mat.uniforms.t.value = now / 1000;
       renderer.render(scene, camera);
       const W = host.clientWidth, H = host.clientHeight;
       camRight.setFromMatrixColumn(camera.matrixWorld, 0);
