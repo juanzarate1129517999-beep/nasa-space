@@ -299,7 +299,7 @@
     $("#inv-gallery").hidden = invMode.m !== "gallery";
     $("#inv-chart-wrap").hidden = invMode.m !== "chart";
     $("#inv-count").textContent = invMode.m === "gallery" ? `${rows.length} shown · open any card for its full file` : `${rows.length} shown · click a bar to open its card`;
-    if (invMode.m === "gallery") renderInvGallery(rows); else safe(() => renderInvChart(rows), "investigation chart");
+    if (invMode.m === "gallery") renderInvGallery(rows); else { $("#inv-more-wrap").hidden = true; safe(() => renderInvChart(rows), "investigation chart"); }
   }
   const invMode = { m: "gallery" };
   const POSTER = { "PSI-25": "assets/video/bass2-rod-22.jpg", "PSI-159": "assets/video/cfig-butane-39.jpg", "PSI-39": "assets/video/more/flex-f208d02.jpg", "PSI-23": "assets/video/more/sflame-20029j1.jpg", "PSI-107": "assets/video/more/spice-62-1127.jpg" };
@@ -309,7 +309,10 @@
   const visOf = (r) => (POSTER[r.psi_id] ? `<img src="${POSTER[r.psi_id]}" alt="" loading="lazy"><span class="ig__src">Flight video</span>` : `<span class="ig__art ig__art--${ART[r.family] || "gas"}"></span>`);
   function renderInvGallery(rows) {
     const hab = invState.hab;
-    $("#inv-gallery").innerHTML = rows.map((r, i) => {
+    const lim = innerWidth < 700 ? 4 : 8;
+    $("#inv-more-wrap").hidden = invMode.m !== "gallery" || rows.length <= lim;
+    $("#inv-more").textContent = invState.all ? "Show fewer" : `Show all ${rows.length}`;
+    $("#inv-gallery").innerHTML = (invState.all ? rows : rows.slice(0, lim)).map((r, i) => {
       const s = scoreOf(r, hab), rel = r.relevance[hab], inCmp = cmpState.ids.includes(r.psi_id);
       return `<article class="ig${i < 3 ? " is-top" : ""}${r.type === "Ground" ? " is-ground" : ""}" data-id="${r.psi_id}" tabindex="0" role="button" aria-label="Open ${esc(r.name)}">
         <span class="ig__vis">${visOf(r)}<span class="ig__top"><span>${esc(r.family)}</span><span>#${i + 1} · ${r.psi_id}</span></span></span>
@@ -714,12 +717,15 @@
     $("#grav-note").innerHTML = `<b>${worse} of ${G.length}</b> samples burned as much or more in 1 g at 20 cm/s. Saffire-I, same fabric: <b>${s1.concurrent} s</b> concurrent flow vs <b>${s1.opposed} s</b> opposed. PSI has no partial-gravity data yet (LUCI, FM2); these pairs bound it only for this flow regime.`;
   }
 
-  let findLayer = "All";
+  let findLayer = "All", findAll = false;
   function renderFindings() {
     $("#find-layer").innerHTML = ["All", "Prevention", "Detection", "Suppression"].map((l) => `<button aria-pressed="${l === findLayer}" data-l="${l}">${l}</button>`).join("");
     document.querySelectorAll("#find-layer button").forEach((b) => b.addEventListener("click", () => { findLayer = b.dataset.l; renderFindings(); }));
     const comp = [["volume", "Volume"], ["quality", "Quality"], ["agreement", "Agreement"], ["closeness", "Lunar fit"]];
-    $("#findings-list").innerHTML = D.findings.filter((f) => findLayer === "All" || f.layer === findLayer).map((f) => `
+    const fl = D.findings.filter((f) => findLayer === "All" || f.layer === findLayer);
+    $("#find-more").hidden = fl.length <= 4;
+    $("#find-more").textContent = findAll ? "Show fewer" : `Show all ${fl.length} findings`;
+    $("#findings-list").innerHTML = (findAll ? fl : fl.slice(0, 4)).map((f) => `
       <article class="finding l-${f.layer}">
         <div class="sc">${Math.round(f.score)}<small>Evidence score</small></div>
         <div><span class="tag solid layer-${f.layer}">${esc(f.layer)}</span><h4>${esc(f.title)}</h4><p>${esc(f.text)}</p><div class="impl">${esc(f.implication)}</div><div class="src">Source · ${esc(f.source)}</div></div>
@@ -1217,16 +1223,7 @@
     if (r.st === "outside") return { v: "—", muted: true, l: "prediction withheld: no flight data near this air", t: `${near} flight tests ran within 3 points of O₂ and 30% of this pressure.`, hb };
     return { v: pct(r.p), l: `chance a droplet fire goes out on its own · 90% range ${pct(r.lo)}–${pct(r.hi)}${r.st === "extrapolating" ? " · extrapolating" : ""}`, t: `${near} flight tests ran within 3 points of O₂ and 30% of this pressure.`, hb };
   }
-  function renderDests() {
-    $("#dests").innerHTML = Object.entries(DEST).map(([k, d]) => {
-      const x = destInfo(k);
-      return `<li class="dst"><span class="dst__n">${esc(d.label)}</span><b>${esc(d.title)}</b>
-        <span class="atm"><span>${o2pct(x.hb.x_o2)} O₂</span><span>${num(x.hb.p_atm * ATM_PSI, 1)} psi</span><span>${d.g}</span></span>
-        <span class="dst__v${x.muted ? " muted" : ""}">${x.v}</span><span class="dst__l">${esc(x.l)}</span><span class="dst__t">${esc(x.t)}</span>
-        <a class="dst__go" href="#/lab" data-hab="${d.hab}">Open in the Fire Lab →</a></li>`;
-    }).join("");
-    document.querySelectorAll("#dests [data-hab]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); ensure("lab"); setPreset(a.dataset.hab); location.hash = "#/lab"; }));
-  }
+
   function destDetail(id) {
     const x = destInfo(id);
     return `<span class="glabel__v${x.muted ? " muted" : ""}">${x.v}</span><span class="glabel__l">${esc(x.l)}</span><a href="#/lab" class="glabel__a" data-hab="${DEST[id].hab}">Open in the Fire Lab →</a>`;
@@ -1255,16 +1252,6 @@
       ["Next flight", `${pct(k.interval[0])}–${pct(k.interval[1])}`, "today's range for the test that would teach the most", `${k.fuel} droplet at ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi, ${(100 * k.x_co2).toFixed(0)}% CO₂: the widest doubt near lunar-base air.`, "#/next", "See the recommendation"],
     ];
     $("#answer-list").innerHTML = items.map(([t, v, l, d, h, a], i) => `<li class="answer"><a href="${h}"><span class="answer__n">${String(i + 1).padStart(2, "0")} · ${t}</span><span class="answer__v">${v}</span><span class="answer__l">${l}</span><span class="answer__d">${esc(d)}</span><span class="answer__go">${a} →</span></a></li>`).join("");
-    const tiles = [
-      ["learn", "Learn 3D", "Seven interactive steps, one flame in four gravities, and the whole fire model as a 3D landscape you can turn."],
-      ["flames", "Flames", `Real ISS flight video: ${(window.CLIPS || []).length} clips of burning solids, liquid droplets and gas flames, filtered by state and oxygen.`],
-      ["lab", "Fire Lab", "Set oxygen, pressure and suppressant; a validated model answers with uncertainty."],
-      ["findings", "Findings", "Where NASA has flown fire versus where crews will live, and what the tests show."],
-      ["ranking", "Ranking", "The 24 investigations ranked for your habitat, with weights you can change."],
-      ["next", "Next flight", "The experiment NASA should fly next, chosen by where the models disagree most."],
-      ["ask", "Ask SI", "Cited briefings checked by code, and a search over NASA's own text."],
-    ];
-    $("#tiles").innerHTML = tiles.map(([v, t, d], i) => `<a class="tile" href="#/${v}"><span class="tile__n">${String(i + 1).padStart(2, "0")}</span><b>${t}</b><small>${d}</small><span class="tile__go" aria-hidden="true">→</span></a>`).join("");
   }
 
   const ROD = [
@@ -1273,12 +1260,7 @@
     { f: "bass2-rod-18", o2: 18.0, test: "O3b", flow: "5, 3, 2, 1 cm/s, then lower", x: 4.0, cap: "Orange and sooty, wrapped around the tip; it shrinks each time the airflow is turned down." },
     { f: "bass2-rod-22", o2: 22.2, test: "O1", flow: "20, 10, 5, 2, then 1 cm/s", x: 6.6, cap: "Air close to the station's: a large, bright, sooty flame that changes shape as the airflow drops." },
   ];
-  const REEL = [
-    { f: "bass2-sibal-18", kind: "Solid · fabric", t: "SIBAL cotton-fiberglass fabric", m: "18.5% O₂ · 10 cm/s · BASS-II test T1", x: 1.2, psi: "PSI-25", cap: "A small, dim flame on a 2 cm strip of the fabric NASA uses as a cabin-textile stand-in." },
-    { f: "bass2-film-22", kind: "Solid · thin film", t: "100 µm acrylic film", m: "22.2% O₂ · 5 cm/s · BASS-II test B1", x: 1.8, psi: "PSI-25", cap: "Thin material burns as a flame front that travels along the strip." },
-    { f: "cfi-droplet", kind: "Liquid · fuel droplet", t: "Fuel droplet, backlit", m: "Cool Flame Investigation · CIR rack", x: 6, psi: "PSI-39", cap: "Two needles deploy the droplet (dark disc), a hot wire lights it, and it shrinks as it burns." },
-    { f: "cfig-butane-39", kind: "Gas · burner flame", t: "Butane from a spherical burner", m: "39.1% O₂ · 1 atm · ACME CFI-G test 21102 B1", x: 4.5, psi: "PSI-159", cap: "Nothing rises, so the flame is a sphere. NASA's table: it went out on its own after 38 s." },
-  ];
+
   const vidUrl = (f) => `assets/video/${f}.mp4`;
   const psiUrl = (id) => (INV.find((r) => r.psi_id === id) || {}).psi_url || "#";
   let rodI = 0;
@@ -1301,16 +1283,7 @@
     document.querySelectorAll(".stage__pick button").forEach((b) => b.addEventListener("click", () => { rodI = +b.dataset.i; renderStage(); }));
     const v = $("#stage-v"); if (v) { v.playbackRate = 1; v.play().catch(() => {}); }
   }
-  function renderReel() {
-    $("#reel").innerHTML = REEL.map((r) => `<figure class="clip"><div class="clip__v"><video data-src="${vidUrl(r.f)}" poster="assets/video/${r.f}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${r.x}</span></div>
-      <figcaption><span class="label">${esc(r.kind)}</span><b>${esc(r.t)}</b><span class="mono-sm">${esc(r.m)}</span><small>${esc(r.cap)}</small><a class="src-link" href="${psiUrl(r.psi)}" target="_blank" rel="noopener">${r.psi} ↗</a></figcaption></figure>`).join("");
-    const vids = [...document.querySelectorAll("#reel video")];
-    const io = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => {
-      const v = e.target;
-      if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
-    }), { threshold: 0.25 }) : null;
-    vids.forEach((v) => (io ? io.observe(v) : (v.src = v.dataset.src)));
-  }
+
 
   let lab3d = null;
   const GRAV = [["ISS", 0, "≈ 0 g"], ["Moon", 0.17, "0.17 g"], ["Mars", 0.38, "0.38 g"], ["Earth", 1, "1 g"]];
@@ -1597,9 +1570,9 @@
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
-    home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(renderDests, "destinations"); safe(initGlobe, "globe"); },
+    home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(initGlobe, "globe"); },
     learn: () => { safe(initLearn, "learn"); safe(initWorlds, "worlds"); safe(renderLand, "landscape"); },
-    flames: () => { safe(renderStage, "stage"); safe(renderReel, "reel"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
+    flames: () => { safe(renderStage, "stage"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
     findings: () => { safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
     ranking: () => { safe(renderSurvival, "survival"); safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
@@ -1672,6 +1645,8 @@
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
   document.querySelectorAll("#inv-mode button").forEach((b) => b.addEventListener("click", () => { invMode.m = b.dataset.m; renderInvList(); }));
   safe(() => { const dlg = $("#inv-modal"); dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); }); }, "modal");
+  $("#find-more").addEventListener("click", () => { findAll = !findAll; renderFindings(); });
+  $("#inv-more").addEventListener("click", () => { invState.all = !invState.all; renderInvGallery(invState.rows || filteredInv()); });
   $("#arch-more").addEventListener("click", () => { archState.all = !archState.all; renderArchive(); });
   document.querySelectorAll("#surv-view button").forEach((b) => b.addEventListener("click", () => { survState.view = b.dataset.v; renderSurvival(); }));
   $("#surv-more").addEventListener("click", () => { survState.all = !survState.all; renderSurvival(); });

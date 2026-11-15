@@ -1023,3 +1023,7 @@ input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; border-radius
 .qc-cats button b { font-size: 1.35rem; font-weight: 500; color: var(--ink); letter-spacing: -.02em; }
 .qc-cats button[aria-pressed="true"] { background: var(--surface-3); border-color: var(--c, var(--ink-2)); color: var(--ink); }
 @media (max-width: 720px) { .qc-cats { display: grid; grid-template-columns: 1fr 1fr; } .qc-cats button { min-width: 0; } }
+details.more { min-width: 0; overflow: hidden; }
+details.more .more__body { min-width: 0; }
+details.more .js-plotly-plot, .land__chart { max-width: 100%; overflow: hidden; }
+.view { overflow-x: clip; }
