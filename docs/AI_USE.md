@@ -14,7 +14,7 @@ Metadata: every SI briefing carries `"source": "si"` in `web/data/si.js`, the ge
 ## What is *not* SI
 
 - **Rankings, scores, predictions and the out-of-data guard** are deterministic code (pandas, scikit-learn, NumPy), validated with held-out ISS test days and covered by tests.
-- **Ask the archive** is a BM25 keyword search over NASA's own text. It quotes passages; it does not generate text.
+- **The Ask SI chat** shows the verified briefings and a BM25 keyword search over NASA's own text. It quotes passages; it does not generate text.
 - **The data**: every number comes from NASA PSI tables, with each correction logged in `data/gold/qc_log.csv`.
 
 ## AI assistance in building the project
@@ -23,5 +23,4 @@ Metadata: every SI briefing carries `"source": "si"` in `web/data/si.js`, the ge
 - **Research** of the challenge and of NASA sources used web search; every source used is cited in the README, the report and the dashboard.
 - **Images:** the website has no SI-generated images; charts are plotted from data and the 3D scenes use NASA imagery and terrain.
 - **Demo video** (`docs/video/skylab_phoenix_30s.mp4`): composed with AI assistance (Claude Code) from real NASA flight video and real captures of the website, with music synthesized by AI-written code. It carries a visible watermark: “Produced with AI assistance (Claude) · Flight video and data: NASA PSI”, and the file metadata (title, comment, description) states that the video and its audio are SI-assisted.
-- **Spanish translation:** the website's Spanish texts were written with AI assistance; numbers in translated SI briefings are copied by code from the verified English text.
 - **NASA branding:** no NASA logo, insignia or mission patch is used anywhere in the project.
