@@ -6,10 +6,10 @@ The NASA Space Apps rules allow SI tools (machine learning, chatbots, large lang
 
 | Component | What the SI does | How it is controlled |
 |---|---|---|
-| **SI briefings** (`data/si/drafts.json`, shown in the dashboard as “SI-written · verified ✓”) | Anthropic **Claude** writes 2–4 sentence briefings for each of the 5 habitats and 24 investigations, only from numbered evidence packs computed by the pipeline (`data/si/evidence_packs.json`). | `pipeline/si.py` publishes a draft only if every sentence cites existing evidence, every number appears in the cited evidence, there is no safety verdict, and the evidence has not changed since the draft (hash). Otherwise the dashboard shows the evidence itself, labelled “Evidence brief · deterministic”. Result per briefing: `data/si/verification.json`. |
+| **SI briefings** (`data/si/drafts.json`, shown on the website as “SI-written · verified ✓”) | Anthropic **Claude** writes 2–4 sentence briefings for each habitat, each of the 24 investigations, each lunar-base module and the base as a whole, only from numbered evidence packs computed by the pipeline (`data/si/evidence_packs.json`). | `pipeline/si.py` publishes a draft only if every sentence cites existing evidence, every number appears in the cited evidence, there is no safety verdict, and the evidence has not changed since the draft (hash). Otherwise the website shows the evidence itself, labelled “Evidence brief · deterministic”. Result per briefing: `data/si/verification.json`. |
 | **Regeneration script** (`scripts/si_generate.py`) | Calls the Claude API (Anthropic SDK) with structured JSON output; failed drafts get one correction round with the list of problems. | Same firewall. Needs the team's own `ANTHROPIC_API_KEY`. |
 
-Metadata: every SI briefing carries `"source": "si"` in `web/data/si.js`, the generator is recorded in `data/si/drafts.json → meta.generator`, and the dashboard badge says “SI-written”.
+Metadata: every SI briefing carries `"source": "si"` in `web/data/si.js`, the generator is recorded in `data/si/drafts.json → meta.generator`, and the website badge says “SI-written”.
 
 ## What is *not* SI
 
@@ -19,7 +19,9 @@ Metadata: every SI briefing carries `"source": "si"` in `web/data/si.js`, the ge
 
 ## AI assistance in building the project
 
-- **Code and documentation** were written with AI assistance (Anthropic Claude, through Claude Code), then run, reviewed and tested by the team. This is acknowledged in descriptive text (this file, the README, the dashboard footer, the reports and the submission page) and in metadata: the git history records Claude as co-author on those commits, and `data/si/drafts.json → meta.generator` names the SI model.
+- **Code and documentation** were written with AI assistance (Anthropic Claude, through Claude Code), then run, reviewed and tested by the team. This is acknowledged in descriptive text (this file, the README, the website footer, the reports and the submission page) and in metadata: the git history records Claude as co-author on those commits, and `data/si/drafts.json → meta.generator` names the SI model.
 - **Research** of the challenge and of NASA sources used web search; every source used is cited in the README, the report and the dashboard.
-- **Images and video:** the dashboard has no SI-generated images, video or audio; the charts are plotted from data. *Team to confirm* for the logo (`web/assets/phoenix.svg`) and for any image or video in the demo: if one was generated with SI, add a visible “SI-generated” watermark before submitting.
+- **Images:** the website has no SI-generated images; charts are plotted from data and the 3D scenes use NASA imagery and terrain.
+- **Demo video** (`docs/video/skylab_phoenix_30s.mp4`): composed with AI assistance (Claude Code) from real NASA flight video and real captures of the website, with synthesized music. It carries a visible watermark: “Produced with AI assistance (Claude) · Flight video and data: NASA PSI”.
+- **Spanish translation:** the website's Spanish texts were written with AI assistance; numbers in translated SI briefings are copied by code from the verified English text.
 - **NASA branding:** no NASA logo, insignia or mission patch is used anywhere in the project.
