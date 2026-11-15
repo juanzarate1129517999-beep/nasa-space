@@ -16,7 +16,7 @@ Team Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and
 |---|---|
 | **Home** | The headline numbers and a 3D Earth with the live ISS orbit and 23 NASA satellites, the Moon and Mars |
 | **Learn 3D** | A four-chapter immersive story: NASA's Artemis plan over a real 3D Moon and the descent to a south-pole site on NASA's 5 m/pixel LOLA terrain, lit by the Sun where JPL Horizons places it; five ways a fire starts inside an ISS module, each tied to the NASA investigation that measured it; how one flame changes from Earth to orbit; the same fire in four gravities |
-| **Flames** | 43 clips of real flight video (solids, liquids, gases) and the solid-material limits measured by BASS-II |
+| **Flames** | 127 clips of real flight video (solids, liquids, gases), cut from NASA PSI raw video by `scripts/build_clips.py`, and the solid-material limits measured by BASS-II |
 | **Fire Lab** | Will a fire go out on its own? A two-stage physics model trained on 261 FLEX droplet fires gives the chance it goes out, breaks apart or burns to the end, with a 90% interval, and says when it is extrapolating. The droplet burns in real time by the d² law, with the burning rate and extinction diameter of the five closest flight tests |
 | **Findings** | An interactive dashboard over all 1,955 records (every chart filters the others), the coverage of crew atmospheres, a fire audit of a three-module lunar base and the findings ranked by evidence |
 | **Ranking** | The 24 PSI combustion investigations ranked for each crew atmosphere with an adjustable score, files and side-by-side comparison |
