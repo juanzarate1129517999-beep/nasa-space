@@ -17,7 +17,7 @@ Team Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and
 | **Home** | The headline numbers and a 3D Earth with the live ISS orbit and 23 NASA satellites, the Moon and Mars |
 | **Learn 3D** | A four-chapter immersive story: NASA's Artemis plan over a real 3D Moon and the descent to a south-pole site on NASA's 5 m/pixel LOLA terrain, lit by the Sun where JPL Horizons places it; five ways a fire starts inside an ISS module, each tied to the NASA investigation that measured it; how one flame changes from Earth to orbit; the same fire in four gravities |
 | **Flames** | 43 clips of real flight video (solids, liquids, gases) and the solid-material limits measured by BASS-II |
-| **Fire Lab** | Will a fire go out on its own? A model trained on 261 FLEX droplet fires answers with a 90% interval and says when it is extrapolating. The droplet burns in real time by the d² law, with the burning rate and extinction diameter of the five closest flight tests |
+| **Fire Lab** | Will a fire go out on its own? A two-stage physics model trained on 261 FLEX droplet fires gives the chance it goes out, breaks apart or burns to the end, with a 90% interval, and says when it is extrapolating. The droplet burns in real time by the d² law, with the burning rate and extinction diameter of the five closest flight tests |
 | **Findings** | An interactive dashboard over all 1,955 records (every chart filters the others), the coverage of crew atmospheres, a fire audit of a three-module lunar base and the findings ranked by evidence |
 | **Ranking** | The 24 PSI combustion investigations ranked for each crew atmosphere with an adjustable score, files and side-by-side comparison |
 | **Next flight** | The experiment that would teach the most, the six candidates and the map of where the model is unsure |
@@ -26,9 +26,9 @@ Team Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and
 
 ## Key results
 
-- A methanol droplet fire puts itself out **72%** of the time in ISS cabin air (21% O₂, 14.7 psi) and only **6%** in lunar-base air (30% O₂, 10.2 psi), 90% interval 2–14%.
-- Only **37 of 1,613** flight records with a known atmosphere sit near lunar-base air, and **no solid material** has ever burned in orbit above 22.7% O₂.
-- The self-extinction model scores **AUC 0.88** and Brier 0.125 on ISS test days it never saw, ahead of gradient boosting (0.84) and an oxygen-only baseline (0.80).
+- A methanol droplet fire puts itself out **75%** of the time in ISS cabin air (21% O₂, 14.7 psi) and only **8%** in lunar-base air (30% O₂, 10.2 psi), 90% interval 1–16%. There the droplet is predicted to break apart 81% of the time and burn to completion 11%: almost no fire ends by going out.
+- Only **37 of 1,613** flight records with a known atmosphere sit near lunar-base air. NASA's PSI tables hold **no solid** burned above 22.7% O₂; the only higher burns are four Saffire V and VI samples that NASA published (26–31% O₂, 0.53–0.70 atm, [Urban et al. 2024](https://ntrs.nasa.gov/citations/20240002981)), shown on the site as literature data.
+- The two-stage model scores **AUC 0.88** (±0.01 over 20 repeats) and Brier 0.120 on ISS test days it never saw, ahead of the previous single logistic (0.87), gradient boosting (0.84) and an oxygen-only baseline (0.80). Its two steps score 0.86 each: will the droplet break apart, and if not, will the flame go out with fuel left.
 - **191** corrections to NASA's tables, each logged with the original value.
 - **33 of 33** SI briefings pass the verification firewall.
 
@@ -55,7 +55,7 @@ GitHub Pages publishes `web/` on every push to `main` (`.github/workflows/pages.
 | `web/` | The website: `index.html`, `styles.css`, `app.js`, `i18n.js`, the 3D modules (`globe.js`, `moonbase.js`, `sources3d.js`, `lab3d.js`), data, flight video and bundled Plotly and three.js |
 | `pipeline/` | Cleaning, profiles and ranking, models, solids, lunar base audit, SI evidence and firewall, web export |
 | `scripts/` | Downloads from NASA PSI, lunar assets, SI drafts, Spanish texts, local server |
-| `data/` | Versioned outputs: clean tests, investigations, quality log, findings, SI evidence and verification |
+| `data/` | Versioned outputs: clean tests, investigations, quality log, findings, SI evidence and verification; `data/literature/` holds the published Saffire IV–VI burns, each with its source |
 | `tests/` | Data, model, out-of-data guard and SI firewall tests |
 | `report/` | Technical report PDFs |
 | `docs/` | Use of AI and the 30-second video |
