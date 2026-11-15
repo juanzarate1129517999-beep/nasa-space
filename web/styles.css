@@ -1018,3 +1018,8 @@ input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; border-radius
 @media (max-width: 960px) { .worlds { grid-template-columns: repeat(2, 1fr); } .land { grid-template-columns: 1fr; } .worlds-ctl { grid-template-columns: 1fr; } .land__chart { height: 440px; } }
 [hidden] { display: none !important; }
 .cmp-cards > *, .cmp-vis > * { min-width: 0; }
+.qc-cats { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
+.qc-cats button { display: grid; gap: 2px; text-align: left; min-width: 120px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line-2); border-left: 3px solid var(--c, var(--ink-3)); background: var(--surface-2); color: var(--ink-2); font: inherit; font-size: .78rem; cursor: pointer; }
+.qc-cats button b { font-size: 1.35rem; font-weight: 500; color: var(--ink); letter-spacing: -.02em; }
+.qc-cats button[aria-pressed="true"] { background: var(--surface-3); border-color: var(--c, var(--ink-2)); color: var(--ink); }
+@media (max-width: 720px) { .qc-cats { display: grid; grid-template-columns: 1fr 1fr; } .qc-cats button { min-width: 0; } }

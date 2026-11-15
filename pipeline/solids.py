@@ -64,12 +64,31 @@ def bass2_gas():
                 QC.add("PSI-25", f"BASS-II ({pi})", str(r[col["test no"]]).strip(), "calibrated final O2 % by vol", o2f, "NaN",
                        "Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded")
                 o2f = np.nan
+            o2i = num("calibrated initial o2")
+            test = str(r[col["test no"]]).strip()
+            if pd.notna(o2f) and pd.notna(o2i) and o2f > o2i + 5:
+                QC.add("PSI-25", f"BASS-II ({pi})", test, "calibrated final O2 % by vol", o2f, "NaN",
+                       "Final O2 far above the initial value: a burn cannot add oxygen to the sealed glovebox; excluded")
+                o2f = np.nan
+            coi, cof = num("initial co (ppm)"), num("final co (ppm)")
+            for k, v in (("initial co (ppm)", r[col["initial co (ppm)"]]), ("final co (ppm)", r[col["final co (ppm)"]])):
+                if re.fullmatch(r"(?i)\s*(or|over|>\s*\d+)\s*", str(v)):
+                    QC.add("PSI-25", f"BASS-II ({pi})", test, k, str(v).strip(), "NaN",
+                           "CO above the sensor range (over-range text in a numeric field); value censored, CO produced not computed")
+            if pd.notna(coi) and coi < 0:
+                QC.add("PSI-25", f"BASS-II ({pi})", test, "Initial CO (ppm)", coi, 0,
+                       "Negative concentration is impossible (sensor zero offset); set to 0")
+                coi = 0.0
+            if pd.notna(coi) and pd.notna(cof) and cof < coi:
+                QC.add("PSI-25", f"BASS-II ({pi})", test, "Final CO (ppm)", cof, "NaN",
+                       "CO fell during a burn in the sealed glovebox (final below initial); CO produced not computed")
+                cof = np.nan
             rows.append({
                 "pi": pi, "test": str(r[col["test no"]]).strip(), "sample": str(r[col["sample no"]]).strip(),
                 "material": str(r[col["material"]]).strip(), "family": _family(str(r[col["material"]])),
                 "o2_initial_pct": num("calibrated initial o2"), "o2_final_pct": o2f,
                 "co2_initial_pct": num("initial co2"), "co2_final_pct": num("final co2"),
-                "co_initial_ppm": num("initial co (ppm)"), "co_final_ppm": num("final co (ppm)"),
+                "co_initial_ppm": coi, "co_final_ppm": cof,
                 "air_display": str(r[col["air display"]]).strip(), "note": note,
             })
     d = pd.DataFrame(rows)

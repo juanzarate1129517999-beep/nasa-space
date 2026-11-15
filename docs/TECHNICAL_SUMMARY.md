@@ -12,8 +12,8 @@ Artemis surface habitats and pressurized rovers are expected to run at **30% O�
 
 - **Source:** PSI public API, 24 Combustion Science investigations (19 flight, 5 ground), CC0.
 - **Silver layer:** one parser per experiment maps every table to a common schema in SI units (O₂ mole fraction, pressure in atm, flow in cm/s, droplet diameter in mm), with flags for assumed cabin air and for O₂ measured at the burner rather than in the room.
-- **Result:** 1,989 test records, 688 with a labeled outcome.
-- **Quality:** 53 corrections, each logged with the original value and the rule applied (`data/gold/qc_log.csv`): spreadsheet auto-fill errors (CH4 → CH5, CH6…), “3400%” instead of 34%, an impossible 0 mmHg pressure, mole fractions that do not sum to 1, duplicate rows, inconsistent labels.
+- **Result:** 1,955 test records, 688 with a labeled outcome.
+- **Quality:** 180 corrections and flags, each logged with the original value and the rule applied (`data/gold/qc_log.csv`): spreadsheet auto-fill errors (CH4 → CH5, CH6…), “3400%” instead of 34%, an impossible 0 mmHg pressure, mole fractions that do not sum to 1, duplicate rows, inconsistent labels.
 
 ## 3. Summaries, ranking and similarity
 
@@ -63,7 +63,7 @@ For each habitat and investigation the pipeline writes a numbered evidence pack.
 
 ## 7. Findings (ranked by evidence score)
 
-1. **Almost no flight data where the Moon base will live:** 37 of 1,647 records sit inside the lunar-base envelope; no solid-material test exceeds 22.7% O₂ or was flown at reduced pressure.
+1. **Almost no flight data where the Moon base will live:** 37 of 1,613 records sit inside the lunar-base envelope; no solid-material test exceeds 22.7% O₂ or was flown at reduced pressure.
 2. **Lunar-base air makes self-extinction about 11× less likely than cabin air** (72% → 6%), so material screening at 21% O₂ and 1 atm cannot be reused without re-testing.
 3. **Solid-material data is dominated by one plastic (PMMA).**
 4. **Above 30% O₂, droplet flames stop putting themselves out:** 2 of 24 fires at 30–34% O₂, and 0 of 17 at 0.70 atm.

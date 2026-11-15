@@ -2,7 +2,7 @@ pi,test,sample,material,family,o2_initial_pct,o2_final_pct,co2_initial_pct,co2_f
 Bhattacharjee,B1,147,"100 micron pmma film, 2 cm wide",PMMA thin film,22.2,22.2,0.44,0.44,0.0,6.0,5,,6.0,0.0,0.0
 Bhattacharjee,B2,155,"200 micron pmma film, 2 cm wide",PMMA thin film,22.2,,0.44,,6.0,,5,final O2 recorded as 1.6% (physically implausible in the 250 L glovebox); not used,,,
 Bhattacharjee,B3,148,"100 micron film, 2 cm wide",PMMA thin film,22.2,21.8,0.43,0.49,12.0,19.0,2,,7.0,0.06,0.3999999999999986
-Bhattacharjee,B4,159,"300 micron pmma film, 2 cm wide",PMMA thin film,22.2,22.2,0.44,0.51,-1.0,10.0,5,,11.0,0.07,0.0
+Bhattacharjee,B4,159,"300 micron pmma film, 2 cm wide",PMMA thin film,22.2,22.2,0.44,0.51,0.0,10.0,5,,10.0,0.07,0.0
 Bhattacharjee,B5,156,200 micron  2 cm wide,PMMA thin film,22.2,21.9,0.43,0.43,0.0,12.0,5,,12.0,0.0,0.3000000000000007
 Bhattacharjee,B6,153m,2 cm 0.1 mm pmma film,PMMA thin film,21.0,20.9,0.33,0.41,0.0,0.3,"3, 5, approaching 10",,0.3,0.07999999999999996,0.10000000000000142
 Bhattacharjee,B7,161,"400 micron film, 2 cm wide",PMMA thin film,22.2,22.1,0.45,0.51,1.0,17.0,2,,16.0,0.06,0.09999999999999787
@@ -19,10 +19,10 @@ Bhattacharjee,B17,175m,1 cm wide 200 micron thick pmma,PMMA thin film,17.5,17.4,
 Bhattacharjee,B18,176m,1 cm wide 200 micron thick pmma,PMMA thin film,17.4,17.4,0.34,0.42,47.0,78.0,"10, blowoff",,31.0,0.07999999999999996,0.0
 Bhattacharjee,B19,151m,2 cm 100 micron thick pmma,PMMA thin film,17.3,17.2,0.51,0.57,119.0,131.0,"10, blowoff",,12.0,0.05999999999999994,0.10000000000000142
 Bhattacharjee,B20,152m,2 cm 100 micron thick pmma,PMMA thin film,17.4,17.4,0.42,0.47,78.0,103.0,"5, 3, , pot 0.5",,25.0,0.04999999999999999,0.0
-Bhattacharjee,B21,174m,1 cm wide 200 micron thick pmma,PMMA thin film,20.8,20.6,0.36,0.44,-1.0,18.0,5 down to ext,,19.0,0.08000000000000002,0.1999999999999993
-Bhattacharjee,B22,176m,1 cm wide 200 micron thick pmma,PMMA thin film,20.7,20.5,0.41,0.47,-1.0,10.0,"5, 2, 0",,11.0,0.06,0.1999999999999993
+Bhattacharjee,B21,174m,1 cm wide 200 micron thick pmma,PMMA thin film,20.8,20.6,0.36,0.44,0.0,18.0,5 down to ext,,18.0,0.08000000000000002,0.1999999999999993
+Bhattacharjee,B22,176m,1 cm wide 200 micron thick pmma,PMMA thin film,20.7,20.5,0.41,0.47,0.0,10.0,"5, 2, 0",,10.0,0.06,0.1999999999999993
 Ferkul,F1,227,Nomex natural (nomex III),Nomex fabric,22.2,22.2,0.46,0.45,0.0,2.0,9.5,,2.0,-0.010000000000000009,0.0
-Ferkul,F2,228m,Nomex natural (nomex III),Nomex fabric,21.0,21.0,0.37,0.39,105.0,82.0,15,,-23.0,0.020000000000000018,0.0
+Ferkul,F2,228m,Nomex natural (nomex III),Nomex fabric,21.0,21.0,0.37,0.39,105.0,,15,,,0.020000000000000018,0.0
 Ferkul,F3,229m,Nomex natural (nomex III),Nomex fabric,21.7,,0.36,,2.0,,8,,,,
 Ferkul,F4,39M,Japan Wax candle,Candle,17.4,17.4,0.38,0.48,22.0,56.0,3 ign,,34.0,0.09999999999999998,0.0
 Miller,M1,222,"1 mm thick pmma, 1 sided, 2 cm",PMMA slab,22.2,21.9,0.45,0.61,0.0,60.0,"10,8",,60.0,0.15999999999999998,0.3000000000000007
@@ -34,7 +34,7 @@ Miller,M6,163m,"1 mm thick pmma, 2 cm wide",PMMA slab,21.8,20.7,0.38,1.27,1.0,34
 Miller,M7,177m,1 cm wide pmma 1 mm thick,PMMA slab,18.9,18.4,1.42,1.84,398.0,612.0,"10, 6,5,4.5,4,3",,214.0,0.42000000000000015,0.5
 Miller,M8,178m,1 cm wide pmma 2 mm thick,PMMA slab,19.1,18.2,0.44,1.28,52.0,467.0,"10, 5>7,5 decr",,415.0,0.8400000000000001,0.9000000000000021
 Miller,M9,179m,1 cm wide pmma 3 mm thick,PMMA slab,18.0,17.6,0.26,0.54,0.0,191.0,"10, 14",,191.0,0.28,0.3999999999999986
-Miller,M10,180m,"4 mm thick, 1 cm wide pmma slab",PMMA slab,20.1,18.6,0.36,1.59,-1.0,536.0,"10,17,14,10,8",,537.0,1.23,1.5
+Miller,M10,180m,"4 mm thick, 1 cm wide pmma slab",PMMA slab,20.1,18.6,0.36,1.59,0.0,536.0,"10,17,14,10,8",,536.0,1.23,1.5
 Miller,M11,181m,1 cm wide pmma 5 mm thick,PMMA slab,20.0,18.5,0.58,1.68,46.0,577.0,"10, 20, 15,12",,531.0,1.1,1.5
 Miller,M12,165m,"2 mm thick pmma, 2 cm wide",PMMA slab,21.7,20.4,0.42,1.42,15.0,443.0,<1,,428.0,1.0,1.3000000000000007
 Miller,M13,169m,"4 mm thick pmma, 2 cm wide",PMMA slab,20.8,19.0,0.36,1.75,0.0,487.0,"6, 5, 4",,487.0,1.3900000000000001,1.8000000000000007
@@ -45,12 +45,12 @@ Miller,M17,166m,2 cm wide pmma 2 mm thick,PMMA slab,18.8,17.1,0.35,1.7,4.0,485.0
 Miller,M18,168m,2 cm wide pmma 3 mm thick,PMMA slab,17.9,16.8,0.32,1.31,0.0,335.0,"10, 15 (brief), 10, 8",,335.0,0.99,1.0999999999999979
 Miller,M19,170m,"4 mm thick, 2 cm 2ide pmma slab",PMMA slab,19.0,17.4,0.35,1.6,3.0,357.0,"10,17,14,10,7,5",,354.0,1.25,1.6000000000000014
 Miller,M20,172m,"5 mm thick pmma, 2 cm wide",PMMA slab,18.0,17.4,0.3,0.75,0.0,157.0,"10,8",,157.0,0.45,0.6000000000000014
-Olson,O1,207,"1/4"" clear rod",PMMA rod,22.2,21.7,0.44,0.85,-1.0,51.0,"20,10,5,2,1",,52.0,0.41,0.5
-Olson,O2,204,"1/4"" clear rod",PMMA rod,22.2,21.9,0.44,0.59,-1.0,23.0,0,,24.0,0.14999999999999997,0.3000000000000007
+Olson,O1,207,"1/4"" clear rod",PMMA rod,22.2,21.7,0.44,0.85,0.0,51.0,"20,10,5,2,1",,51.0,0.41,0.5
+Olson,O2,204,"1/4"" clear rod",PMMA rod,22.2,21.9,0.44,0.59,0.0,23.0,0,,23.0,0.14999999999999997,0.3000000000000007
 Olson,O3a,205M,"1/4"" clear rod",PMMA rod,18.0,18.0,0.25,0.28,16.0,22.0,"5,3",,6.0,0.030000000000000027,0.0
 Olson,O3b,205M,"1/4"" clear rod",PMMA rod,18.0,17.7,0.28,0.53,22.0,116.0,"5,3,2,1,low",,94.0,0.25,0.3000000000000007
 Olson,O4,216m,"3/8""clear rod",PMMA rod,14.8,13.6,0.72,1.72,290.0,,"5, down to ext",,,1.0,1.200000000000001
-Olson,O5a,220m,"1/2"" clear pmma rod",PMMA rod,15.1,14.2,0.25,1.05,-2.0,496.0,"5,10,5, 2, 0 (49, 62, 49, 44, 42)",,498.0,0.8,0.9000000000000004
+Olson,O5a,220m,"1/2"" clear pmma rod",PMMA rod,15.1,14.2,0.25,1.05,0.0,496.0,"5,10,5, 2, 0 (49, 62, 49, 44, 42)",,496.0,0.8,0.9000000000000004
 Olson,O5b,220m,"1/2"" clear pmma rod",PMMA rod,14.2,14.1,1.05,1.14,496.0,590.0,"49, 5 cm/s",,94.0,0.08999999999999986,0.09999999999999964
 Olson,O6,206M,"1/4"" clear rod",PMMA rod,16.7,16.0,0.32,0.74,1.0,232.0,see fan,,231.0,0.42,0.6999999999999993
 Olson,O7,214m,"1/4"" clear rod",PMMA rod,16.0,15.5,0.74,1.27,232.0,512.0,nan,,280.0,0.53,0.5
@@ -69,7 +69,7 @@ Olson,O16,219m,"3/8""clear rod",PMMA rod,14.5,14.5,0.27,0.32,2.0,33.0,5,,31.0,0.
 Olson,O17,211m,"1/4"" clear rod",PMMA rod,15.1,14.3,0.31,0.9,2.0,377.0,"3, 0, 11",,375.0,0.5900000000000001,0.7999999999999989
 Olson,O18,212m,"1/4"" clear rod",PMMA rod,15.2,14.5,1.45,1.94,523.0,816.0,"5,2,0,11,2,11,2,0",,293.0,0.49,0.6999999999999993
 Olson,O19,213m,"1/4"" clear rod",PMMA rod,15.3,14.6,0.86,1.51,352.0,686.0,5 down to ext,,334.0,0.65,0.7000000000000011
-Olson,O20,204m,"1/4"" clear rod",PMMA rod,16.5,15.9,0.2,0.57,-3.0,57.0,"5, 8,  incr to max 38.5",,60.0,0.36999999999999994,0.5999999999999996
+Olson,O20,204m,"1/4"" clear rod",PMMA rod,16.5,15.9,0.2,0.57,0.0,57.0,"5, 8,  incr to max 38.5",,57.0,0.36999999999999994,0.5999999999999996
 Olson,O21,219m,"3/8"" clear rod",PMMA rod,15.9,15.4,0.53,0.95,52.0,187.0,incr to 28,,135.0,0.41999999999999993,0.5
 Olson,O22,220m,"1/2"" clear rod",PMMA rod,15.4,14.9,0.92,1.33,185.0,322.0,4 incr to 26.5,,137.0,0.41000000000000003,0.5
 Fernandez-Pello,P1,185M,"1/4"" black rod",PMMA rod,17.7,17.5,0.27,0.44,1.0,14.0,"5,2, slow decr to ext",,13.0,0.16999999999999998,0.1999999999999993
@@ -95,7 +95,7 @@ Fernandez-Pello,P20,195m,"1/4"" black rod",PMMA rod,19.0,18.2,0.34,1.05,2.0,78.0
 Fernandez-Pello,P21a,196M,1/4 black rod,PMMA rod,16.3,16.3,0.96,1.0,86.0,94.0,5,,8.0,0.040000000000000036,0.0
 Fernandez-Pello,P21b,196M,"1/4"" black rod",PMMA rod,16.3,16.3,1.0,1.03,94.0,98.0,5,,4.0,0.030000000000000027,0.0
 Fernandez-Pello,P22a,200m,"3/8"" black rod",PMMA rod,20.8,,0.32,,4.0,,"5, down to ext",final O2 recorded as 0.6% (physically implausible in the 250 L glovebox); not used,,,
-Fernandez-Pello,P22b,200m,"3/8"" black rod",PMMA rod,20.0,39.1,,1.09,,239.0,5 down to ext,,,,-19.1
+Fernandez-Pello,P22b,200m,"3/8"" black rod",PMMA rod,20.0,,,1.09,,239.0,5 down to ext,,,,
 Fernandez-Pello,P23,201m,"3/8"" black rod",PMMA rod,18.2,17.0,1.05,2.08,78.0,159.0,"2,0,2,0,etc",,81.0,1.03,1.1999999999999993
 Fernandez-Pello,P24,819L,"3/8"" black rod",PMMA rod,19.0,17.5,1.2,2.24,26.0,260.0,"2,0,2,0,etc",,234.0,1.0400000000000003,1.5
 Fernandez-Pello,P25,217m,"3/8"" clear rod",PMMA rod,20.9,20.2,0.38,1.0,43.0,205.0,5 down to ext,,162.0,0.62,0.6999999999999993
@@ -122,9 +122,9 @@ T'ien,T21,145m,1 cm SIBAL,SIBAL fabric,17.2,17.2,0.31,0.32,34.0,45.0,"11, max(47
 T'ien,T22,146m,1 cm SIBAL,SIBAL fabric,17.1,17.0,0.59,0.62,140.0,162.0,"10, 5",,22.0,0.030000000000000027,0.10000000000000142
 T'ien,T23,133m,"2 cm Sibal, moved igniter",SIBAL fabric,17.2,17.3,0.32,0.32,45.0,49.0,10,,4.0,0.0,-0.10000000000000142
 T'ien,T24,133m,"1 cm SIBAL, top side ign",SIBAL fabric,18.2,18.2,0.51,0.53,85.0,107.0,10,,22.0,0.020000000000000018,0.0
-T'ien,T25,138m,SIBAL 2 cm,SIBAL fabric,20.8,20.7,0.36,0.39,-1.0,17.0,"5, 2.5",,18.0,0.030000000000000027,0.10000000000000142
-T'ien,T26,137m,SIBAL 2 cm,SIBAL fabric,20.8,20.7,0.36,0.43,-1.0,24.0,"5, 2.5",,25.0,0.07,0.10000000000000142
-T'ien,T27,146m,1 cm SIBAL,SIBAL fabric,20.7,20.6,0.41,0.42,-1.0,9.0,"5, 2",,10.0,0.010000000000000009,0.09999999999999787
-T'ien,T28a,144m,1 cm SIBAL,SIBAL fabric,20.7,,0.41,,-1.0,,5,final O2 recorded as 0.9% (physically implausible in the 250 L glovebox); not used,,,
-T'ien,T28b,144m,1 cm SIBAL,SIBAL fabric,20.7,40.4,,0.42,,2.0,5,,,,-19.7
-T'ien,T29,145m,1 cm SIBAL,SIBAL fabric,20.7,20.5,0.41,0.44,-1.0,10.0,"5, 2(?)",,11.0,0.030000000000000027,0.1999999999999993
+T'ien,T25,138m,SIBAL 2 cm,SIBAL fabric,20.8,20.7,0.36,0.39,0.0,17.0,"5, 2.5",,17.0,0.030000000000000027,0.10000000000000142
+T'ien,T26,137m,SIBAL 2 cm,SIBAL fabric,20.8,20.7,0.36,0.43,0.0,24.0,"5, 2.5",,24.0,0.07,0.10000000000000142
+T'ien,T27,146m,1 cm SIBAL,SIBAL fabric,20.7,20.6,0.41,0.42,0.0,9.0,"5, 2",,9.0,0.010000000000000009,0.09999999999999787
+T'ien,T28a,144m,1 cm SIBAL,SIBAL fabric,20.7,,0.41,,0.0,,5,final O2 recorded as 0.9% (physically implausible in the 250 L glovebox); not used,,,
+T'ien,T28b,144m,1 cm SIBAL,SIBAL fabric,20.7,,,0.42,,2.0,5,,,,
+T'ien,T29,145m,1 cm SIBAL,SIBAL fabric,20.7,20.5,0.41,0.44,0.0,10.0,"5, 2(?)",,10.0,0.030000000000000027,0.1999999999999993
