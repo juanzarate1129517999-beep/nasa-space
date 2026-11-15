@@ -58,7 +58,7 @@
           </div>
         </div>
       </div>
-      <p class="space__note mono-sm">Earth, day and night, and the ISS orbit are live: NASA SVS imagery and today's orbital elements. Moon: LRO. Mars: Viking. Sizes and distances not to scale · drag to turn · select a body</p>
+      <p class="space__note mono-sm">Earth, the ISS and NASA's satellite fleet move on today's orbital elements at 600× speed (NASA SVS Orbit Viewer data). Moon: LRO. Mars: Viking. Not to scale · drag to turn · hover a satellite · select a body</p>
     </div>
     <section class="sec">
       <div class="wrap">
@@ -340,24 +340,7 @@
       <div class="wrap">
         <header class="sec__head">
           <p class="eyebrow">04 · Ranking</p>
-          <h2>Which fires refuse to go out. <span class="mute">Flight flames grouped by fuel and air.</span></h2>
-          <p class="sec__lead">FLEX droplets and ACME CFI-G gas flames from the ISS, grouped by fuel, oxygen, pressure and suppressant. Ranked by the share that did not go out on its own, using the low end of its 90% range so a group of 5 cannot outrank a group of 50 by luck.</p>
-        </header>
-        <div class="card" id="survival">
-          <div class="controls-row">
-            <div class="seg" id="surv-kind" role="group" aria-label="Fire type"></div>
-            <span class="mono-sm">Mark groups near</span>
-            <div class="seg seg--wrap" id="surv-hab" role="group" aria-label="Habitat"></div>
-          </div>
-          <div class="surv-top"><div class="legend" id="surv-legend"></div><div class="seg" id="surv-view" role="group" aria-label="Ranking view"><button type="button" data-v="chart" aria-pressed="true">Chart</button><button type="button" data-v="list" aria-pressed="false">Table</button></div></div>
-          <div class="surv-chart" id="surv-chart-wrap"><div class="chart" id="surv-chart" role="img" aria-label="Share of flames that did not go out on their own, per group, with 90% range"></div><p class="sub" id="surv-how"></p></div>
-          <div class="surv" id="surv-list" hidden></div>
-          <div class="links"><button class="btn btn--line btn--sm" id="surv-more" type="button">Show all groups</button></div>
-          <p class="note" id="surv-note"></p>
-        </div>
-        <header class="sec__head card--gap" style="margin-top:clamp(64px,8vw,110px)">
-          <p class="eyebrow">Which investigations matter</p>
-          <h2>The 24 investigations, ranked for your habitat. <span class="mute">Change the weights; see if the answer holds.</span></h2>
+          <h2>The 24 investigations, ranked for your habitat. <span class="mute">Pick a habitat; the most relevant NASA evidence comes first.</span></h2>
         </header>
         <details class="card more crit-d">
           <summary><span><span class="label">How the ranking works</span><b>Three criteria, weights you can change, and a robustness test</b></span></summary>
@@ -391,6 +374,23 @@
           <div class="cmp-air" id="cmp-air"></div>
           <details class="more cmp-more"><summary><span><span class="label">Every field</span><b>Full comparison table</b></span></summary><div class="more__body"><div class="tbl-wrap"><table id="cmp-table" class="cmp"></table></div></div></details>
           <p class="note" id="cmp-note"></p>
+        </div>
+        <header class="sec__head card--gap" style="margin-top:clamp(64px,8vw,110px)">
+          <p class="eyebrow">From the flight data</p>
+          <h2>Which fires refuse to go out. <span class="mute">Flight flames grouped by fuel and air.</span></h2>
+          <p class="sec__lead">FLEX droplets and ACME CFI-G gas flames from the ISS, ranked by the share that did not go out on their own, using the low end of the 90% range so a small lucky group cannot win.</p>
+        </header>
+        <div class="card" id="survival">
+          <div class="controls-row">
+            <div class="seg" id="surv-kind" role="group" aria-label="Fire type"></div>
+            <span class="mono-sm">Mark groups near</span>
+            <div class="seg seg--wrap" id="surv-hab" role="group" aria-label="Habitat"></div>
+          </div>
+          <div class="surv-top"><div class="legend" id="surv-legend"></div><div class="seg" id="surv-view" role="group" aria-label="Ranking view"><button type="button" data-v="chart" aria-pressed="true">Chart</button><button type="button" data-v="list" aria-pressed="false">Table</button></div></div>
+          <div class="surv-chart" id="surv-chart-wrap"><div class="chart" id="surv-chart" role="img" aria-label="Share of flames that did not go out on their own, per group, with 90% range"></div><p class="sub" id="surv-how"></p></div>
+          <div class="surv" id="surv-list" hidden></div>
+          <div class="links"><button class="btn btn--line btn--sm" id="surv-more" type="button">Show all groups</button></div>
+          <p class="note" id="surv-note"></p>
         </div>
         <dialog class="modal" id="inv-modal" aria-labelledby="im-title"><div class="modal__in" id="inv-modal-body"></div></dialog>
       </div>

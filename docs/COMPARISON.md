@@ -16,7 +16,7 @@
 | Models | FLEX logistic, 200-model bootstrap, AUC 0.88 (day-grouped CV) vs GBM 0.84 and O₂-only 0.80; calibration plot; CFI-G limiting-temperature test | None (deterministic match score) | Solids GBM (AUC 0.958), gas-flame survival model, droplet Gaussian process |
 | Out-of-data handling | kNN distance **and** per-input flown range → within / extrapolating / withheld | O₂ gate ±2 points + score threshold | In/out of tested range label |
 | Next experiment | Active learning on the bootstrap ensemble | — | 5 recommended experiments |
-| Data quality | 180 logged corrections | Status per value (recorded, approx, suspect…) | 103 logged corrections |
+| Data quality | 191 logged corrections | Status per value (recorded, approx, suspect…) | 103 logged corrections |
 | Habitats | Cabin, EVA prep, lunar base, exploration 8.2 psi / 34%, suit | ISS, lunar base, exploration, EVA | Mission presets incl. Moon, Mars |
 | Audiences | “Choose your view” for 5 audiences | Engineer focus | 5 audience views |
 | Compare investigations | Up to 3 side by side, differences highlighted | — | Up to 3 side by side |

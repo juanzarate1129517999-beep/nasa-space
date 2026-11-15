@@ -115,7 +115,14 @@
     iss.add(issDot, issGlow, issHit);
     earthGroup.add(iss);
     let orbitLine = null, satrec = null;
-    const others = [];
+    const others = [], fleet = [];
+    const satTex = (() => {
+      const c = document.createElement("canvas"); c.width = c.height = 64;
+      const g = c.getContext("2d"); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, "rgba(186,230,253,1)"); gr.addColorStop(0.4, "rgba(56,189,248,.45)"); gr.addColorStop(1, "rgba(56,189,248,0)");
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new T.CanvasTexture(c);
+    })();
+    const tip = document.createElement("div"); tip.className = "gsat is-hidden"; host.appendChild(tip);
 
     const controls = new T.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -152,23 +159,33 @@
       if (orbitLine) earthGroup.remove(orbitLine);
       orbitLine = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.55 }));
       earthGroup.add(orbitLine);
-      const names = ["TERRA", "AQUA", "AURA", "LANDSAT 9", "SUOMI NPP", "PACE"];
       others.forEach((o) => earthGroup.remove(o));
-      others.length = 0;
-      names.forEach((n) => {
-        const t2 = parseTle(text, n);
-        if (!t2) return;
-        const sr = S.twoline2satrec(t2[0], t2[1]);
+      others.length = 0; fleet.length = 0;
+      const L = text.split(/\r?\n/).map((x) => x.trim());
+      for (let k = 0; k + 2 < L.length; k++) {
+        if (!L[k + 1].startsWith("1 ") || !L[k + 2].startsWith("2 ") || L[k].startsWith("1 ") || L[k].startsWith("2 ")) continue;
+        const name = L[k];
+        if (/^ISS/i.test(name)) continue;
+        let sr; try { sr = S.twoline2satrec(L[k + 1], L[k + 2]); } catch (e) { continue; }
         const per = (2 * Math.PI) / sr.no, p2 = [];
-        for (let i = 0; i <= 160; i++) {
-          const tt = new Date(now.getTime() + ((i / 160) * per - per / 2) * 60000);
+        for (let m = 0; m <= 140; m++) {
+          const tt = new Date(now.getTime() + ((m / 140) * per - per / 2) * 60000);
           const pv = S.propagate(sr, tt);
           if (pv && pv.position) p2.push(toScene(T, [pv.position.x / RE, pv.position.y / RE, pv.position.z / RE]));
         }
-        const l = new T.Line(new T.BufferGeometry().setFromPoints(p2), new T.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.12 }));
-        earthGroup.add(l);
-        others.push(l);
-      });
+        if (p2.length < 10) continue;
+        const l = new T.Line(new T.BufferGeometry().setFromPoints(p2), new T.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.1 }));
+        const g = new T.Group();
+        const dot = new T.Mesh(new T.SphereGeometry(0.011, 10, 8), new T.MeshBasicMaterial({ color: 0x7dd3fc }));
+        const glow = new T.Sprite(new T.SpriteMaterial({ map: satTex, depthWrite: false, blending: T.AdditiveBlending, opacity: 0.8 }));
+        glow.scale.set(0.07, 0.07, 1);
+        const hit = new T.Mesh(new T.SphereGeometry(0.05, 6, 6), new T.MeshBasicMaterial({ visible: false }));
+        hit.userData.sat = name.replace(/\s*\(.*\)$/, "");
+        g.add(dot, glow, hit);
+        earthGroup.add(l, g);
+        others.push(l, g);
+        fleet.push({ sr, g, hit });
+      }
     }
     fetch(base + "tle_today.txt").then((r) => r.text()).then(setSat).catch(() => {});
 
@@ -224,6 +241,9 @@
       mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(mouse, camera);
       renderer.domElement.style.cursor = ray.intersectObjects([issHit, bodies.moon.mesh, bodies.mars.mesh, earth], false).length ? "pointer" : "grab";
+      const sh = fleet.length ? ray.intersectObjects(fleet.map((f) => f.hit), false)[0] : null;
+      if (sh) { tip.innerHTML = `<b>${sh.object.userData.sat}</b> <span>NASA satellite</span>`; tip.style.transform = `translate(${(e.clientX - r.left + 14).toFixed(0)}px, ${(e.clientY - r.top - 10).toFixed(0)}px)`; tip.classList.remove("is-hidden"); }
+      else tip.classList.add("is-hidden");
     });
 
     function resize() {
@@ -248,15 +268,12 @@
       return t > 0 && t < L - 0.01;
     }
     let yaw = null;
-    let running = true, visible = true, last = 0, speed = reduce ? 1 : 60, simOff = 0, lastT = performance.now();
+    let running = true, visible = true, last = 0, speed = reduce ? 1 : 600, simOff = 0, lastT = performance.now();
     const clock = document.createElement("div");
     clock.className = "gclock";
-    clock.innerHTML = `<span class="gclock__t"></span><div class="seg" role="group" aria-label="Time"><button type="button" data-s="1">Live</button><button type="button" data-s="60">×60</button><button type="button" data-s="600">×600</button></div>`;
+    clock.innerHTML = `<span class="gclock__t"></span><span class="gclock__f"></span>`;
     host.appendChild(clock);
-    const clockT = clock.querySelector(".gclock__t");
-    const syncClock = () => clock.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.s === speed)));
-    clock.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { speed = +b.dataset.s; if (speed === 1) simOff = 0; syncClock(); }));
-    syncClock();
+    const clockT = clock.querySelector(".gclock__t"), clockF = clock.querySelector(".gclock__f");
     const tmp = new T.Vector3(), camRight = new T.Vector3();
     function frame(now) {
       if (!running) return;
@@ -280,6 +297,13 @@
         const pv = window.satellite.propagate(satrec, date);
         if (pv && pv.position) iss.position.copy(toScene(T, [pv.position.x / RE, pv.position.y / RE, pv.position.z / RE]));
         issGlow.material.opacity = 0.75 + 0.25 * Math.sin(now / 300);
+      }
+      if (fleet.length && window.satellite) {
+        for (const f of fleet) {
+          const pv = window.satellite.propagate(f.sr, date);
+          if (pv && pv.position) f.g.position.copy(toScene(T, [pv.position.x / RE, pv.position.y / RE, pv.position.z / RE]));
+        }
+        if (!clockF.textContent) clockF.textContent = `ISS + ${fleet.length} NASA satellites`;
       }
       if (fly) {
         const k = Math.min(1, (now - fly.t0) / fly.dur), e = 1 - Math.pow(1 - k, 3);
