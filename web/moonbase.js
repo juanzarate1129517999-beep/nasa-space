@@ -57,6 +57,7 @@
     const moonSun = new T.DirectionalLight(0xffffff, 2.4);
     moonScene.add(moonSun);
     const moonMat = new T.MeshStandardMaterial({ map: tex(base + "lroc_color_2k.jpg"), roughness: 1, metalness: 0 });
+    loader.load(base + "lroc_color_4k.jpg", (t4) => { t4.encoding = T.sRGBEncoding; t4.anisotropy = renderer.capabilities.getMaxAnisotropy(); const old = moonMat.map; moonMat.map = t4; moonMat.needsUpdate = true; if (old) old.dispose(); });
     const ldem = loader.load(base + "ldem_3_8bit.jpg");
     moonMat.displacementMap = ldem; moonMat.displacementScale = 0.012; moonMat.bumpMap = ldem; moonMat.bumpScale = 0.004;
     const moon = new T.Mesh(new T.SphereGeometry(1, 256, 128), moonMat);
