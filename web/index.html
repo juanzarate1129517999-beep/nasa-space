@@ -60,16 +60,6 @@
       </div>
       <p class="space__note mono-sm">Earth, day and night, and the ISS orbit are live: NASA SVS imagery and today's orbital elements. Moon: LRO. Mars: Viking. Sizes and distances not to scale · drag to turn · select a body</p>
     </div>
-    <section class="sec sec--tight">
-      <div class="wrap">
-        <header class="sec__head">
-          <p class="eyebrow">Four places, one fire</p>
-          <h2>Where crews will breathe. <span class="mute">And what NASA's data says about fire there.</span></h2>
-        </header>
-        <ol class="dests" id="dests"></ol>
-        <dl class="facts facts--4 card--gap" id="kpis"></dl>
-      </div>
-    </section>
     <section class="sec">
       <div class="wrap">
         <header class="sec__head rv">
@@ -77,6 +67,7 @@
           <h2>What NASA's flight data says about fire on the Moon. <span class="mute">Each one links to its evidence.</span></h2>
         </header>
         <ol class="answers rv" id="answer-list"></ol>
+        <dl class="facts facts--4 card--gap" id="kpis"></dl>
       </div>
     </section>
     <section class="sec sec--alt">
@@ -88,7 +79,6 @@
           </div>
           <ol class="history__list" id="history"></ol>
         </div>
-        <div class="tiles rv" id="tiles"></div>
       </div>
     </section>
   </section>
@@ -141,8 +131,6 @@
           <p class="sec__lead">NASA's BASS-II experiment burned the same quarter-inch acrylic (PMMA) rod at different oxygen levels inside the station's glovebox. Move through the oxygen levels: as oxygen drops, the flame shrinks, loses its soot and turns blue, and it still burns below what Earth tests allow.</p>
         </header>
         <div class="stage" id="stage"></div>
-        <h3 class="sub-h">Solids, liquids and gases.</h3>
-        <div class="reel" id="reel"></div>
         <div class="arch-head">
           <h3 class="sub-h">The flight archive: solids, liquids and gases.</h3>
           <div class="seg" id="arch-state" role="group" aria-label="State of the fuel"></div>
@@ -160,27 +148,24 @@
           <h2>Cabin materials in orbit. <span class="mute">They keep burning at less oxygen than Earth tests suggest.</span></h2>
         </header>
         <dl class="facts facts--4" id="solid-facts"></dl>
-        <div class="grid-2 card--gap">
-          <div class="card">
-            <p class="label">NASA flammability boundary · PMMA rods · 1 atm</p>
-            <h3>Where a solid flame can survive.</h3>
-            <p class="sub">Above the line a rod keeps burning; below it the flame goes out. Solid line: tested by BASS-II. Dashed: the same equation extended.</p>
-            <div class="legend" id="solid-legend"></div>
-            <div class="chart" id="solid-map" role="img" aria-label="Flammability boundary of PMMA rods: oxygen versus airflow"></div>
-            <p class="note" id="solid-note"></p>
-          </div>
-          <div class="card">
+        <div class="card card--gap">
+          <p class="label">NASA flammability boundary · PMMA rods · 1 atm</p>
+          <h3>Where a solid flame can survive.</h3>
+          <p class="sub">Above the line a rod keeps burning; below it the flame goes out. Solid line: tested by BASS-II. Dashed: the same equation extended.</p>
+          <div class="legend" id="solid-legend"></div>
+          <div class="chart" id="solid-map" role="img" aria-label="Flammability boundary of PMMA rods: oxygen versus airflow"></div>
+          <p class="note" id="solid-note"></p>
+        </div>
+        <details class="card card--gap more">
+          <summary><span><span class="label">More from the solid tests</span><b>Carbon monoxide, and every crewed atmosphere</b></span></summary>
+          <div class="more__body">
             <p class="label">BASS-II gas sensors · 118 tests</p>
             <h3>Starved flames make more carbon monoxide.</h3>
             <p class="sub">CO added to the glovebox by each test, against the oxygen level at ignition. A detection target.</p>
             <div class="legend" id="solid-co-legend"></div>
             <div class="chart" id="solid-co" role="img" aria-label="Carbon monoxide produced versus oxygen"></div>
             <p class="note" id="solid-co-note"></p>
-          </div>
-        </div>
-        <details class="card card--gap more">
-          <summary><span><span class="label">Per habitat</span><b>In every crewed atmosphere, a PMMA rod can burn in still air</b></span></summary>
-          <div class="more__body">
+            <p class="label" style="margin-top:28px">Per habitat · in every crewed atmosphere, a PMMA rod can burn in still air</p>
             <div class="tbl-wrap"><table id="solid-hab"></table></div>
             <p class="note" id="solid-hab-note"></p>
           </div>
@@ -308,14 +293,14 @@
           <div class="seg" id="find-layer" role="group" aria-label="Filter findings by layer"></div>
         </header>
         <div class="findings" id="findings-list"></div>
+        <div class="links"><button class="btn btn--line btn--sm" id="find-more" type="button">Show all findings</button></div>
       </div>
     </div>
-    <div class="sec" id="evidence">
+    <div class="sec sec--tight" id="evidence">
       <div class="wrap">
-        <header class="sec__head">
-          <p class="eyebrow">The measurements</p>
-          <h2>Raw outcomes. <span class="mute">With sample sizes and intervals.</span></h2>
-        </header>
+        <details class="card more">
+          <summary><span><span class="label">The measurements</span><b>Raw outcomes behind the findings, with sample sizes and intervals</b></span></summary>
+          <div class="more__body">
         <div class="grid-2">
           <div class="card">
             <p class="label">FLEX · share of tests per outcome</p>
@@ -344,6 +329,8 @@
             <p class="note" id="grav-note"></p>
           </div>
         </div>
+          </div>
+        </details>
       </div>
     </div>
   </section>
@@ -372,7 +359,10 @@
           <p class="eyebrow">Which investigations matter</p>
           <h2>The 24 investigations, ranked for your habitat. <span class="mute">Change the weights; see if the answer holds.</span></h2>
         </header>
-        <div class="crit" id="criteria"></div>
+        <details class="card more crit-d">
+          <summary><span><span class="label">How the ranking works</span><b>Three criteria, weights you can change, and a robustness test</b></span></summary>
+          <div class="more__body"><div class="crit" id="criteria"></div></div>
+        </details>
         <div class="inv-mode">
           <div class="seg" id="inv-mode" role="group" aria-label="Investigation view"><button type="button" data-m="gallery" aria-pressed="true">Gallery</button><button type="button" data-m="chart" aria-pressed="false">Score chart</button></div>
           <span class="mono-sm" id="inv-count"></span>
@@ -383,6 +373,7 @@
           <input class="search" type="search" id="inv-search" placeholder="Search name, keyword, PI…" aria-label="Search investigations">
         </div>
         <div class="inv-gallery" id="inv-gallery"></div>
+        <div class="links" id="inv-more-wrap"><button class="btn btn--line btn--sm" id="inv-more" type="button">Show all 24</button></div>
         <div class="card inv-chart" id="inv-chart-wrap" hidden>
           <p class="sub">Each bar is one investigation's score for the habitat above, split into the three criteria. Click a bar to open its card.</p>
           <div class="legend" id="inv-chart-legend"></div>
@@ -425,7 +416,7 @@
           <summary><span><span class="label">In plain numbers</span><b>Recommendation table</b></span></summary>
           <div class="more__body"><div class="tbl-wrap"><table id="next-table"></table></div><p class="note" id="next-note"></p></div>
         </details>
-        <details class="card card--gap more" id="unc-details" open>
+        <details class="card card--gap more" id="unc-details">
           <summary><span><span class="label">Map of doubt</span><b>Where the model is unsure, and why we chose this test</b></span></summary>
           <div class="more__body">
             <div class="controls-row"><span class="mono-sm">Background computed at</span><div class="seg" id="unc-co2" role="group" aria-label="CO2 level for the map"></div></div>
@@ -526,11 +517,10 @@
           <p class="note">Checks per sentence: at least one citation to an existing evidence item; every number present in the cited items; no safety verdict (“is safe”, “certified”, “guaranteed”…); the evidence pack unchanged since the draft was written. A briefing that fails shows the evidence itself, labelled “Evidence brief”. Regenerate with <code>python scripts/si_generate.py</code>.</p>
         </div>
         <div class="grid-2 card--gap">
-          <div class="card">
-            <p class="label">Challenge resources</p>
-            <h3>Every resource the challenge lists, and where we use it.</h3>
-            <div class="downloads" id="resources"></div>
-          </div>
+          <details class="card more">
+            <summary><span><span class="label">Challenge resources</span><b>Every resource the challenge lists, and where we use it</b></span></summary>
+            <div class="more__body"><div class="downloads" id="resources"></div></div>
+          </details>
           <div class="card">
             <p class="label">Downloads</p>
             <h3>Take the data with you.</h3>
