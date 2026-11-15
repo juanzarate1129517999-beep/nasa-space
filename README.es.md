@@ -16,7 +16,7 @@ Equipo Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (líder)
 |---|---|
 | **Inicio** | Las cifras principales y una Tierra 3D con la órbita en vivo de la ISS y 23 satélites de la NASA, la Luna y Marte |
 | **Aprende 3D** | Una historia inmersiva en cuatro capítulos: el plan Artemis sobre una Luna 3D real y el descenso a un sitio del polo sur sobre el terreno LOLA de la NASA (5 m por píxel), iluminado por el Sol donde lo sitúa JPL Horizons; cinco formas en que empieza un fuego dentro de un módulo de la ISS, cada una ligada a la investigación que la midió; cómo cambia una llama de la Tierra a la órbita; el mismo fuego en cuatro gravedades |
-| **Llamas** | 43 clips de video real de vuelo (sólidos, líquidos y gases) y los límites de materiales sólidos medidos por BASS-II |
+| **Llamas** | 127 clips de video real de vuelo (sólidos, líquidos y gases), recortados del video crudo de NASA PSI con `scripts/build_clips.py`, y los límites de materiales sólidos medidos por BASS-II |
 | **Fire Lab** | ¿Se apagará solo este fuego? Un modelo entrenado con 261 fuegos de gotas de FLEX responde con un intervalo del 90 % y avisa cuando extrapola. La gota arde en tiempo real según la ley d², con la tasa de combustión y el diámetro de extinción de los cinco ensayos de vuelo más cercanos |
 | **Hallazgos** | Un panel interactivo sobre los 1.955 registros (cada gráfica filtra a las demás), la cobertura de las atmósferas de tripulación, una auditoría de incendios de una base lunar de tres módulos y los hallazgos ordenados por evidencia |
 | **Ranking** | Las 24 investigaciones de combustión de PSI ordenadas para cada atmósfera, con puntaje ajustable, fichas y comparación |
