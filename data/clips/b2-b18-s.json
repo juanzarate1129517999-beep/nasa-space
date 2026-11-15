@@ -1,0 +1,26 @@
+{
+ "id": "b2-b18-s",
+ "source": "PSI-25_Raw Data_BASS_GMT183_SAMPLE_176_TESTB18_Still_Sequence.mp4",
+ "test": "B18",
+ "material": "1 cm wide 200 micron thick pmma",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.4,
+ "air": "10, blowoff",
+ "co": 31.0,
+ "cam": "still sequence",
+ "ok": true,
+ "x": 3.2,
+ "dir": "bass2x",
+ "f": "b2-b18-s",
+ "t0": 0,
+ "t1": 31.598233,
+ "crop": [
+  216,
+  120,
+  92,
+  99
+ ],
+ "peak_area": 0.0094
+}

@@ -1,0 +1,26 @@
+{
+ "id": "b2-m7",
+ "source": "PSI-25_Raw Data_BASS_GMT192_SAMPLE_177_TEST_M7.mp4",
+ "test": "M7",
+ "material": "1 cm wide pmma 1 mm thick",
+ "family": "PMMA slab",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.9,
+ "air": "10, 6,5,4.5,4,3",
+ "co": 214.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 3.5,
+ "dir": "bass2x",
+ "f": "b2-m7",
+ "t0": 2.966666666666667,
+ "t1": 38.2,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.0979
+}

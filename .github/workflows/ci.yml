@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Every Monday: rebuild everything from NASA PSI to catch changes in NASA's tables or API.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      reproduce:
+        description: "Also re-download NASA PSI and rebuild everything from source"
+        type: boolean
+        default: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Code checks (ruff.toml)
+        run: ruff check .
+      - name: Type checks (mypy.ini)
+        run: mypy
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.12 is the floor: the pipeline uses 3.12 f-string syntax.
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Tests (units, properties, data contract, models, out-of-data guard, SI firewall)
+        run: python -m pytest -q --cov=pipeline --cov-report=term
+      - name: Dashboard JavaScript parses
+        run: node -e "new Function(require('fs').readFileSync('web/app.js','utf8'))"
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: pip install -r requirements.txt
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Browser tests (every section, phone width, links, Fire Lab = Python model)
+        run: npm run test:e2e
+
+  reproduce:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.reproduce)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Download NASA PSI (public API)
+        run: |
+          python scripts/fetch_psi_catalog.py combustion
+          python scripts/fetch_psi.py data/psi PSI-10 PSI-20 PSI-21 PSI-22 PSI-23 PSI-25 PSI-26 PSI-39 PSI-47 PSI-60 PSI-62 PSI-68 PSI-69 PSI-98 PSI-99 PSI-100 PSI-101 PSI-102 PSI-106 PSI-107 PSI-115 PSI-117 PSI-142 PSI-159
+      - name: Rebuild and test, measuring coverage of the whole pipeline
+        run: |
+          python -m coverage run --source=pipeline -m pipeline.run
+          python -m pytest -q --cov=pipeline --cov-append --cov-report=term --cov-fail-under=95
+      - name: Committed outputs match a fresh build
+        run: git diff --stat --exit-code -- data/gold data/si web/data/downloads ':!web/data/ember.js' ':!web/data/ember.json'

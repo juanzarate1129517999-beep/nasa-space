@@ -1,0 +1,15 @@
+{
+ "id": "cfig-21174f3",
+ "source": "PSI-159_Raw Data_vlc-record-2021-06-23-21h01m21s-udp____21174F3.ts",
+ "test": "21174F3",
+ "material": "30% butane from a spherical burner",
+ "family": "Spherical gas flame",
+ "state": "Gas",
+ "psi": "PSI-159",
+ "o2": 38.5,
+ "m": "2.0 atm \u00b7 ACME CFI-G \u00b7 still burning when the fuel was cut",
+ "out": 0,
+ "burn_s": 23.0,
+ "ok": false,
+ "why": "no flame found, or the file does not decode"
+}

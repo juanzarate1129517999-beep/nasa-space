@@ -1,0 +1,26 @@
+{
+ "id": "b2-o3a",
+ "source": "PSI-25_Raw Data_BASS_GMT164_SAMPLE_205_TEST_O3a.mp4",
+ "test": "O3a",
+ "material": "1/4\" clear rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.0,
+ "air": "5,3",
+ "co": 6.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 2.7,
+ "dir": "bass2x",
+ "f": "b2-o3a",
+ "t0": 40.96666666666666,
+ "t1": 67.53333333333333,
+ "crop": [
+  682,
+  384,
+  37,
+  96
+ ],
+ "peak_area": 0.2354
+}

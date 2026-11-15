@@ -1,0 +1,192 @@
+psi_id,experimento,registro,campo,valor_original,valor_nuevo,regla
+PSI-69,FLEX,"24, 80, 81, 83, 96, 138",Droplet initial diameter; mm,– (byte 0x96),NaN,Windows-1252 en dash used as an empty value in a numeric column (6 cells)
+PSI-69,FLEX,"40, 41, 42, 44, 47, 48, 88, 89, 90, 91, 92, 96, 107, 108, 128, 136, 137, 138, 139, 151, 175, 176, 183, 184, 192, 204, 205, 208",Visible flame extinction diameter; mm,– (byte 0x96),NaN,Windows-1252 en dash used as an empty value in a numeric column (28 cells)
+PSI-69,FLEX,223,Burn time; s,~6,6,Approximate value written with '~' in a numeric column; number kept and flagged
+PSI-69,FLEX,224,Burn time; s,~9,9,Approximate value written with '~' in a numeric column; number kept and flagged
+PSI-69,FLEX,50 rows,Test Date,m/d/yy,m/d/yyyy,Two date formats mixed in one column; normalized
+PSI-69,FLEX,129,Visible flame extinction diameter; mm,3.34,flagged,Droplet diameter at extinction larger than the initial diameter (3.33 mm); flagged
+PSI-69,FLEX,"70, 73",FLEX Identifier + Test GMT,193F001 at 7:25:43,flagged,"Two records share identifier, date and GMT second, so they cannot be independent tests; both kept and flagged"
+PSI-69,FLEX,114,Ambient pressure; mmHg,0.0,NaN,Physically impossible pressure (0 mmHg); excluded from models
+PSI-69,FLEX,69,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,75,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,76,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,79,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,80,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-69,FLEX,81,mole fractions,0.98,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-39,CFI,1285,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1286,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1287,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1288,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1289,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1295,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1296,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,1297,row,exact duplicate,dropped,Identical row repeated in the source table
+PSI-39,CFI,14 rows,Pressure,trailing spaces,stripped,Whitespace-padded labels split one category into two; normalized
+PSI-39,CFI,57 rows,Fuel,trailing spaces,stripped,Whitespace-padded labels split one category into two; normalized
+PSI-39,CFI,1219,Oxygen + Nitrogen + Helium,0.97,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-39,CFI,1220,Oxygen + Nitrogen + Helium,0.97,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-39,CFI,1221,Oxygen + Nitrogen + Helium,0.97,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-39,CFI,1222,Oxygen + Nitrogen + Helium,0.97,flagged,Mole fractions do not sum to 1 (±0.02)
+PSI-159,CFI-G normal,21106 F4,Hot ignition,No,Yes,"Marked not ignited, yet the same row reports a burn time, a flow-termination outcome and 'hot flame'; set to ignited"
+PSI-159,CFI-G normal,21125 A4,"Tad (K), Zst",#DIV/0!,NaN,Spreadsheet error value exported as data
+PSI-159,CFI-G normal,21125 H3,"Tad (K), Zst",#DIV/0!,NaN,Spreadsheet error value exported as data
+PSI-159,CFI-G inverse,861 rows,row,empty,dropped,Empty rows exported below the table
+PSI-159,CFI-G inverse,21242 F4,Peak burner temp (K),#VALUE!,NaN,Spreadsheet error value exported as data
+PSI-159,CFI-G inverse,21242 P2,Peak burner temp (K),#VALUE!,NaN,Spreadsheet error value exported as data
+PSI-159,CFI-G inverse,154 rows,Flame Type,Inverse|inverse,lowercase,Inconsistent capitalization normalized
+PSI-159,CFI-G inverse,69 rows,Color,Blue|blue / Yellow|yellow,lowercase,Inconsistent capitalization normalized
+PSI-159,CFI-G inverse,19 rows,Hot ignition,yes/no (lowercase),Yes/No,Inconsistent capitalization normalized
+PSI-159,CFI-G inverse,8 rows,Hot ignition,flash,"ignited=1, resultado=flash",Momentary 'flash' ignition kept as ignition but labeled separately
+PSI-10,ACME Flame Design,60 rows (N),multiple,RAMP / RAMPED,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
+PSI-10,ACME Flame Design,9 rows (I),multiple,RAMP,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
+PSI-10,ACME Flame Design,22024K2,XO2 and derived fields,LOW O2,NaN,Text note written into numeric fields; set to NaN
+PSI-10,ACME Flame Design,22024K3,XO2 and derived fields,LOW O2,NaN,Text note written into numeric fields; set to NaN
+PSI-10,ACME Flame Design,22042M1,Test,22042M1,22024M1,Test day code has transposed digits (22042 vs 22024 for every other test of experiment day 6); flagged
+PSI-21,ACME CLD,1,Fuel Bottle,40% CH5,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,2,Fuel Bottle,40% CH6,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,3,Fuel Bottle,40% CH7,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,4,Fuel Bottle,40% CH8,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,5,Fuel Bottle,40% CH9,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,6,Fuel Bottle,40% CH10,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,7,Fuel Bottle,40% CH11,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,8,Fuel Bottle,40% CH12,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,9,Fuel Bottle,40% CH13,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,10,Fuel Bottle,40% CH14,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,12,Fuel Bottle,100% CH5,100% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,13,Fuel Bottle,100% CH6,100% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,15,Fuel Bottle,100% C2H5,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,16,Fuel Bottle,100% C2H6,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,17,Fuel Bottle,100% C2H7,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,18,Fuel Bottle,100% C2H8,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,19,Fuel Bottle,100% C2H9,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,20,Fuel Bottle,100% C2H10,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,21,Fuel Bottle,100% C2H11,100% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,23,Fuel Bottle,50% C2H5,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,24,Fuel Bottle,50% C2H6,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,25,Fuel Bottle,50% C2H7,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,26,Fuel Bottle,50% C2H8,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,27,Fuel Bottle,50% C2H9,50% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,29,Fuel Bottle,30% C2H5,30% C2H4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-21,ACME CLD,31,Fuel Bottle,40% CH5,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,1,Atmosphere*,~21% O2 with N3,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,2,Atmosphere*,~21% O2 with N4,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,5,Atmosphere*,~21% O2 with N3,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,6,Atmosphere*,~21% O2 with N4,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,7,Atmosphere*,~21% O2 with N5,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,8,Atmosphere*,~21% O2 with N6,~21% O2 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,1,Fuel Bottle,50% C2H4 with N3,50% C2H4 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-23,ACME s-Flame,3,Fuel Bottle,45% CH4 with N3,45% CH4 with N2,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
+PSI-20,ACME BRE,2019-March-7,Oxygen Conc (percent),3400%,34.0,Value formatted as percent of a percent (3400% -> 34)
+PSI-20,ACME BRE,2019-April-1,Oxygen Conc (percent),2100%,21.0,Value formatted as percent of a percent (3400% -> 34)
+PSI-107,SPICE,line 3,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 7,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 10,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 12,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 14,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 103,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 125,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 131,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 132,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 146,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 148,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 153,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 155,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 159,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 160,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 165,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 167,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 172,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 173,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 174,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 184,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 185,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 192,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 216,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 222,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 231,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 232,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 235,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 236,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 241,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 242,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 253,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 267,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,line 336,row,exact duplicate of an earlier row,dropped,Identical row repeated in the source table
+PSI-107,SPICE,16 rows,Fuel,75% Propylene,75 % Propylene,Same fuel written two ways; normalized
+PSI-107,SPICE,GMT day 119 (8 rows),Fuel Rate (mg/s),0.65 mg per cm³,flagged,Mass flow implies a gas density 42% of the other 75 % Propylene rows (close to methane); mass rates flagged
+PSI-107,SPICE,GMT day 136 (28 rows),Fuel Rate (mg/s),0.65 mg per cm³,flagged,Mass flow implies a gas density 42% of the other 75 % Propylene rows (close to methane); mass rates flagged
+PSI-107,SPICE,line 296,Air Rate (cm/s),-0.28,0,"Negative air speed: zero offset of the sensor, set to 0"
+PSI-107,SPICE,line 298,Air Rate (cm/s),-0.28,0,"Negative air speed: zero offset of the sensor, set to 0"
+PSI-107,SPICE,line 299,Air Rate (cm/s),-0.28,0,"Negative air speed: zero offset of the sensor, set to 0"
+PSI-107,SPICE,line 300,Air Rate (cm/s),-0.28,0,"Negative air speed: zero offset of the sensor, set to 0"
+PSI-107,SPICE,line 301,Air Rate (cm/s),-0.28,0,"Negative air speed: zero offset of the sensor, set to 0"
+PSI-107,SPICE,line 337,Air Rate (cm/s),-5.92,NaN,Negative air speed is impossible; set to NaN
+PSI-107,SPICE,line 338,Air Rate (cm/s),-5.92,NaN,Negative air speed is impossible; set to NaN
+PSI-107,SPICE,line 339,Air Rate (cm/s),-5.92,NaN,Negative air speed is impossible; set to NaN
+PSI-107,SPICE,3 rows,GMT ignition,LOS,NaN,Loss-of-signal note written in a time column
+PSI-107,SPICE,line 133,GMT Flame Off,17:00:27 < ignition 17:58:09,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-107,SPICE,line 411,GMT Flame Off,10:05:20 < ignition 11:04:43,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-107,SPICE,line 412,GMT Flame Off,10:05:20 < ignition 11:04:43,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-107,SPICE,line 413,GMT Flame Off,10:05:20 < ignition 11:04:43,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-107,SPICE,line 459,GMT Flame Off,12:36:06 < ignition 12:36:12,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-107,SPICE,line 460,GMT Flame Off,12:36:06 < ignition 12:36:12,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-107,SPICE,line 461,GMT Flame Off,12:36:06 < ignition 12:36:12,flagged,Flame-off time earlier than the ignition time (likely an hour typo); duration not used
+PSI-106,SLICE,2 rows,Fuel Type,leading space,stripped,Leading spaces made the same fuel appear as two fuels; normalized
+PSI-101,SAME-R,13 rows,Description,Baseline Aging|Baseline aging / High Temp aging|High temp aging,one spelling,Inconsistent capitalization normalized
+PSI-25/26,BASS,2 rows,material,unrecognized,dropped,"Rows that are not a recognizable fuel sample (headers, calibrations)"
+PSI-26,BASS,as-run 93 (test 38),Date vs GMT day,"4/26/2013 is day 116, GMT column says 113",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 111 (test 109),Date vs GMT day,"6/1/2013 is day 152, GMT column says 137",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 112 (test 79),Date vs GMT day,"6/1/2013 is day 152, GMT column says 150",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 113 (test 80),Date vs GMT day,"6/1/2013 is day 152, GMT column says 150",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 114 (test 75),Date vs GMT day,"6/1/2013 is day 152, GMT column says 150",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 115 (test 53),Date vs GMT day,"6/1/2013 is day 152, GMT column says 150",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 116 (test 53a),Date vs GMT day,"6/1/2013 is day 152, GMT column says 150",flagged,Calendar date and GMT day-of-year disagree
+PSI-26,BASS,as-run 89,As Run Test #,test 26 on 4/16/2013 and test 87 on 4/23/2013,flagged,One as-run number used for two different tests on different days
+PSI-26,BASS,as-run 90,As Run Test #,test 27 on 4/16/2013 and test 103 on 4/23/2013,flagged,One as-run number used for two different tests on different days
+PSI-26,BASS,as-run 91,As Run Test #,test 28 on 4/16/2013 and test 104 on 4/23/2013,flagged,One as-run number used for two different tests on different days
+PSI-26,BASS,"test 114, sample 25",Fuel Sample Material,pmma sphere vs PMMA 2 cm,flagged,Same test and sample number described as a sphere in one row and a flat sample in another
+PSI-26,BASS,26 rows,Fuel Sample Material,PMMA 1 cm|pmma 1 cm / PMMA 2 cm|pmma 2 cm / PMMA slab|pmma slab,one spelling,Same material written with different capitalization or spacing
+PSI-26,BASS,2 rows,Fuel Sample Material,parrafin,paraffin,Spelling error in a material label
+PSI-26,BASS,1 rows,Fuel Sample Material,oppsed,opposed,Spelling error in a material label
+PSI-98,Saffire-I,S1,Sample Thickness (cm),0.37 cm,0.37 mm,Unit error: SIBAL fabric is 0.37 mm thick (Saffire-II lists the same fabric as 0.37 mm); 0.37 cm would be ten times thicker
+PSI-98,Saffire-I,S1,Sample Length / Width (cm),40.6 / 94.0,94.0 / 40.6,Length and width swapped: the Saffire sample is 94 cm long and 40.6 cm wide (as in the Saffire-III table)
+PSI-98,Saffire-I,S2,Sample Thickness (cm),0.37 cm,0.37 mm,Unit error: SIBAL fabric is 0.37 mm thick (Saffire-II lists the same fabric as 0.37 mm); 0.37 cm would be ten times thicker
+PSI-98,Saffire-I,S2,Sample Length / Width (cm),40.6 / 94.0,94.0 / 40.6,Length and width swapped: the Saffire sample is 94 cm long and 40.6 cm wide (as in the Saffire-III table)
+PSI-100,Saffire-III,S1,Sample Thickness,.33 cm,0.33 mm,Unit error: a SIBAL fabric sample a third of a centimeter thick is ten times the fabric's thickness; read as mm
+PSI-100,Saffire-III,S2,Sample Thickness,.33 cm,0.33 mm,Unit error: a SIBAL fabric sample a third of a centimeter thick is ten times the fabric's thickness; read as mm
+PSI-99,Saffire-II,2-4,Camera 2,S4C1,S4C2,Camera file name does not match the sample (pattern S<n>C2)
+PSI-99,Saffire-II,2-6,Camera 2,S56C2,S6C2,Camera file name does not match the sample (pattern S<n>C2)
+PSI-99,Saffire-II,"2-6, 2-9",Material,blank (merged cell),filled from the row above,Merged spreadsheet cell exported as an empty value
+PSI-99,Saffire-II,header,"?-g Burn Length, ?-g Spread Length",?-g,μ-g,Character lost in export: the Greek letter μ (micro-gravity) became '?'
+PSI-99,Saffire-II,header,Samle Thickness,Samle,Sample,Spelling error in a column name
+PSI-25,BASS-II,O10,GMT,213,203,"GMT day disagrees with the date 7/22/2014 (day 203); NASA's raw video for this test is 'BASS_GMT203_SAMPLE_210_TEST_O10', so the GMT column is the typo (also in the test matrix)"
+PSI-25,BASS-II,"O4, O16",Fuel Sample Material,"3/8""clear rod",normalized,Material label written inconsistently (missing space after the inch mark)
+PSI-25,BASS-II,"P3b, P15, P21a",Fuel Sample Material,1/4 black rod | 1/4 clear rod,normalized,Material label written inconsistently (missing inch mark)
+PSI-25,BASS-II,"B4, B5, O22",Fuel Sample Material,"1/2"" clear rod | 200 micron  2 cm wide | 300 micron PMMA film   2 cm wide",normalized,Material label written inconsistently (trailing space)
+PSI-25,BASS-II,M5,Fuel Sample Material,3 mm thick PMMA   2 sided   2 cm thick,flagged,Two thicknesses in one label ('mm thick' and 'cm thick'); the second is probably the width
+PSI-99,Saffire-II,2-4..2-6,Samle Thickness,037 mm,0.37 mm,Missing decimal point
+PSI-99,Saffire-II,2-7,Material,PMMA & Nomex,excluded from μg-vs-1g comparison,"Composite sample: PMMA burned fully, Nomex never ignited"
+PSI-25,BASS-II (Bhattacharjee),B2,calibrated final O2 % by vol,1.6,NaN,Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded
+PSI-25,BASS-II (Bhattacharjee),B4,Initial CO (ppm),-1.0,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Bhattacharjee),B21,Initial CO (ppm),-1.0,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Bhattacharjee),B22,Initial CO (ppm),-1.0,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Ferkul),F2,Final CO (ppm),82,NaN,CO fell during a burn in the sealed glovebox (final below initial); CO produced not computed
+PSI-25,BASS-II (Miller),M5,final co (ppm),>500,NaN,"CO above the sensor range (over-range text in a numeric field); value censored, CO produced not computed"
+PSI-25,BASS-II (Miller),M10,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Olson),O1,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Olson),O2,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Olson),O4,final co (ppm),OR,NaN,"CO above the sensor range (over-range text in a numeric field); value censored, CO produced not computed"
+PSI-25,BASS-II (Olson),O5a,Initial CO (ppm),-2,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Olson),O12,initial co (ppm),OR,NaN,"CO above the sensor range (over-range text in a numeric field); value censored, CO produced not computed"
+PSI-25,BASS-II (Olson),O12,final co (ppm),OR,NaN,"CO above the sensor range (over-range text in a numeric field); value censored, CO produced not computed"
+PSI-25,BASS-II (Olson),O13b,final co (ppm),over,NaN,"CO above the sensor range (over-range text in a numeric field); value censored, CO produced not computed"
+PSI-25,BASS-II (Olson),O20,Initial CO (ppm),-3,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (Fernandez-Pello),P22a,calibrated final O2 % by vol,0.6,NaN,Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded
+PSI-25,BASS-II (Fernandez-Pello),P22b,calibrated final O2 % by vol,39.1,NaN,Final O2 far above the initial value: a burn cannot add oxygen to the sealed glovebox; excluded
+PSI-25,BASS-II (T'ien),T25,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (T'ien),T26,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (T'ien),T27,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (T'ien),T28a,calibrated final O2 % by vol,0.9,NaN,Final O2 far below the initial value cannot happen in the 250 L glovebox; excluded
+PSI-25,BASS-II (T'ien),T28a,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0
+PSI-25,BASS-II (T'ien),T28b,calibrated final O2 % by vol,40.4,NaN,Final O2 far above the initial value: a burn cannot add oxygen to the sealed glovebox; excluded
+PSI-25,BASS-II (T'ien),T29,Initial CO (ppm),-1,0,Negative concentration is impossible (sensor zero offset); set to 0

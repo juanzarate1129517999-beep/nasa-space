@@ -1,0 +1,27 @@
+{
+ "id": "b2-o15b",
+ "source": "PSI-25_Raw Data_BASS_GMT209_SAMPLE_218_TEST_O15b.mp4",
+ "test": "O15b",
+ "material": "3/8\" clear rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 16.7,
+ "air": "5, 0",
+ "co": 575.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 8.9,
+ "dir": "bass2x",
+ "f": "b2-o15b",
+ "t0": 1861.3,
+ "t1": 1950.2,
+ "crop": [
+  682,
+  384,
+  23,
+  96
+ ],
+ "peak_area": 0.1897,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

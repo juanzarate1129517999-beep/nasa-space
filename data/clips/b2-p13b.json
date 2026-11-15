@@ -1,0 +1,26 @@
+{
+ "id": "b2-p13b",
+ "source": "PSI-25_Raw Data_BASS_GMT195_SAMPLE_203_TEST_P13b.mp4",
+ "test": "P13b",
+ "material": "0.5\" black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 20.6,
+ "air": "5 down to ext",
+ "co": 67.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 7.8,
+ "dir": "bass2x",
+ "f": "b2-p13b",
+ "t0": 0,
+ "t1": 77.86666666666667,
+ "crop": [
+  492,
+  276,
+  0,
+  142
+ ],
+ "peak_area": 0.2065
+}

@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Skylab Phoenix · Fire Safety Intelligence</title>
+  <meta name="description" content="Skylab Phoenix turns NASA's microgravity combustion flight data (PSI) into fire-safety answers for the Moon base and spacecraft: an immersive 3D story, real flight video, a Fire Lab, an interactive dashboard, validated models with uncertainty and the next experiment to fly.">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="assets/phoenix.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <!-- Bump __V (and the ?v= on the scripts at the end of <body>) when web/ files change. -->
+  <script>window.__V = "3"; document.documentElement.classList.add("js");</script>
+  <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__V + '">');</script>
+  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+</head>
+<body>
+<div class="loading" id="loading"><span>Skylab Phoenix</span><span>Loading NASA PSI data</span></div>
+<script>
+  // Show the page at once: the static HTML paints immediately and the scripts (deferred)
+  // fill in data and 3D as they arrive. The splash only reappears for a real data error.
+  document.getElementById("loading").classList.add("done");
+  document.documentElement.classList.add("is-ready");
+</script>
+
+<header class="nav" id="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#/" aria-label="Skylab Phoenix, home">
+      <img class="brand__mark" src="assets/phoenix.svg" alt="" width="28" height="28">
+      <span class="brand__word">SKYLAB PHOENIX</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Sections">
+      <a href="#/learn" data-v="learn">Learn 3D</a>
+      <a href="#/flames" data-v="flames">Flames</a>
+      <a href="#/lab" data-v="lab">Fire Lab</a>
+      <a href="#/findings" data-v="findings">Findings</a>
+      <a href="#/ranking" data-v="ranking">Ranking</a>
+      <a href="#/next" data-v="next">Next flight</a>
+      <a href="#/data" data-v="data">Method</a>
+    </nav>
+    <a class="btn btn--fire btn--sm nav__cta" href="https://github.com/juanzarate1129517999-beep/nasa-space" target="_blank" rel="noopener">Source <span aria-hidden="true">↗</span></a>
+    <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="view" id="v-home" data-view="home">
+    <div class="space">
+      <div class="globe" id="globe" aria-label="Interactive 3D view: Earth with the live ISS orbit, the Moon and Mars. Drag to turn, scroll to zoom, select a body."></div>
+      <div class="wrap space__in">
+        <div class="space__text">
+          <p class="eyebrow load" style="--i:0">NASA Space Apps 2026 · Flame in Freefall</p>
+          <h1 class="hero__title">
+            <span class="ln"><span>The Moon base will</span></span>
+            <span class="ln"><span>breathe <span class="fire">30% oxygen.</span></span></span>
+          </h1>
+          <p class="hero__lead load" style="--i:2" id="hero-lead"></p>
+          <div class="hero__ctas load" style="--i:3">
+            <a class="btn btn--fire" href="#/learn">Fly to the Moon base <span aria-hidden="true">→</span></a>
+            <a class="btn btn--line" href="#/flames">Watch fire in orbit</a>
+          </div>
+        </div>
+      </div>
+      <p class="space__note mono-sm">Earth, the ISS and NASA's satellite fleet move on today's orbital elements at 600× speed (NASA SVS Orbit Viewer data). Moon: LRO. Mars: Viking. Not to scale · drag to turn · hover a satellite · select a body</p>
+    </div>
+    <section class="sec sec--reel" id="reel">
+      <div class="wrap">
+        <header class="sec__head sec__head--row rv">
+          <div>
+            <p class="eyebrow">Watch first · real flight video</p>
+            <h2>Fire as NASA filmed it in orbit. <span class="mute">Six flames worth seeing, and the investigations that lit them.</span></h2>
+          </div>
+          <a class="btn btn--line" href="#/flames" id="reel-all">Every flight clip →</a>
+        </header>
+        <div class="reel rv" id="reel-main">
+          <div class="reel__stage">
+            <div class="reel__v">
+              <video id="reel-v" muted loop playsinline preload="none"></video>
+              <span class="stage__tag" id="reel-tag"></span>
+              <button class="reel__pp" id="reel-pp" type="button" aria-label="Pause video" aria-pressed="false"><span aria-hidden="true"></span></button>
+            </div>
+            <div class="reel__info" id="reel-info" aria-live="polite"></div>
+          </div>
+          <ol class="reel__list" id="reel-list" aria-label="Featured flames"></ol>
+        </div>
+        <div class="arch-head">
+          <h3 class="sub-h">The investigations behind the video.</h3>
+          <span class="mono-sm">Ranked for the Moon base · open any card for its full file</span>
+        </div>
+        <div class="vinv" id="reel-inv"></div>
+      </div>
+    </section>
+    <section class="sec">
+      <div class="wrap">
+        <header class="sec__head rv">
+          <p class="eyebrow">The answer in 60 seconds</p>
+          <h2>What NASA's flight data says about fire on the Moon. <span class="mute">Each one links to its evidence.</span></h2>
+        </header>
+        <ol class="answers rv" id="answer-list"></ol>
+        <dl class="facts facts--4 card--gap" id="kpis"></dl>
+      </div>
+    </section>
+    <section class="sec sec--alt">
+      <div class="wrap">
+        <div class="history rv" style="margin-top:0">
+          <div class="history__head">
+            <p class="label">Why it matters</p>
+            <h3>Apollo 1, Apollo 13, Mir: each one involved oxygen. <span class="mute">The Moon base will breathe more of it.</span></h3>
+          </div>
+          <ol class="history__list" id="history"></ol>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="view xp" id="v-learn" data-view="learn" hidden>
+    <nav class="xp-rail" id="xp-rail" aria-label="Chapters">
+      <a href="#/learn/xp-1" data-c="xp-1"><span>01</span>The mission</a>
+      <a href="#/learn/xp-2" data-c="xp-2"><span>02</span>Why fires start</a>
+      <a href="#/learn/xp-3" data-c="xp-3"><span>03</span>How fire behaves</a>
+      <a href="#/learn/xp-4" data-c="xp-4"><span>04</span>Four worlds</a>
+    </nav>
+    <div class="xp-ch xp-story" id="xp-1">
+      <div class="xp-sticky"><div class="xp-canvas" id="xp-moon"></div><div class="xp-shade"></div></div>
+      <div class="xp-cards" id="xp-cards"></div>
+    </div>
+    <div class="xp-ch xp-full" id="xp-2">
+      <div class="xp-canvas" id="xp-sources"></div>
+      <header class="xp-head">
+        <p class="eyebrow">Chapter 2 · Why fires start</p>
+        <h2>Five ways a fire can start in a spacecraft.</h2>
+        <p>Pick a glowing point. Each one plays out in four steps, with what NASA measured about it in orbit.</p>
+      </header>
+      <aside class="xp-src-panel" id="xp-src-panel" aria-live="polite"></aside>
+      <div class="xp-chips" id="xp-chips"></div>
+    </div>
+    <div class="xp-ch" id="xp-3">
+      <header class="xp-head xp-head--in">
+        <p class="eyebrow">Chapter 3 · How fire behaves</p>
+        <h2>The same flame, from Earth to orbit. <span class="mute">Seven steps, every number from NASA flight data.</span></h2>
+      </header>
+      <div class="learn learn--wide">
+        <div class="learn__view" id="learn3d"><span class="lab3d__tag">Drag to turn · scroll to zoom</span></div>
+        <aside class="learn__panel" id="learn-panel" aria-live="polite"></aside>
+      </div>
+    </div>
+    <div class="xp-ch" id="xp-4">
+      <header class="xp-head xp-head--in">
+        <p class="eyebrow">Chapter 4 · Four worlds</p>
+        <h2>One flame, four gravities. <span class="mute">Same fuel, same air, side by side.</span></h2>
+        <p>Change the oxygen, the airflow or the fuel and watch all four flames answer at once. Drag any of them to turn it.</p>
+      </header>
+      <div class="xp-inner">
+        <div class="worlds-ctl" id="worlds-ctl"></div>
+        <div class="worlds" id="worlds"></div>
+        <p class="note">Only the ISS flame comes from flight data: the model was trained on ISS droplet fires. The Moon, Mars and Earth shapes show how rising hot gas stretches a flame as gravity grows; they are illustrations, not predictions. No partial-gravity fire data is in NASA PSI yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-flames" data-view="flames" hidden>
+    <div class="sec sec--first">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">01 · Flames in orbit</p>
+          <h2>Same plastic rod, four oxygen levels. <span class="mute">Real flight video from the ISS.</span></h2>
+          <p class="sec__lead">NASA's BASS-II experiment burned the same quarter-inch acrylic (PMMA) rod at different oxygen levels inside the station's glovebox. Move through the oxygen levels: as oxygen drops, the flame shrinks, loses its soot and turns blue, and it still burns below what Earth tests allow.</p>
+        </header>
+        <div class="stage" id="stage"></div>
+        <div class="arch-head">
+          <h3 class="sub-h">The flight archive: solids, liquids and gases.</h3>
+          <div class="seg" id="arch-state" role="group" aria-label="State of the fuel"></div>
+          <div class="seg seg--wrap" id="arch-filter" role="group" aria-label="Material"></div>
+        </div>
+        <div class="arch" id="arch"></div>
+        <div class="links"><button class="btn btn--line btn--sm" id="arch-more" type="button">Show all</button></div>
+        <p class="note">Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Solids: BASS-II, with the oxygen measured before ignition, the airflow steps the crew set and the carbon monoxide the burn added. Liquids: droplets from the Cool Flame Investigation (PSI-39), with oxygen, pressure and helium from its table; the pink glow is the hot flame around the droplet. Gases: ACME s-Flame and CFI-G spheres and SPICE jet flames; “≈” marks oxygen taken as cabin air. Camera exposure changes between and within tests, so compare shape and color, not brightness. Sequences that show only the hardware or no flame are left out.</p>
+      </div>
+    </div>
+    <div class="sec sec--alt">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">What the solid tests measured</p>
+          <h2>Cabin materials in orbit. <span class="mute">They keep burning at less oxygen than Earth tests suggest.</span></h2>
+        </header>
+        <dl class="facts facts--4" id="solid-facts"></dl>
+        <div class="card card--gap">
+          <p class="label">NASA flammability boundary · PMMA rods · 1 atm</p>
+          <h3>Where a solid flame can survive.</h3>
+          <p class="sub">Above the line a rod keeps burning; below it the flame goes out. Solid line: tested by BASS-II. Dashed: the same equation extended.</p>
+          <div class="legend" id="solid-legend"></div>
+          <div class="chart" id="solid-map" role="img" aria-label="Flammability boundary of PMMA rods: oxygen versus airflow"></div>
+          <p class="note" id="solid-note"></p>
+        </div>
+        <details class="card card--gap more">
+          <summary><span><span class="label">More from the solid tests</span><b>Carbon monoxide, and every crewed atmosphere</b></span></summary>
+          <div class="more__body">
+            <p class="label">BASS-II gas sensors · 118 tests</p>
+            <h3>Starved flames make more carbon monoxide.</h3>
+            <p class="sub">CO added to the glovebox by each test, against the oxygen level at ignition. A detection target.</p>
+            <div class="legend" id="solid-co-legend"></div>
+            <div class="chart" id="solid-co" role="img" aria-label="Carbon monoxide produced versus oxygen"></div>
+            <p class="note" id="solid-co-note"></p>
+            <p class="label" style="margin-top:28px">Per habitat · in every crewed atmosphere, a PMMA rod can burn in still air</p>
+            <div class="tbl-wrap"><table id="solid-hab"></table></div>
+            <p class="note" id="solid-hab-note"></p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-lab" data-view="lab" hidden>
+    <div class="sec sec--first">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">02 · Fire Lab</p>
+          <h2>Will this fire go out on its own? <span class="mute">Ask the flight data.</span></h2>
+          <p class="sec__lead">A model trained on 261 FLEX droplet fires from the ISS runs in your browser, with 200 bootstrap models for uncertainty. Leave the region NASA tested and it says so instead of guessing.</p>
+        </header>
+        <div class="lab3d" id="lab3d-wrap">
+          <div class="lab3d__col">
+            <div class="lab3d__view" id="lab3d"><span class="lab3d__tag">3D Lab · drag to turn</span><button class="lab3d__lbl" id="lab3d-lbl" type="button" aria-pressed="true">Labels</button></div>
+            <div class="tl" id="lab3d-tl">
+              <div class="tl__bar"><i id="tl-fill"></i><span id="tl-out"></span></div>
+              <ol class="tl__steps">
+                <li data-ph="deploy"><b>1</b> Droplet deployed</li>
+                <li data-ph="ignite"><b>2</b> Hot wire ignites it</li>
+                <li data-ph="burn"><b>3</b> Burns and shrinks</li>
+                <li data-ph="end"><b>4</b> <span id="tl-end">Out on its own, or fuel gone</span></li>
+              </ol>
+            </div>
+          </div>
+          <div class="lab3d__hud">
+            <p class="label">Gravity</p>
+            <div class="seg seg--wrap" id="g-seg" role="group" aria-label="Gravity"></div>
+            <p class="label">Your scenario</p>
+            <p class="lab3d__sc" id="lab3d-sc"></p>
+            <div class="lab3d__p" id="lab3d-p"></div>
+            <p class="label">Live physics · d² law</p>
+            <div class="d2"><canvas id="lab-d2" width="560" height="300" role="img" aria-label="Droplet diameter squared against time for this fire and the five closest NASA flight tests"></canvas></div>
+            <div class="d2-read" id="lab-read"></div>
+            <p class="label">Replays</p>
+            <div class="lab3d__runs" id="lab3d-runs" aria-live="polite"></div>
+            <p class="note">Each replay runs in real time. The droplet shrinks by the d² law, d² = d₀² − K·t, with the burning rate K and the extinction diameter taken from the five closest FLEX flight tests (grey curves). Whether it goes out on its own is drawn with the model's probability, so many replays show how often a fire like this survives. Flame size uses typical flame-to-droplet ratios from droplet theory and is illustrative; on the Moon, Mars and Earth the stretched flame is an illustration, not a prediction.</p>
+          </div>
+        </div>
+        <div class="habitats card--gap" id="habitats"></div>
+        <div class="console card--gap" id="scenario">
+          <div class="console__side" id="sim-controls">
+            <p class="label">Habitat presets</p>
+            <div class="presets" id="presets"></div>
+            <p class="label">Fuel</p>
+            <div class="seg" id="fuel-seg" role="group" aria-label="Fuel"></div>
+            <div id="sliders"></div>
+          </div>
+          <div class="console__main">
+            <div class="result">
+              <div>
+                <p class="label">Chance the flame goes out on its own</p>
+                <div class="big" id="r-big">—</div>
+                <div class="cap" id="r-cap"></div>
+              </div>
+              <div class="result__right">
+                <div class="status-row"><div id="r-status"></div><button class="btn btn--line btn--sm" id="share-btn" type="button" title="Copy a link that opens this exact scenario">Copy link</button></div>
+                <div class="interval">
+                  <div class="track"><div class="ci" id="r-ci"></div><div class="pt" id="r-pt"></div></div>
+                  <div class="scale"><span>0%</span><span>50%</span><span>100%</span></div>
+                  <div class="txt" id="r-int"></div>
+                </div>
+              </div>
+            </div>
+            <div class="console__chart">
+              <div class="chart-head">
+                <div><p class="label">Explore</p><h3 id="viz-label">Will a droplet fire go out on its own?</h3></div>
+                <div class="seg" id="viz-seg" role="group" aria-label="Chart view"></div>
+              </div>
+              <p class="sub" id="viz-sub"></p>
+              <div class="legend" id="map-legend"></div>
+              <div class="chart" id="map-chart" role="img" aria-label="Chance that a droplet fire goes out on its own, by oxygen and pressure"></div>
+              <p class="note" id="viz-note"></p>
+            </div>
+          </div>
+        </div>
+        <details class="card card--gap more">
+          <summary><span><span class="label">For researchers</span><b>Why the model says this: closest flight tests and drivers</b></span></summary>
+          <div class="more__body grid-2">
+            <div>
+              <p class="label">Closest real flight tests</p>
+              <div class="tbl-wrap"><table id="nn-table"></table></div>
+              <p class="note" id="nn-note"></p>
+            </div>
+            <div>
+              <p class="label">What drives self-extinction · 90% bootstrap intervals</p>
+              <div class="chart short" id="drivers-chart" role="img" aria-label="Model coefficients"></div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-findings" data-view="findings" hidden>
+    <div class="sec sec--first" id="dash">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">03 · Findings · Interactive dashboard</p>
+          <h2>Explore every NASA fire test. <span class="mute">Click any chart and the others follow.</span></h2>
+          <p class="sec__lead">Every test record NASA published for the 24 PSI combustion investigations (18 of them have test tables; ground studies and FLEX-2 do not), cleaned into one table. Pick a state of matter, click a bar, drag a box on the map or jump to the Moon-base air: every number and chart recomputes from the filtered records.</p>
+        </header>
+        <div class="dash">
+          <div class="dash-bar">
+            <div class="seg" id="dash-state" role="group" aria-label="State of matter"></div>
+            <div class="dash-quick" id="dash-quick"></div>
+            <button type="button" class="btn btn--line btn--sm" id="dash-reset">Reset filters</button>
+          </div>
+          <div class="dash-active" id="dash-active" aria-live="polite"></div>
+          <dl class="dash-kpis" id="dash-kpis"></dl>
+          <div class="dash-grid">
+            <div class="card dash-c"><p class="label">Oxygen in the air</p><p class="dash-q">How many tests ran at each oxygen level? <span>Click a column to filter.</span></p><div class="dash-ch" id="dash-o2" role="group" aria-label="Records by oxygen level"></div></div>
+            <div class="card dash-c"><p class="label">Outcome</p><p class="dash-q">Did the fire go out on its own? <span>Click a part to filter.</span></p><div class="dash-ch" id="dash-out" role="group" aria-label="Records by outcome"></div></div>
+            <div class="card dash-c dash-c--tall"><p class="label">Investigations</p><p class="dash-q">Which experiments hold the records? <span>Click a bar to filter.</span></p><div class="dash-ch dash-ch--tall" id="dash-exp" role="group" aria-label="Records by investigation"></div></div>
+            <div class="card dash-c dash-c--wide"><p class="label">Oxygen against pressure</p><p class="dash-q">Where did NASA fly fire, and where will crews live? <span>Drag a box to filter.</span></p><div class="legend" id="dash-map-legend"></div><div class="chart dash-ch dash-ch--map" id="dash-map" role="img" aria-label="Records by oxygen and pressure, with crew atmospheres"></div></div>
+          </div>
+          <div class="card dash-tbl">
+            <div class="dash-tbl__head"><p class="label" id="dash-tbl-cap">Records</p><button type="button" class="btn btn--line btn--sm" id="dash-csv">Download filtered CSV</button></div>
+            <div class="tbl-wrap"><table id="dash-table"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sec sec--dark">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">Coverage</p>
+          <h2>Where NASA has flown fire. <span class="mute">And where crews will live.</span></h2>
+          <p class="sec__lead">Every flight test with a known oxygen level and pressure, against the crewed atmospheres. The lunar-base envelope from the brief (≥30% O₂, ≤10.2 psi) is almost empty.</p>
+        </header>
+        <div class="card" id="coverage">
+          <div class="cov-top">
+            <div class="seg" id="cov-mode" role="group" aria-label="Chart type"><button type="button" data-m="simple" aria-pressed="true">Simple view</button><button type="button" data-m="map" aria-pressed="false">Full map</button></div>
+            <div class="controls-row" id="cov-filters"></div>
+          </div>
+          <div id="cov-simple"></div>
+          <div id="cov-map" hidden>
+          <div class="legend" id="cov-legend"></div>
+          <div class="chart tall" id="cov-chart" role="img" aria-label="Scatter of flight tests by oxygen fraction and pressure, with habitat atmospheres"></div>
+          <p class="note">How to read it: each dot is one flight test. Further right means more oxygen in the air; lower means thinner air (lower pressure). The white crosses are the air crews breathe or will breathe. Hollow markers: O₂ or pressure not reported per test, taken as ISS cabin air. Crossed markers: inverse flames, where the O₂ value is the oxidizer stream from the burner. ACME BRE (26.5 / 34 / 40% O₂) is not plotted because its table does not report pressure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sec sec--dark" id="audit">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">Is the Moon base ready?</p>
+          <h2>The lunar base, audited for fire. <span class="mute">Every module, every layer, and what the data cannot tell yet.</span></h2>
+          <p class="sec__lead">A surface habitat, an airlock for EVA prep and a pressurized rover at the challenge's 30% O₂ and 10.2 psi. Each cell is answered from NASA data and labelled by where its number comes from. Click a row to see the numbers.</p>
+        </header>
+        <div class="mb-legend" id="mb-legend"></div>
+        <div class="tbl-wrap"><table class="mb-matrix" id="mb-matrix"></table></div>
+        <h3 class="sub-h" style="margin-top:clamp(40px,5vw,64px)">Three flights that would close the gaps.</h3>
+        <div class="mb-flights" id="mb-flights"></div>
+        <details class="card card--gap more">
+          <summary><span><span class="label">Sources</span><b>Where the Moon, the Sun and every number come from</b></span></summary>
+          <div class="more__body"><ul class="mb-sources" id="mb-sources"></ul></div>
+        </details>
+        <div class="card card--gap" id="mb-brief"></div>
+      </div>
+    </div>
+    <div class="sec sec--dark">
+      <div class="wrap">
+        <header class="sec__head sec__head--row">
+          <div>
+            <p class="eyebrow">Ranked by strength of evidence</p>
+            <h2>Fire-safety findings. <span class="mute">Every number computed from PSI tables.</span></h2>
+          </div>
+          <div class="seg" id="find-layer" role="group" aria-label="Filter findings by layer"></div>
+        </header>
+        <div class="findings" id="findings-list"></div>
+        <div class="links"><button class="btn btn--line btn--sm" id="find-more" type="button">Show all findings</button></div>
+      </div>
+    </div>
+    <div class="sec sec--tight" id="evidence">
+      <div class="wrap">
+        <details class="card more">
+          <summary><span><span class="label">The measurements</span><b>Raw outcomes behind the findings, with sample sizes and intervals</b></span></summary>
+          <div class="more__body">
+        <div class="grid-2">
+          <div class="card">
+            <p class="label">FLEX · share of tests per outcome</p>
+            <h3>Droplet fire outcome vs oxygen.</h3>
+            <div class="legend" id="band-legend"></div>
+            <div class="chart short" id="band-chart" role="img" aria-label="Outcome share by oxygen band"></div>
+          </div>
+          <div class="card">
+            <p class="label">FLEX · 90% Wilson intervals</p>
+            <h3>Suppression with CO₂ dilution.</h3>
+            <div class="legend" id="sup-legend"></div>
+            <div class="chart short" id="sup-chart" role="img" aria-label="Self-extinction rate by CO2 level"></div>
+          </div>
+          <div class="card">
+            <p class="label">ACME CFI-G · ignited tests</p>
+            <h3>Is there a limiting flame temperature?</h3>
+            <div class="legend" id="tad-legend"></div>
+            <div class="chart short" id="tad-chart" role="img" aria-label="Self-extinction probability versus flame temperature"></div>
+            <p class="note" id="tad-note"></p>
+          </div>
+          <div class="card">
+            <p class="label">Saffire-II · same samples</p>
+            <h3>Microgravity vs Earth gravity.</h3>
+            <div class="legend" id="grav-legend"></div>
+            <div class="chart short" id="grav-chart" role="img" aria-label="Burn extent in microgravity and 1 g"></div>
+            <p class="note" id="grav-note"></p>
+          </div>
+        </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-ranking" data-view="ranking" hidden>
+    <div class="sec sec--first">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">04 · Ranking</p>
+          <h2>The 24 investigations, ranked for your habitat. <span class="mute">Pick a habitat; the most relevant NASA evidence comes first.</span></h2>
+        </header>
+        <details class="card more crit-d">
+          <summary><span><span class="label">How the ranking works</span><b>Three criteria, weights you can change, and a robustness test</b></span></summary>
+          <div class="more__body"><div class="crit" id="criteria"></div></div>
+        </details>
+        <div class="inv-mode">
+          <div class="seg" id="inv-mode" role="group" aria-label="Investigation view"><button type="button" data-m="gallery" aria-pressed="true">Gallery</button><button type="button" data-m="chart" aria-pressed="false">Score chart</button></div>
+          <span class="mono-sm" id="inv-count"></span>
+        </div>
+        <div class="toolbar" id="investigations">
+          <div class="seg seg--wrap" id="inv-habitat" role="group" aria-label="Rank for habitat"></div>
+          <div class="seg" id="inv-layer" role="group" aria-label="Fire-safety layer"></div>
+          <input class="search" type="search" id="inv-search" placeholder="Search name, keyword, PI…" aria-label="Search investigations">
+        </div>
+        <div class="inv-gallery" id="inv-gallery"></div>
+        <div class="links" id="inv-more-wrap"><button class="btn btn--line btn--sm" id="inv-more" type="button">Show all 24</button></div>
+        <div class="card inv-chart" id="inv-chart-wrap" hidden>
+          <p class="sub">Each bar is one investigation's score for the habitat above, split into the three criteria. Click a bar to open its card.</p>
+          <div class="legend" id="inv-chart-legend"></div>
+          <div class="chart" id="inv-chart" role="img" aria-label="Score of each investigation split by criterion"></div>
+        </div>
+        <div class="card card--gap" id="compare">
+          <p class="label">Side by side</p>
+          <h3>Compare investigations.</h3>
+          <p class="sub">Pick up to three, or press “Compare” on any card. The shape shows where each one is strong.</p>
+          <div class="controls-row" id="cmp-pick"></div>
+          <div class="cmp-vis">
+            <div class="chart cmp-radar" id="cmp-radar" role="img" aria-label="Radar comparison of the selected investigations"></div>
+            <div class="cmp-cards" id="cmp-cards"></div>
+          </div>
+          <div class="cmp-air" id="cmp-air"></div>
+          <details class="more cmp-more"><summary><span><span class="label">Every field</span><b>Full comparison table</b></span></summary><div class="more__body"><div class="tbl-wrap"><table id="cmp-table" class="cmp"></table></div></div></details>
+          <p class="note" id="cmp-note"></p>
+        </div>
+        <header class="sec__head card--gap" style="margin-top:clamp(64px,8vw,110px)">
+          <p class="eyebrow">From the flight data</p>
+          <h2>Which fires refuse to go out. <span class="mute">Flight flames grouped by fuel and air.</span></h2>
+          <p class="sec__lead">FLEX droplets and ACME CFI-G gas flames from the ISS, ranked by the share that did not go out on their own, using the low end of the 90% range so a small lucky group cannot win.</p>
+        </header>
+        <div class="card" id="survival">
+          <div class="controls-row">
+            <div class="seg" id="surv-kind" role="group" aria-label="Fire type"></div>
+            <span class="mono-sm">Mark groups near</span>
+            <div class="seg seg--wrap" id="surv-hab" role="group" aria-label="Habitat"></div>
+          </div>
+          <div class="legend" id="surv-legend"></div>
+          <div class="surv" id="surv-list"></div>
+          <div class="links"><button class="btn btn--line btn--sm" id="surv-more" type="button">Show all groups</button></div>
+          <p class="note" id="surv-note"></p>
+        </div>
+        <dialog class="modal" id="inv-modal" aria-labelledby="im-title"><div class="modal__in" id="inv-modal-body"></div></dialog>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-next" data-view="next" hidden>
+    <div class="sec sec--first sec--dark">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">05 · Next flight</p>
+          <h2>What NASA should fly next. <span class="mute">Where one new test would teach the most.</span></h2>
+          <p class="sec__lead">Among conditions near lunar-base air, Skylab Phoenix picks those where the 200 bootstrap models disagree most. Partial-gravity data (LUCI, FM2) is not in PSI yet; these are the conditions where it would pay off first.</p>
+        </header>
+        <div class="mission" id="mission"></div>
+        <div class="howpick" id="howpick"></div>
+        <header class="sec__head card--gap" style="margin-top:clamp(48px,6vw,80px)">
+          <p class="eyebrow">All six candidates</p>
+          <h2>How sure is the model today? <span class="mute">A long bar means it does not know yet.</span></h2>
+        </header>
+        <div class="cands" id="cands"></div>
+        <div class="card card--gap" id="next-tbl-d">
+          <p class="label">In plain numbers</p>
+          <h3>Recommendation table</h3>
+          <div class="tbl-wrap"><table id="next-table"></table></div><p class="note" id="next-note"></p>
+        </div>
+        <div class="card card--gap" id="unc-details">
+          <p class="label">Map of doubt</p>
+          <h3>Where the model is unsure, and why we chose this test</h3>
+          <div class="controls-row"><span class="mono-sm">Background computed at</span><div class="seg" id="unc-co2" role="group" aria-label="CO2 level for the map"></div></div>
+          <p class="sub">Each spot is a possible cabin air. Brighter purple means the model is less sure what a methanol droplet fire would do there. The orange numbered dots are the recommended tests at the chosen CO₂ level; the outlined ones use another level. The best flight goes where it is brightest and close to the crews’ air.</p>
+          <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">On Earth</p>
+          <h2>Space fire research comes home. <span class="mute">Detectors, air tanks, suits and water mist.</span></h2>
+        </header>
+        <div class="earth" id="earth-list"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="view" id="v-data" data-view="data" hidden>
+    <div class="sec sec--first">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">06 · Method</p>
+          <h2>How every number on this site is made. <span class="mute">From NASA's raw tables to an answer you can check.</span></h2>
+          <p class="sec__lead">Nine steps, in the order the code runs them. Each one says what we did, why, and where you can see the result. One command rebuilds all of it from NASA's public servers in about four seconds.</p>
+        </header>
+        <div class="mth">
+          <nav class="mth-toc" id="mth-toc" aria-label="Method steps">
+            <a href="#/data/m-1"><span>01</span>The question</a>
+            <a href="#/data/m-2"><span>02</span>Sources</a>
+            <a href="#/data/m-3"><span>03</span>Cleaning</a>
+            <a href="#/data/m-4"><span>04</span>One table</a>
+            <a href="#/data/m-5"><span>05</span>The model</a>
+            <a href="#/data/m-6"><span>06</span>Ranking</a>
+            <a href="#/data/m-7"><span>07</span>SI with a firewall</a>
+            <a href="#/data/m-8"><span>08</span>Limits</a>
+            <a href="#/data/m-9"><span>09</span>Reproduce</a>
+          </nav>
+          <div class="mth-body">
+            <article class="mth-step" id="m-1">
+              <div class="mth-n">01</div>
+              <div class="mth-c">
+                <p class="label">The question</p>
+                <h3>What does NASA's fire data say about the air crews will breathe?</h3>
+                <p>The challenge asks for fire-safety insight from NASA's microgravity combustion archive, with a lunar base planned at about 30% oxygen and 10.2 psi. We split that into three questions a safety engineer would ask, and every part of the site answers one of them.</p>
+                <ul class="mth-q">
+                  <li><b>Will a small fire put itself out?</b><span>A model trained on FLEX droplet fires gives the chance, with an interval. Fire Lab.</span></li>
+                  <li><b>Which NASA investigations matter most here?</b><span>A transparent score ranks all 24 for each crew atmosphere. Ranking.</span></li>
+                  <li><b>Where is the data missing?</b><span>A coverage map, the base audit and the next-flight picks. Findings and Next flight.</span></li>
+                </ul>
+              </div>
+            </article>
+            <article class="mth-step" id="m-2">
+              <div class="mth-n">02</div>
+              <div class="mth-c">
+                <p class="label">Sources</p>
+                <h3>Only public NASA data, fetched by code.</h3>
+                <p>Nothing was typed in by hand. Scripts download each source and keep the original file, so any number can be traced back.</p>
+                <div class="mth-src" id="mth-src"></div>
+              </div>
+            </article>
+            <article class="mth-step" id="m-3">
+              <div class="mth-n">03</div>
+              <div class="mth-c">
+                <p class="label">Cleaning</p>
+                <h3>We read every table and logged every fix.</h3>
+                <p>NASA's tables were exported from spreadsheets over fifteen years, and they carry the marks of it: placeholders typed into numeric columns, duplicated rows, units off by ten, a Greek μ that became “?”. Each rule below changed a value, and the log keeps the original next to the new one, so the change can be checked or undone. Nothing is silently dropped.</p>
+                <div class="card mth-card">
+                  <p class="sub" id="qc-sub"></p>
+                  <div class="qc-cats" id="qc-cats" role="group" aria-label="Filter corrections by type"></div>
+                  <div class="tbl-wrap scroll"><table id="qc-table"></table></div>
+                </div>
+              </div>
+            </article>
+            <article class="mth-step" id="m-4">
+              <div class="mth-n">04</div>
+              <div class="mth-c">
+                <p class="label">One table</p>
+                <h3>Nineteen experiments, one schema.</h3>
+                <p>Each experiment names its columns its own way. We map all of them to one table with SI units: oxygen as a mole fraction, pressure in atmospheres, flow in cm/s and one outcome field (went out on its own, kept burning, or not labelled). Two rules matter for honesty:</p>
+                <ul class="mth-list">
+                  <li>When a table does not report oxygen or pressure per test, we assume ISS cabin air and mark the record as assumed (hollow dots in every chart).</li>
+                  <li>Only outcomes NASA recorded count as labels. We never infer an outcome from video or from other columns.</li>
+                </ul>
+                <ol class="pipe" id="pipe"></ol>
+              </div>
+            </article>
+            <article class="mth-step" id="m-5">
+              <div class="mth-n">05</div>
+              <div class="mth-c">
+                <p class="label">The model</p>
+                <h3>A simple model, tested on days it never saw.</h3>
+                <p>The self-extinction model is a logistic regression on six physical inputs: fuel, oxygen, pressure (log), CO₂, helium and droplet size. We chose it over gradient boosting because it scored better on held-out data and every coefficient can be read and checked against combustion physics: more oxygen, fewer fires that go out on their own.</p>
+                <ul class="mth-list">
+                  <li><b>Honest validation.</b> Tests run on the same day share hardware and settings, so we hold out whole test days (GroupKFold, 5 folds). Random splits would score higher and mean less.</li>
+                  <li><b>Uncertainty.</b> 200 models are refit on bootstrap resamples of whole days; the interval on every prediction is their 5th to 95th percentile.</li>
+                  <li><b>Knowing when not to answer.</b> If the requested air is far from every flown test (mean distance to the 5 nearest beyond the 95th percentile of flown tests), the site says it is extrapolating; beyond twice that it withholds the number.</li>
+                  <li><b>Physics in the Fire Lab.</b> The droplet shrinks by the d² law with the burning rate and extinction diameter of the five closest FLEX tests, so the animation follows measured data, not a script.</li>
+                </ul>
+                <div class="grid-2 card--gap" id="quality">
+                  <div class="card">
+                    <p class="label">Model vs baselines</p>
+                    <h3>Held-out validation.</h3>
+                    <p class="sub" id="val-sub"></p>
+                    <div class="tbl-wrap"><table id="val-table"></table></div>
+                    <p class="note">AUC: ranking quality (0.5 = chance). Brier and log loss: calibration (lower is better).</p>
+                  </div>
+                  <div class="card">
+                    <p class="label">Calibration</p>
+                    <h3>Predicted vs observed.</h3>
+                    <p class="sub">Out-of-fold predicted probability vs observed self-extinction rate.</p>
+                    <div class="chart short" id="rel-chart" role="img" aria-label="Reliability diagram"></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="mth-step" id="m-6">
+              <div class="mth-n">06</div>
+              <div class="mth-c">
+                <p class="label">Ranking</p>
+                <h3>Three criteria you can see and change.</h3>
+                <p>Each investigation gets a relevance score out of 100 for each crew atmosphere. The score adds three parts, with default weights you can move on the Ranking page:</p>
+                <div class="mth-crit">
+                  <div><b>50%</b><span>Atmosphere closeness</span><small>How many of its tests sit near the habitat's oxygen and pressure, weighted by distance.</small></div>
+                  <div><b>20%</b><span>Data volume</span><small>How many records with a labelled outcome it contributes (log scale).</small></div>
+                  <div><b>30%</b><span>Fire-safety directness</span><small>Whether it measured prevention, detection or suppression directly, from NASA's own descriptions.</small></div>
+                </div>
+                <p>To check the order does not hinge on our weights, we re-rank with 2,000 random weightings and report how often each investigation keeps its place.</p>
+              </div>
+            </article>
+            <article class="mth-step" id="m-7">
+              <div class="mth-n">07</div>
+              <div class="mth-c">
+                <p class="label">SI with a firewall</p>
+                <h3>The SI writes; code decides what gets published.</h3>
+                <p>The briefings are drafted by an SI model (Anthropic Claude) from an evidence pack the pipeline computes. The model never sees the raw data and never decides anything: rankings, predictions and the out-of-data guard are plain code. Before a briefing is shown, code checks every sentence:</p>
+                <p><button type="button" class="btn btn--line btn--sm" data-open-chat="moon_base">Read the verified lunar-base briefing in the chat →</button></p>
+                <ol class="mth-checks">
+                  <li>It cites at least one evidence item that exists.</li>
+                  <li>Every number in it appears in the items it cites.</li>
+                  <li>It makes no safety verdict (“is safe”, “certified”, “guaranteed”).</li>
+                  <li>The evidence pack has not changed since the draft was written.</li>
+                </ol>
+                <p>If any check fails, the site shows the evidence itself, labelled “Evidence brief”. In Spanish, briefings are translated from the verified English text and their numbers are copied from it automatically, so translation cannot change a figure.</p>
+                <div class="card mth-card">
+                  <p class="sub" id="si-sub"></p>
+                  <div class="tbl-wrap"><table id="si-table"></table></div>
+                </div>
+              </div>
+            </article>
+            <article class="mth-step" id="m-8">
+              <div class="mth-n">08</div>
+              <div class="mth-c">
+                <p class="label">Limits</p>
+                <h3>What this work cannot tell you.</h3>
+                <ul class="mth-list mth-list--warn">
+                  <li>The model covers fuel droplets only, because FLEX is the only investigation with enough labelled outcomes. Solids are described from BASS, BASS-II and Saffire, not predicted.</li>
+                  <li>No combustion test in PSI ran at lunar or Martian gravity. Every partial-gravity flame on this site is an illustration.</li>
+                  <li>No solid in NASA's PSI tables burned above <span id="mth-solid">22.7</span>% oxygen. NASA's Saffire V and VI burned four large samples at 26–31% oxygen and 0.53–0.70 atm (Urban et al., ICES-2024-365); the site shows them as published data, outside PSI. They show that fabric and acrylic burn there, not where they stop burning, so every materials limit for 30% air is still an extrapolation and is labelled so.</li>
+                  <li>Module volumes for the Moon base use ISS and Orion volumes as stand-ins.</li>
+                  <li>This is a research aid built for the challenge. It is not flight certification and is not endorsed by NASA.</li>
+                </ul>
+              </div>
+            </article>
+            <article class="mth-step" id="m-9">
+              <div class="mth-n">09</div>
+              <div class="mth-c">
+                <p class="label">Reproduce</p>
+                <h3>Run it yourself.</h3>
+                <pre class="mth-code"><code>python scripts/fetch_psi.py data/psi PSI-10 PSI-20 … PSI-159
+python -m pipeline.run
+python -m pytest</code></pre>
+                <div class="grid-2 card--gap">
+                  <details class="card more">
+                    <summary><span><span class="label">Challenge resources</span><b>Every resource the challenge lists, and where we use it</b></span></summary>
+                    <div class="more__body"><div class="downloads" id="resources"></div></div>
+                  </details>
+                  <div class="card">
+                    <p class="label">Downloads</p>
+                    <h3>Take the data with you.</h3>
+                    <p class="sub">Everything on this site comes from these files (CC0, like the NASA source).</p>
+                    <div class="downloads" id="downloads"></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="cb" id="cb">
+  <section class="cb-panel" id="cb-panel" role="dialog" aria-label="Ask the archive" aria-hidden="true">
+    <header class="cb-head">
+      <div><p class="label">Ask the archive</p><b>Answers you can check</b></div>
+      <button class="cb-x" id="cb-close" type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="cb-log" id="cb-log" aria-live="polite">
+      <div class="cb-msg cb-msg--bot"><p>Ask about fire in space. Answers are the SI briefings, published only after code checks every citation and number, and passages quoted from NASA's 24 combustion investigations with their source. Nothing here is generated on the fly.</p></div>
+      <p class="label cb-l">Verified SI briefings</p>
+      <div class="seg seg--wrap cb-briefs" id="cb-briefs" role="group" aria-label="Verified SI briefings"></div>
+      <p class="label cb-l">Or ask about NASA's archive</p>
+      <div class="chips cb-sug" id="cb-sug"></div>
+    </div>
+    <form class="cb-form" id="cb-form" role="search">
+      <input type="search" id="cb-q" placeholder="e.g. What happens to fire on the Moon?" aria-label="Your question" autocomplete="off">
+      <button class="btn btn--fire btn--sm" type="submit" aria-label="Ask">↑</button>
+    </form>
+  </section>
+  <button class="cb-btn" id="cb-btn" type="button" aria-expanded="false" aria-controls="cb-panel"><span class="cb-dot" aria-hidden="true"></span><span>Ask SI</span></button>
+</div>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__cols">
+      <div>
+        <a class="brand" href="#/"><img class="brand__mark" src="assets/phoenix.svg" alt="" width="28" height="28"><span class="brand__word">SKYLAB PHOENIX</span></a>
+        <p>Built for the NASA Space Apps Challenge 2026, “Flame in Freefall”. Code under the MIT license; data, flight video and imagery from NASA (PSI, SVS, LRO, Viking), public domain or CC0. Models are research aids, not flight certification. Not affiliated with or endorsed by NASA.</p>
+      </div>
+      <div>
+        <p class="label">Sources</p>
+        <a href="https://psi.nasa.gov/physci/repo/search?q=combustion&amp;data_source=psi&amp;data_type=investigation" target="_blank" rel="noopener">PSI combustion repository</a>
+        <a href="https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/" target="_blank" rel="noopener">Challenge brief</a>
+        <a href="https://svs.gsfc.nasa.gov/webapps/orbit_viewer/" target="_blank" rel="noopener">NASA SVS Orbit Viewer (imagery)</a>
+      </div>
+      <div>
+        <p class="label">Project</p>
+        <a href="https://github.com/juanzarate1129517999-beep/nasa-space" target="_blank" rel="noopener">Source code</a>
+        <a href="https://github.com/juanzarate1129517999-beep/nasa-space/blob/main/report/Technical_Report_Skylab_Phoenix.pdf" target="_blank" rel="noopener">Technical report</a>
+        <a href="https://github.com/juanzarate1129517999-beep/nasa-space/blob/main/docs/AI_USE.md" target="_blank" rel="noopener">Use of AI</a>
+      </div>
+      <div>
+        <p class="label">Use of SI</p>
+        <p>Briefings are written by an SI model (Anthropic Claude) and published only after the code checks in Data; the code was written with AI assistance.</p>
+        <p class="mono-sm" id="built"></p>
+      </div>
+    </div>
+    <div class="footer__bottom"><span>Team Skylab Phoenix · Juan Sebastián Zárate · Javier Medina · Barranquilla, Colombia</span><span>NASA Space Apps Challenge 2026</span></div>
+  </div>
+</footer>
+
+<!-- defer: the page paints right away; scripts still run in this order once the HTML is parsed.
+     Bump the ?v= value (and window.__V) when these files change so browsers fetch the new copies. -->
+<script defer src="data/ember.js?v=3"></script>
+<script defer src="data/si.js?v=3"></script>
+<script defer src="data/corpus.js?v=3"></script>
+<script defer src="data/clips.js?v=3"></script>
+<script defer src="vendor/three-0.147.0.min.js"></script>
+<script defer src="vendor/OrbitControls-0.147.0.js"></script>
+<script defer src="vendor/satellite-5.0.0.min.js"></script>
+<script defer src="globe.js?v=3"></script>
+<script defer src="lab3d.js?v=3"></script>
+<script defer src="moonbase.js?v=3"></script>
+<script defer src="sources3d.js?v=3"></script>
+<script defer src="app.js?v=3"></script>
+</body>
+</html>

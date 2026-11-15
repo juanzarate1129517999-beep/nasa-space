@@ -1,0 +1,15 @@
+{
+ "id": "b2-o13b-s",
+ "source": "PSI-25_Raw Data_BASS_GMT202_SAMPLE_221_TEST_O13b_Still_Sequence.mp4",
+ "test": "O13b",
+ "material": "1/2\" clear pmma rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 14.6,
+ "air": "7, 4? (49, ?)",
+ "co": null,
+ "cam": "still sequence",
+ "ok": false,
+ "why": "no flame found, or the file does not decode"
+}

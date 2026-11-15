@@ -1,0 +1,26 @@
+{
+ "id": "b2-o13b",
+ "source": "PSI-25_Raw Data_BASS_GMT202_SAMPLE_221_TEST_O13b.mp4",
+ "test": "O13b",
+ "material": "1/2\" clear pmma rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 14.6,
+ "air": "7, 4? (49, ?)",
+ "co": null,
+ "cam": "video camera",
+ "ok": true,
+ "x": 21.5,
+ "dir": "bass2x",
+ "f": "b2-o13b",
+ "t0": 0,
+ "t1": 215.2,
+ "crop": [
+  574,
+  322,
+  145,
+  137
+ ],
+ "peak_area": 0.1908
+}

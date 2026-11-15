@@ -1,0 +1,15 @@
+{
+ "id": "b2-b14",
+ "source": "PSI-25_Raw Data_BASS_GMT183_SAMPLE_174_TESTB14.mp4",
+ "test": "B14",
+ "material": "1 cm wide 200 micron thick pmma",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 15.0,
+ "air": "5,3,2, ext",
+ "co": null,
+ "cam": "video camera",
+ "ok": false,
+ "why": "no flame found, or the file does not decode"
+}

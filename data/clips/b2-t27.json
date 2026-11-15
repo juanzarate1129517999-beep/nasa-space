@@ -1,0 +1,26 @@
+{
+ "id": "b2-t27",
+ "source": "PSI-25_Raw Data_BASS_GMT216_SAMPLE_146_TEST_T27.mp4",
+ "test": "T27",
+ "material": "1 cm SIBAL",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 20.7,
+ "air": "5, 2",
+ "co": 9.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 1.0,
+ "dir": "bass2x",
+ "f": "b2-t27",
+ "t0": 17.633333333333333,
+ "t1": 24.2,
+ "crop": [
+  450,
+  254,
+  183,
+  156
+ ],
+ "peak_area": 0.1351
+}
