@@ -1,0 +1,27 @@
+{
+ "id": "b2-m14-s",
+ "source": "PSI-25_Raw Data_BASS_GMT51_SAMPLE_223_TEST_M14_Still_Sequence.mp4",
+ "test": "M14",
+ "material": "2mm thick pmma, 1 sided, 2 cm wide",
+ "family": "PMMA slab",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 22.2,
+ "air": "10, ~8",
+ "co": 198.0,
+ "cam": "still sequence",
+ "ok": false,
+ "x": 5.9,
+ "dir": "bass2x",
+ "f": "b2-m14-s",
+ "t0": 0,
+ "t1": 58.691967,
+ "crop": [
+  292,
+  164,
+  427,
+  315
+ ],
+ "peak_area": 0.0813,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

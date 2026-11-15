@@ -1,0 +1,26 @@
+{
+ "id": "b2-p3b",
+ "source": "PSI-25_Raw Data_BASS_GMT167_SAMPLE_215_TEST_P3b.mp4",
+ "test": "P3b",
+ "material": "1/4 clear rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.4,
+ "air": "5, very low (0.85, 0.32, 0.31, 0.305, 0.30, 0.295)",
+ "co": 46.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 7.9,
+ "dir": "bass2x",
+ "f": "b2-p3b",
+ "t0": 38.3,
+ "t1": 117.53333333333333,
+ "crop": [
+  518,
+  292,
+  61,
+  135
+ ],
+ "peak_area": 0.1754
+}

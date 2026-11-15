@@ -1,0 +1,15 @@
+{
+ "id": "b2-b19-s",
+ "source": "PSI-25_Raw Data_BASS_GMT183_SAMPLE_151_TESTB19_Still_Sequence.mp4",
+ "test": "B19",
+ "material": "2 cm 100 micron thick pmma",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.3,
+ "air": "10, blowoff",
+ "co": 12.0,
+ "cam": "still sequence",
+ "ok": false,
+ "why": "no flame found, or the file does not decode"
+}

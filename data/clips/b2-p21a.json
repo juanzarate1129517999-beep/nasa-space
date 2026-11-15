@@ -1,0 +1,26 @@
+{
+ "id": "b2-p21a",
+ "source": "PSI-25_Raw Data_BASS_GMT174_SAMPLE_196_TEST_P21a.mp4",
+ "test": "P21a",
+ "material": "1/4 black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 16.3,
+ "air": "5",
+ "co": 8.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 9.6,
+ "dir": "bass2x",
+ "f": "b2-p21a",
+ "t0": 19.3,
+ "t1": 114.86666666666667,
+ "crop": [
+  614,
+  346,
+  0,
+  96
+ ],
+ "peak_area": 0.1511
+}

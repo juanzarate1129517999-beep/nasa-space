@@ -1,0 +1,15 @@
+{
+ "id": "b2-t25-s",
+ "source": "PSI-25_Raw Data_BASS_GMT216_SAMPLE_138_TEST_T25_Still_Sequence.mp4",
+ "test": "T25",
+ "material": "SIBAL 2 cm",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 20.8,
+ "air": "5, 2.5",
+ "co": 17.0,
+ "cam": "still sequence",
+ "ok": false,
+ "why": "no flame found, or the file does not decode"
+}

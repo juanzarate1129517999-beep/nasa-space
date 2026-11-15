@@ -1,0 +1,26 @@
+{
+ "id": "b2-f4",
+ "source": "PSI-25_Raw Data_BASS_GMT175_SAMPLE_039_TEST_F4.mp4",
+ "test": "F4",
+ "material": "Japan Wax candle",
+ "family": "Candle",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.4,
+ "air": "3 ign",
+ "co": 34.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 8.0,
+ "dir": "bass2x",
+ "f": "b2-f4",
+ "t0": 12.3,
+ "t1": 92.53333333333333,
+ "crop": [
+  600,
+  338,
+  118,
+  130
+ ],
+ "peak_area": 0.133
+}

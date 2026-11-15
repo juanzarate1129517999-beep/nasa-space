@@ -1,0 +1,26 @@
+{
+ "id": "b2-m17",
+ "source": "PSI-25_Raw Data_BASS_GMT196_SAMPLE_166_TEST_M17.mp4",
+ "test": "M17",
+ "material": "2 cm wide pmma 2 mm thick",
+ "family": "PMMA slab",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.8,
+ "air": "10, 5, 3, 0ext",
+ "co": 481.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 28.8,
+ "dir": "bass2x",
+ "f": "b2-m17",
+ "t0": 1.9666666666666666,
+ "t1": 289.8666666666667,
+ "crop": [
+  532,
+  300,
+  0,
+  151
+ ],
+ "peak_area": 0.1629
+}

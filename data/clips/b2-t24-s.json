@@ -1,0 +1,27 @@
+{
+ "id": "b2-t24-s",
+ "source": "PSI-25_Raw Data_BASS_GMT190_SAMPLE_133_TEST_T24_Still_Sequence.mp4",
+ "test": "T24",
+ "material": "1 cm SIBAL, top side ign",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.2,
+ "air": "10",
+ "co": 22.0,
+ "cam": "still sequence",
+ "ok": false,
+ "x": 5.3,
+ "dir": "bass2x",
+ "f": "b2-t24-s",
+ "t0": 0,
+ "t1": 52.53333333333334,
+ "crop": [
+  668,
+  376,
+  0,
+  0
+ ],
+ "peak_area": 0.2136,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

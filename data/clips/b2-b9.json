@@ -1,0 +1,26 @@
+{
+ "id": "b2-b9",
+ "source": "PSI-25_Raw Data_BASS_GMT188_SAMPLE_154_TESTB9.mp4",
+ "test": "B9",
+ "material": "2 cm, 0.1 mm pmma film",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 21.0,
+ "air": "2, <1",
+ "co": 10.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 3.0,
+ "dir": "bass2x",
+ "f": "b2-b9",
+ "t0": 0.6333333333333333,
+ "t1": 30.53333333333333,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.0764
+}

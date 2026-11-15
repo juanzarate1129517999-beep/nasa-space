@@ -1,0 +1,27 @@
+{
+ "id": "b2-f3",
+ "source": "PSI-25_Raw Data_BASS_GMT213_SAMPLE_229_TEST_F3.mp4",
+ "test": "F3",
+ "material": "Nomex natural (nomex III)",
+ "family": "Nomex fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 21.7,
+ "air": "8",
+ "co": null,
+ "cam": "video camera",
+ "ok": false,
+ "x": 1.1,
+ "dir": "bass2x",
+ "f": "b2-f3",
+ "t0": 100.3,
+ "t1": 111.2,
+ "crop": [
+  682,
+  384,
+  25,
+  96
+ ],
+ "peak_area": 0.4133,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

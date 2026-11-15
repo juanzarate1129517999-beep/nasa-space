@@ -1,0 +1,26 @@
+{
+ "id": "b2-p25",
+ "source": "PSI-25_Raw Data_BASS_GMT189_SAMPLE_217_TEST_P25.mp4",
+ "test": "P25",
+ "material": "3/8\" clear rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 20.9,
+ "air": "5 down to ext",
+ "co": 162.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 2.3,
+ "dir": "bass2x",
+ "f": "b2-p25",
+ "t0": 19.96666666666667,
+ "t1": 42.86666666666667,
+ "crop": [
+  506,
+  284,
+  0,
+  150
+ ],
+ "peak_area": 0.1509
+}

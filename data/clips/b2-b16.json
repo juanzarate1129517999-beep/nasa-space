@@ -1,0 +1,27 @@
+{
+ "id": "b2-b16",
+ "source": "PSI-25_Raw Data_BASS_GMT183_SAMPLE_150_TESTB16.mp4",
+ "test": "B16",
+ "material": "2 cm 100 micron thick pmma",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.3,
+ "air": "3,0.5 pot, 0.4 pot",
+ "co": 16.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 2.2,
+ "dir": "bass2x",
+ "f": "b2-b16",
+ "t0": 112.96666666666667,
+ "t1": 135.135,
+ "crop": [
+  260,
+  146,
+  33,
+  332
+ ],
+ "peak_area": 0.118,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}
