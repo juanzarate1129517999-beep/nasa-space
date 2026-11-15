@@ -1,6 +1,6 @@
 # Skylab Phoenix: technical summary (English)
 
-Short summary of the full technical report: [English](../report/Technical_Report_Skylab_Phoenix.pdf) (40 pages) · [Spanish](../report/Informe_Skylab_Phoenix.pdf). Every number below is produced by `python -m pipeline.run`.
+Short summary of the full technical report: [English](../report/Technical_Report_Skylab_Phoenix.pdf) (54 pages) · [Spanish](../report/Informe_Skylab_Phoenix.pdf). Every number below is produced by `python -m pipeline.run`.
 
 ## 1. Problem
 

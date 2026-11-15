@@ -342,3 +342,5 @@ UI_ES.update({
     "Every test record NASA published for the # PSI combustion investigations (# of them have test tables; ground studies and FLEX-# do not), cleaned into one table. Pick a state of matter, click a bar, drag a box on the map or jump to the Moon-base air: every number and chart recomputes from the filtered records.": "Cada registro de prueba que la NASA publicó para las # investigaciones de combustión de PSI (# de ellas tienen tablas de pruebas; los estudios en tierra y FLEX-# no), limpiado en una sola tabla. Elige un estado de la materia, haz clic en una barra, arrastra un recuadro en el mapa o salta al aire de la base lunar: cada número y cada gráfica se recalculan con los registros filtrados.",
     "investigations with test records (# have no test table in PSI)": "investigaciones con registros de prueba (# no tienen tabla de pruebas en PSI)",
 })
+
+UI_ES.update({"BASS-II oxygen, CO and CO₂ before and after each burn (CSV)": "Oxígeno, CO y CO₂ de BASS-II antes y después de cada quema (CSV)"})
