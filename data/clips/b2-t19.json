@@ -1,0 +1,26 @@
+{
+ "id": "b2-t19",
+ "source": "PSI-25_Raw Data_BASS_GMT190_SAMPLE_143_TEST_T19.mp4",
+ "test": "T19",
+ "material": "1 cm SIBAL",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.2,
+ "air": "11",
+ "co": 19.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 1.3,
+ "dir": "bass2x",
+ "f": "b2-t19",
+ "t0": 8.633333333333335,
+ "t1": 21.2,
+ "crop": [
+  370,
+  208,
+  349,
+  165
+ ],
+ "peak_area": 0.0416
+}

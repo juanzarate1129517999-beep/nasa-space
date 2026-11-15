@@ -1,0 +1,15 @@
+{
+ "id": "b2-b8-s",
+ "source": "PSI-25_Raw Data_BASS_GMT188_SAMPLE_157_TESTB8_Still_Sequence.mp4",
+ "test": "B8",
+ "material": "2 cm, 0.2 mm pmma film",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 21.0,
+ "air": "10, max",
+ "co": 131.0,
+ "cam": "still sequence",
+ "ok": false,
+ "why": "no flame found, or the file does not decode"
+}

@@ -1,0 +1,26 @@
+{
+ "id": "b2-o14",
+ "source": "PSI-25_Raw Data_BASS_GMT213_SAMPLE_183_TEST_O14.mp4",
+ "test": "O14",
+ "material": "1/4\" black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 16.3,
+ "air": "5 down to ext",
+ "co": 348.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 3.0,
+ "dir": "bass2x",
+ "f": "b2-o14",
+ "t0": 4.633333333333333,
+ "t1": 34.86666666666667,
+ "crop": [
+  682,
+  384,
+  37,
+  96
+ ],
+ "peak_area": 0.24
+}

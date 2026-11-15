@@ -1,0 +1,27 @@
+{
+ "id": "b2-t5-s",
+ "source": "PSI-25_Raw Data_BASS_GMT100_SAMPLE_131_TEST_T5_Still_Sequence.mp4",
+ "test": "T5",
+ "material": "2 cm SIBAL",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.8,
+ "air": "10, 2, 1",
+ "co": 39.0,
+ "cam": "still sequence",
+ "ok": false,
+ "x": 1.9,
+ "dir": "bass2x",
+ "f": "b2-t5-s",
+ "t0": 0,
+ "t1": 18.785433,
+ "crop": [
+  322,
+  180,
+  0,
+  233
+ ],
+ "peak_area": 0.1413,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

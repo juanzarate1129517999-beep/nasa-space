@@ -1,0 +1,26 @@
+{
+ "id": "b2-p23",
+ "source": "PSI-25_Raw Data_BASS_GMT211_SAMPLE_201_TEST_P23.mp4",
+ "test": "P23",
+ "material": "3/8\" black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.2,
+ "air": "2,0,2,0,etc",
+ "co": 81.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 4.0,
+ "dir": "bass2x",
+ "f": "b2-p23",
+ "t0": 17.3,
+ "t1": 57.53333333333334,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.1426
+}

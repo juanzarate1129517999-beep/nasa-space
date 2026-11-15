@@ -1,0 +1,27 @@
+{
+ "id": "b2-b6-s",
+ "source": "PSI-25_Raw Data_BASS_GMT188_SAMPLE_153_TESTB6_Still_Sequence.mp4",
+ "test": "B6",
+ "material": "2 cm 0.1 mm pmma film",
+ "family": "PMMA thin film",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 21.0,
+ "air": "3, 5, approaching 10",
+ "co": 0.3,
+ "cam": "still sequence",
+ "ok": false,
+ "x": 3.1,
+ "dir": "bass2x",
+ "f": "b2-b6-s",
+ "t0": 0,
+ "t1": 30.563867,
+ "crop": [
+  482,
+  272,
+  0,
+  21
+ ],
+ "peak_area": 0.0263,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

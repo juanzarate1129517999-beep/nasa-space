@@ -1,0 +1,27 @@
+{
+ "id": "b2-m2",
+ "source": "PSI-25_Raw Data_BASS_GMT51_SAMPLE_224_TEST_M2.mp4",
+ "test": "M2",
+ "material": "3 mm thick pmma 1 sided , 2 cm wide",
+ "family": "PMMA slab",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 22.2,
+ "air": "20,15,13, 14",
+ "co": 313.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 75.5,
+ "dir": "bass2x",
+ "f": "b2-m2",
+ "t0": 26.96666666666667,
+ "t1": 781.8666666666667,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.2429,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

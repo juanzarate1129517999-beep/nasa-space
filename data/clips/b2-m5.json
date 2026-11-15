@@ -1,0 +1,26 @@
+{
+ "id": "b2-m5",
+ "source": "PSI-25_Raw Data_BASS_GMT51_SAMPLE_167_TEST_M5.mp4",
+ "test": "M5",
+ "material": "3 mm thick pmma, 2 sided, 2 cm thick",
+ "family": "PMMA slab",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 22.2,
+ "air": "20,13,10,8,5",
+ "co": null,
+ "cam": "video camera",
+ "ok": true,
+ "x": 66.1,
+ "dir": "bass2x",
+ "f": "b2-m5",
+ "t0": 0,
+ "t1": 661.2,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.3706
+}

@@ -1,0 +1,26 @@
+{
+ "id": "b2-o19",
+ "source": "PSI-25_Raw Data_BASS_GMT213_SAMPLE_213_TEST_O19.mp4",
+ "test": "O19",
+ "material": "1/4\" clear rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 15.3,
+ "air": "5 down to ext",
+ "co": 334.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 3.0,
+ "dir": "bass2x",
+ "f": "b2-o19",
+ "t0": 0,
+ "t1": 29.53333333333333,
+ "crop": [
+  682,
+  384,
+  37,
+  96
+ ],
+ "peak_area": 0.2108
+}
