@@ -26,15 +26,27 @@ Equipo Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (líder)
 
 ## Resultados clave
 
-- Un fuego de gota de metanol se apaga solo el **72 %** de las veces en aire de cabina de la ISS (21 % O₂, 14,7 psi) y apenas el **6 %** en aire de base lunar (30 % O₂, 10,2 psi), intervalo del 90 %: 2–14 %.
-- Solo **37 de 1.613** registros de vuelo con atmósfera conocida están cerca del aire de la base lunar, y **ningún material sólido** ha ardido en órbita por encima de 22,7 % de O₂.
-- El modelo de autoextinción logra **AUC 0,88** y Brier 0,125 en días de ensayo de la ISS que nunca vio.
+- Un fuego de gota de metanol se apaga solo el **75 %** de las veces en aire de cabina de la ISS (21 % O₂, 14,7 psi) y apenas el **8 %** en aire de base lunar (30 % O₂, 10,2 psi), intervalo del 90 %: 1–16 %. Ahí se predice que la gota se rompe el 81 % de las veces y arde hasta consumirse el 11 %: casi ningún fuego termina apagándose.
+- Solo **37 de 1.613** registros de vuelo con atmósfera conocida están cerca del aire de la base lunar. Las tablas de PSI de la NASA **no tienen ningún sólido** quemado por encima de 22,7 % de O₂; las únicas quemas más altas son cuatro muestras de Saffire V y VI que publicó la NASA (26–31 % O₂, 0,53–0,70 atm, [Urban et al. 2024](https://ntrs.nasa.gov/citations/20240002981)), que el sitio muestra como datos de literatura.
+- El modelo físico de dos etapas logra **AUC 0,88** (±0,01 en 20 repeticiones) y Brier 0,120 en días de ensayo de la ISS que nunca vio, por delante de la logística simple anterior (0,87), gradient boosting (0,84) y la referencia de solo oxígeno (0,80).
 - **191** correcciones a las tablas de la NASA, cada una con su valor original.
 - **33 de 33** resúmenes SI pasan el firewall de verificación.
 
 ## Cómo correrlo
 
 Los comandos están en el [README en inglés](README.md#run-it). Un solo `python -m pipeline.run` reconstruye todos los datos del sitio en unos cuatro segundos.
+
+## Repositorio
+
+| Ruta | Función |
+|---|---|
+| `web/` | El sitio: `index.html`, `styles.css`, `app.js`, `i18n.js`, los módulos 3D (`globe.js`, `moonbase.js`, `sources3d.js`, `lab3d.js`), datos, video de vuelo y Plotly y three.js incluidos |
+| `pipeline/` | Limpieza, perfiles y ranking, modelos, sólidos, auditoría de la base lunar, evidencia y firewall SI, exportación web |
+| `scripts/` | Descargas de NASA PSI, recursos lunares, borradores SI, textos en español, servidor local |
+| `data/` | Salidas versionadas: ensayos limpios, investigaciones, registro de calidad, hallazgos, evidencia y verificación SI; `data/literature/` guarda las quemas publicadas de Saffire IV–VI, cada una con su fuente |
+| `tests/` | Pruebas de datos, modelos, guardia fuera de los datos y firewall SI |
+| `report/` | Informes técnicos en PDF |
+| `docs/` | Uso de IA y el video de 30 segundos |
 
 ## Datos y licencia
 
