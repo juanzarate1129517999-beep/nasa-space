@@ -1,0 +1,26 @@
+{
+ "id": "b2-p22a",
+ "source": "PSI-25_Raw Data_BASS_GMT189_SAMPLE_200_TEST_P22a.mp4",
+ "test": "P22a",
+ "material": "3/8\" black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 20.8,
+ "air": "5, down to ext",
+ "co": null,
+ "cam": "video camera",
+ "ok": true,
+ "x": 7.8,
+ "dir": "bass2x",
+ "f": "b2-p22a",
+ "t0": 0,
+ "t1": 77.53333333333333,
+ "crop": [
+  478,
+  268,
+  0,
+  153
+ ],
+ "peak_area": 0.1476
+}

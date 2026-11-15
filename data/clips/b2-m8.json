@@ -1,0 +1,26 @@
+{
+ "id": "b2-m8",
+ "source": "PSI-25_Raw Data_BASS_GMT192_SAMPLE_178_TEST_M8.mp4",
+ "test": "M8",
+ "material": "1 cm wide pmma 2 mm thick",
+ "family": "PMMA slab",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 19.1,
+ "air": "10, 5>7,5 decr",
+ "co": 415.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 4.2,
+ "dir": "bass2x",
+ "f": "b2-m8",
+ "t0": 12.966666666666667,
+ "t1": 54.53333333333334,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.1106
+}

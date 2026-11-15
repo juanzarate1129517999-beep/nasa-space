@@ -1,0 +1,26 @@
+{
+ "id": "b2-p4",
+ "source": "PSI-25_Raw Data_BASS_GMT184_SAMPLE_197_TESTP4.mp4",
+ "test": "P4",
+ "material": "3/8\" black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.5,
+ "air": "5, pots 0.4, 0.36, 0.32, 0.308, .3, off",
+ "co": 429.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 2.9,
+ "dir": "bass2x",
+ "f": "b2-p4",
+ "t0": 0,
+ "t1": 28.53333333333333,
+ "crop": [
+  682,
+  384,
+  0,
+  96
+ ],
+ "peak_area": 0.1599
+}

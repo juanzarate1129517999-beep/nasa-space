@@ -1,0 +1,26 @@
+{
+ "id": "b2-o12",
+ "source": "PSI-25_Raw Data_BASS_GMT189_SAMPLE_217_TEST_O12.mp4",
+ "test": "O12",
+ "material": "3/8\" clear rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 13.6,
+ "air": "no ign at any flow",
+ "co": null,
+ "cam": "video camera",
+ "ok": true,
+ "x": 14.4,
+ "dir": "bass2x",
+ "f": "b2-o12",
+ "t0": 299.6333333333333,
+ "t1": 443.2,
+ "crop": [
+  682,
+  384,
+  37,
+  96
+ ],
+ "peak_area": 0.1508
+}

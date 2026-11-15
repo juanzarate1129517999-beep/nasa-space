@@ -1,0 +1,27 @@
+{
+ "id": "b2-t29",
+ "source": "PSI-25_Raw Data_BASS_GMT216_SAMPLE_145_TEST_T29.mp4",
+ "test": "T29",
+ "material": "1 cm SIBAL",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 20.7,
+ "air": "5, 2(?)",
+ "co": 10.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 2.6,
+ "dir": "bass2x",
+ "f": "b2-t29",
+ "t0": 134.96666666666667,
+ "t1": 160.693867,
+ "crop": [
+  682,
+  384,
+  23,
+  96
+ ],
+ "peak_area": 0.2125,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

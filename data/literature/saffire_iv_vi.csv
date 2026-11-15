@@ -1,0 +1,7 @@
+sample,material,family,length_cm,flow_cm_s,flow_direction,p_kpa,x_o2,ignited,burn_s,co2_increase_ppm,co_increase_ppm,source
+IV-1,SIBAL cloth (75% cotton / 25% fiberglass),SIBAL fabric,50,20,concurrent,100.0,0.220,1,130,1390,80,"Urban et al., ICES-2024-365, Tables 1-2 (NTRS 20240002981)"
+V-2,Cotton jersey,Cotton fabric,50,20,concurrent,70.7,0.262,1,200,2360,83,"Urban et al., ICES-2024-365, Tables 1-2 (NTRS 20240002981)"
+VI-2,SIBAL cloth (75% cotton / 25% fiberglass),SIBAL fabric,50,20,concurrent,54.1,0.310,1,112,2800,120,"Urban et al., ICES-2024-365, Tables 1-2 (NTRS 20240002981)"
+VI-3,Two-sided PMMA (10 mm),PMMA slab,18,20,concurrent,54.6,0.303,1,780,8539,308,"Urban et al., ICES-2024-365, Tables 1-2 (NTRS 20240002981)"
+VI-4,One-sided PMMA (5 mm),PMMA slab,18,20,concurrent,55.2,0.288,1,1200,8117,320,"Urban et al., ICES-2024-365, Tables 1-2 (NTRS 20240002981)"
+VI-1,Nomex fabric,Nomex fabric,7,,,,,0,,,,"Urban et al., ICES-2024-365, p. 4: the Nomex sample did not ignite (conditions not tabulated)"

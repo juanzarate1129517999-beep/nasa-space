@@ -1,0 +1,26 @@
+{
+ "id": "b2-t17",
+ "source": "PSI-25_Raw Data_BASS_GMT178_SAMPLE_142_TEST_T17.mp4",
+ "test": "T17",
+ "material": "2 cm SIBAL",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 16.9,
+ "air": "6, 53",
+ "co": 38.0,
+ "cam": "video camera",
+ "ok": true,
+ "x": 2.4,
+ "dir": "bass2x",
+ "f": "b2-t17",
+ "t0": 16.96666666666667,
+ "t1": 41.2,
+ "crop": [
+  382,
+  214,
+  336,
+  168
+ ],
+ "peak_area": 0.015
+}

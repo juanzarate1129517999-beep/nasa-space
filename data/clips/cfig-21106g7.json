@@ -1,0 +1,26 @@
+{
+ "id": "cfig-21106g7",
+ "source": "PSI-159_Raw Data_vlc-record-2021-04-17-00h40m10s-udp____21106G7.ts",
+ "test": "21106G7",
+ "material": "50% butane from a spherical burner",
+ "family": "Spherical gas flame",
+ "state": "Gas",
+ "psi": "PSI-159",
+ "o2": 20.9,
+ "m": "0.5 atm \u00b7 ACME CFI-G \u00b7 went out on its own",
+ "out": 1,
+ "burn_s": 20.0,
+ "ok": true,
+ "x": 2.3,
+ "dir": "cfig",
+ "f": "cfig-21106g7",
+ "t0": 31.633333333333336,
+ "t1": 54.86666666666667,
+ "crop": [
+  470,
+  264,
+  116,
+  97
+ ],
+ "peak_area": 0.2801
+}

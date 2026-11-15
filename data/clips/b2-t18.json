@@ -1,0 +1,27 @@
+{
+ "id": "b2-t18",
+ "source": "PSI-25_Raw Data_BASS_GMT175_SAMPLE_141_TEST_T18.mp4",
+ "test": "T18",
+ "material": "2 cm SIBAL",
+ "family": "SIBAL fabric",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.4,
+ "air": "5,2",
+ "co": 20.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 2.5,
+ "dir": "bass2x",
+ "f": "b2-t18",
+ "t0": 82.96666666666667,
+ "t1": 107.640867,
+ "crop": [
+  314,
+  176,
+  0,
+  302
+ ],
+ "peak_area": 0.1267,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

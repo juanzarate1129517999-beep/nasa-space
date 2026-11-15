@@ -1,0 +1,27 @@
+{
+ "id": "b2-p19",
+ "source": "PSI-25_Raw Data_BASS_GMT203_SAMPLE_194_TEST_P19.mp4",
+ "test": "P19",
+ "material": "1/4\" black rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 17.5,
+ "air": "5,8,2,max, 0",
+ "co": 40.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 2.3,
+ "dir": "bass2x",
+ "f": "b2-p19",
+ "t0": 0,
+ "t1": 22.53333333333333,
+ "crop": [
+  682,
+  384,
+  25,
+  96
+ ],
+ "peak_area": 0.2963,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}

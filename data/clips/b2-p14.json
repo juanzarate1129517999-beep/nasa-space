@@ -1,0 +1,27 @@
+{
+ "id": "b2-p14",
+ "source": "PSI-25_Raw Data_BASS_GMT174_SAMPLE_189_TEST_P14.mp4",
+ "test": "P14",
+ "material": "1/4 blac rod",
+ "family": "PMMA rod",
+ "state": "Solid",
+ "psi": "PSI-25",
+ "o2": 18.4,
+ "air": "5, low (.85, .4, .32)",
+ "co": 87.0,
+ "cam": "video camera",
+ "ok": false,
+ "x": 9.4,
+ "dir": "bass2x",
+ "f": "b2-p14",
+ "t0": 638.3,
+ "t1": 732.298233,
+ "crop": [
+  682,
+  384,
+  23,
+  96
+ ],
+ "peak_area": 0.1858,
+ "why": "rejected on visual review: camera menu, hardware or monitor in frame, or no visible flame"
+}
