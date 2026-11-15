@@ -1197,6 +1197,7 @@
       ["qc_log.csv", "Every correction to NASA's tables, with the original value (CSV)"],
       ["findings.json", "Findings with evidence scores (JSON)"],
       ["saffire2_ug_vs_1g.csv", "Saffire-II microgravity vs 1 g, sample by sample (CSV)"],
+      ["solidos_bass2_gases.csv", "BASS-II oxygen, CO and CO₂ before and after each burn (CSV)"],
       ["si_evidence_packs.json", "Evidence packs given to the SI model (JSON)"],
       ["si_verification.json", "Firewall result for every SI briefing (JSON)"],
     ];
