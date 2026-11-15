@@ -77,14 +77,19 @@ def build(P, ens=None):
             "materials": {
                 "layer": "Prevention",
                 "question": "Will a cabin material keep burning here?",
-                "answer": f"Yes: every solid flown in orbit would keep burning in still air at {100 * x:.1f}% O2, and nothing has been tested this rich.",
+                "answer": (f"Yes: every solid flown in orbit would keep burning in still air at {100 * x:.1f}% O2. "
+                           + (f"Only {S['literature']['elevated']['n']} published Saffire burns (outside PSI) reached this oxygen, all at one airflow; none mapped a limit."
+                              if 100 * x <= S['literature']['max_o2_pct'] else "Nothing has been tested this rich.")),
                 "status": "extrapolated",
                 "facts": [
                     fact("PMMA rod, still air: lowest O2 that sustains a flame", f"{S['zero_flow_o2_pct']}%", "measured",
                          "NASA BASS-II flammability boundary (NASA/TM-20210011385, Eq. 6.1)"),
                     fact("Oxygen in this module", f"{100 * x:.1f}%", "assumed", h["source"]),
-                    fact("Highest O2 any solid has burned at in orbit", f"{S['max_o2_any_solid_pct']}%", "measured",
+                    fact("Highest O2 any solid has burned at in NASA PSI's tables", f"{S['max_o2_any_solid_pct']}%", "measured",
                          "PSI BASS, BASS-II, Saffire tables"),
+                    fact("Highest O2 any solid has burned at in orbit (published, outside PSI)",
+                         f"{S['literature']['max_o2_pct']}% at {S['literature']['min_p_atm']:.2f} atm", "measured",
+                         "NASA Saffire VI on Cygnus: " + S["literature"]["citation"]),
                     fact("Airflow needed to blow a PMMA rod flame out here", f"{sf['blowoff_flow_cm_s']:.0f} cm/s", "extrapolated",
                          f"Boundary equation beyond the tested {S['tested_flow_cm_s'][1]:.0f} cm/s and {S['tested_o2_pct'][1]}% O2, 1 atm only"),
                     fact("Flame spread over cotton-fiberglass fabric in orbit (20 cm/s air)",
@@ -143,8 +148,10 @@ def build(P, ens=None):
                     fact("Methanol fire in this air with 30% CO2 added: chance it goes out",
                          f"{100 * c30[1]:.0f}% (90% range {100 * c30[2]:.0f}–{100 * c30[3]:.0f}%)", "extrapolated",
                          "FLEX model; no FLEX test combined this much oxygen with CO2"),
-                    fact("CO2 effect in the model (90% interval of its coefficient)", f"{co2c['lo']:+.2f} to {co2c['hi']:+.2f}", "model",
-                         "Includes zero: the flights cannot yet separate the CO2 effect from the oxygen effect"),
+                    fact("CO2 effect in the model (change in the chance a flame goes out per standard deviation of CO2, 90% interval)",
+                         f"{100 * co2c['lo']:+.0f} to {100 * co2c['hi']:+.0f} points", "model",
+                         ("Includes zero: the flights cannot yet separate the CO2 effect from the oxygen effect" if co2c["lo"] < 0 < co2c["hi"]
+                          else "CO2 helps, but every FLEX CO2 test ran at 25% O2 or less, so the effect at base oxygen is extrapolated")),
                 ],
                 "curve": sup_m["Methanol"]["curve"],
             },
@@ -157,8 +164,10 @@ def build(P, ens=None):
         "measured_layers": sum(f["tag"] == "measured" for mm in mods for t in mm["tests"].values() for f in t["facts"]),
         "total_facts": sum(len(t["facts"]) for mm in mods for t in mm["tests"].values()),
         "flight_tests_needed": [
-            {"what": "Solid-material flammability (fabric, PMMA, Nomex) at ≥30% O2 and ≤10.2 psi", "why": "No solid has burned in orbit above "
-             f"{S['max_o2_any_solid_pct']}% O2 or at reduced pressure; every materials answer for the base is extrapolated."},
+            {"what": "Flammability limits of habitat materials (fabric, PMMA, Nomex) at ≥30% O2 and ≤10.2 psi", "why": "NASA PSI's tables hold no solid "
+             f"burned above {S['max_o2_any_solid_pct']}% O2 or at reduced pressure. Saffire V and VI (published, not in PSI) burned "
+             f"{S['literature']['elevated']['n']} samples at {S['literature']['elevated']['o2_pct'][0]}–{S['literature']['elevated']['o2_pct'][1]}% O2, "
+             "all at one airflow and with no limit mapped, so every materials limit for the base is still extrapolated."},
             {"what": f"{pick['fuel']} droplet at {100 * pick['x_o2']:.0f}% O2, {pick['p_atm']:.2f} atm, {100 * pick['x_co2']:.0f}% CO2",
              "why": f"Where the 200 models disagree most near lunar-base air (90% range {100 * pick['interval'][0]:.0f}–{100 * pick['interval'][1]:.0f}%)."},
             {"what": "Any flame at lunar gravity (0.17 g)", "why": "PSI holds microgravity and 1 g data only; partial-gravity facilities (LUCI, FM2) have no data in PSI yet."},

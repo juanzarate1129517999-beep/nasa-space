@@ -64,7 +64,24 @@ def test_habitat_predictions_are_probabilities_with_intervals():
 def test_more_oxygen_means_fewer_self_extinctions():
     p = [HC[h]["Methanol"]["p"] for h in ("cabin", "eva_prep", "moon_base", "exploration")]
     assert p == sorted(p, reverse=True)
-    assert round(100 * HC["cabin"]["Methanol"]["p"]) == 72 and round(100 * HC["moon_base"]["Methanol"]["p"]) == 6
+    assert round(100 * HC["cabin"]["Methanol"]["p"]) == 75 and round(100 * HC["moon_base"]["Methanol"]["p"]) == 8
+
+
+def test_three_endings_add_up_and_disruption_rises_with_oxygen():
+    for fuels in HC.values():
+        for r in fuels.values():
+            assert abs(r["p"] + r["disruption"]["p"] + r["completion"]["p"] - 1) < 1e-6
+    d = [HC[h]["Methanol"]["disruption"]["p"] for h in ("cabin", "eva_prep", "moon_base", "exploration")]
+    assert d == sorted(d)
+    assert HC["moon_base"]["Methanol"]["steady_extinction"]["p"] > HC["moon_base"]["Methanol"]["p"]
+
+
+def test_each_stage_is_validated_on_unseen_days():
+    V = EMBER["flex"]["validation"]
+    assert V["reps"] >= 10
+    assert V["stages"]["disruption"]["auc"] > 0.8 and V["stages"]["extinction"]["auc"] > 0.8
+    assert V["stages"]["extinction"]["n"] == EMBER["flex"]["outcomes"]["extincion"] + EMBER["flex"]["outcomes"]["completo"]
+    assert sum(EMBER["flex"]["outcomes"].values()) == EMBER["flex"]["n"]
 
 
 def test_guard_statuses():
@@ -115,7 +132,8 @@ def test_firewall_rejects_stale_drafts(moon):
 
 
 def test_firewall_accepts_a_faithful_draft(moon):
-    assert si.verify({"sentences": [{"text": "Only 6% self-extinguish here.", "cites": ["E2"]}], "pack_hash": moon["hash"]}, moon) == []
+    p = round(100 * HC["moon_base"]["Methanol"]["p"])
+    assert si.verify({"sentences": [{"text": f"Only {p}% self-extinguish here.", "cites": ["E2"]}], "pack_hash": moon["hash"]}, moon) == []
 
 
 def test_every_published_si_briefing_passes_the_firewall():
@@ -217,3 +235,14 @@ def test_records_and_flex_physics():
     assert len(k) > 200 and all(0 < v < 2 for v in k)
     ext = [t for t in T if t.get("d_ext_mm") is not None]
     assert ext and all(t["d_ext_mm"] <= t["d0_mm"] for t in ext)
+
+
+def test_published_saffire_burns_are_kept_apart_from_psi():
+    S = EMBER["solids"]
+    L = S["literature"]
+    assert L["max_o2_pct"] == 31.0 and L["n_burned"] == 5 and "20240002981" in L["citation"]
+    assert S["max_o2_any_solid_pct"] < L["max_o2_pct"]
+    nomex = [r for r in L["rows"] if r["family"] == "Nomex fabric"]
+    assert nomex and nomex[0]["ignited"] == 0
+    app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+    assert "solid material has burned in orbit above" not in app and "has ever burned in orbit" not in app

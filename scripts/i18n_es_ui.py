@@ -344,3 +344,88 @@ UI_ES.update({
 })
 
 UI_ES.update({"BASS-II oxygen, CO and CO₂ before and after each burn (CSV)": "Oxígeno, CO y CO₂ de BASS-II antes y después de cada quema (CSV)"})
+
+# Three-ending FLEX model and published Saffire IV-VI burns
+UI_ES.update({
+    "came near Moon-base air, and no solid in NASA's PSI tables burned above": "se acercaron al aire de la base lunar, y ningún sólido de las tablas de PSI de la NASA ardió por encima de",
+    "; only # published Saffire burns go higher. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.":
+        "; solo # quemas publicadas de Saffire llegan más alto. Skylab Phoenix convierte el archivo en respuestas de seguridad contra incendios que puedes comprobar, y dice con claridad dónde se acaban los datos.",
+    "No solid in NASA's PSI tables burned above #% O₂ or at reduced pressure; only # published Saffire burns did.":
+        "Ningún sólido de las tablas de PSI de la NASA ardió por encima de #% de O₂ ni a presión reducida; solo lo hicieron # quemas publicadas de Saffire.",
+    "Fire erupted in the oxygen-filled spacecraft during a pre-launch test and the crew died. Today, NASA's PSI tables hold no solid burned above #% O₂, and only # published Saffire burns reach #–#%.":
+        "Un incendio estalló en la nave llena de oxígeno durante una prueba previa al lanzamiento y la tripulación murió. Hoy, las tablas de PSI de la NASA no tienen ningún sólido quemado por encima de #% de O₂, y solo # quemas publicadas de Saffire llegan a #–#%.",
+    "% oxygen. NASA's Saffire V and VI burned four large samples at #–#% oxygen and #–# atm (Urban et al., ICES-#-#); the site shows them as published data, outside PSI. They show that fabric and acrylic burn there, not where they stop burning, so every materials limit for #% air is still an extrapolation and is labelled so.":
+        "% de oxígeno. Saffire V y VI de la NASA quemaron cuatro muestras grandes a #–#% de oxígeno y #–# atm (Urban et al., ICES-#-#); el sitio las muestra como datos publicados, fuera de PSI. Muestran que la tela y el acrílico arden ahí, no dónde dejan de arder, así que todo límite de materiales para aire al #% sigue siendo una extrapolación y está etiquetado así.",
+    "A droplet fire puts itself out #% of the time in ISS air, but only #% in the base's air, and NASA's PSI tables hold no solid burned above #% oxygen. The next chapters show why.":
+        "Un fuego de gota se apaga solo el #% de las veces en el aire de la ISS, pero solo el #% en el aire de la base, y las tablas de PSI de la NASA no tienen ningún sólido quemado por encima de #% de oxígeno. Los siguientes capítulos muestran por qué.",
+    "highest O₂ of any solid burn in NASA's PSI tables (# flight tests); the Moon base will be at #%+":
+        "O₂ más alto de cualquier quema de sólido en las tablas de PSI de la NASA (# pruebas de vuelo); la base lunar estará a #%+",
+    "highest O₂ of any solid burned in orbit: Saffire VI on Cygnus at # atm (# published burns, not in PSI)":
+        "O₂ más alto en que un sólido ha ardido en órbita: Saffire VI en Cygnus a # atm (# quemas publicadas, no están en PSI)",
+    "Saffire IV–VI burns (published)": "Quemas de Saffire IV–VI (publicadas)",
+    "No solid in NASA's PSI tables burned above": "Ningún sólido de las tablas de PSI de la NASA ardió por encima del",
+    "Equation: X_O#(%) = # exp(-# a) + # a + #, a = # U / r for the # cm base rod · NASA/TM-#, BASS-II Summary Report (PSI-#), p. #, Eq. (#). Above about #% O₂ and beyond # cm/s BASS-II flew no rod, so the dashed line and every habitat above cabin air are extrapolation. Diamonds: the large Saffire IV–VI samples that burned on Cygnus at # cm/s (Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-#-# (NTRS #)); they show burning, not a limit.":
+        "Ecuación: X_O#(%) = # exp(-# a) + # a + #, a = # U / r para la barra base de # cm · NASA/TM-#, BASS-II Summary Report (PSI-#), p. #, ec. (#). Por encima de cerca de #% de O₂ y más allá de # cm/s BASS-II no voló ninguna barra, así que la línea discontinua y todos los hábitats por encima del aire de cabina son extrapolación. Rombos: las muestras grandes de Saffire IV–VI que ardieron en Cygnus a # cm/s (Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-#-# (NTRS #)); muestran que arden, no un límite.",
+    "Breaks apart #% · burns to the end #%": "Se rompe #% · arde hasta el final #%",
+    "Of # droplet fires like this, about # go out on their own, # break apart and # burn to the end.":
+        "De # fuegos de gota como este, cerca de # se apagan solos, # se rompen y # arden hasta el final.",
+    "Breaks apart": "Se rompe",
+    "Burns to the end": "Arde hasta el final",
+    "break apart, scattering burning fuel": "se rompen y esparcen combustible en llamas",
+    "burn until the fuel is gone": "arden hasta que se acaba el combustible",
+    "go out on their own": "se apagan solos",
+    "Only the first group puts itself out; the rest must be detected and put out. The model is inside NASA's flight data: the share that goes out on its own could be anywhere from # to # in #.":
+        "Solo el primer grupo se apaga solo; el resto hay que detectarlo y apagarlo. El modelo está dentro de los datos de vuelo de la NASA: la proporción que se apaga sola podría estar entre # y # de cada #.",
+    "Only the first group puts itself out; the rest must be detected and put out. The model is near the edge of NASA's flight data: the share that goes out on its own could be anywhere from # to # in #.":
+        "Solo el primer grupo se apaga solo; el resto hay que detectarlo y apagarlo. El modelo está cerca del borde de los datos de vuelo de la NASA: la proporción que se apaga sola podría estar entre # y # de cada #.",
+    "Oxygen scale at # psi with no suppressant: blue where most fires go out on their own, orange where most do not (they break apart or burn to the end). The white mark is your scenario. Above about #% O₂, most fires like this do not go out on their own.":
+        "Escala de oxígeno a # psi sin supresor: azul donde la mayoría de los incendios se apagan solos, naranja donde la mayoría no (se rompen o arden hasta el final). La marca blanca es tu escenario. Por encima de cerca de #% de O₂, la mayoría de los incendios así no se apagan solos.",
+    "Oxygen scale at # psi with no suppressant: blue where most fires go out on their own, orange where most do not (they break apart or burn to the end). The white mark is your scenario.":
+        "Escala de oxígeno a # psi sin supresor: azul donde la mayoría de los incendios se apagan solos, naranja donde la mayoría no (se rompen o arden hasta el final). La marca blanca es tu escenario.",
+    "← less likely · change in the chance it goes out on its own, per standard deviation · more likely →":
+        "← menos probable · cambio en la probabilidad de que se apague solo, por desviación estándar · más probable →",
+    "<b>%{y}</b><br>effect %{x:+.#%}<br>#% CI %{customdata[#]:+.#%} to %{customdata[#]:+.#%}<extra></extra>":
+        "<b>%{y}</b><br>efecto %{x:+.#%}<br>IC del #% %{customdata[#]:+.#%} a %{customdata[#]:+.#%}<extra></extra>",
+    "Yes: every solid flown in orbit would keep burning in still air at #% O#. Only # published Saffire burns (outside PSI) reached this oxygen, all at one airflow; none mapped a limit.":
+        "Sí: todo sólido volado en órbita seguiría ardiendo en aire quieto a #% de O#. Solo # quemas publicadas de Saffire (fuera de PSI) llegaron a este oxígeno, todas con un solo flujo de aire; ninguna midió un límite.",
+    "Flammability limits of habitat materials (fabric, PMMA, Nomex) at ≥#% O# and ≤# psi":
+        "Límites de inflamabilidad de materiales del hábitat (tela, PMMA, Nomex) a ≥#% de O# y ≤# psi",
+    "Flight test the data asks for: Flammability limits of habitat materials (fabric, PMMA, Nomex) at ≥#% O# and ≤# psi. Why: NASA PSI's tables hold no solid burned above #% O# or at reduced pressure. Saffire V and VI (published, not in PSI) burned # samples at #–#% O#, all at one airflow and with no limit mapped, so every materials limit for the base is still extrapolated.":
+        "Prueba de vuelo que piden los datos: límites de inflamabilidad de materiales del hábitat (tela, PMMA, Nomex) a ≥#% de O# y ≤# psi. Por qué: las tablas de PSI de la NASA no tienen ningún sólido quemado por encima de #% de O# ni a presión reducida. Saffire V y VI (publicados, no están en PSI) quemaron # muestras a #–#% de O#, todas con un solo flujo de aire y sin medir un límite, así que todo límite de materiales para la base sigue siendo extrapolado.",
+    "NASA PSI's tables hold no solid burned above #% O# or at reduced pressure. Saffire V and VI (published, not in PSI) burned # samples at #–#% O#, all at one airflow and with no limit mapped, so every materials limit for the base is still extrapolated.":
+        "Las tablas de PSI de la NASA no tienen ningún sólido quemado por encima de #% de O# ni a presión reducida. Saffire V y VI (publicados, no están en PSI) quemaron # muestras a #–#% de O#, todas con un solo flujo de aire y sin medir un límite, así que todo límite de materiales para la base sigue siendo extrapolado.",
+    "Of # flight-test records with an ambient O₂ and pressure (# measured, the rest run in ISS cabin air), # sit inside the lunar-base envelope (≥#% O₂, ≤# atm), all from CFI-G normal, FLEX. No solid-material test in PSI's tables exceeds #% O₂ or was flown at reduced pressure; NASA's Saffire V and VI (published, not in PSI) burned # large samples at #–#% O₂ and #–# atm. ⟨H⟩ conditions (#% O₂, # psi): # tests.":
+        "De # registros de pruebas de vuelo con O₂ y presión ambiente (# medidos, el resto en aire de cabina de la ISS), # caen dentro de la envolvente de la base lunar (≥#% de O₂, ≤# atm), todos de CFI-G normal y FLEX. Ninguna prueba de material sólido en las tablas de PSI supera #% de O₂ ni se voló a presión reducida; Saffire V y VI de la NASA (publicados, no están en PSI) quemaron # muestras grandes a #–#% de O₂ y #–# atm. Condiciones de ⟨H⟩ (#% de O₂, # psi): # pruebas.",
+    "The validated FLEX model gives a methanol droplet flame a #% chance of self-extinguishing in cabin air (#%, # atm) and #% at #% O₂ and # psi (#% interval #%–#%). There, the droplet is predicted to break apart #% of the time and burn to completion #%; even a droplet that burns steadily goes out only #% of the time. Out-of-sample AUC # with whole test days held out.":
+        "El modelo validado de FLEX da a una gota de metanol en llamas un #% de probabilidad de apagarse sola en aire de cabina (#%, # atm) y un #% con #% de O₂ y # psi (intervalo del #% #%–#%). Ahí, se predice que la gota se rompe el #% de las veces y arde hasta consumirse el #%; incluso una gota que arde de forma estable se apaga solo el #% de las veces. AUC fuera de muestra de #, con días de prueba completos apartados.",
+    "In FLEX, # droplet fires burned at #–#% O₂ (# of them at # atm, next to the lunar-base atmosphere). Only # self-extinguished — # of the # at # atm, where # broke apart and # burned to completion — against # of # below #% O₂.":
+        "En FLEX, # fuegos de gota ardieron a #–#% de O₂ (# de ellos a # atm, junto a la atmósfera de la base lunar). Solo # se apagaron solos — # de los # a # atm, donde # se rompieron y # ardieron hasta consumirse — frente a # de # por debajo de #% de O₂.",
+    "Across all PSI flight tests with an ambient O# and pressure, # of # records sit inside the lunar-base envelope (at least #% O#, at most # atm), and no solid-material test in PSI's tables was flown there.":
+        "Entre todas las pruebas de vuelo de PSI con O# y presión ambiente, # de # registros caen dentro de la envolvente de la base lunar (al menos #% de O#, como máximo # atm), y ninguna prueba de material sólido de las tablas de PSI se voló ahí.",
+    "Outside PSI, NASA's Saffire V and VI burned # large fabric and PMMA samples on Cygnus at #–#% O# and #–# atm, all at one airflow; the Nomex sample did not ignite (Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-#-# (NTRS #)).":
+        "Fuera de PSI, Saffire V y VI de la NASA quemaron # muestras grandes de tela y PMMA en Cygnus a #–#% de O# y #–# atm, todas con un solo flujo de aire; la muestra de Nomex no encendió (Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-#-# (NTRS #)).",
+    "GroupKFold (# folds), whole ISS test days held out, repeated # times with reshuffled folds · # test days · n = #":
+        "GroupKFold (# particiones), días de prueba completos de la ISS apartados, repetido # veces con particiones barajadas · # días de prueba · n = #",
+    "Skylab Phoenix two-stage physics model": "Modelo físico de dos etapas de Skylab Phoenix",
+    "Single logistic on the # raw inputs (previous model)": "Logística simple con las # entradas originales (modelo anterior)",
+    "Gradient boosting (# raw inputs)": "Gradient boosting (# entradas originales)",
+    "Each step of the deployed model, scored the same way": "Cada paso del modelo desplegado, evaluado de la misma forma",
+    "Does the droplet break apart (disruption)?": "¿Se rompe la gota (disrupción)?",
+    "If it burns steadily, does the flame go out with fuel left (vs burning to completion)?": "Si arde de forma estable, ¿se apaga la llama con combustible restante (frente a arder hasta consumirse)?",
+    "Does the droplet burn to completion?": "¿Arde la gota hasta consumirse?",
+    "did not go out on its own": "no se apagó sola",
+    "Highest O2 any solid has burned at in NASA PSI's tables": "O2 más alto al que ha ardido un sólido en las tablas de PSI de la NASA",
+    "Highest O2 any solid has burned at in orbit (published, outside PSI)": "O2 más alto al que ha ardido un sólido en órbita (publicado, fuera de PSI)",
+    "#% at # atm": "#% a # atm",
+    "NASA Saffire VI on Cygnus: Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-#-# (NTRS #)":
+        "Saffire VI de la NASA en Cygnus: Urban, Ruff, Ferkul et al., Preliminary Results from the Saffire VI Experiment, ICES-#-# (NTRS #)",
+    "CO# effect in the model (change in the chance a flame goes out per standard deviation of CO#, #% interval)":
+        "Efecto del CO# en el modelo (cambio en la probabilidad de que la llama se apague por desviación estándar de CO#, intervalo del #%)",
+    "+# to +# points": "+# a +# puntos",
+    "CO# helps, but every FLEX CO# test ran at #% O# or less, so the effect at base oxygen is extrapolated":
+        "El CO# ayuda, pero todas las pruebas de FLEX con CO# se hicieron a #% de O# o menos, así que el efecto con el oxígeno de la base es extrapolado",
+    "At # atm, droplet flames self-extinguished in #% of tests without CO₂ (n=#) and in #% with >#% CO₂ (n=#). Once O₂ is accounted for, the model attributes a smaller effect to CO₂ (+# points per standard deviation, #% CI +# to +#) — CO₂ tests were often run at different O₂ levels.":
+        "A # atm, las llamas de gota se apagaron solas en el #% de las pruebas sin CO₂ (n=#) y en el #% con >#% de CO₂ (n=#). Una vez descontado el O₂, el modelo atribuye un efecto menor al CO₂ (+# puntos por desviación estándar, IC del #% +# a +#): las pruebas con CO₂ se hicieron a menudo con otros niveles de O₂.",
+    "Holding everything else fixed, one standard deviation more helium changes the chance of self-extinction by +# points (#% CI +# to +#); a larger initial droplet by +# points, consistent with radiative-loss extinction of large microgravity flames.":
+        "Con todo lo demás fijo, una desviación estándar más de helio cambia la probabilidad de autoextinción en +# puntos (IC del #% +# a +#); una gota inicial más grande, en +# puntos, coherente con la extinción por pérdidas radiativas de las llamas grandes en microgravedad.",
+})

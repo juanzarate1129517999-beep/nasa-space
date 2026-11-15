@@ -71,17 +71,35 @@
   };
 
   const M = D.flex;
-  const BOOT = M.boot;
   const MU = M.mu, SD = M.sd;
+  const ST = M.stages, PH = M.phys;
+  const BOOT = ST.extinction.boot;
   function stdz(x) { return x.map((v, i) => (v - MU[i]) / SD[i]); }
   function sig(z) { return 1 / (1 + Math.exp(-z)); }
-  function predict(x) {
-    const xs = stdz(x);
-    const ps = BOOT.map((b) => { let z = b[0]; for (let i = 0; i < xs.length; i++) z += b[i + 1] * xs[i]; return sig(z); }).sort((a, b) => a - b);
-    const q = (f) => ps[Math.min(ps.length - 1, Math.max(0, Math.round(f * (ps.length - 1))))];
-    return { p: ps.reduce((a, b) => a + b, 0) / ps.length, lo: q(0.05), hi: q(0.95) };
+  // Same physics features as pipeline/models.py: stoichiometric flame temperature and residence time.
+  function physics(x) {
+    const [hep, o2, logp, co2, he, d0] = x, n2 = Math.max(0, 1 - o2 - co2 - he), Mm = PH.molar_mass, Cp = PH.cp_j_mol_k;
+    const mass = o2 * Mm.o2 + n2 * Mm.n2 + co2 * Mm.co2 + he * Mm.he;
+    const yo = (o2 * Mm.o2) / mass, cp = (o2 * Cp.o2 + n2 * Cp.n2 + co2 * Cp.co2 + he * Cp.he) / (mass / 1000);
+    const fuel = hep === 1 ? "Heptane" : "Methanol";
+    const t_st = PH.t0_k + (PH.q_j_kg[fuel] * yo) / (cp * (PH.s_o2[fuel] + yo)), res = Math.log(d0 * d0 * Math.exp(logp));
+    return { heptane: hep, x_o2: o2, log_p: logp, x_co2: co2, x_he: he, d0_mm: d0, t_st, res, hep_t_st: hep * t_st, hep_res: hep * res };
   }
-  function pointEstimate(xs) { let z = M.coef[0]; for (let i = 0; i < xs.length; i++) z += M.coef[i + 1] * xs[i]; return sig(z); }
+  function stageZ(st, ph, b) { let z = b[0]; st.features.forEach((f, i) => { z += b[i + 1] * (ph[f] - st.mu[i]) / st.sd[i]; }); return z; }
+  // Three endings: goes out on its own (e), breaks apart (d), burns to completion (c). Paired bootstrap draws.
+  function predict3(x) {
+    const ph = physics(x), A = ST.disruption, B = ST.extinction, n = B.boot.length;
+    const E = [], Dd = [], Cc = [], S = [];
+    for (let i = 0; i < n; i++) {
+      const pd = sig(stageZ(A, ph, A.boot[i])), ps = sig(stageZ(B, ph, B.boot[i]));
+      E.push((1 - pd) * ps); Dd.push(pd); Cc.push((1 - pd) * (1 - ps)); S.push(ps);
+    }
+    const sum = (a) => { a.sort((u, v) => u - v); const q = (f) => a[Math.min(a.length - 1, Math.max(0, Math.round(f * (a.length - 1))))]; return { p: a.reduce((u, v) => u + v, 0) / a.length, lo: q(0.05), hi: q(0.95) }; };
+    const e = sum(E);
+    return { ...e, e, d: sum(Dd), c: sum(Cc), steady: sum(S) };
+  }
+  function predict(x) { return predict3(x); }
+  function pointEstimate(x) { const ph = physics(x), pd = sig(stageZ(ST.disruption, ph, ST.disruption.coef)), ps = sig(stageZ(ST.extinction, ph, ST.extinction.coef)); return (1 - pd) * ps; }
   function neighbors(x, k = 5) {
     const xs = stdz(x);
     const d = M.train_std.map((t, i) => ({ i, d: Math.sqrt(t.reduce((s, v, j) => s + (v - xs[j]) ** 2, 0)) }));
@@ -112,7 +130,7 @@
       [auc.toFixed(2), "<small>AUC</small>", "self-extinction model, scored on ISS test days it never saw"],
     ];
     $("#kpis").innerHTML = k.map(([v, s, l]) => `<div><dt>${l}</dt><dd>${v}${s}</dd></div>`).join("");
-    $("#hero-lead").innerHTML = `NASA's flight archive holds ${S.ambient.toLocaleString("en-US")} fire-test records with an atmosphere: ${D.coverage.n_measured.toLocaleString("en-US")} with measured oxygen and pressure, the rest run in ordinary cabin air. Only <b>${S.moon_envelope}</b> came near Moon-base air, and no solid material has burned in orbit above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
+    $("#hero-lead").innerHTML = `NASA's flight archive holds ${S.ambient.toLocaleString("en-US")} fire-test records with an atmosphere: ${D.coverage.n_measured.toLocaleString("en-US")} with measured oxygen and pressure, the rest run in ordinary cabin air. Only <b>${S.moon_envelope}</b> came near Moon-base air, and no solid in NASA's PSI tables burned above <b>${D.solids.max_o2_any_solid_pct}% O₂</b>; only ${D.solids.literature.elevated.n} published Saffire burns go higher. Skylab Phoenix turns the archive into fire-safety answers you can check, and says plainly where the data runs out.`;
   }
   function renderHabitats() {
     $("#habitats").innerHTML = HUI.map((hb) => {
@@ -125,7 +143,7 @@
       const body = r.ood
         ? `<div class="p muted">—</div><div class="plabel">Prediction withheld</div><div class="ood-note"><b>Outside all flight data.</b> No microgravity fire has been flown near this atmosphere.</div>`
         : `<div class="p">${pct(r.p)}</div><div class="plabel">Self-extinguishes</div>
-           <div class="track"><div class="ci" style="left:${100 * r.lo}%;width:${Math.max(1, 100 * (r.hi - r.lo))}%"></div><div class="pt" style="left:${100 * r.p}%"></div></div><div class="ci-txt">90% interval ${pct(r.lo)}–${pct(r.hi)}</div>${warn}`;
+           <div class="track"><div class="ci" style="left:${100 * r.lo}%;width:${Math.max(1, 100 * (r.hi - r.lo))}%"></div><div class="pt" style="left:${100 * r.p}%"></div></div><div class="ci-txt">90% interval ${pct(r.lo)}–${pct(r.hi)}</div><div class="ci-txt">Breaks apart ${pct(r.d.p)} · burns to the end ${pct(r.c.p)}</div>${warn}`;
       return `<button class="hab" type="button" data-hab="${hb.id}" title="${esc(hb.source)}"><span class="go" aria-hidden="true">→</span><div class="name">${esc(hb.name)}</div><div class="det">${esc(hb.detail)}</div>${atm}${body}</button>`;
     }).join("");
     document.querySelectorAll(".hab").forEach((b) => b.addEventListener("click", () => {
@@ -484,7 +502,7 @@
     big.classList.toggle("muted", !show);
     const dil = [sc.co2 ? `${(100 * sc.co2).toFixed(0)}% CO₂` : "", sc.he ? `${(100 * sc.he).toFixed(0)}% He` : ""].filter(Boolean).join(" + ") || "no diluent";
     $("#r-cap").innerHTML = show
-      ? `<b>About ${100 - Math.round(100 * r.p)} of 100 droplet fires like this keep burning.</b><br>${sc.fuel} droplet, d₀ ${sc.d0.toFixed(2)} mm · ${(100 * sc.o2).toFixed(1)}% O₂ · ${(sc.p * ATM_PSI).toFixed(1)} psi (${sc.p.toFixed(2)} atm) · ${dil}`
+      ? `<b>Of 100 droplet fires like this, about ${Math.round(100 * r.p)} go out on their own, ${Math.round(100 * r.d.p)} break apart and ${Math.max(0, 100 - Math.round(100 * r.p) - Math.round(100 * r.d.p))} burn to the end.</b><br>${sc.fuel} droplet, d₀ ${sc.d0.toFixed(2)} mm · ${(100 * sc.o2).toFixed(1)}% O₂ · ${(sc.p * ATM_PSI).toFixed(1)} psi (${sc.p.toFixed(2)} atm) · ${dil}`
       : `No ISS test was flown near this atmosphere (distance ${nn.dist.toFixed(1)}; predictions are withheld beyond ${(2 * thr).toFixed(1)}, twice the out-of-data limit). This gap is itself a finding — see “Next experiment”.`;
     $("#r-ci").style.left = `${100 * r.lo}%`; $("#r-ci").style.width = `${Math.max(1, 100 * (r.hi - r.lo))}%`;
     $("#r-pt").style.left = `${100 * r.p}%`;
@@ -518,7 +536,7 @@
   function renderFires(dil) {
     const x = featVec(sc), r = predict(x), stt = statusAt(x);
     $("#viz-label").textContent = "Out of 100 fires like this…";
-    $("#map-legend").innerHTML = [legendItem("circle", "#7dd3fc", "Goes out on its own"), legendItem("circle", C.orange, "Keeps burning"), legendItem("circle", "rgba(203,213,225,.35)", "Could go either way (90% range)")].join("");
+    $("#map-legend").innerHTML = [legendItem("circle", "#7dd3fc", "Goes out on its own"), legendItem("circle", C.amber, "Breaks apart"), legendItem("circle", C.orange, "Burns to the end")].join("");
     const o2s = []; for (let o = 0.10; o <= 0.401; o += 0.01) o2s.push(+o.toFixed(2));
     const ps = o2s.map((o) => { const xx = featVec({ ...sc, o2: o }); return { o, p: predict(xx).p, st: statusAt(xx) }; });
     let cross = null; for (let i = 1; i < ps.length; i++) if (ps[i - 1].p >= 0.5 && ps[i].p < 0.5) { cross = ps[i - 1].o + 0.01 * (ps[i - 1].p - 0.5) / (ps[i - 1].p - ps[i].p); break; }
@@ -529,7 +547,7 @@
           ${cross ? `<span class="ladder__x" style="left:${pos(cross)}"><b>50/50 at ≈${(100 * cross).toFixed(0)}% O₂</b></span>` : ""}
           <span class="ladder__you" style="left:${pos(Math.min(0.4, sc.o2))}"></span></div>
         <div class="ladder__ticks">${habs.map((h) => `<span style="left:${pos(h.x_o2)}">${esc(h.name)}<small>${o2pct(h.x_o2)}</small></span>`).join("")}</div>
-        <p class="note">Oxygen scale at ${PSI(sc.p).toFixed(1)} psi with ${esc(dil)}: blue where most fires go out on their own, orange where most keep burning. The white mark is your scenario.${cross ? ` Above about ${(100 * cross).toFixed(0)}% O₂, most fires like this keep burning.` : ""}</p>
+        <p class="note">Oxygen scale at ${PSI(sc.p).toFixed(1)} psi with ${esc(dil)}: blue where most fires go out on their own, orange where most do not (they break apart or burn to the end). The white mark is your scenario.${cross ? ` Above about ${(100 * cross).toFixed(0)}% O₂, most fires like this do not go out on their own.` : ""}</p>
       </div>`;
     if (stt === "outside") {
       $("#viz-sub").textContent = `${sc.fuel} droplet, ${(100 * sc.o2).toFixed(1)}% O₂, ${PSI(sc.p).toFixed(1)} psi, ${dil}.`;
@@ -538,13 +556,15 @@
       return;
     }
     const nOut = Math.round(100 * r.p), lo = Math.round(100 * r.lo), hi = Math.round(100 * r.hi);
-    const cells = Array.from({ length: 100 }, (_, i) => (i < lo ? "o" : i < nOut ? "ou" : i < hi ? "ku" : "k"));
+    const nD = Math.min(100 - nOut, Math.round(100 * r.d.p)), nC = 100 - nOut - nD;
+    const cells = Array.from({ length: 100 }, (_, i) => (i < nOut ? "o" : i < nOut + nD ? "b" : "k"));
     $("#viz-sub").textContent = `${sc.fuel} droplet, ${(100 * sc.o2).toFixed(1)}% O₂, ${PSI(sc.p).toFixed(1)} psi, ${dil}. Each dot is one fire.`;
     $("#map-chart").innerHTML = `<div class="fires">
         <div class="fires__grid">${cells.map((c) => `<i class="${c}"></i>`).join("")}</div>
-        <div class="fires__txt"><span class="fires__k">${100 - nOut}</span><span>keep burning and must be detected and put out</span>
-          <span class="fires__o">${nOut}</span><span>go out on their own</span>
-          <span class="mono-sm">The model is ${stt === "within" ? "inside" : "near the edge of"} NASA's flight data: the real number could be anywhere from ${100 - hi} to ${100 - lo} fires that keep burning.</span></div>
+        <div class="fires__txt"><span class="fires__o">${nOut}</span><span>go out on their own</span>
+          <span class="fires__b">${nD}</span><span>break apart, scattering burning fuel</span>
+          <span class="fires__k">${nC}</span><span>burn until the fuel is gone</span>
+          <span class="mono-sm">Only the first group puts itself out; the rest must be detected and put out. The model is ${stt === "within" ? "inside" : "near the edge of"} NASA's flight data: the share that goes out on its own could be anywhere from ${lo} to ${hi} in 100.</span></div>
       </div>${ladder}`;
     $("#viz-note").textContent = "";
   }
@@ -580,7 +600,7 @@
     $("#viz-label").textContent = "Will a droplet fire go out on its own?";
     $("#viz-sub").textContent = `${sc.fuel} droplet at ${PSI(sc.p).toFixed(1)} psi (${sc.p.toFixed(2)} atm), ${dil}. The line is the model's best estimate; the band is its 90% range. Move the oxygen slider or pick a habitat.`;
     $("#map-legend").innerHTML = [legendItem("line", C.amber, "Chance it goes out on its own"), legendItem("bar", "rgba(251,191,36,0.3)", "90% range"), legendItem("bar", "rgba(148,163,184,0.35)", "No flight data"), legendItem("circle", C.ink, "Your scenario")].join("");
-    $("#viz-note").textContent = "Above the dotted 50% line, most fires like this put themselves out; below it, most keep burning. Grey bands are atmospheres no FLEX flight test came close to.";
+    $("#viz-note").textContent = "Above the dotted 50% line, most fires like this put themselves out; below it, most do not (they break apart or burn to the end). Grey bands are atmospheres no FLEX flight test came close to.";
     plot("map-chart", [
       { x: pts.map((q) => 100 * q.o), y: seg((q) => q.hi), type: "scatter", mode: "lines", line: { width: 0 }, hoverinfo: "skip", connectgaps: false },
       { x: pts.map((q) => 100 * q.o), y: seg((q) => q.lo), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(251,191,36,0.20)", hoverinfo: "skip", connectgaps: false },
@@ -599,20 +619,20 @@
     for (let i = 0; i <= 60; i++) o2.push(0.10 + i * 0.005);
     for (let j = 0; j <= 40; j++) p.push(Math.exp(Math.log(0.3) + (j * (Math.log(3.2) - Math.log(0.3))) / 40));
     const base = (oo, pp) => [sc.fuel === "Heptane" ? 1 : 0, oo, Math.log(pp), sc.co2, sc.he, sc.d0];
-    const risk = p.map((pp) => o2.map((oo) => 1 - pointEstimate(stdz(base(oo, pp)))));
+    const risk = p.map((pp) => o2.map((oo) => 1 - pointEstimate(base(oo, pp))));
     const gap = p.map((pp) => o2.map((oo) => (statusAt(base(oo, pp)) === "within" ? null : 1)));
     const tr = M.train;
     const habs = D.habitats.filter((x) => x.x_o2 <= 0.4);
     $("#viz-label").textContent = "Fire risk map";
-    $("#viz-sub").textContent = `${sc.fuel} droplet, ${dil}. Brighter means the fire is more likely to keep burning. Click anywhere on the map to test that atmosphere.`;
+    $("#viz-sub").textContent = `${sc.fuel} droplet, ${dil}. Brighter means the fire is less likely to go out on its own. Click anywhere on the map to test that atmosphere.`;
     $("#map-legend").innerHTML = [legendItem("line", "#fff", "50% line: half of fires go out"), legendItem("bar", "rgba(148,163,184,0.45)", "No flight data"), legendItem("circle", C.ink2, "Flown FLEX test"), legendItem("cross", C.ink, "Your scenario")].join("");
-    $("#viz-note").textContent = "Dark areas: most fires put themselves out. Bright areas: most keep burning and must be detected and suppressed. Grey veil: no FLEX flight test came close, so the colours there are extrapolation.";
+    $("#viz-note").textContent = "Dark areas: most fires put themselves out. Bright areas: most do not go out on their own and must be detected and suppressed. Grey veil: no FLEX flight test came close, so the colours there are extrapolation.";
     const y = p.map(PSI);
     const el = plot("map-chart", [
       { z: risk, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, zsmooth: "best",
         colorscale: [[0, "#0b0c0f"], [0.3, "#3b1d6e"], [0.55, "#e11d48"], [0.78, "#f97316"], [1, "#fde68a"]],
-        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "keeps burning", side: "right", font: { size: 10.5, color: C.ink3 } } },
-        hovertemplate: "O₂ %{x:.1f}% · %{y:.1f} psi<br>keeps burning: %{z:.0%}<br><i>click to test</i><extra></extra>" },
+        colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "does not go out on its own", side: "right", font: { size: 10.5, color: C.ink3 } } },
+        hovertemplate: "O₂ %{x:.1f}% · %{y:.1f} psi<br>does not go out on its own: %{z:.0%}<br><i>click to test</i><extra></extra>" },
       { z: gap, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, showscale: false, hoverinfo: "skip", colorscale: [[0, "rgba(148,163,184,0.42)"], [1, "rgba(148,163,184,0.42)"]] },
       { z: risk, x: o2.map((v) => 100 * v), y, type: "contour", showscale: false, hoverinfo: "skip", contours: { start: 0.5, end: 0.5, size: 1, coloring: "none" }, line: { color: "#ffffff", width: 1.6, dash: "dash" } },
       { x: tr.map((t) => 100 * t.x_o2), y: tr.map((t) => PSI(t.p_atm)), type: "scatter", mode: "markers", marker: { size: 4, color: "rgba(241,245,249,0.75)" }, hoverinfo: "skip" },
@@ -642,10 +662,10 @@
       error_x: { type: "data", symmetric: false, array: d.map((r) => r.hi - r.coef), arrayminus: d.map((r) => r.coef - r.lo), color: C.ink3, thickness: 1.5, width: 0 },
       marker: { size: 11, color: d.map((r) => (r.lo > 0 ? C.blue : r.hi < 0 ? C.orange : C.ink4)), line: { color: C.bg, width: 2 } },
       customdata: d.map((r) => [r.lo, r.hi]),
-      hovertemplate: "<b>%{y}</b><br>effect %{x:+.2f}<br>90% CI %{customdata[0]:+.2f} to %{customdata[1]:+.2f}<extra></extra>",
+      hovertemplate: "<b>%{y}</b><br>effect %{x:+.0%}<br>90% CI %{customdata[0]:+.0%} to %{customdata[1]:+.0%}<extra></extra>",
     }], layout({
       margin: { l: 10, r: 18, t: 6, b: 40 },
-      xaxis: { zeroline: true, zerolinecolor: C.ink4, zerolinewidth: 1, title: { text: "← keeps burning · standardized effect · self-extinguishes →" } },
+      xaxis: { zeroline: true, zerolinecolor: C.ink4, zerolinewidth: 1, title: { text: "← less likely · change in the chance it goes out on its own, per standard deviation · more likely →" }, tickformat: "+.0%" },
       yaxis: { tickfont: { family: "Geist, Inter, sans-serif", size: 12, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
     }));
   }
@@ -832,7 +852,7 @@
       ["2026", "Artemis II", "A smoke alarm went off about 80,000 miles from Earth. As the commander put it, it gets everyone's attention.", CHALLENGE_URL, "Challenge brief"],
       ["1997", "Mir", "A fire caused by an oxygen generator failure erupted aboard the station during joint operations.", RES.mir[1], "NASA history"],
       ["1970", "Apollo 13", "An oxygen tank exploded on the way to the Moon; the crew survived a life-threatening flight home.", RES.a13[1], "NASA lessons learned"],
-      ["1967", "Apollo 1", `Fire erupted in the oxygen-filled spacecraft during a pre-launch test and the crew died. Today, no solid material has burned in orbit above ${S.max_o2_any_solid_pct}% O₂.`, RES.a1[1], "NASA lessons learned"],
+      ["1967", "Apollo 1", `Fire erupted in the oxygen-filled spacecraft during a pre-launch test and the crew died. Today, NASA's PSI tables hold no solid burned above ${S.max_o2_any_solid_pct}% O₂, and only ${S.literature.elevated.n} published Saffire burns reach ${S.literature.elevated.o2_pct[0]}–${S.literature.elevated.o2_pct[1]}%.`, RES.a1[1], "NASA lessons learned"],
     ];
     $("#history").innerHTML = ev.map(([y, n, d, u, s]) => `<li><span class="yr">${y}</span><div><b>${esc(n)}</b><p>${esc(d)}</p><a class="src-link" href="${u}" target="_blank" rel="noopener">${esc(s)} ↗</a></div></li>`).join("");
   }
@@ -842,7 +862,8 @@
       [`${S.min_o2_pct}%`, `lowest O₂ for a lasting PMMA flame in orbit, against ${S.g1_upward_limit_pct}% in the normal-gravity upward test`],
       [`${S.min_flow_cm_s[0].toFixed(1)}–${S.min_flow_cm_s[1].toFixed(1)}`, "cm/s: the gentle breeze where solids burn at the lowest oxygen, typical of spacecraft flows near surfaces"],
       [`${S.ignition_limit_pct}%`, `O₂ needed to ignite a rod; once lit, flames survived down to ${S.lowest_final_o2_rods_pct}%`],
-      [`${S.max_o2_any_solid_pct}%`, `highest O₂ in which any solid has burned in orbit (${S.n_solid_tests} flight tests); the Moon base will be at 30%+`],
+      [`${S.max_o2_any_solid_pct}%`, `highest O₂ of any solid burn in NASA's PSI tables (${S.n_solid_tests} flight tests); the Moon base will be at 30%+`],
+      [`${S.literature.max_o2_pct}%`, `highest O₂ of any solid burned in orbit: Saffire VI on Cygnus at ${num(S.literature.min_p_atm, 2)} atm (${S.literature.n_burned} published burns, not in PSI)`],
     ].map(([v, l]) => `<div><dt>${l}</dt><dd>${v}</dd></div>`).join("");
     const u = B.flow_cm_s, o = B.o2_pct;
     const inT = u.map((v, i) => (B.tested[i] ? o[i] : null)), outT = u.map((v, i) => (!B.tested[i] || i === B.tested.lastIndexOf(true) ? o[i] : null));
@@ -850,11 +871,14 @@
     const vis = u.map((v, i) => v >= xr[0] && v <= xr[1]);
     const X = u.filter((_, i) => vis[i]), Y = o.filter((_, i) => vis[i]);
     const habs = D.habitats.filter((h) => h.x_o2 < 1);
-    $("#solid-legend").innerHTML = [legendItem("line", C.amber, "NASA boundary (tested range)"), legendItem("line", C.ink3, "Extrapolated"), legendItem("bar", "rgba(242,96,15,0.35)", "Keeps burning"), legendItem("bar", "rgba(203,213,225,0.18)", "Where BASS-II tested")].join("");
+    $("#solid-legend").innerHTML = [legendItem("line", C.amber, "NASA boundary (tested range)"), legendItem("line", C.ink3, "Extrapolated"), legendItem("bar", "rgba(242,96,15,0.35)", "Keeps burning"), legendItem("bar", "rgba(203,213,225,0.18)", "Where BASS-II tested"), legendItem("diamond", C.orange, "Saffire IV–VI burns (published)")].join("");
     plot("solid-map", [
       { x: X.concat([...X].reverse()), y: Y.concat(X.map(() => yr[1])), type: "scatter", fill: "toself", fillcolor: "rgba(242,96,15,0.13)", line: { width: 0 }, hoverinfo: "skip" },
       { x: u, y: outT, type: "scatter", mode: "lines", line: { color: C.ink3, width: 2, dash: "dash" }, hoverinfo: "skip", connectgaps: false },
       { x: u, y: inT, type: "scatter", mode: "lines", line: { color: C.amber, width: 3 }, connectgaps: false, hovertemplate: "airflow %{x:.1f} cm/s<br>flame survives above %{y:.1f}% O₂<extra></extra>" },
+      ...(() => { const L = S.literature.rows.filter((r) => r.ignited && r.x_o2 != null); return [{ x: L.map((r) => r.flow_cm_s * (1 + (L.indexOf(r) - 2) * 0.06)), y: L.map((r) => 100 * r.x_o2), type: "scatter", mode: "markers",
+        marker: { symbol: "diamond", size: 11, color: C.orange, line: { color: C.ink, width: 1.2 } }, customdata: L.map((r) => [r.sample, r.material, r.p_atm, r.burn_s]),
+        hovertemplate: "<b>Saffire %{customdata[0]}</b> · %{customdata[1]}<br>%{y:.1f}% O₂ · %{customdata[2]:.2f} atm · burned %{customdata[3]} s<br>NASA paper, not in PSI<extra></extra>" }]; })(),
     ], layout({
       margin: { l: 52, r: 150, t: 10, b: 48 },
       xaxis: { type: "log", range: xr.map(Math.log10), tickvals: [0.3, 1, 2, 5, 10, 20, 50, 100, 200], title: { text: "Airflow past the sample, cm/s (log)" } },
@@ -872,7 +896,7 @@
         { x: Math.log10(250), y: 12.7, xanchor: "right", text: "FLAME GOES OUT", showarrow: false, font: { family: "Geist Mono, monospace", size: 10.5, color: "#5eead4" } },
       ],
     }));
-    $("#solid-note").innerHTML = `Equation: ${esc(B.equation)} · ${esc(S.source)}, ${esc(B.page)}. Above about ${S.tested_o2_pct[1]}% O₂ and beyond ${S.tested_flow_cm_s[1]} cm/s no solid was flown, so the dashed line and every habitat above cabin air are extrapolation.`;
+    $("#solid-note").innerHTML = `Equation: ${esc(B.equation)} · ${esc(S.source)}, ${esc(B.page)}. Above about ${S.tested_o2_pct[1]}% O₂ and beyond ${S.tested_flow_cm_s[1]} cm/s BASS-II flew no rod, so the dashed line and every habitat above cabin air are extrapolation. Diamonds: the large Saffire IV–VI samples that burned on Cygnus at 20 cm/s (${esc(S.literature.citation)}); they show burning, not a limit.`;
     const fams = [["PMMA rod", C.orange, "circle"], ["PMMA slab", C.amber, "square"], ["PMMA thin film", C.violet, "diamond"], ["SIBAL fabric", C.blue, "triangle-up"]];
     $("#solid-co-legend").innerHTML = fams.map(([f, c, s]) => legendItem(s === "square" ? "square" : s === "diamond" ? "diamond" : s === "triangle-up" ? "tri" : "circle", c, f)).join("");
     plot("solid-co", fams.map(([f, c, s]) => {
@@ -930,7 +954,9 @@
     const V = M.validation;
     $("#val-sub").textContent = V.scheme;
     $("#val-table").innerHTML = `<thead><tr><th>Model</th><th class="num">AUC ↑</th><th class="num">Brier ↓</th><th class="num">Log loss ↓</th><th class="num">Accuracy</th></tr></thead><tbody>${V.models.map((m) => `
-      <tr${m.deployed ? ' class="hl"' : ""}><td>${esc(m.name)}${m.deployed ? ' <span class="tag solid">deployed</span>' : ""}</td><td class="num">${m.auc.toFixed(3)}</td><td class="num">${m.brier.toFixed(3)}</td><td class="num">${m.log_loss.toFixed(3)}</td><td class="num">${pct(m.accuracy, 1)}</td></tr>`).join("")}</tbody>`;
+      <tr${m.deployed ? ' class="hl"' : ""}><td>${esc(m.name)}${m.deployed ? ' <span class="tag solid">deployed</span>' : ""}</td><td class="num">${m.auc.toFixed(3)}${m.auc_sd ? `<small> ±${m.auc_sd.toFixed(3)}</small>` : ""}</td><td class="num">${m.brier.toFixed(3)}</td><td class="num">${m.log_loss.toFixed(3)}</td><td class="num">${pct(m.accuracy, 1)}</td></tr>`).join("")}
+      <tr><th colspan="5">Each step of the deployed model, scored the same way</th></tr>${Object.values(V.stages).map((m) => `
+      <tr><td>${esc(m.question)} <small>n = ${m.n}</small></td><td class="num">${m.auc.toFixed(3)}<small> ±${m.auc_sd.toFixed(3)}</small></td><td class="num">${m.brier.toFixed(3)}</td><td class="num">${m.log_loss.toFixed(3)}</td><td class="num">${pct(m.accuracy, 1)}</td></tr>`).join("")}</tbody>`;
     const R = V.reliability;
     plot("rel-chart", [
       { x: [0, 1], y: [0, 1], type: "scatter", mode: "lines", line: { color: C.ink4, width: 1 }, hoverinfo: "skip" },
@@ -1262,7 +1288,7 @@
     const cab = habPredict(D.habitats.find((x) => x.id === "cabin")), moon = habPredict(D.habitats.find((x) => x.id === "moon_base"));
     const k = D.next.picks[0];
     const items = [
-      ["The gap", `${S.moon_envelope}<small>/ ${S.ambient.toLocaleString("en-US")}</small>`, "flight tests anywhere near lunar-base air", `No solid material has burned in orbit above ${SO.max_o2_any_solid_pct}% O₂, and none at reduced pressure.`, "#/findings", "See the gap"],
+      ["The gap", `${S.moon_envelope}<small>/ ${S.ambient.toLocaleString("en-US")}</small>`, "flight tests anywhere near lunar-base air", `No solid in NASA's PSI tables burned above ${SO.max_o2_any_solid_pct}% O₂ or at reduced pressure; only ${SO.literature.elevated.n} published Saffire burns did.`, "#/findings", "See the gap"],
       ["Prevention", pct(moon.p), "chance a droplet fire goes out on its own in lunar-base air", `Against ${pct(cab.p)} in cabin air. On the Moon base, a fire must be detected and put out; it will not die on its own.`, "#/lab", "Try it in the Fire Lab"],
       ["Solids", `${SO.min_o2_pct}%`, "lowest oxygen where a plastic rod kept burning in orbit", `Below the ${SO.g1_upward_limit_pct}% limit of the upward test used on Earth. Watch the flight video.`, "#/flames", "Watch the flames"],
       ["Next flight", `${pct(k.interval[0])}–${pct(k.interval[1])}`, "today's range for the test that would teach the most", `${k.fuel} droplet at ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi, ${(100 * k.x_co2).toFixed(0)}% CO₂: the widest doubt near lunar-base air.`, "#/next", "See the recommendation"],
@@ -1338,7 +1364,7 @@
       if (run.n > 1) { lab3dState.tally.unshift(run.out); lab3dState.tally = lab3dState.tally.slice(0, 20); }
       const t = lab3dState.tally, outN = t.filter(Boolean).length;
       $("#lab3d-runs").innerHTML = `<div class="runs__now">Replay ${run.n}: <b>${run.status}</b></div>
-        <div class="runs__dots">${t.map((o) => `<i class="${o ? "o" : "k"}" title="${o ? "went out on its own" : "burned to the end"}"></i>`).join("")}</div>
+        <div class="runs__dots">${t.map((o) => `<i class="${o ? "o" : "k"}" title="${o ? "went out on its own" : "did not go out on its own"}"></i>`).join("")}</div>
         <div class="mono-sm">${t.length ? `${outN} of the last ${t.length} went out on its own` : "collecting replays…"}</div>`;
     });
   }
@@ -1573,7 +1599,7 @@
       { act: "moon", e: "Where", t: "The lunar south pole.", b: "Ridges near the pole see sunlight most of the time, for solar power and warmth, while nearby craters keep water ice in permanent shadow. NASA's laser altimeter has mapped the candidate sites at 5 m per pixel; the orange marker is ours." },
       { act: "moon", e: "The air", t: "Richer air, lower pressure.", b: "To save mass and shorten the preparation for each spacewalk, the base is planned at about 30% oxygen and 10.2 psi. The ISS keeps Earth-like air: 21% oxygen at 14.7 psi." },
       { act: "base", e: "Landing", t: `The ${s.name || "Connecting ridge"}.`, b: `This is real terrain from NASA's LOLA altimeter, ${Math.round(s.z || 1959).toLocaleString("en-US")} m above the lunar datum, lit by the Sun where JPL Horizons puts it today: barely above the horizon, so shadows run for kilometres. A habitat, an airlock and a pressurized rover. Drag to look around, or click a module to cut it open.` },
-      { act: "base", e: "The problem", t: "In this air, fires stop putting themselves out.", b: `A droplet fire puts itself out ${pct(cab.p)} of the time in ISS air, but only ${pct(moon.p)} in the base's air, and no solid material has ever burned in orbit above ${SO.max_o2_any_solid_pct}% oxygen. The next chapters show why.`, link: ["#/findings/audit", "See the full base audit →"] },
+      { act: "base", e: "The problem", t: "In this air, fires stop putting themselves out.", b: `A droplet fire puts itself out ${pct(cab.p)} of the time in ISS air, but only ${pct(moon.p)} in the base's air, and NASA's PSI tables hold no solid burned above ${SO.max_o2_any_solid_pct}% oxygen. The next chapters show why.`, link: ["#/findings/audit", "See the full base audit →"] },
     ];
   }
   function xpSources() {
@@ -1590,7 +1616,7 @@
       { id: "fabric", label: "Fabric and stowage bags", inv: "Saffire · BASS-II", psi: "PSI-99", steps: [
         ["A soft target.", "Stowage bags, clothing and towels fill every module, and a hot surface or a spark can light their fibres."],
         ["The flame creeps along the fabric.", "With the fans on, the flame spreads along the cloth in the direction of the airflow."],
-        ["What NASA measured.", `On Cygnus cargo ships after leaving the ISS, Saffire burned large fabric samples: flames spread at ${sp.join(" and ")} mm/s at about 22% O₂, and a 94 cm sample burned for ${s1.tiempo_quemado_s} s. No fabric has burned in orbit above ${SO.max_o2_any_solid_pct}% O₂.`],
+        ["What NASA measured.", `On Cygnus cargo ships after leaving the ISS, Saffire burned large fabric samples: flames spread at ${sp.join(" and ")} mm/s at about 22% O₂, and a 94 cm sample burned for ${s1.tiempo_quemado_s} s. Saffire VI later burned the same fabric at ${SO.literature.max_o2_pct}% O₂ and ${num(SO.literature.min_p_atm, 2)} atm, a result published outside PSI.`],
         ["Catch it and stop it.", "Smoke reaches the detector within the airflow. The crew stops the fans and uses the CO₂ extinguisher; at 30% O₂ nobody has measured how much faster fabric burns."]] },
       { id: "liquid", label: "Fuel or alcohol leak", inv: "FLEX", psi: "PSI-69", steps: [
         ["A leak becomes floating droplets.", "In orbit a spilled liquid does not pool: it breaks into droplets that drift through the cabin."],

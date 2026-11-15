@@ -166,7 +166,7 @@ ES = {
     "The model is near the edge of NASA's flight data: the real number could be anywhere from # to # fires that keep burning.": "El modelo está cerca del borde de los datos de vuelo de la NASA: el número real podría estar entre # y # incendios que siguen ardiendo.",
     "Methanol droplet, #% O₂, # psi, no suppressant. Each dot is one fire.": "Gota de metanol, #% O₂, # psi, sin supresor. Cada punto es un incendio.",
     "Heptane droplet, #% O₂, # psi, no suppressant. Each dot is one fire.": "Gota de heptano, #% O₂, # psi, sin supresor. Cada punto es un incendio.",
-    "50/50 at ≈#% O₂": "50/50 con ≈#% de O₂",
+    "50/50 at ≈#% O₂": "#/# con ≈#% de O₂",
     "Oxygen scale at # psi with no suppressant: blue where most fires go out on their own, orange where most keep burning. The white mark is your scenario. Above about #% O₂, most fires like this keep burning.": "Escala de oxígeno a # psi sin supresor: azul donde la mayoría de los incendios se apagan solos, naranja donde la mayoría sigue ardiendo. La marca blanca es tu escenario. Por encima de cerca de #% de O₂, la mayoría de los incendios así siguen ardiendo.",
     "No flight data near this air.": "No hay datos de vuelo cerca de este aire.",
     "NASA never flew a droplet fire close to it, so the model does not guess.": "La NASA nunca voló una gota en llamas cerca de él, así que el modelo no adivina.",
@@ -908,7 +908,7 @@ ES.update({
     "NASA test · kept burning<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>": "Prueba NASA · siguió ardiendo<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>",
     "3D surface of the chance a droplet fire goes out on its own, by oxygen and pressure": "Superficie 3D de la probabilidad de que un incendio de gota se apague solo, según oxígeno y presión",
     "The flight archive: solids, liquids and gases.": "El archivo de vuelo: sólidos, líquidos y gases.",
-    "Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Solids: BASS-II, with the oxygen measured before ignition, the airflow steps the crew set and the carbon monoxide the burn added. Liquids: droplets from the Cool Flame Investigation (PSI-#), with oxygen, pressure and helium from its table; the pink glow is the hot flame around the droplet. Gases: ACME s-Flame and CFI-G spheres and SPICE jet flames; “≈” marks oxygen taken as cabin air. Camera exposure changes between and within tests, so compare shape and color, not brightness. Sequences that show only the hardware or no flame are left out.": "Los clips vienen de los datos crudos de NASA PSI (CC0), recortados a la llama y acelerados como se indica. Sólidos: BASS-II, con el oxígeno medido antes del encendido, los pasos de flujo de aire que fijó la tripulación y el monóxido de carbono que añadió la combustión. Líquidos: gotas de la Cool Flame Investigation (PSI-#), con oxígeno, presión y helio de su tabla; el brillo rosado es la llama caliente alrededor de la gota. Gases: esferas de ACME s-Flame y CFI-G y llamas de chorro de SPICE; “≈” indica oxígeno tomado como aire de cabina. La exposición de la cámara cambia entre pruebas y dentro de ellas, así que compara forma y color, no brillo. Se omiten las secuencias que solo muestran el equipo o no muestran llama.",
+    "Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Solids: BASS-II, with the oxygen measured before ignition, the airflow steps the crew set and the carbon monoxide the burn added. Liquids: droplets from the Cool Flame Investigation (PSI-#), with oxygen, pressure and helium from its table; the pink glow is the hot flame around the droplet. Gases: ACME s-Flame and CFI-G spheres and SPICE jet flames; “≈” marks oxygen taken as cabin air. Camera exposure changes between and within tests, so compare shape and color, not brightness. Sequences that show only the hardware or no flame are left out.": "Los clips vienen de los datos crudos de NASA PSI (CC#), recortados a la llama y acelerados como se indica. Sólidos: BASS-II, con el oxígeno medido antes del encendido, los pasos de flujo de aire que fijó la tripulación y el monóxido de carbono que añadió la combustión. Líquidos: gotas de la Cool Flame Investigation (PSI-#), con oxígeno, presión y helio de su tabla; el brillo rosado es la llama caliente alrededor de la gota. Gases: esferas de ACME s-Flame y CFI-G y llamas de chorro de SPICE; “≈” indica oxígeno tomado como aire de cabina. La exposición de la cámara cambia entre pruebas y dentro de ellas, así que compara forma y color, no brillo. Se omiten las secuencias que solo muestran el equipo o no muestran llama.",
     "All": "Todos",
     "Solids": "Sólidos",
     "Liquids": "Líquidos",
@@ -960,7 +960,7 @@ ES.update({
     "Share of flames that did NOT go out on their own": "Proporción de llamas que NO se apagaron solas",
     "Share of flames that did not go out on their own, per group, with #% range": "Proporción de llamas que no se apagaron solas, por grupo, con intervalo del #%",
     "How to read it: the dot is what NASA saw; its size is the number of flames; the faint bar is the #% range. Groups are ranked by the left end of the bar, so a small lucky group cannot jump to the top. Blue: droplets · violet: gas flames · pink: inverse flames. White ring and orange band: near ⟨H⟩ air.": "Cómo leerlo: el punto es lo que vio la NASA; su tamaño es el número de llamas; la barra tenue es el intervalo del #%. Los grupos se ordenan por el extremo izquierdo de la barra, así que un grupo pequeño con suerte no puede saltar al primer lugar. Azul: gotas · violeta: llamas de gas · rosa: llamas inversas. Anillo blanco y franja naranja: cerca del aire de ⟨H⟩.",
-    "<b>%{y}</b><br>did not go out: %{customdata[0]} of %{customdata[1]}<br>#% range %{customdata[2]:.0%}–%{customdata[3]:.0%}<br>%{customdata[4]} · %{customdata[5]}<extra></extra>": "<b>%{y}</b><br>no se apagó: %{customdata[0]} de %{customdata[1]}<br>intervalo del #% %{customdata[2]:.0%}–%{customdata[3]:.0%}<br>%{customdata[4]} · %{customdata[5]}<extra></extra>",
+    "<b>%{y}</b><br>did not go out: %{customdata[0]} of %{customdata[1]}<br>#% range %{customdata[2]:.0%}–%{customdata[3]:.0%}<br>%{customdata[4]} · %{customdata[5]}<extra></extra>": "<b>%{y}</b><br>no se apagó: %{customdata[#]} de %{customdata[#]}<br>intervalo del #% %{customdata[#]:.#%}–%{customdata[#]:.#%}<br>%{customdata[#]} · %{customdata[#]}<extra></extra>",
     "# to #% O₂": "# a #% O₂",
     "under #% O₂": "menos de #% O₂",
     "# to # atm": "# a # atm",
@@ -1276,8 +1276,18 @@ def norm(s):
     return NUM.sub("#", s)
 
 
+def check(out):
+    """A translation that keeps some but not all number slots fills them in the wrong order (e.g. "50/50 at ≈23%"
+    rendered as "≈50%"). Every value must keep all of its key's number slots, or none (a fixed literal text)."""
+    safe = {"# · Learn in #D", "Recommended flight test · ## of #"}  # the slots kept are the leading ones, in order
+    bad = [(k, v) for k, v in out.items() if 0 < v.count("#") != k.count("#") and k.count("#") and k not in safe]
+    if bad:
+        raise SystemExit("Number slots do not match:\n" + "\n".join(f"  {k[:90]}\n  {v[:90]}" for k, v in bad))
+
+
 if __name__ == "__main__":
     out = {norm(k): v for k, v in ES.items()}
+    check(out)
     names = {k: v for k, v in NAMES.items()}
     js = "window.I18N_ES = " + json.dumps({"t": out, "names": names}, ensure_ascii=False) + ";\n"
     Path(sys.argv[1] if len(sys.argv) > 1 else "web/data/i18n-es.js").write_text(js, encoding="utf-8")
