@@ -8,11 +8,15 @@
 
 Skylab Phoenix convierte los datos de combustión de vuelo del repositorio NASA PSI en hallazgos de seguridad contra incendios para la base lunar, las naves y los trajes espaciales:
 
-- **Ingeniería de datos:** limpia las 24 investigaciones de *Combustion Science*, lleva todo a un esquema común en unidades SI y registra cada corrección (53 en total).
+- **Ingeniería de datos:** limpia las 24 investigaciones de *Combustion Science*, lleva todo a un esquema común en unidades SI y registra cada corrección (191 en total).
 - **Análisis:** perfila, rankea y compara cada investigación para cinco atmósferas: cabina, preparación de EVA, base lunar, atmósfera de exploración de NASA (8,2 psi y 34 % O₂) y traje espacial.
 - **Machine learning:** modelos validados con incertidumbre explícita, un detector de "fuera de los datos" que también revisa el rango volado de cada variable, y la recomendación del próximo experimento.
-- **Capa SI (lo que pide el título del reto):** una SI (Claude, de Anthropic) escribe resúmenes en lenguaje claro por hábitat y por investigación. El código los publica solo si cada frase cita su evidencia, cada número aparece en esa evidencia y no hay veredictos de seguridad. Pasan 29 de 29.
+- **Capa SI (lo que pide el título del reto):** una SI (Claude, de Anthropic) escribe resúmenes en lenguaje claro por hábitat y por investigación. El código los publica solo si cada frase cita su evidencia, cada número aparece en esa evidencia y no hay veredictos de seguridad. Pasan 33 de 33, y en español se muestran traducidos con los números copiados del original verificado.
 - **Materiales sólidos (BASS-II):** en órbita, las llamas sobre PMMA sobreviven hasta cerca de 13,5 % de O₂ con una brisa de 2 cm/s, por debajo del 15,4 % del ensayo ascendente en gravedad normal (límite ajustado por la NASA, NASA/TM-20210011385, PSI-25). Cerca del límite liberan más del doble de CO. Ningún sólido ha ardido en órbita por encima de 22,7 % de O₂.
+- **Aprende 3D inmersivo:** cuatro capítulos a pantalla completa: el plan Artemis sobre una Luna 3D real con el descenso al terreno LOLA de 5 m/píxel del polo sur, cinco formas en que empieza un fuego dentro de un módulo de la ISS (cada una ligada a la investigación de la NASA que la midió), cómo cambia una llama de la Tierra a la órbita y el mismo fuego en cuatro gravedades.
+- **Panel interactivo:** en Hallazgos, los 1.955 registros con filtros cruzados (estado, investigación, resultado, oxígeno, presión, aire de base lunar) y descarga del CSV filtrado.
+- **Fire Lab con física real:** la gota se encoge en tiempo real según la ley d² con la tasa de combustión y el diámetro de extinción de los cinco ensayos FLEX más cercanos, junto a una gráfica d² en vivo.
+- **Método:** nueve pasos explicados, de la pregunta a la reproducción, con el registro de correcciones, la validación y el firewall de la SI.
 - **Historia y Tierra:** lecciones de Apollo 1, Apollo 13 y Mir, aplicaciones en la Tierra y los diez recursos oficiales del reto enlazados.
 - **Para cada público:** vistas guiadas para pregrado, posgrado, profesores, investigadores e ingenieros; búsqueda "Ask the archive" sobre el texto de NASA; comparación lado a lado; enlaces compartibles; descargas.
 

@@ -217,6 +217,28 @@ def _jsonable(o):
     return o
 
 
+
+def records_payload(ens):
+    moon = next(h for h in HABITATS if h["id"] == "moon_base")
+    exps = sorted(ens["experimento"].dropna().unique().tolist())
+    psi = {e: ens.loc[ens["experimento"] == e, "psi_id"].iloc[0] for e in exps}
+    state = {"gas": "G", "gota": "L", "solido": "S", "humo": "M", "polvo": "M"}
+    fuel = ens["material_familia"].where(ens["material_familia"].notna() & (ens["familia"] == "solido"), ens["combustible"])
+    fuel = fuel.fillna("—").astype(str).str.strip()
+    fuels = sorted(fuel.unique().tolist())
+    fi = {f: i for i, f in enumerate(fuels)}
+    ei = {e: i for i, e in enumerate(exps)}
+    num = lambda v, k: None if pd.isna(v) else round(float(v), k)
+    rows = []
+    for r, f in zip(ens.itertuples(index=False), fuel):
+        amb = r.o2_ubicacion == "ambiente"
+        rows.append([ei[r.experimento], state.get(r.familia, "M"), num(r.x_o2, 4) if amb else None, num(r.p_atm, 3),
+                     1 if bool(r.o2_supuesto) or bool(r.p_supuesta) else 0,
+                     None if pd.isna(r.autoextincion) else int(r.autoextincion), fi[f], num(r.x_co2, 3)])
+    return {"cols": ["exp", "state", "x_o2", "p_atm", "assumed", "out", "fuel", "x_co2"],
+            "experiments": exps, "psi": psi, "fuels": fuels, "rows": rows,
+            "moon_envelope": {"x_o2_min": round(moon["x_o2"] - 0.02, 4), "p_atm_max": round(moon["p_atm"] + 0.05, 4)}}
+
 def write(ens, saffire2, saffire1, invs, sim, models, gas, solid):
     GOLD.mkdir(parents=True, exist_ok=True)
     WEB_DATA.mkdir(parents=True, exist_ok=True)
@@ -245,6 +267,7 @@ def write(ens, saffire2, saffire1, invs, sim, models, gas, solid):
         "solids": solid, "findings": F, "qc": qc.to_dict(orient="records"), "survival": survival(ens),
     }
     payload["moonbase"] = moonbase.build(payload, ens)
+    payload["records"] = records_payload(ens)
     payload = _jsonable(payload)
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     (WEB_DATA / "ember.json").write_text(blob, encoding="utf-8")

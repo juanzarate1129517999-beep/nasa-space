@@ -941,6 +941,21 @@
     ], layout({ margin: { l: 52, r: 14, t: 6, b: 44 }, xaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Predicted P(self-extinction)" } }, yaxis: { tickformat: ".0%", range: [0, 1], title: { text: "Observed rate" } },
       annotations: [{ x: 0.25, y: 0.25, ax: 30, ay: -34, text: "perfect calibration", showarrow: true, arrowhead: 0, arrowwidth: 1, arrowcolor: C.ink4, xanchor: "left", font: { size: 10, color: C.ink3, family: "Geist Mono, JetBrains Mono, monospace" } }] }));
     renderQC();
+    const nClips = (window.CLIPS || []).length;
+    $("#mth-src").innerHTML = [
+      ["NASA PSI", `${S.investigations} combustion investigations · ${S.records.toLocaleString("en-US")} records`, "Experimental tables and metadata from the Physical Sciences Informatics public API.", "https://psi.nasa.gov/physci/repo/search?q=combustion&data_source=psi&data_type=investigation"],
+      ["PSI flight video", `${nClips} clips`, "Raw ISS and Cygnus flight video, cropped to the flame for the archive in Flames.", "https://psi.nasa.gov/"],
+      ["LOLA terrain", "5 m per pixel", "South-pole elevation maps from NASA GSFC PGDA product 78 (Barker et al. 2021) for the landing site.", "https://pgda.gsfc.nasa.gov/products/78"],
+      ["CGI Moon Kit", "LROC color · LOLA relief", "NASA SVS textures for the 3D Moon.", "https://svs.gsfc.nasa.gov/4720"],
+      ["JPL Horizons", "Sun and Earth every 3 h", "Where the Sun and Earth sit in the sky of the base, November 2026 to November 2027.", "https://ssd.jpl.nasa.gov/horizons/"],
+      ["NASA reports", "BASS-II summary · exploration atmospheres", "Flammability boundary (NASA/TM-20210011385) and the exploration habitat atmosphere.", "https://ntrs.nasa.gov/"],
+    ].map(([k, n, d, u]) => `<a class="mth-s" href="${u}" target="_blank" rel="noopener"><b>${k}</b><span>${esc(n)}</span><small>${esc(d)}</small></a>`).join("");
+    $("#mth-solid").textContent = D.solids.max_o2_any_solid_pct;
+    const toc = [...document.querySelectorAll("#mth-toc a")];
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) toc.forEach((a) => a.classList.toggle("is-on", a.getAttribute("href").endsWith(e.target.id))); }), { rootMargin: "-40% 0px -55% 0px" });
+      document.querySelectorAll(".mth-step").forEach((x) => io.observe(x));
+    }
     $("#built").innerHTML = `Pipeline run ${esc(D.generated)}<br>Python · pandas · scikit-learn · Plotly`;
   }
 
@@ -1641,6 +1656,120 @@
     document.querySelectorAll(".xp-ch").forEach((c) => rail.observe(c));
   }
 
+  const RC = D.records;
+  const DSTATE = [["All", "All"], ["S", "Solids"], ["L", "Liquids"], ["G", "Gases"], ["M", "Smoke & dust"]];
+  const DCOL = { S: C.orange, L: C.blue, G: C.violet, M: C.teal };
+  const OUTS = [["1", "Went out on its own", C.blue], ["0", "Kept burning", C.orange], ["u", "No outcome label", C.ink4]];
+  const BANDS = [[0, 0.16, "<16%"], [0.16, 0.19, "16–19%"], [0.19, 0.22, "19–22%"], [0.22, 0.26, "22–26%"], [0.26, 0.30, "26–30%"], [0.30, 0.40, "30–40%"], [0.40, 1.01, "≥40%"]];
+  const dash = { state: "All", exp: new Set(), out: new Set(), band: null, box: null, moon: false };
+  const rec = (r) => ({ exp: RC.experiments[r[0]], st: r[1], o2: r[2], p: r[3], assumed: !!r[4], out: r[5] == null ? "u" : String(r[5]), fuel: RC.fuels[r[6]], co2: r[7] });
+  const RECS = RC ? RC.rows.map(rec) : [];
+  const MOON = RC ? { o2: RC.moon_envelope.x_o2_min, p: RC.moon_envelope.p_atm_max } : { o2: 0.28, p: 0.744 };
+  function dashPass(r, skip) {
+    if (skip !== "state" && dash.state !== "All" && r.st !== dash.state) return false;
+    if (skip !== "exp" && dash.exp.size && !dash.exp.has(r.exp)) return false;
+    if (skip !== "out" && dash.out.size && !dash.out.has(r.out)) return false;
+    if (skip !== "band" && dash.band != null) { const b = BANDS[dash.band]; if (r.o2 == null || r.o2 < b[0] || r.o2 >= b[1]) return false; }
+    if (skip !== "box" && dash.box) { const [x0, x1, y0, y1] = dash.box; if (r.o2 == null || r.p == null || 100 * r.o2 < x0 || 100 * r.o2 > x1 || r.p < y0 || r.p > y1) return false; }
+    if (skip !== "moon" && dash.moon && !(r.o2 != null && r.p != null && r.o2 >= MOON.o2 && r.p <= MOON.p)) return false;
+    return true;
+  }
+  function renderDash() {
+    if (!RC) { $("#dash").hidden = true; return; }
+    $("#dash-state").innerHTML = DSTATE.map(([k, l]) => `<button type="button" data-s="${k}" aria-pressed="${dash.state === k}">${l} <small>${k === "All" ? RECS.length.toLocaleString("en-US") : RECS.filter((r) => r.st === k).length.toLocaleString("en-US")}</small></button>`).join("");
+    document.querySelectorAll("#dash-state button").forEach((b) => b.addEventListener("click", () => { dash.state = b.dataset.s; dash.exp.clear(); renderDash(); }));
+    $("#dash-quick").innerHTML = `<button type="button" class="chip" id="dash-moon" aria-pressed="${dash.moon}">Only Moon-base air</button>`;
+    $("#dash-moon").addEventListener("click", () => { dash.moon = !dash.moon; renderDash(); });
+    const F = RECS.filter((r) => dashPass(r));
+    const pills = [];
+    if (dash.state !== "All") pills.push(["state", DSTATE.find((s) => s[0] === dash.state)[1]]);
+    dash.exp.forEach((e) => pills.push(["exp:" + e, e]));
+    dash.out.forEach((o) => pills.push(["out:" + o, OUTS.find((x) => x[0] === o)[1]]));
+    if (dash.band != null) pills.push(["band", `O₂ ${BANDS[dash.band][2]}`]);
+    if (dash.box) pills.push(["box", `O₂ ${dash.box[0].toFixed(0)}–${dash.box[1].toFixed(0)}% · ${dash.box[2].toFixed(2)}–${dash.box[3].toFixed(2)} atm`]);
+    if (dash.moon) pills.push(["moon", "Moon-base air"]);
+    $("#dash-active").innerHTML = pills.length ? `<span class="label">Filters</span>${pills.map(([k, l]) => `<button type="button" class="pill" data-k="${esc(k)}">${esc(l)} ✕</button>`).join("")}` : `<span class="note">No filter yet: showing all ${RECS.length.toLocaleString("en-US")} records.</span>`;
+    document.querySelectorAll("#dash-active .pill").forEach((b) => b.addEventListener("click", () => {
+      const k = b.dataset.k;
+      if (k === "state") dash.state = "All"; else if (k.startsWith("exp:")) dash.exp.delete(k.slice(4)); else if (k.startsWith("out:")) dash.out.delete(k.slice(4));
+      else if (k === "band") dash.band = null; else if (k === "box") dash.box = null; else if (k === "moon") dash.moon = false;
+      renderDash();
+    }));
+    const lab = F.filter((r) => r.out !== "u"), outN = lab.filter((r) => r.out === "1").length;
+    const meas = F.filter((r) => r.o2 != null && r.p != null && !r.assumed);
+    const moonN = F.filter((r) => r.o2 != null && r.p != null && r.o2 >= MOON.o2 && r.p <= MOON.p).length;
+    const o2s = F.filter((r) => r.o2 != null).map((r) => r.o2).sort((a, b) => a - b);
+    const kp = [
+      [F.length.toLocaleString("en-US"), "records match"],
+      [new Set(F.map((r) => r.exp)).size, "investigations"],
+      [lab.length ? pct(outN / lab.length) : "—", `went out on its own (${outN} of ${lab.length} labelled)`],
+      [o2s.length ? `${(100 * o2s[0]).toFixed(0)}–${(100 * o2s[o2s.length - 1]).toFixed(0)}%` : "—", "oxygen range covered"],
+      [moonN, "inside the Moon-base envelope"],
+      [meas.length.toLocaleString("en-US"), "with measured O₂ and pressure"],
+    ];
+    $("#dash-kpis").innerHTML = kp.map(([v, l]) => `<div><dd>${v}</dd><dt>${l}</dt></div>`).join("");
+    if (!hasPlotly) return;
+    const bandBase = RECS.filter((r) => dashPass(r, "band"));
+    const bc = BANDS.map((b) => bandBase.filter((r) => r.o2 != null && r.o2 >= b[0] && r.o2 < b[1]));
+    const el1 = plot("dash-o2", [{
+      type: "bar", x: BANDS.map((b) => b[2]), y: bc.map((x) => x.length), customdata: BANDS.map((_, i) => i),
+      marker: { color: BANDS.map((_, i) => dash.band == null || dash.band === i ? (i >= 5 ? C.orange : C.blue) : "rgba(148,163,184,.25)") },
+      hovertemplate: "%{x} O₂: %{y} records<extra></extra>", text: bc.map((x) => x.length), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 11 },
+    }], layout({ margin: { l: 40, r: 10, t: 18, b: 36 }, yaxis: { title: { text: "Records" } }, bargap: 0.25 }));
+    const outBase = RECS.filter((r) => dashPass(r, "out"));
+    const el2 = plot("dash-out", [{
+      type: "bar", orientation: "h", y: OUTS.map((o) => o[1]), x: OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), customdata: OUTS.map((o) => o[0]),
+      marker: { color: OUTS.map((o) => !dash.out.size || dash.out.has(o[0]) ? o[2] : "rgba(148,163,184,.25)") },
+      text: OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 11 },
+      hovertemplate: "%{y}: %{x} records<extra></extra>",
+    }], layout({ margin: { l: 150, r: 40, t: 10, b: 30 }, yaxis: { autorange: "reversed" }, bargap: 0.35 }));
+    const expBase = RECS.filter((r) => dashPass(r, "exp"));
+    const ex = [...new Set(expBase.map((r) => r.exp))].map((e) => ({ e, n: expBase.filter((r) => r.exp === e).length, st: expBase.find((r) => r.exp === e).st })).sort((a, b) => b.n - a.n);
+    const el3 = plot("dash-exp", [{
+      type: "bar", orientation: "h", y: ex.map((x) => x.e), x: ex.map((x) => x.n), customdata: ex.map((x) => x.e),
+      marker: { color: ex.map((x) => !dash.exp.size || dash.exp.has(x.e) ? DCOL[x.st] : "rgba(148,163,184,.25)") },
+      text: ex.map((x) => x.n), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 10.5 },
+      hovertemplate: "%{y} (" + "%{customdata}" + "): %{x} records<extra></extra>",
+    }], layout({ margin: { l: 130, r: 40, t: 6, b: 24 }, yaxis: { autorange: "reversed", tickfont: { size: 10.5 } }, bargap: 0.3, height: Math.max(150, 24 * ex.length + 44) }));
+    const mapBase = RECS.filter((r) => dashPass(r, "box") && r.o2 != null && r.p != null);
+    const tr = [];
+    const moonH = D.habitats.find((x) => x.id === "moon_base");
+    tr.push({ x: [30, 100, 100, 30, 30], y: [0.2, 0.2, moonH.p_atm, moonH.p_atm, 0.2], type: "scatter", mode: "lines", fill: "toself", fillcolor: "rgba(242,96,15,0.10)", line: { color: "rgba(251,146,60,0.6)", width: 1 }, hoverinfo: "skip" });
+    ["S", "L", "G", "M"].forEach((k) => {
+      const pts = mapBase.filter((r) => r.st === k);
+      if (!pts.length) return;
+      tr.push({ type: "scattergl", mode: "markers", x: pts.map((r) => 100 * r.o2), y: pts.map((r) => r.p), name: DSTATE.find((s) => s[0] === k)[1],
+        text: pts.map((r) => `${r.exp} · ${r.fuel}`),
+        marker: { size: 6, color: pts.map((r) => r.assumed ? "rgba(0,0,0,0)" : DCOL[k]), line: { color: DCOL[k], width: 1 }, opacity: 0.8 },
+        hovertemplate: "%{text}<br>O₂ %{x:.1f}% · %{y:.2f} atm<extra></extra>" });
+    });
+    tr.push({ type: "scatter", mode: "markers+text", x: HUI.map((h) => 100 * h.x_o2), y: HUI.map((h) => h.p_atm), text: HUI.map((h) => h.name), textposition: "top right", textfont: { color: C.ink, size: 10.5 },
+      marker: { symbol: "cross-thin-open", size: 14, color: C.ink, line: { color: C.ink, width: 2 } }, hovertemplate: "%{text}<extra></extra>" });
+    const el4 = plot("dash-map", tr, layout({ dragmode: "select", margin: { l: 56, r: 16, t: 10, b: 46 }, xaxis: { title: { text: "Oxygen, % of the air" }, range: [8, 90] }, yaxis: { title: { text: "Pressure, atm" }, type: "log", range: [Math.log10(0.3), Math.log10(4)] },
+      shapes: dash.box ? [{ type: "rect", x0: dash.box[0], x1: dash.box[1], y0: dash.box[2], y1: dash.box[3], line: { color: C.amber, width: 1.5, dash: "dot" }, fillcolor: "rgba(251,191,36,.06)" }] : [] }));
+    const wire = (el, fn) => { if (!el || !el.on) return; el.removeAllListeners && el.removeAllListeners("plotly_click"); el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p) fn(p); }); };
+    wire(el1, (p) => { dash.band = dash.band === p.customdata ? null : p.customdata; renderDash(); });
+    wire(el2, (p) => { const k = p.customdata; dash.out.has(k) ? dash.out.delete(k) : dash.out.add(k); renderDash(); });
+    wire(el3, (p) => { const k = p.customdata; dash.exp.has(k) ? dash.exp.delete(k) : dash.exp.add(k); renderDash(); });
+    if (el4 && el4.on) {
+      el4.removeAllListeners && el4.removeAllListeners("plotly_selected");
+      el4.on("plotly_selected", (ev) => {
+        if (!ev || !ev.range) return;
+        const [x0, x1] = ev.range.x, [ly0, ly1] = ev.range.y;
+        dash.box = [x0, x1, Math.pow(10, Math.min(ly0, ly1)), Math.pow(10, Math.max(ly0, ly1))];
+        renderDash();
+      });
+    }
+    $("#dash-tbl-cap").textContent = `${F.length.toLocaleString("en-US")} records · first ${Math.min(12, F.length)} shown`;
+    $("#dash-table").innerHTML = `<thead><tr><th>Investigation</th><th>Fuel or material</th><th class="num">O₂</th><th class="num">atm</th><th>Outcome</th></tr></thead><tbody>${F.slice(0, 12).map((r) => `<tr><td>${esc(r.exp)}</td><td>${esc(r.fuel)}</td><td class="num">${r.o2 == null ? "—" : (100 * r.o2).toFixed(1) + "%"}${r.assumed ? "*" : ""}</td><td class="num">${r.p == null ? "—" : r.p.toFixed(2)}</td><td>${esc(OUTS.find((o) => o[0] === r.out)[1])}</td></tr>`).join("")}</tbody>`;
+    $("#dash-csv").onclick = () => {
+      const rows = [["investigation", "psi_id", "state", "fuel_or_material", "x_o2", "p_atm", "x_co2", "conditions_assumed", "went_out_on_its_own"]].concat(F.map((r) => [r.exp, RC.psi[r.exp], r.st, r.fuel, r.o2 ?? "", r.p ?? "", r.co2 ?? "", r.assumed ? 1 : 0, r.out === "u" ? "" : r.out]));
+      const blob = new Blob([rows.map((r) => r.map((v) => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v).join(",")).join("\n")], { type: "text/csv" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "skylab_phoenix_filtered_records.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
+  }
+  $("#dash-reset") && $("#dash-reset").addEventListener("click", () => { dash.state = "All"; dash.exp.clear(); dash.out.clear(); dash.band = null; dash.box = null; dash.moon = false; renderDash(); });
+
   function renderBaseReport() {
     $("#mb-legend").innerHTML = Object.keys(TAG).map((t) => `<span>${tagHtml(t)} ${esc(TAG[t][1])}</span>`).join("");
     $("#mb-matrix").innerHTML = `<thead><tr><th>Module</th>${LAYERS.map(([, n]) => `<th>${n}</th>`).join("")}<th>Lunar gravity</th></tr></thead><tbody>${MB.modules.map((m) => `
@@ -1668,7 +1797,7 @@
     ].map(([k, t, u]) => `<li><b>${k}</b><span>${esc(t)}</span>${u ? `<a href="${u}" ${u.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${u.startsWith("http") ? "Open ↗" : "See"}</a>` : ""}</li>`).join("");
   }
   const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
-  const ALIAS = { base: "learn", scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
+  const ALIAS = { method: "data", base: "learn", scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
@@ -1676,7 +1805,7 @@
     learn: () => { safe(initLearn, "learn"); safe(initXP, "learn experience"); },
     flames: () => { safe(renderStage, "stage"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
-    findings: () => { if (MB) safe(renderBaseReport, "base audit"); safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
+    findings: () => { safe(renderDash, "dashboard"); if (MB) safe(renderBaseReport, "base audit"); safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
     ranking: () => { safe(renderSurvival, "survival"); safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
     ask: () => { safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing"); },
