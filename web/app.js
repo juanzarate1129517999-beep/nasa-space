@@ -1514,6 +1514,91 @@
     vids.forEach((v) => io.observe(v));
   }
 
+  // Home: featured flight flames and the investigations behind them.
+  const REEL = [
+    { f: "bass2-rod-22", psi: "PSI-25", test: "O1", o2: 22.2, x: 6.6, state: "Solid", t: "A plastic rod in station air", cap: "A quarter-inch acrylic rod burns in the station's glovebox. With no up or down, the flame wraps around the tip, bright and sooty, and changes shape each time the crew turns the airflow down." },
+    { f: "bass2-rod-15", psi: "PSI-25", test: "O17", o2: 15.1, x: 2.2, state: "Solid", t: "Still burning at 15% oxygen", cap: "The same rod with far less oxygen: small, dim and blue, and still alight. On Earth, the standard upward test says this material stops burning below about 15.4% O₂." },
+    { f: "cfig-butane-39", psi: "PSI-159", test: "21102 B1", o2: 39.1, x: 4.5, state: "Gas", t: "A sphere of fire at 39% oxygen", cap: "Butane seeps out of a porous ball and burns as an almost perfect sphere. In this oxygen-rich air the flame lasted 38 seconds before it went out on its own." },
+    { f: "more/sflame-20029j1", psi: "PSI-23", test: "20029 J1", o2: 21, approx: true, x: 1.6, state: "Gas", t: "A flame that stays round", cap: "Ethylene mixed with nitrogen feeds a flame around a porous sphere. On Earth hot gas rises and stretches a flame into a teardrop; in orbit nothing rises, so it stays round." },
+    { f: "more/flex-f208d02", psi: "PSI-39", test: "F208D02", o2: 21, x: 8.2, state: "Liquid", t: "A burning fuel droplet", cap: "A single droplet of dodecane fuel, held on thin fibers at three quarters of normal pressure. Spilled liquid in orbit breaks into droplets like this one, and each burns inside its own spherical flame." },
+    { f: "more/spice-62-1141", psi: "PSI-107", test: "GMT 62 11:41", o2: 21, approx: true, x: 1.3, state: "Gas", t: "A jet flame with no draft", cap: "Gas from a nozzle burns as a long, smooth flame. SPICE raised the flow until each flame began to give off smoke: that smoke point tells engineers how sooty a fuel will be." },
+  ];
+  const REEL_INV = [["PSI-25", "bass2/b12"], ["PSI-159", "cfig/cfig-21209a1"], ["PSI-39", "more/flex-f173e06"], ["PSI-23", "more/sflame-20029j1"], ["PSI-107", "more/spice-62-1116"]];
+  const reel = { i: 0, auto: !matchMedia("(prefers-reduced-motion: reduce)").matches, vis: false, user: false };
+  function renderReel() {
+    const CL = window.CLIPS || [];
+    const invOf = (id) => INV.find((r) => r.psi_id === id) || { name: id, title: "", n_tests: 0 };
+    const clipPsi = (c) => c.psi || (c.dir === "bass2" ? "PSI-25" : "");
+    $("#reel-all").textContent = `All ${CL.length} flight clips →`;
+    $("#reel-main").classList.toggle("is-auto", reel.auto);
+    $("#reel-list").innerHTML = REEL.map((c, i) => `<li><button type="button" class="reel__it" data-i="${i}" aria-pressed="${i === reel.i}">
+      <span class="reel__th"><img src="assets/video/${c.f}.jpg" alt="" loading="lazy"></span>
+      <span class="reel__tx"><span class="reel__n"><span>${String(i + 1).padStart(2, "0")}</span> <span data-no-i18n>${esc(invOf(c.psi).name)}</span></span><b>${esc(c.t)}</b><span class="reel__m">${c.approx ? "≈" : ""}${c.o2}% O₂ · ×${c.x}</span></span>
+      <i class="reel__bar" aria-hidden="true"></i></button></li>`).join("");
+    document.querySelectorAll(".reel__it").forEach((b) => b.addEventListener("click", () => { reel.user = true; reel.auto = false; $("#reel-main").classList.remove("is-auto"); showReel(+b.dataset.i); }));
+    document.querySelectorAll(".reel__bar").forEach((bar) => bar.addEventListener("animationend", () => { if (reel.auto) showReel((reel.i + 1) % REEL.length); }));
+    const v = $("#reel-v"), pp = $("#reel-pp");
+    pp.addEventListener("click", () => {
+      reel.user = true;
+      if (v.paused) { v.play().catch(() => {}); } else { v.pause(); reel.auto = false; $("#reel-main").classList.remove("is-auto"); }
+    });
+    const sync = () => { const p = v.paused; pp.setAttribute("aria-pressed", String(p)); pp.setAttribute("aria-label", p ? "Play video" : "Pause video"); pp.classList.toggle("is-paused", p); };
+    v.addEventListener("play", sync); v.addEventListener("pause", sync);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((es) => es.forEach((e) => {
+        reel.vis = e.isIntersecting;
+        $("#reel-main").classList.toggle("is-in", reel.vis);
+        if (reel.vis) { if (!v.getAttribute("src")) showReel(reel.i); else if (!reel.user || reel.auto) v.play().catch(() => {}); } else v.pause();
+      }), { threshold: 0.3 }).observe($("#reel-main"));
+    } else { reel.vis = true; showReel(0); }
+
+    const hab = "moon_base";
+    const order = [...INV].sort((a, b) => scoreOf(b, hab) - scoreOf(a, hab)).map((r) => r.psi_id);
+    const cards = REEL_INV.map(([id, f]) => ({ r: invOf(id), f, k: order.indexOf(id) + 1, n: CL.filter((c) => clipPsi(c) === id).length })).sort((a, b) => a.k - b.k);
+    const pct = (x) => Math.round(1000 * x) / 10;
+    $("#reel-inv").innerHTML = cards.map(({ r, f, k, n }) => `<a class="vi" href="#/ranking" data-inv="${r.psi_id}" aria-label="Open ${esc(r.name)}">
+      <span class="vi__v"><video data-src="assets/video/${f}.mp4" poster="assets/video/${f}.jpg" muted loop playsinline preload="none"></video>
+        <span class="ig__top"><span>${esc(r.family)}</span><span>${r.psi_id}</span></span>
+        <span class="vi__clips">${n} clips</span></span>
+      <span class="vi__body">
+        <span class="vi__hd"><b data-no-i18n>${esc(r.name)}</b><span class="vi__rk">#${k}<small>Moon base rank</small></span></span>
+        <span class="ig__t">${esc(r.title)}</span>
+        <span class="ig__meta"><span>${r.n_tests.toLocaleString("en-US")} records</span><span>${r.o2_min == null ? "" : r.o2_min === r.o2_max ? `${pct(r.o2_min)}% O₂` : `${pct(r.o2_min)}–${pct(r.o2_max)}% O₂`}</span></span>
+        <span class="ig__open">Open file →</span>
+      </span></a>`).join("") + `<a class="vi vi--more" href="#/ranking"><span class="vi__body"><span class="label">Ranking</span><b>All ${INV.length} investigations, ranked for your habitat.</b><span class="ig__t">Change the habitat or the weights and compare up to three side by side.</span><span class="ig__open">See the ranking →</span></span></a>`;
+    document.querySelectorAll("#reel-inv [data-inv]").forEach((a) => a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const id = a.dataset.inv;
+      go("ranking");
+      setTimeout(() => safe(() => openInv(id), "open investigation"), 120);
+    }));
+    lazyVideos("#reel-inv video");
+  }
+  function showReel(i) {
+    reel.i = i;
+    const c = REEL[i], r = INV.find((x) => x.psi_id === c.psi) || { name: c.psi, psi_url: "#" };
+    const v = $("#reel-v");
+    v.poster = `assets/video/${c.f}.jpg`;
+    v.src = `assets/video/${c.f}.mp4`;
+    v.playbackRate = 1;
+    if (reel.vis) v.play().catch(() => {});
+    $("#reel-tag").innerHTML = `<span data-no-i18n>ISS · ${esc(r.name)} · </span><span>×${c.x} speed</span>`;
+    const st = { Solid: "Solid", Liquid: "Liquid", Gas: "Gas" }[c.state];
+    $("#reel-info").innerHTML = `
+      <div class="reel__o2">${c.approx ? "≈" : ""}${c.o2}<small>% O₂</small></div>
+      <div class="reel__txt">
+        <p class="label"><span>${st}</span> · <span data-no-i18n>${esc(r.name)} · ${c.psi} · ${esc(c.test)}</span></p>
+        <h3>${esc(c.t)}</h3>
+        <p>${esc(c.cap)}</p>
+        <div class="reel__links"><a class="btn btn--fire btn--sm" href="#/ranking" data-inv="${c.psi}">Open the investigation <span aria-hidden="true">→</span></a><a class="btn btn--line btn--sm" href="${r.psi_url}" target="_blank" rel="noopener">NASA PSI ↗</a></div>
+      </div>`;
+    $("#reel-info [data-inv]").addEventListener("click", (e) => { e.preventDefault(); go("ranking"); setTimeout(() => safe(() => openInv(c.psi), "open investigation"), 120); });
+    document.querySelectorAll(".reel__it").forEach((b) => {
+      b.setAttribute("aria-pressed", String(+b.dataset.i === i));
+      const bar = b.querySelector(".reel__bar"); bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = "";
+    });
+  }
+
   const survState = { kind: "All", hab: "moon_base", all: false, view: "chart" };
   function renderSurvival() {
     const SV = D.survival || [];
@@ -1908,7 +1993,7 @@
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
-    home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(initGlobe, "globe"); },
+    home: () => { safe(renderHero, "hero"); safe(renderReel, "reel"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(initGlobe, "globe"); },
     learn: () => { safe(initLearn, "learn"); safe(initXP, "learn experience"); },
     flames: () => { safe(renderStage, "stage"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },

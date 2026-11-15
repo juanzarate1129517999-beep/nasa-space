@@ -60,6 +60,33 @@
       </div>
       <p class="space__note mono-sm">Earth, the ISS and NASA's satellite fleet move on today's orbital elements at 600× speed (NASA SVS Orbit Viewer data). Moon: LRO. Mars: Viking. Not to scale · drag to turn · hover a satellite · select a body</p>
     </div>
+    <section class="sec sec--reel" id="reel">
+      <div class="wrap">
+        <header class="sec__head sec__head--row rv">
+          <div>
+            <p class="eyebrow">Watch first · real flight video</p>
+            <h2>Fire as NASA filmed it in orbit. <span class="mute">Six flames worth seeing, and the investigations that lit them.</span></h2>
+          </div>
+          <a class="btn btn--line" href="#/flames" id="reel-all">Every flight clip →</a>
+        </header>
+        <div class="reel rv" id="reel-main">
+          <div class="reel__stage">
+            <div class="reel__v">
+              <video id="reel-v" muted loop playsinline preload="none"></video>
+              <span class="stage__tag" id="reel-tag"></span>
+              <button class="reel__pp" id="reel-pp" type="button" aria-label="Pause video" aria-pressed="false"><span aria-hidden="true"></span></button>
+            </div>
+            <div class="reel__info" id="reel-info" aria-live="polite"></div>
+          </div>
+          <ol class="reel__list" id="reel-list" aria-label="Featured flames"></ol>
+        </div>
+        <div class="arch-head">
+          <h3 class="sub-h">The investigations behind the video.</h3>
+          <span class="mono-sm">Ranked for the Moon base · open any card for its full file</span>
+        </div>
+        <div class="vinv" id="reel-inv"></div>
+      </div>
+    </section>
     <section class="sec">
       <div class="wrap">
         <header class="sec__head rv">
