@@ -237,6 +237,7 @@
     }
     window.addEventListener("resize", resize);
     resize();
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(host);
 
     function occluded(p) {
       const o = camera.position, d = p.clone().sub(o), L = d.length();
@@ -315,7 +316,7 @@
     return {
       select, reset,
       pause() { running = false; },
-      resume() { if (!running) { running = true; lastT = performance.now(); resize(); requestAnimationFrame(frame); } },
+      resume() { resize(); if (!running) { running = true; lastT = performance.now(); resize(); requestAnimationFrame(frame); } },
       resize,
     };
   }

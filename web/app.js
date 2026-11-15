@@ -141,12 +141,50 @@
     document.querySelectorAll("#cov-filters .chip").forEach((b) => b.addEventListener("click", () => {
       covState[b.dataset.f] = !covState[b.dataset.f];
       b.setAttribute("aria-pressed", covState[b.dataset.f]);
-      renderCoverage();
+      renderCovMode();
     }));
     $("#cov-legend").innerHTML = [
       legendItem("circle", C.ink2, "Measured conditions"), legendItem("circle", C.ink2, "Assumed cabin air", true),
       legendItem("cross", C.ink, "Habitat atmosphere"), legendItem("bar", "rgba(242,96,15,.35)", "Lunar-base envelope (challenge brief)"),
     ].join("");
+  }
+  const covMode = { m: "simple" };
+  function nearByFamily(hb) {
+    const out = { solido: 0, gota: 0, gas: 0, humo: 0 };
+    for (const g of D.coverage.groups) {
+      const fam = g.family === "polvo" ? "humo" : g.family;
+      for (let k = 0; k < g.x_o2.length; k++) {
+        const o = g.x_o2[k], pp = g.p_atm[k];
+        if (o == null || pp == null) continue;
+        if (Math.abs(o - hb.x_o2) <= 0.03 && Math.abs(Math.log(pp / hb.p_atm)) <= Math.log(1.3)) out[fam]++;
+      }
+    }
+    return out;
+  }
+  function renderCovSimple() {
+    const fams = ["solido", "gota", "gas", "humo"].filter((f) => covState[f]);
+    const rows = D.habitats.map((h) => { const c = nearByFamily(h); return { h, c, n: fams.reduce((s, f) => s + c[f], 0) }; });
+    const max = Math.max(1, ...rows.map((r) => r.n));
+    const cab = rows.find((r) => r.h.id === "cabin"), moon = rows.find((r) => r.h.id === "moon_base");
+    const ratio = moon.n ? Math.round(cab.n / moon.n) : null;
+    const air = (h) => `<span class="cvs__air"><i style="--o:${Math.min(100, 100 * h.x_o2)}%"></i>${o2pct(h.x_o2)} O₂</span><span class="cvs__air cvs__air--p"><i style="--o:${Math.min(100, 100 * h.p_atm)}%"></i>${num(h.p_atm * ATM_PSI, 1)} psi</span>`;
+    $("#cov-simple").innerHTML = `
+      <div class="cvs__head"><p class="cvs__big">${ratio ? `<b>${ratio}×</b> more flight tests in today's cabin air than in Moon-base air.` : `No flight tests near Moon-base air.`}</p>
+      <p class="sub">A test counts as “near” when its oxygen is within 3 points and its pressure within 30% of that air. Colors show what was burning.</p></div>
+      <div class="cvs">${rows.map((r) => `
+        <div class="cvs__r${r.h.id === "moon_base" ? " is-key" : ""}">
+          <div class="cvs__n"><b>${esc(r.h.name)}</b><span>${esc(r.h.detail || "")}</span><span class="cvs__airs">${air(r.h)}</span></div>
+          <div class="cvs__track">${fams.map((f) => r.c[f] ? `<i style="width:${(100 * r.c[f]) / max}%;background:${FAMILY[f].color}" title="${esc(FAMILY[f].name)}: ${r.c[f]}"></i>` : "").join("")}${r.n === 0 ? '<span class="cvs__zero">no flight test in this air</span>' : ""}</div>
+          <div class="cvs__v"><b>${r.n.toLocaleString("en-US")}</b><small>tests</small></div>
+        </div>`).join("")}</div>
+      <div class="legend">${fams.map((f) => legendItem("bar", FAMILY[f].color, FAMILY[f].name)).join("")}</div>
+      <p class="note">The bars for oxygen and pressure under each name compare that air with pure oxygen and with sea-level pressure. Switch to the full map to see every test as a dot.</p>`;
+  }
+  function renderCovMode() {
+    $("#cov-mode").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.m === covMode.m)));
+    $("#cov-simple").hidden = covMode.m !== "simple";
+    $("#cov-map").hidden = covMode.m !== "map";
+    if (covMode.m === "simple") renderCovSimple(); else { renderCoverage(); resizeIn($("#cov-map")); }
   }
   function renderCoverage() {
     const traces = [];
@@ -185,8 +223,8 @@
     const xt = [12, 15, 20, 25, 30, 40, 60, 85, 100];
     plot("cov-chart", traces, layout({
       margin: { l: 64, r: 20, t: 10, b: 54 },
-      xaxis: { type: "log", range: [Math.log10(10.5), Math.log10(108)], tickvals: xt, ticktext: xt.map((v) => v + "%"), title: { text: "Oxygen mole fraction (log scale)" } },
-      yaxis: { type: "log", range: [Math.log10(0.22), Math.log10(5.6)], tickvals: [0.25, 0.5, 0.7, 1, 2, 3, 5], title: { text: "Pressure, atm (log scale)" } },
+      xaxis: { type: "log", range: [Math.log10(10.5), Math.log10(108)], tickvals: xt, ticktext: xt.map((v) => v + "%"), title: { text: "Oxygen in the air → more" } },
+      yaxis: { type: "log", range: [Math.log10(0.22), Math.log10(5.6)], tickvals: [0.25, 0.5, 0.7, 1, 2, 3, 5], title: { text: "Air pressure, atm (1 = sea level)" } },
       annotations: [{ x: Math.log10(48), y: Math.log10(0.24), text: "LUNAR-BASE ENVELOPE · ≥30% O₂ · ≤10.2 psi", showarrow: false, font: { family: "Geist Mono, JetBrains Mono, monospace", size: 10, color: C.ink3 }, xanchor: "center" }, ...habNotes],
       hovermode: "closest",
     }));
@@ -256,103 +294,134 @@
   }
   function renderInvList() {
     const rows = filteredInv();
-    if (!invState.sel || !rows.find((r) => r.psi_id === invState.sel)) invState.sel = rows.length ? rows[0].psi_id : null;
-    $("#inv-list").innerHTML = rows.length ? rows.map((r, i) => {
-      const s = scoreOf(r, invState.hab), rb = robust[r.psi_id];
-      return `<button class="inv-row" role="option" aria-selected="${r.psi_id === invState.sel}" data-id="${r.psi_id}">
-        <span class="rk">${String(i + 1).padStart(2, "0")}</span>
-        <span><span class="nm">${esc(r.name)} <small>${r.psi_id}</small></span><span class="mt">${esc(r.family)} · ${r.type} · ${r.n_tests.toLocaleString("en-US")} records${r.n_with_outcome ? ` · ${r.n_with_outcome} labeled` : ""}</span></span>
-        <span class="score"><span class="n">${s.toFixed(1)}</span><span class="bar"><i style="width:${s}%"></i></span>${rb != null && rb >= 0.05 ? `<span class="rb" title="Share of 2,000 random weightings in which it stays in the top 3">top 3 in ${Math.round(100 * rb)}%</span>` : ""}</span></button>`;
-    }).join("") : '<p class="note" style="padding:18px">No investigation matches.</p>';
-    document.querySelectorAll(".inv-row").forEach((b) => b.addEventListener("click", () => selectInv(b.dataset.id)));
-    renderInvDetail();
-    renderInvGallery(rows);
-  }
-  const invMode = { m: "gallery" };
-  const POSTER = { "PSI-25": "assets/video/bass2-rod-22.jpg", "PSI-159": "assets/video/cfig-butane-39.jpg", "PSI-39": "assets/video/cfi-droplet.jpg" };
-  const ART = { "Solid materials": "solid", "Fuel droplets": "drop", "Gas flames": "gas", "Smoke & dust": "smoke" };
-  function renderInvGallery(rows) {
+    invState.rows = rows;
     $("#inv-mode").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.m === invMode.m)));
     $("#inv-gallery").hidden = invMode.m !== "gallery";
-    $("#inv-layout").hidden = invMode.m === "gallery";
-    $("#inv-count").textContent = `${rows.length} shown · flight video frame where NASA filmed it, illustration otherwise`;
-    if (invMode.m !== "gallery") return;
+    $("#inv-chart-wrap").hidden = invMode.m !== "chart";
+    $("#inv-count").textContent = invMode.m === "gallery" ? `${rows.length} shown · open any card for its full file` : `${rows.length} shown · click a bar to open its card`;
+    if (invMode.m === "gallery") renderInvGallery(rows); else safe(() => renderInvChart(rows), "investigation chart");
+  }
+  const invMode = { m: "gallery" };
+  const POSTER = { "PSI-25": "assets/video/bass2-rod-22.jpg", "PSI-159": "assets/video/cfig-butane-39.jpg", "PSI-39": "assets/video/more/flex-f208d02.jpg", "PSI-23": "assets/video/more/sflame-20029j1.jpg", "PSI-107": "assets/video/more/spice-62-1127.jpg" };
+  const ART = { "Solid materials": "solid", "Fuel droplets": "drop", "Gas flames": "gas", "Smoke & dust": "smoke" };
+  const CRIT = [["Atmosphere closeness", C.orange], ["Data volume", C.blue], ["Fire-safety directness", C.violet]];
+  const critVals = (r, h) => [r.relevance[h].proximity, volOf(r, h), r.relevance[h].directness];
+  const visOf = (r) => (POSTER[r.psi_id] ? `<img src="${POSTER[r.psi_id]}" alt="" loading="lazy"><span class="ig__src">Flight video</span>` : `<span class="ig__art ig__art--${ART[r.family] || "gas"}"></span>`);
+  function renderInvGallery(rows) {
     const hab = invState.hab;
     $("#inv-gallery").innerHTML = rows.map((r, i) => {
-      const s = scoreOf(r, hab), rel = r.relevance[hab];
-      const vis = POSTER[r.psi_id] ? `<img src="${POSTER[r.psi_id]}" alt="" loading="lazy"><span class="ig__src">Flight video</span>` : `<span class="ig__art ig__art--${ART[r.family] || "gas"}"></span>`;
-      return `<button type="button" class="ig${i < 3 ? " is-top" : ""}${r.type === "Ground" ? " is-ground" : ""}" data-id="${r.psi_id}">
-        <span class="ig__vis">${vis}<span class="ig__top"><span>${esc(r.family)}</span><span>#${i + 1} · ${r.psi_id}</span></span></span>
+      const s = scoreOf(r, hab), rel = r.relevance[hab], inCmp = cmpState.ids.includes(r.psi_id);
+      return `<article class="ig${i < 3 ? " is-top" : ""}${r.type === "Ground" ? " is-ground" : ""}" data-id="${r.psi_id}" tabindex="0" role="button" aria-label="Open ${esc(r.name)}">
+        <span class="ig__vis">${visOf(r)}<span class="ig__top"><span>${esc(r.family)}</span><span>#${i + 1} · ${r.psi_id}</span></span></span>
         <span class="ig__body"><b>${esc(r.name)}</b><span class="ig__t">${esc(r.title)}</span>
-          <span class="ig__rel"><span>Relevance</span><span class="ig__bar"><i style="width:${s}%"></i></span><span class="ig__n">${Math.round(s)}</span></span>
-          <span class="ig__meta"><span>${r.n_tests.toLocaleString("en-US")} records</span><span>${rel.n_near >= 1 ? `≈${Math.round(rel.n_near)} near your air` : "none near your air"}</span></span></span></button>`;
+          <span class="ig__rel"><span>Relevance</span><span class="ig__bar">${critVals(r, hab).map((v, k) => `<i style="width:${100 * wt.w[k] * v}%;background:${CRIT[k][1]}"></i>`).join("")}</span><span class="ig__n">${Math.round(s)}</span></span>
+          <span class="ig__meta"><span>${r.n_tests.toLocaleString("en-US")} records</span><span>${rel.n_near >= 1 ? `≈${Math.round(rel.n_near)} near your air` : "none near your air"}</span></span>
+          <span class="ig__act"><span class="ig__open">Open file →</span><button type="button" class="ig__cmp" data-cmp="${r.psi_id}" aria-pressed="${inCmp}">${inCmp ? "✓ In comparison" : "+ Compare"}</button></span></span></article>`;
     }).join("") || '<p class="note">No investigation matches.</p>';
-    document.querySelectorAll("#inv-gallery .ig").forEach((b) => b.addEventListener("click", () => {
-      invMode.m = "list"; invState.sel = b.dataset.id; renderInvList();
-      document.getElementById("inv-layout").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelectorAll("#inv-gallery .ig").forEach((b) => {
+      b.addEventListener("click", (e) => { if (e.target.closest(".ig__cmp")) return; openInv(b.dataset.id); });
+      b.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && !e.target.closest(".ig__cmp")) { e.preventDefault(); openInv(b.dataset.id); } });
+    });
+    document.querySelectorAll("#inv-gallery .ig__cmp").forEach((b) => b.addEventListener("click", () => { toggleCmp(b.dataset.cmp); renderInvGallery(invState.rows || rows); }));
+  }
+  function toggleCmp(id) {
+    if (cmpState.ids.includes(id)) cmpState.ids = cmpState.ids.map((x) => (x === id ? "" : x));
+    else { const k = cmpState.ids.indexOf(""); if (k >= 0) cmpState.ids[k] = id; else cmpState.ids = [...cmpState.ids.slice(1), id]; }
+    while (cmpState.ids.length < 3) cmpState.ids.push("");
+    safe(renderCompare, "compare");
+  }
+  function renderInvChart(rows) {
+    const hab = invState.hab, R = [...rows].reverse();
+    $("#inv-chart-legend").innerHTML = CRIT.map(([n, c], k) => legendItem("bar", c, `${n} · weight ${Math.round(100 * wt.w[k])}%`)).join("");
+    const lab = (r) => `${r.name}  #${rows.indexOf(r) + 1}`;
+    const traces = CRIT.map(([n, c], k) => ({
+      type: "bar", orientation: "h", name: n, y: R.map(lab), x: R.map((r) => 100 * wt.w[k] * critVals(r, hab)[k]), customdata: R.map((r) => r.psi_id),
+      marker: { color: R.map((r) => (rows.indexOf(r) < 3 ? c : c + "aa")), line: { width: 0 } },
+      hovertemplate: `<b>%{y}</b><br>${n}: %{x:.1f} points<extra></extra>`,
     }));
+    traces.push({ type: "scatter", mode: "text", y: R.map(lab), x: R.map((r) => scoreOf(r, hab) + 2.5), text: R.map((r) => scoreOf(r, hab).toFixed(0)), textposition: "middle right", textfont: { family: "Geist Mono, monospace", size: 11, color: C.ink2 }, hoverinfo: "skip", showlegend: false });
+    plot("inv-chart", traces, layout({ barmode: "stack", height: Math.max(320, 28 * R.length + 70), margin: { l: 150, r: 30, t: 6, b: 40 }, showlegend: false, bargap: 0.28,
+      xaxis: { range: [0, 100], title: { text: "Relevance score (0–100)" } }, yaxis: { type: "category", tickfont: { size: 12, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" } }));
+    const el = $("#inv-chart");
+    if (el.removeAllListeners) el.removeAllListeners("plotly_click");
+    el.on && el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p && p.customdata) openInv(p.customdata); });
   }
-  function selectInv(id) {
-    invState.sel = id;
-    document.querySelectorAll(".inv-row").forEach((b) => b.setAttribute("aria-selected", b.dataset.id === id));
-    renderInvDetail();
+  function airStrip(lo, hi, kind, color = C.orange) {
+    const hab = D.habitats;
+    const pos = kind === "o2" ? (v) => Math.max(0, Math.min(100, ((v - 0.1) / 0.9) * 100)) : (v) => Math.max(0, Math.min(100, ((Math.log(v) - Math.log(0.2)) / (Math.log(5.5) - Math.log(0.2))) * 100));
+    const band = lo == null ? "" : `<i class="as__band" style="left:${pos(lo)}%;width:${Math.max(1.2, pos(hi) - pos(lo))}%;background:${color}"></i>`;
+    const ticks = hab.filter((h) => kind === "o2" || h.p_atm >= 0.2).map((h) => `<span class="as__h${h.id === invState.hab ? " is-on" : ""}" style="left:${pos(kind === "o2" ? h.x_o2 : h.p_atm)}%" title="${esc(h.name)}"></span>`).join("");
+    const ends = kind === "o2" ? ["10%", "100% O₂"] : ["0.2", "5 atm"];
+    return `<div class="as"><div class="as__t">${band}${ticks}</div><div class="as__e"><span>${ends[0]}</span><span>${ends[1]}</span></div></div>`;
   }
-  function vfRows(items, max = 7) {
-    if (!items.length) return '<p class="note">—</p>';
-    const more = items.length > max ? `<p class="note">+${items.length - max} more</p>` : "";
-    return `<div class="vf">${items.slice(0, max).map((x) => `<div class="row"><span class="k">${esc(x.variable)}</span><span class="v">${esc(x.values)}</span></div>`).join("")}</div>${more}`;
-  }
-  function renderInvDetail() {
-    const r = INV.find((x) => x.psi_id === invState.sel);
-    const el = $("#inv-detail");
-    if (!r) { el.innerHTML = '<p class="note">Select an investigation.</p>'; return; }
-    const rel = r.relevance[invState.hab];
-    const bar = (v) => `<span class="bar"><i style="width:${100 * v}%"></i></span>`;
-    const cond = r.o2_min != null
-      ? `${pct(r.o2_min, 1)}–${pct(r.o2_max, 1)} O₂ · ${num(r.p_min)}–${num(r.p_max)} atm${r.conditions_assumed ? " (cabin air assumed)" : ""}`
-      : "Not reported per test";
-    const tables = r.tables.map((t) => `
-      <div class="label">${esc(t.table)} · ${t.rows} rows</div>
-      <div class="pair">
-        <div><div class="k-head">What varied</div>${vfRows(t.varied)}</div>
-        <div><div class="k-head">What was measured</div>${vfRows(t.measured)}</div>
+  function openInv(id) {
+    const rows = invState.rows || filteredInv();
+    const r = INV.find((x) => x.psi_id === id);
+    if (!r) return;
+    const hab = invState.hab, rel = r.relevance[hab], i = rows.findIndex((x) => x.psi_id === id), rb = robust[r.psi_id];
+    const vals = critVals(r, hab), s = scoreOf(r, hab), inCmp = cmpState.ids.includes(r.psi_id);
+    const vary = [...new Set(r.tables.flatMap((t) => t.varied.map((v) => v.variable)))], meas = [...new Set(r.tables.flatMap((t) => t.measured.map((v) => v.variable)))];
+    const chips = (xs, n = 10) => (xs.length ? `<div class="chips">${xs.slice(0, n).map((x) => `<span>${esc(x)}</span>`).join("")}${xs.length > n ? `<span class="more">+${xs.length - n}</span>` : ""}</div>` : '<p class="note">Not in a PSI table.</p>');
+    const pubs = r.publications.length ? `<div class="pubs">${r.publications.slice(0, 3).map((p) => `<div>${p.doi ? `<a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}<small>${esc((p.authors || "").split(",").slice(0, 3).join(","))}${(p.authors || "").split(",").length > 3 ? " et al." : ""}</small></div>`).join("")}</div>` : '<p class="note">No publications listed in PSI.</p>';
+    const prev = i > 0 ? rows[i - 1] : null, next = i >= 0 && i < rows.length - 1 ? rows[i + 1] : null;
+    $("#inv-modal-body").innerHTML = `
+      <button class="modal__x" type="button" data-close aria-label="Close">✕</button>
+      <header class="im__hero">
+        <div class="im__vis">${visOf(r)}</div>
+        <div class="im__head">
+          <div class="tags">${r.layers.map((l) => `<span class="tag solid layer-${l}">${l}</span>`).join("")}<span class="tag">${r.type}</span><span class="tag">${esc(r.family)}</span></div>
+          <h3 id="im-title">${esc(r.name)} <small>${r.psi_id}</small></h3>
+          <p class="im__ttl">${esc(r.title)}</p>
+          <div class="im__rank"><span class="im__pos">#${i + 1}<small>of ${rows.length}</small></span><span><small>Ranked for</small><br><b>${esc(habName(hab))}</b><br><small>${rb != null ? `top 3 in ${Math.round(100 * rb)}% of 2,000 random weightings` : ""}</small></span></div>
+        </div>
+      </header>
+      <div class="im__stats">
+        <div><b>${r.n_tests.toLocaleString("en-US")}</b><span>test records</span></div>
+        <div><b>${r.n_with_outcome}</b><span>with a labeled outcome</span></div>
+        <div><b>${rel.n_near >= 1 ? `≈${Math.round(rel.n_near)}` : "0"}</b><span>near ${esc(habName(hab))} air</span></div>
+        <div><b>${r.n_publications}</b><span>publications in PSI</span></div>
       </div>
-      ${t.fixed.length ? `<div class="note"><b>Held fixed:</b> ${t.fixed.slice(0, 6).map((x) => `${esc(x.variable)} = ${esc(x.values)}`).join(" · ")}</div>` : ""}`).join("");
-    const pubs = r.publications.length ? `<div class="label">Publications · ${r.n_publications} listed in PSI</div><div class="pubs">${r.publications.slice(0, 3).map((p) => `<div>${p.doi ? `<a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">${esc(p.title)}</a>` : esc(p.title)}<small>${esc((p.authors || "").split(",").slice(0, 3).join(","))}${(p.authors || "").split(",").length > 3 ? " et al." : ""}</small></div>`).join("")}</div>` : "";
-    el.innerHTML = `
-      <div class="tags">${r.layers.map((l) => `<span class="tag solid layer-${l}">${l}</span>`).join("")}<span class="tag">${r.type}</span><span class="tag">${esc(r.family)}</span></div>
-      <h3>${esc(r.name)}<small>${r.psi_id}</small></h3>
-      <div class="ttl">${esc(r.title)}</div>
-      ${SI && SI.investigation[r.psi_id] ? `<div class="si-sum">${badge(SI.investigation[r.psi_id])}<p>${sentencesHtml(SI.investigation[r.psi_id], "inv")}</p>${evidenceHtml(SI.investigation[r.psi_id], "inv")}</div>` : ""}
-      <div class="label">Objective · NASA PSI text</div>
-      <p class="obj">${esc(r.objective || "No objective text in PSI metadata.")}</p>
-      <div class="meta">
-        <div><span>Science team</span><b>${esc(r.pi || "—")}</b></div>
-        <div><span>Platform</span><b>${esc(r.platform)}</b></div>
-        <div><span>Hardware</span><b>${esc(r.hardware)}</b></div>
-        <div><span>Conditions tested</span><b>${cond}</b></div>
+      <div class="im__grid">
+        <section>
+          <p class="label">Why it ranks here · ${s.toFixed(1)} / 100</p>
+          <div class="im__score">${vals.map((v, k) => `<i style="width:${100 * wt.w[k] * v}%;background:${CRIT[k][1]}"></i>`).join("")}</div>
+          <div class="im__crit">${vals.map((v, k) => `<div><span class="dot" style="background:${CRIT[k][1]}"></span><span>${CRIT[k][0]}</span><span class="im__cb"><i style="width:${100 * v}%;background:${CRIT[k][1]}"></i></span><b>${v.toFixed(2)}</b><small>× ${wt.w[k].toFixed(2)}</small></div>`).join("")}</div>
+          <p class="label" style="margin-top:22px">Air it tested · against crew atmospheres</p>
+          <div class="im__air"><span>Oxygen</span>${airStrip(r.o2_min, r.o2_max, "o2")}<span>Pressure</span>${airStrip(r.p_min, r.p_max, "p")}</div>
+          <p class="note">${r.o2_min != null ? `${pct(r.o2_min, 1)}–${pct(r.o2_max, 1)} O₂ · ${num(r.p_min)}–${num(r.p_max)} atm${r.conditions_assumed ? " (cabin air assumed)" : ""}.` : "Oxygen and pressure are not reported per test."} White ticks: crew atmospheres; the bright one is ${esc(habName(hab))}.</p>
+                  <p class="label" style="margin-top:22px">What they changed</p>${chips(vary)}
+          <p class="label" style="margin-top:18px">What they measured</p>${chips(meas)}
+        </section>
+        <section>
+          <p class="label">What NASA set out to learn</p>
+          <p class="obj">${esc(r.objective || "No objective text in PSI metadata.")}</p>
+          ${SI && SI.investigation[r.psi_id] ? `<div class="si-sum">${badge(SI.investigation[r.psi_id])}<p>${sentencesHtml(SI.investigation[r.psi_id], "inv")}</p>${evidenceHtml(SI.investigation[r.psi_id], "inv")}</div>` : ""}
+          <div class="meta">
+            <div><span>Science team</span><b>${esc(r.pi || "—")}</b></div>
+            <div><span>Platform</span><b>${esc(r.platform)}</b></div>
+            <div><span>Hardware</span><b>${esc(r.hardware)}</b></div>
+          </div>
+        </section>
       </div>
-      <div class="label">Relevance for ${esc(habName(invState.hab))} · ${scoreOf(r, invState.hab).toFixed(1)} / 100</div>
-      <div class="breakdown">
-        <div class="r"><span>Atmosphere closeness ×${wt.w[0].toFixed(2)}</span>${bar(rel.proximity)}<span class="n">${rel.proximity.toFixed(2)}</span></div>
-        <div class="r"><span>${wt.vol === "records" ? "Measured records" : "Labeled outcomes"} ×${wt.w[1].toFixed(2)}</span>${bar(volOf(r, invState.hab))}<span class="n">${volOf(r, invState.hab).toFixed(2)}</span></div>
-        <div class="r"><span>Fire-safety directness ×${wt.w[2].toFixed(2)}</span>${bar(rel.directness)}<span class="n">${rel.directness.toFixed(2)}</span></div>
-      </div>
-      <p class="note">≈${rel.n_near} test-equivalents within ~3 points of O₂ and ~30% of the pressure of this habitat.</p>
-      ${tables || '<p class="note">No experimental table in PSI (ground or modeling investigation).</p>'}
-      ${r.earth_benefit ? `<div class="label">Benefit on Earth · from PSI</div><p class="obj">${esc(r.earth_benefit)}</p>` : ""}
-      ${pubs}
+      ${r.earth_benefit ? `<p class="label">Benefit on Earth · from PSI</p><p class="obj">${esc(r.earth_benefit)}</p>` : ""}
+      <p class="label">Publications · ${r.n_publications} listed in PSI</p>${pubs}
       <div class="links">
         <a class="btn btn--fire btn--sm" href="${r.psi_url}" target="_blank" rel="noopener">Open in NASA PSI <span aria-hidden="true">↗</span></a>
         ${r.doi ? `<a class="btn btn--line btn--sm" href="https://doi.org/${esc(r.doi)}" target="_blank" rel="noopener">Dataset DOI ↗</a>` : ""}
-        <button class="btn btn--line btn--sm" type="button" id="add-cmp">Add to comparison</button>
-      </div>`;
-    wireCites(el);
-    $("#add-cmp").addEventListener("click", () => {
-      if (!cmpState.ids.includes(r.psi_id)) { cmpState.ids = [r.psi_id, ...cmpState.ids.filter((x) => x !== r.psi_id)].slice(0, 3); }
-      renderCompare();
+        <button class="btn btn--line btn--sm" type="button" data-cmp-add>${inCmp ? "✓ In comparison · view" : "+ Add to comparison"}</button>
+      </div>
+      <nav class="im__nav">${prev ? `<button type="button" class="btn btn--line btn--sm" data-go="${prev.psi_id}">← #${i} ${esc(prev.name)}</button>` : "<span></span>"}${next ? `<button type="button" class="btn btn--line btn--sm" data-go="${next.psi_id}">#${i + 2} ${esc(next.name)} →</button>` : ""}</nav>`;
+    const dlg = $("#inv-modal"), body = $("#inv-modal-body");
+    wireCites(body);
+    body.querySelector("[data-close]").addEventListener("click", () => dlg.close());
+    body.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => openInv(b.dataset.go)));
+    body.querySelector("[data-cmp-add]").addEventListener("click", () => {
+      if (!cmpState.ids.includes(r.psi_id)) toggleCmp(r.psi_id);
+      dlg.close(); if (invMode.m === "gallery") renderInvGallery(invState.rows || rows);
       document.getElementById("compare").scrollIntoView({ behavior: "smooth", block: "start" });
     });
+    if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); }
+    body.scrollTop = 0; dlg.scrollTop = 0;
   }
   const SL = [
     { k: "o2", label: "Oxygen", min: 0.10, max: 1.0, step: 0.005, fmt: (v) => `${(100 * v).toFixed(1)}%`, ticks: ["10%", "40%", "70%", "100%"] },
@@ -660,33 +729,50 @@
 
   const nextState = { co2: null };
   function pickLabel(k) { return `${o2pct(k.x_o2)} O₂ · ${PSI(k.p_atm).toFixed(1)} psi · ${(100 * k.x_co2).toFixed(0)}% CO₂`; }
+  function gauge(frac, big, label, color, sub = "") {
+    const R = 34, L = 2 * Math.PI * R * 0.75, f = Math.max(0.02, Math.min(1, frac));
+    return `<div class="gauge"><svg viewBox="0 0 90 90" aria-hidden="true"><circle cx="45" cy="45" r="${R}" fill="none" stroke="rgba(203,213,225,.12)" stroke-width="7" stroke-dasharray="${L} 999" stroke-linecap="round" transform="rotate(135 45 45)"/><circle cx="45" cy="45" r="${R}" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${L * f} 999" stroke-linecap="round" transform="rotate(135 45 45)"/></svg><b>${big}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ""}</div>`;
+  }
+  function doubtBar(lo, hi, p, big = false) {
+    return `<div class="doubt${big ? " doubt--big" : ""}"><div class="doubt__t"><i class="doubt__r" style="left:${100 * lo}%;width:${100 * (hi - lo)}%"></i><i class="doubt__p" style="left:${100 * p}%"></i></div>${big ? `<div class="doubt__s"><span>0% · it never goes out</span><span>50%</span><span>100% · always goes out</span></div>` : ""}</div>`;
+  }
   function renderNext() {
     const N = D.next, k = N.picks[0];
     const asks = k.x_co2 > 0
       ? `How much CO₂ it takes to put out a ${k.fuel.toLowerCase()} fire in air close to the lunar base (${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi).`
       : `Whether a ${k.fuel.toLowerCase()} fire goes out on its own in air close to the lunar base.`;
+    const moon = D.habitats.find((h) => h.id === "moon_base");
     $("#mission").innerHTML = `
       <div class="mission__main">
         <p class="label">Recommended flight test · #1 of ${N.picks.length}</p>
-        <h3 class="mission__title">${esc(k.fuel)} droplet <span class="mute">at</span> ${o2pct(k.x_o2)} O₂, ${PSI(k.p_atm).toFixed(1)} psi <span class="mute">with</span> ${(100 * k.x_co2).toFixed(0)}% CO₂</h3>
+        <h3 class="mission__title">A ${esc(k.fuel.toLowerCase())} droplet fire in almost-lunar-base air, with CO₂ added.</h3>
+        <div class="gauges">
+          ${gauge(k.x_o2, o2pct(k.x_o2), "oxygen", "#38bdf8", `Moon base ${o2pct(moon.x_o2)}`)}
+          ${gauge(k.p_atm, `${PSI(k.p_atm).toFixed(1)}`, "psi pressure", "#e2e8f0", `Moon base ${PSI(moon.p_atm).toFixed(1)}`)}
+          ${gauge(k.x_co2 / 0.7, `${(100 * k.x_co2).toFixed(0)}%`, "CO₂ added", "#a78bfa", "suppressant")}
+        </div>
       </div>
-      <dl class="mission__facts">
-        <div><dt>What it answers</dt><dd>${esc(asks)}</dd></div>
-        <div><dt>Why this one</dt><dd>Today the model can only say the flame goes out on its own somewhere between <b>${pct(k.interval[0])} and ${pct(k.interval[1])}</b> of the time. That is the widest doubt near lunar-base air, so one flight here teaches the most.</dd></div>
-        <div><dt>How it was chosen</dt><dd>Active learning: the 200 bootstrap models were asked about every candidate atmosphere near the lunar base; this is where they disagree most.</dd></div>
-      </dl>`;
-    const narrow = innerWidth < 700;
-    const P = N.picks.map((q, i) => ({ ...q, i, lab: narrow ? `#${i + 1}` : `#${i + 1}  ${pickLabel(q)}` })).reverse();
-    plot("range-chart", [
-      { x: P.map((q) => q.p_ext), y: P.map((q) => q.lab), type: "scatter", mode: "markers", marker: { size: 12, color: C.ink, line: { color: C.bg, width: 2 } },
-        customdata: P.map((q) => [q.interval[0], q.interval[1]]), hovertemplate: "<b>%{y}</b><br>best estimate %{x:.0%}<br>could be anywhere from %{customdata[0]:.0%} to %{customdata[1]:.0%}<extra></extra>" },
-    ], layout({
-      margin: { l: 10, r: 18, t: 6, b: 44 },
-      shapes: P.map((q) => ({ type: "line", xref: "x", yref: "y", x0: q.interval[0], x1: q.interval[1], y0: q.lab, y1: q.lab, line: { color: q.i === 0 ? C.orange : C.ink4, width: q.i === 0 ? 12 : 8 }, layer: "below" })),
-      xaxis: { range: [0, 1], tickformat: ".0%", tickvals: [0, 0.25, 0.5, 0.75, 1], title: { text: narrow ? "Chance it goes out on its own" : "Chance the flame goes out on its own (today's estimate)" } },
-      yaxis: { type: "category", tickfont: { family: "Geist Mono, monospace", size: 11.5, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
-    }));
-    $("#next-sub").textContent = "A long bar means the model does not know yet. The dot is its best guess.";
+      <div class="mission__side">
+        <p class="label">Today the model can only say</p>
+        <p class="mission__q">The flame goes out on its own <b>${pct(k.interval[0])}–${pct(k.interval[1])}</b> of the time.</p>
+        ${doubtBar(k.interval[0], k.interval[1], k.p_ext, true)}
+        <p class="sub">That range is too wide to plan a fire response. It is the widest doubt anywhere near lunar-base air, so one flight here teaches the most.</p>
+        <dl class="mission__facts">
+          <div><dt>What it answers</dt><dd>${esc(asks)}</dd></div>
+          <div><dt>Where to fly it</dt><dd>The FLEX droplet rig in the ISS Combustion Integrated Rack, which already burned ${D.flex.n} droplets for this model.</dd></div>
+        </dl>
+      </div>`;
+    $("#howpick").innerHTML = [
+      ["200", "models", "We trained the same model 200 times, each on a different resample of the NASA tests."],
+      ["3,600", "candidate tests", "Each model is asked about 2 fuels × 20 oxygen levels (21–40%) × 15 pressures (4.4–14.7 psi) × 6 CO₂ levels."],
+      ["1", "biggest disagreement", "Where the 200 answers spread the most and the air is closest to the lunar base, one flight teaches the most."],
+      ["↻", "update", "After the flight, the new result goes into the data and the doubt map is redrawn."],
+    ].map(([n, t, d], i) => `<div class="hp"><span class="hp__i">${String(i + 1).padStart(2, "0")}</span><b>${n}</b><span class="hp__t">${t}</span><p>${d}</p></div>`).join('<span class="hp__a" aria-hidden="true">→</span>');
+    $("#cands").innerHTML = N.picks.map((q, i) => `<article class="cand${i === 0 ? " is-top" : ""}">
+      <div class="cand__h"><span class="cand__n">#${i + 1}</span><span class="mono-sm">${esc(q.fuel)} droplet</span></div>
+      <div class="cand__air"><span><b>${o2pct(q.x_o2)}</b>O₂</span><span><b>${PSI(q.p_atm).toFixed(1)}</b>psi</span><span><b>${(100 * q.x_co2).toFixed(0)}%</b>CO₂</span></div>
+      ${doubtBar(q.interval[0], q.interval[1], q.p_ext)}
+      <p class="cand__l">Goes out on its own <b>${pct(q.interval[0])}–${pct(q.interval[1])}</b> · doubt ${pct(q.uncertainty)}</p></article>`).join("");
     $("#next-table").innerHTML = `<thead><tr><th>#</th><th>Atmosphere to fly</th><th class="num">CO₂ added</th><th class="num">Goes out today</th><th class="num">Doubt</th></tr></thead><tbody>${N.picks.map((q, i) => `
       <tr${i === 0 ? ' class="hl"' : ""}><td class="mono">${i + 1}</td><td>${esc(q.fuel)} · ${o2pct(q.x_o2)} O₂ · ${PSI(q.p_atm).toFixed(1)} psi <span class="mono-sm">${q.p_atm.toFixed(2)} atm</span></td><td class="num">${(100 * q.x_co2).toFixed(0)}%</td><td class="num">${pct(q.interval[0])}–${pct(q.interval[1])}</td><td class="num">${pct(q.uncertainty)}</td></tr>`).join("")}</tbody>`;
     $("#next-note").innerHTML = `<b>Doubt</b> is the width of the 90% range. All six candidates add CO₂ near lunar-base oxygen and pressure: the open question is how much CO₂ it takes to put out a fire in the air planned for the Moon base. Score = ${esc(N.score_formula)}.`;
@@ -1012,13 +1098,31 @@
   }
 
   const cmpState = { ids: ["PSI-69", "PSI-25", "PSI-99"] };
+  const CMPC = ["#f97316", "#38bdf8", "#a78bfa"];
+  function renderCmpVisual(R, hab) {
+    const rank = Object.fromEntries([...INV].sort((a, b) => scoreOf(b, hab) - scoreOf(a, hab)).map((r, i) => [r.psi_id, i + 1]));
+    const axes = ["Atmosphere closeness", "Data volume", "Fire-safety directness", "Oxygen range tested", "Publications"];
+    const v5 = (r) => [...critVals(r, hab), r.o2_min != null ? Math.min(1, (r.o2_max - r.o2_min) / 0.4 + 0.05) : 0, Math.min(1, Math.log1p(r.n_publications) / Math.log1p(60))];
+    plot("cmp-radar", R.map((r, i) => { const v = v5(r); return { type: "scatterpolar", r: [...v, v[0]], theta: [...axes, axes[0]], name: r.name, fill: "toself", fillcolor: CMPC[i] + "33", line: { color: CMPC[i], width: 2 }, marker: { size: 5, color: CMPC[i] }, hovertemplate: `<b>${esc(r.name)}</b><br>%{theta}: %{r:.2f}<extra></extra>` }; }),
+      layout({ height: 340, margin: innerWidth < 700 ? { l: 70, r: 70, t: 30, b: 30 } : { l: 100, r: 110, t: 30, b: 30 }, showlegend: false, polar: { bgcolor: "rgba(0,0,0,0)", radialaxis: { range: [0, 1], showticklabels: false, gridcolor: C.line2, linecolor: "rgba(0,0,0,0)" }, angularaxis: { gridcolor: C.line2, linecolor: C.line2, tickfont: { size: innerWidth < 700 ? 9 : 11, color: C.ink2 } } } }));
+    $("#cmp-cards").innerHTML = R.map((r, i) => `<button type="button" class="cc" data-id="${r.psi_id}" style="--c:${CMPC[i]}">
+      <span class="cc__vis">${visOf(r)}</span>
+      <span class="cc__b"><span class="cc__n"><i></i>${esc(r.name)} <small>${r.psi_id}</small></span>
+      <span class="cc__k"><span><b>#${rank[r.psi_id]}</b>rank</span><span><b>${Math.round(scoreOf(r, hab))}</b>score</span><span><b>${r.n_tests.toLocaleString("en-US")}</b>records</span><span><b>${r.n_with_outcome}</b>labeled</span></span>
+      <span class="cc__bar">${critVals(r, hab).map((v, k) => `<i style="width:${100 * wt.w[k] * v}%;background:${CRIT[k][1]}"></i>`).join("")}</span>
+      <span class="cc__t">${esc(r.family)} · ${r.type} · ${esc(r.layers.join(", "))}</span></span></button>`).join("");
+    document.querySelectorAll("#cmp-cards .cc").forEach((b) => b.addEventListener("click", () => openInv(b.dataset.id)));
+    const strip = (kind) => `<div class="ca__row"><span class="ca__k">${kind === "o2" ? "Oxygen tested" : "Pressure tested"}</span><div class="ca__stack">${R.map((r, i) => airStrip(kind === "o2" ? r.o2_min : r.p_min, kind === "o2" ? r.o2_max : r.p_max, kind, CMPC[i])).join("")}</div></div>`;
+    $("#cmp-air").innerHTML = strip("o2") + strip("p") + `<p class="note">Each colored band is the range one investigation tested, on the same scale. White ticks mark crew atmospheres; the bright tick is ${esc(habName(hab))}. Click a card to open its full file.</p>`;
+  }
   function renderCompare() {
     const opts = [...INV].sort((a, b) => a.name.localeCompare(b.name));
     $("#cmp-pick").innerHTML = cmpState.ids.map((id, k) => `<label class="pick"><span class="label" style="margin:0">#${k + 1}</span><select data-k="${k}" aria-label="Investigation ${k + 1}"><option value="">—</option>${opts.map((r) => `<option value="${r.psi_id}" ${r.psi_id === id ? "selected" : ""}>${esc(r.name)} · ${r.psi_id}</option>`).join("")}</select></label>`).join("");
     document.querySelectorAll("#cmp-pick select").forEach((s) => s.addEventListener("change", () => { cmpState.ids[+s.dataset.k] = s.value; renderCompare(); }));
     const R = cmpState.ids.map((id) => INV.find((r) => r.psi_id === id)).filter(Boolean);
-    if (!R.length) { $("#cmp-table").innerHTML = ""; $("#cmp-note").textContent = "Pick an investigation."; return; }
+    if (!R.length) { $("#cmp-table").innerHTML = ""; $("#cmp-cards").innerHTML = ""; $("#cmp-air").innerHTML = ""; $("#cmp-note").textContent = "Pick an investigation."; return; }
     const hab = invState.hab;
+    safe(() => renderCmpVisual(R, hab), "compare visual");
     const rank = Object.fromEntries([...INV].sort((a, b) => scoreOf(b, hab) - scoreOf(a, hab)).map((r, i) => [r.psi_id, i + 1]));
     const S = D.similarity;
     const sim = (a, b) => S.matrix[S.ids.indexOf(a)][S.ids.indexOf(b)];
@@ -1133,8 +1237,8 @@
     ];
     $("#answer-list").innerHTML = items.map(([t, v, l, d, h, a], i) => `<li class="answer"><a href="${h}"><span class="answer__n">${String(i + 1).padStart(2, "0")} · ${t}</span><span class="answer__v">${v}</span><span class="answer__l">${l}</span><span class="answer__d">${esc(d)}</span><span class="answer__go">${a} →</span></a></li>`).join("");
     const tiles = [
-      ["learn", "Learn 3D", "Seven interactive steps: why a flame becomes a sphere in orbit, what oxygen and pressure do, and a quiz."],
-      ["flames", "Flames", "Real ISS flight video: the same plastic at four oxygen levels, plus fabric, film, a droplet and a gas sphere."],
+      ["learn", "Learn 3D", "Seven interactive steps, one flame in four gravities, and the whole fire model as a 3D landscape you can turn."],
+      ["flames", "Flames", `Real ISS flight video: ${(window.CLIPS || []).length} clips of burning solids, liquid droplets and gas flames, filtered by state and oxygen.`],
       ["lab", "Fire Lab", "Set oxygen, pressure and suppressant; a validated model answers with uncertainty."],
       ["findings", "Findings", "Where NASA has flown fire versus where crews will live, and what the tests show."],
       ["ranking", "Ranking", "The 24 investigations ranked for your habitat, with weights you can change."],
@@ -1239,18 +1343,26 @@
     lab3dState.tally = [];
   }
 
-  const FAM_LABEL = { "PMMA rod": "Acrylic rods", "SIBAL fabric": "Cotton-fiberglass fabric", "PMMA thin film": "Thin films", "PMMA slab": "Slabs", "PMMA sphere": "Spheres", "Nomex fabric": "Nomex" };
-  const archState = { fam: "All", all: false };
+  const FAM_LABEL = { "PMMA rod": "Acrylic rods", "SIBAL fabric": "Cotton-fiberglass fabric", "PMMA thin film": "Thin films", "PMMA slab": "Slabs", "PMMA sphere": "Spheres", "Nomex fabric": "Nomex", Droplet: "Fuel droplets", "Spherical gas flame": "Gas spheres", "Gas jet flame": "Gas jets" };
+  const STATE = [["All", "All"], ["Solid", "Solids"], ["Liquid", "Liquids"], ["Gas", "Gases"]];
+  const archState = { st: "All", fam: "All", all: false };
   function renderArchive() {
     const CL = window.CLIPS || [];
-    const fams = ["All", ...Object.keys(FAM_LABEL).filter((f) => CL.some((c) => c.family === f))];
-    $("#arch-filter").innerHTML = fams.map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === archState.fam}">${f === "All" ? `All ${CL.length}` : FAM_LABEL[f]}</button>`).join("");
+    $("#arch-state").innerHTML = STATE.map(([k, l]) => `<button type="button" data-s="${k}" aria-pressed="${k === archState.st}">${l} <small>${k === "All" ? CL.length : CL.filter((c) => c.state === k).length}</small></button>`).join("");
+    document.querySelectorAll("#arch-state button").forEach((b) => b.addEventListener("click", () => { archState.st = b.dataset.s; archState.fam = "All"; archState.all = false; renderArchive(); }));
+    const inState = CL.filter((c) => archState.st === "All" || c.state === archState.st);
+    const fams = ["All", ...Object.keys(FAM_LABEL).filter((f) => inState.some((c) => c.family === f))];
+    $("#arch-filter").innerHTML = fams.length > 2 ? fams.map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === archState.fam}">${f === "All" ? "Every material" : FAM_LABEL[f]}</button>`).join("") : "";
     document.querySelectorAll("#arch-filter button").forEach((b) => b.addEventListener("click", () => { archState.fam = b.dataset.f; renderArchive(); }));
-    const list = CL.filter((c) => archState.fam === "All" || c.family === archState.fam).sort((a, b) => a.o2 - b.o2);
-    const shown = archState.all ? list : list.slice(0, 12);
+    const ord = { Solid: 0, Liquid: 1, Gas: 2 };
+    const list = inState.filter((c) => archState.fam === "All" || c.family === archState.fam).sort((a, b) => (archState.st === "All" ? 0 : ord[a.state] - ord[b.state]) || (a.o2 ?? 99) - (b.o2 ?? 99));
+    const pickMix = () => { const by = { Solid: [], Liquid: [], Gas: [] }; list.forEach((c) => by[c.state].push(c)); const out = []; for (let i = 0; out.length < Math.min(12, list.length); i++) for (const k of ["Solid", "Liquid", "Gas"]) if (by[k][i] && out.length < 12) out.push(by[k][i]); return out; };
+    const shown = archState.all ? list : archState.st === "All" ? pickMix() : list.slice(0, 12);
     const air = (a) => { const t = String(a).replace(/\([^)]*\)/g, "").replace(/\s*,\s*/g, ", ").replace(/,\s*$/, "").trim(); return t ? `${t} cm/s` : "—"; };
-    $("#arch").innerHTML = shown.map((c) => `<figure class="ac"><div class="ac__v"><video data-src="assets/video/bass2/${c.f}.mp4" poster="assets/video/bass2/${c.f}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span></div>
-      <figcaption><span class="ac__o2">${c.o2}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · test ${esc(c.test)}</span><span class="ac__m"><span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}</span></figcaption></figure>`).join("");
+    const path = (c) => `assets/video/${c.dir ? c.dir + "/" : ""}${c.f}`;
+    const stTag = { Solid: "Solid", Liquid: "Liquid", Gas: "Gas" };
+    $("#arch").innerHTML = shown.map((c) => `<figure class="ac ac--${c.state.toLowerCase()}"><div class="ac__v"><video data-src="${path(c)}.mp4" poster="${path(c)}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span><span class="ac__st">${stTag[c.state]}</span></div>
+      <figcaption><span class="ac__o2">${c.o2 == null ? "—" : `${c.approx ? "≈" : ""}${c.o2}`}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · ${c.psi ? `${c.psi} · ` : ""}test ${esc(c.test)}</span><span class="ac__m">${c.m ? esc(c.m) : `<span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}`}</span></figcaption></figure>`).join("");
     $("#arch-more").hidden = list.length <= 12;
     $("#arch-more").textContent = archState.all ? "Show fewer" : `Show all ${list.length}`;
     lazyVideos("#arch video");
@@ -1265,7 +1377,7 @@
     vids.forEach((v) => io.observe(v));
   }
 
-  const survState = { kind: "All", hab: "moon_base", all: false };
+  const survState = { kind: "All", hab: "moon_base", all: false, view: "chart" };
   function renderSurvival() {
     const SV = D.survival || [];
     const kinds = ["All", "Droplet", "Gas flame", "Inverse gas flame"];
@@ -1285,11 +1397,38 @@
         <span class="surv__bar"><i class="k" style="width:${w(r.kept)}"></i><i class="b" style="width:${w(r.broke)}"></i><i class="o" style="width:${w(r.out)}"></i></span>
         <span class="num"><b>${r.kept + r.broke}</b> of ${r.n}</span><span class="num mono-sm">${pct(r.ci[0])}–${pct(r.ci[1])}</span></div>`;
     }).join("");
+    $("#surv-view").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === survState.view)));
+    $("#surv-list").hidden = survState.view !== "list";
+    $("#surv-chart-wrap").hidden = survState.view !== "chart";
+    if (survState.view === "chart") safe(() => renderSurvChart(shown, near, hb), "survival chart");
     $("#surv-more").hidden = list.length <= 10;
     $("#surv-more").textContent = survState.all ? "Show fewer" : `Show all ${list.length} groups`;
     $("#surv-note").textContent = `Groups need at least 5 flames that ran to an end (no-ignition and flash tests are left out). A droplet that broke apart is counted as not going out on its own: its fragments were still burning. Near = within 5 points of O₂ and about 35% of the pressure of ${hb.name} air.`;
   }
 
+  const TT = (s) => (window.I18N ? window.I18N.t(s) : s);
+  const KIND_C = { Droplet: C.blue, "Gas flame": C.violet, "Inverse gas flame": "#e879f9" };
+  function renderSurvChart(shown, near, hb) {
+    const narrow = innerWidth < 700;
+    const R = shown.map((r, i) => ({ ...r, i, lab: narrow ? `${String(i + 1).padStart(2, "0")} ${TT(r.fuel)}` : `${String(i + 1).padStart(2, "0")}  ${TT(r.kind === "Droplet" ? `${r.fuel} droplets` : `${r.fuel} ${r.kind.toLowerCase()}s`)} · ${TT(`${r.o2} O₂`)} · ${TT(r.p)}` })).reverse();
+    const col = (r) => KIND_C[r.kind] || C.ink2;
+    $("#surv-legend").innerHTML = [legendItem("circle", C.blue, "Droplets"), legendItem("circle", C.violet, "Gas flames"), legendItem("circle", "#e879f9", "Inverse flames"), legendItem("bar", "rgba(242,96,15,.35)", `Near ${hb.name} air`)].join("");
+    plot("surv-chart", [
+      { type: "scatter", mode: "markers", x: R.map((r) => r.rate), y: R.map((r) => r.lab), customdata: R.map((r) => [r.kept + r.broke, r.n, r.ci[0], r.ci[1], r.dil, r.psi.join(", ")]),
+        marker: { size: R.map((r) => Math.min(26, 8 + Math.sqrt(r.n) * 2.2)), color: R.map(col), line: { color: R.map((r) => (near(r) ? "#fff" : C.bg)), width: R.map((r) => (near(r) ? 2.5 : 1.5)) } },
+        hovertemplate: "<b>%{y}</b><br>did not go out: %{customdata[0]} of %{customdata[1]}<br>90% range %{customdata[2]:.0%}–%{customdata[3]:.0%}<br>%{customdata[4]} · %{customdata[5]}<extra></extra>" },
+    ], layout({
+      height: Math.max(300, 34 * R.length + 70), margin: { l: narrow ? 70 : 330, r: 14, t: 8, b: 46 },
+      shapes: [
+        ...R.map((r) => ({ type: "line", xref: "x", yref: "y", x0: r.ci[0], x1: r.ci[1], y0: r.lab, y1: r.lab, line: { color: col(r), width: 6 }, opacity: 0.35, layer: "below" })),
+        ...R.filter(near).map((r) => ({ type: "rect", xref: "paper", yref: "y", x0: 0, x1: 1, y0: R.indexOf(r) - 0.45, y1: R.indexOf(r) + 0.45, fillcolor: "rgba(242,96,15,0.10)", line: { width: 0 }, layer: "below" })),
+        { type: "line", xref: "x", yref: "paper", x0: 0.5, x1: 0.5, y0: 0, y1: 1, line: { color: C.line2, width: 1, dash: "dot" } },
+      ],
+      xaxis: { range: [0, 1.02], tickformat: ".0%", tickvals: [0, 0.25, 0.5, 0.75, 1], title: { text: "Share of flames that did NOT go out on their own" } },
+      yaxis: { type: "category", tickfont: { family: "Geist Mono, monospace", size: 11, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" },
+    }));
+    $("#surv-how").innerHTML = `How to read it: the dot is what NASA saw; its size is the number of flames; the faint bar is the 90% range. Groups are ranked by the left end of the bar, so a small lucky group cannot jump to the top. Blue: droplets · violet: gas flames · pink: inverse flames. White ring and orange band: near ${esc(hb.name)} air.`;
+  }
   let learn3d = null;
   const learnState = { i: 0, o2: 0.30, answers: {} };
   const pAt = (o2, p, extra = {}) => { const x = featVec({ fuel: "Methanol", o2, p, co2: 0, he: 0, d0: M.d0_median, ...extra }); return { ...predict(x), st: dataStatus(x).s }; };
@@ -1361,16 +1500,89 @@
     renderLearn();
   }
 
+  const worldState = { o2: 0.21, flow: 0, fuel: "Methanol" };
+  let worlds = [];
+  const WORLDS = [["ISS", 0, "≈ 0 g", "A sphere. Nothing is lighter or heavier, so hot gas does not rise and oxygen only arrives by slow diffusion."],
+    ["Moon", 0.17, "0.17 g", "A short, round flame. A sixth of Earth's pull already starts a weak updraft."],
+    ["Mars", 0.38, "0.38 g", "A rounded teardrop. More updraft means more fresh oxygen and more soot at the tip."],
+    ["Earth", 1, "1 g", "The familiar tall teardrop: a strong draft feeds and stretches the flame."]];
+  function renderWorldCtl() {
+    const r = pAt(worldState.o2, 1, { fuel: worldState.fuel });
+    $("#worlds-ctl").innerHTML = `
+      <div class="lslider"><div class="top"><label for="wo2">Oxygen</label><output>${o2pct(worldState.o2)}</output></div><input type="range" id="wo2" min="0.15" max="0.40" step="0.01" value="${worldState.o2}"></div>
+      <div class="lslider"><div class="top"><label for="wfl">Airflow from the left</label><output>${worldState.flow ? `${Math.round(worldState.flow * 20)} cm/s` : "still air"}</output></div><input type="range" id="wfl" min="0" max="0.6" step="0.05" value="${worldState.flow}"></div>
+      <div class="worlds-ctl__f"><span class="mono-sm">Fuel</span><div class="seg" id="wfuel">${["Methanol", "Heptane"].map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === worldState.fuel}">${f}</button>`).join("")}</div></div>
+      <p class="worlds-ctl__r">On the ISS at 1 atm, the model says this fire goes out on its own <b>${pct(r.p)}</b> of the time <small>(90% range ${pct(r.lo)}–${pct(r.hi)}${r.st !== "within" ? ` · ${r.st}` : ""})</small>.</p>`;
+    $("#wo2").addEventListener("input", (e) => { worldState.o2 = +e.target.value; syncWorlds(); e.target.closest(".lslider").querySelector("output").textContent = o2pct(worldState.o2); clearTimeout(renderWorldCtl.t); renderWorldCtl.t = setTimeout(renderWorldCtl, 250); });
+    $("#wfl").addEventListener("input", (e) => { worldState.flow = +e.target.value; syncWorlds(); e.target.closest(".lslider").querySelector("output").textContent = worldState.flow ? `${Math.round(worldState.flow * 20)} cm/s` : "still air"; });
+    document.querySelectorAll("#wfuel button").forEach((b) => b.addEventListener("click", () => { worldState.fuel = b.dataset.f; syncWorlds(); renderWorldCtl(); }));
+  }
+  function syncWorlds() { worlds.forEach((w, i) => w && w.set({ o2: worldState.o2, p: 1, co2: 0, he: 0, g: WORLDS[i][1], flow: worldState.flow, fuel: worldState.fuel, steady: true })); }
+  function initWorlds() {
+    $("#worlds").innerHTML = WORLDS.map(([n, , g, d], i) => `<figure class="world"><div class="world__v" id="world-${i}"><span class="world__g">${g}</span></div><figcaption><b>${n}</b><p>${d}</p></figcaption></figure>`).join("");
+    if (window.PhoenixLab3D && window.THREE) worlds = WORLDS.map((w, i) => window.PhoenixLab3D.init($(`#world-${i}`), { labels: {}, showLabels: false, autoRotate: false, lit: true, cam: [0, 0.5, 6.2] }));
+    worlds.forEach((w, i) => { if (!w) $(`#world-${i}`).classList.add("lab3d__view--off"); });
+    syncWorlds(); renderWorldCtl();
+  }
+  const landState = { fuel: "Methanol", co2: 0 };
+  function renderLand() {
+    const go2 = [], gp = [];
+    for (let v = 0.12; v <= 0.40 + 1e-9; v += 0.01) go2.push(+v.toFixed(3));
+    for (let j = 0; j <= 28; j++) gp.push(Math.exp(Math.log(0.3) + (j * (Math.log(3.2) - Math.log(0.3))) / 28));
+    const d0 = M.d0_median, hep = landState.fuel === "Heptane" ? 1 : 0, c = landState.co2;
+    const z = gp.map((pp) => go2.map((oo) => (oo + c > 0.97 ? null : predict([hep, oo, Math.log(pp), c, 0, d0]).p)));
+    const T = (M.train || []).filter((t) => (t.combustible === landState.fuel) && Math.abs((t.x_co2 || 0) - c) <= 0.075 && (t.x_he || 0) < 0.05);
+    const out = T.filter((t) => t.autoextincion === 1), kept = T.filter((t) => t.autoextincion !== 1);
+    const habs = D.habitats.filter((h) => h.x_o2 <= 0.4 && h.p_atm >= 0.3);
+    const rng = M.ranges, oLo = rng.x_o2[0], oHi = rng.x_o2[1], pLo = Math.exp(rng.log_p[0]), pHi = Math.exp(rng.log_p[1]);
+    const box = { x: [oLo, oHi, oHi, oLo, oLo].map((v) => 100 * v), y: [pLo, pLo, pHi, pHi, pLo], z: [0, 0, 0, 0, 0] };
+    const pts = (L, zv, col, name) => ({ type: "scatter3d", mode: "markers", name, x: L.map((t) => 100 * t.x_o2), y: L.map((t) => t.p_atm), z: L.map(() => zv), marker: { size: 4.6, color: col, line: { width: 0 }, opacity: 0.95 },
+      hovertemplate: `${name}<br>O₂ %{x:.0f}% · %{y:.2f} atm<extra></extra>` });
+    plot("land3d", [
+      { type: "surface", x: go2.map((v) => 100 * v), y: gp, z, cmin: 0, cmax: 1, opacity: 0.92, showscale: false,
+        colorscale: [[0, "#f97316"], [0.35, "#f43f5e"], [0.65, "#8b5cf6"], [1, "#38bdf8"]],
+        contours: { z: { show: true, usecolormap: false, color: "rgba(255,255,255,0.25)", width: 1, start: 0.1, end: 0.9, size: 0.1 } },
+        hovertemplate: "O₂ %{x:.0f}% · %{y:.2f} atm<br>goes out on its own %{z:.0%}<extra></extra>", lighting: { ambient: 0.75, diffuse: 0.5, specular: 0.15 } },
+      pts(out, 1.04, "#7dd3fc", "NASA test · went out on its own"),
+      pts(kept, -0.04, "#fdba74", "NASA test · kept burning"),
+      { type: "scatter3d", mode: "lines", x: box.x, y: box.y, z: box.z, line: { color: "rgba(255,255,255,0.55)", width: 3, dash: "dash" }, hoverinfo: "skip", name: "flight data range" },
+      { type: "scatter3d", mode: "markers+text", x: habs.map((h) => 100 * h.x_o2), y: habs.map((h) => h.p_atm), z: habs.map((h) => (h.x_o2 + c > 0.97 ? 0 : predict([hep, h.x_o2, Math.log(h.p_atm), c, 0, d0]).p) + 0.06), text: habs.map((h) => h.name), textposition: "top center", textfont: { color: "#fff", size: 11 },
+        marker: { size: 6, symbol: "diamond", color: "#fff" }, hoverinfo: "skip", name: "crew air" },
+    ], layout({ height: 560, margin: { l: 0, r: 0, t: 0, b: 0 },
+      scene: { dragmode: "turntable", bgcolor: "rgba(0,0,0,0)", camera: { eye: { x: 1.55, y: -1.55, z: 0.85 } }, aspectratio: { x: 1.2, y: 1.2, z: 0.75 },
+        xaxis: { title: { text: "Oxygen %" }, range: [12, 40], gridcolor: C.line2, color: C.ink3, backgroundcolor: "rgba(0,0,0,0)" },
+        yaxis: { title: { text: "Pressure, atm" }, type: "log", tickvals: [0.3, 0.5, 0.7, 1, 2, 3], ticktext: ["0.3", "0.5", "0.7", "1", "2", "3"], gridcolor: C.line2, color: C.ink3 },
+        zaxis: { title: { text: "Goes out on its own" }, range: [-0.08, 1.12], tickformat: ".0%", tickvals: [0, 0.5, 1], gridcolor: C.line2, color: C.ink3 } } }));
+    const moon = habs.find((h) => h.id === "moon_base"), cab = habs.find((h) => h.id === "cabin");
+    const pm = predict([hep, moon.x_o2, Math.log(moon.p_atm), c, 0, d0]).p, pc = predict([hep, cab.x_o2, Math.log(cab.p_atm), c, 0, d0]).p;
+    $("#land-side").innerHTML = `
+      <p class="label">Controls</p>
+      <div class="seg" id="land-fuel">${["Methanol", "Heptane"].map((f) => `<button type="button" data-f="${f}" aria-pressed="${f === landState.fuel}">${f}</button>`).join("")}</div>
+      <div class="lslider"><div class="top"><label for="land-co2">CO₂ added as suppressant</label><output>${(100 * c).toFixed(0)}%</output></div><input type="range" id="land-co2" min="0" max="0.5" step="0.05" value="${c}"></div>
+      <div class="land__read"><div><b>${pct(pc)}</b><span>${esc(cab.name)}</span></div><div><b>${pct(pm)}</b><span>${esc(moon.name)}</span></div></div>
+      <p class="label">How to read it</p>
+      <ul class="land__how">
+        <li><i style="background:#38bdf8"></i>High and blue: the fire usually dies by itself.</li>
+        <li><i style="background:#f97316"></i>Low and orange: it keeps burning until someone acts.</li>
+        <li><i style="background:#7dd3fc;border-radius:50%"></i>Dots on top: real ISS fires that went out (${out.length}).</li>
+        <li><i style="background:#fdba74;border-radius:50%"></i>Dots below: real ISS fires that kept burning (${kept.length}).</li>
+        <li><i style="border:1px dashed #fff"></i>Dashed box: the oxygen and pressure NASA flew. Outside it the surface is a guess.</li>
+      </ul>
+      <p class="note">Drag to turn, scroll to zoom. Notice how the surface drops as oxygen rises: richer air makes fires harder to stop. Adding CO₂ lifts it back up.</p>`;
+    document.querySelectorAll("#land-fuel button").forEach((b) => b.addEventListener("click", () => { landState.fuel = b.dataset.f; renderLand(); }));
+    $("#land-co2").addEventListener("change", (e) => { landState.co2 = +e.target.value; renderLand(); });
+    $("#land-co2").addEventListener("input", (e) => { e.target.closest(".lslider").querySelector("output").textContent = `${Math.round(100 * e.target.value)}%`; });
+  }
   const VIEWS = ["home", "learn", "flames", "lab", "findings", "ranking", "next", "ask", "data"];
   const ALIAS = { scenario: "lab", atmospheres: "lab", problem: "lab", briefing: "ask", coverage: "findings", evidence: "findings", findings: "findings",
     investigations: "ranking", compare: "ranking", next: "next", earth: "next", quality: "data", archive: "data", sources: "data", solids: "flames", answer: "home", top: "home" };
   const done = {};
   const INIT = {
     home: () => { safe(renderHero, "hero"); safe(renderAnswers, "answers"); safe(renderHistory, "history"); safe(renderDests, "destinations"); safe(initGlobe, "globe"); },
-    learn: () => { safe(initLearn, "learn"); },
+    learn: () => { safe(initLearn, "learn"); safe(initWorlds, "worlds"); safe(renderLand, "landscape"); },
     flames: () => { safe(renderStage, "stage"); safe(renderReel, "reel"); safe(renderArchive, "archive"); safe(renderSolids, "solids"); },
     lab: () => { safe(initLab3D, "3d lab"); safe(renderHabitats, "habitats"); safe(() => { renderScenarioControls(); updateScenario(true); renderDrivers(); }, "scenario"); safe(applyUrlScenario, "url"); urlReady = true; },
-    findings: () => { safe(() => { renderCoverageFilters(); renderCoverage(); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
+    findings: () => { safe(() => { renderCoverageFilters(); renderCovMode(); $("#cov-mode").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { covMode.m = b.dataset.m; renderCovMode(); })); }, "coverage"); safe(renderFindings, "findings"); safe(renderEvidence, "evidence"); },
     ranking: () => { safe(renderSurvival, "survival"); safe(() => { computeRobust(invState.hab); renderInvControls(); renderCriteria(); renderInvList(); renderCompare(); }, "investigations"); },
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
     ask: () => { safe(() => { renderAudience(); renderBrief(); renderAsk(""); }, "briefing"); },
@@ -1403,6 +1615,7 @@
     if (globe) { if (v === "home") globe.resume(); else globe.pause(); }
     if (lab3d) { if (v === "lab") lab3d.resume(); else lab3d.pause(); }
     if (learn3d) { if (v === "learn") learn3d.resume(); else learn3d.pause(); }
+    worlds.forEach((w) => w && (v === "learn" ? w.resume() : w.pause()));
     const view = document.querySelector(`.view[data-view="${v}"]`);
     view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
     requestAnimationFrame(() => {
@@ -1439,7 +1652,9 @@
   $("#brief-sim").addEventListener("click", () => { ensure("lab"); setPreset(briefState.hab); location.hash = "#/lab"; });
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });
   document.querySelectorAll("#inv-mode button").forEach((b) => b.addEventListener("click", () => { invMode.m = b.dataset.m; renderInvList(); }));
+  safe(() => { const dlg = $("#inv-modal"); dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); }); }, "modal");
   $("#arch-more").addEventListener("click", () => { archState.all = !archState.all; renderArchive(); });
+  document.querySelectorAll("#surv-view button").forEach((b) => b.addEventListener("click", () => { survState.view = b.dataset.v; renderSurvival(); }));
   $("#surv-more").addEventListener("click", () => { survState.all = !survState.all; renderSurvival(); });
   $("#share-btn").addEventListener("click", (e) => copyText(shareUrl(), e.currentTarget));
   $("#unc-details").addEventListener("toggle", () => { if ($("#unc-details").open) safe(renderUncMap, "uncertainty map"); });
