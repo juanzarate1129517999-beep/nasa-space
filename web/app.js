@@ -679,7 +679,7 @@
       marker: { color: c, line: { color: C.surface, width: 2 } }, customdata: B.map((b) => [b[k], b.n]),
       hovertemplate: `<b>%{y}</b> · ${l}<br>%{customdata[0]} of %{customdata[1]} tests (%{x:.0%})<extra></extra>`,
     })).concat([{ y: B.map((b) => `${b.band} O₂`), x: B.map(() => 1.02), type: "scatter", mode: "text", text: B.map((b) => `n=${b.n}`), textposition: "middle right", textfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 10.5, color: C.ink3 }, hoverinfo: "skip" }]),
-    layout({ barmode: "stack", bargap: 0.35, margin: { l: 10, r: 10, t: 4, b: 36 }, xaxis: { tickformat: ".0%", range: [0, 1.16], tickvals: [0, 0.25, 0.5, 0.75, 1] }, yaxis: { gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 11, color: C.ink2 } } }));
+    layout({ barmode: "stack", bargap: 0.6, margin: { l: 10, r: 10, t: 4, b: 36 }, xaxis: { tickformat: ".0%", range: [0, 1.16], tickvals: [0, 0.25, 0.5, 0.75, 1] }, yaxis: { gridcolor: "rgba(0,0,0,0)", tickfont: { family: "Geist Mono, JetBrains Mono, monospace", size: 11, color: C.ink2 } } }));
 
     const S = D.suppression.co2;
     const cats = ["0%", "1–20%", "20–30%", ">30%"];
@@ -1083,8 +1083,16 @@
   const CORPUS = (window.CORPUS || []).map((d) => ({ ...d, tf: (() => { const m = new Map(); for (const w of [...toks(d.title), ...toks(d.title), ...toks(d.text)]) m.set(w, (m.get(w) || 0) + 1); return m; })(), len: toks(d.title).length * 2 + toks(d.text).length }));
   const AVGLEN = CORPUS.reduce((s, d) => s + d.len, 0) / Math.max(1, CORPUS.length);
   const DF = (() => { const m = new Map(); CORPUS.forEach((d) => d.tf.forEach((_, w) => m.set(w, (m.get(w) || 0) + 1))); return m; })();
+  const ES_Q = { supresor: "suppressant", supresores: "suppressant", suprimir: "suppress", extintor: "extinguish", extintores: "extinguish", apagar: "extinguish", apaga: "extinguish", apago: "extinguish",
+    fuego: "fire", fuegos: "fire", incendio: "fire", incendios: "fire", llama: "flame", llamas: "flame", fria: "cool", frias: "cool", humo: "smoke", hollin: "soot", gota: "droplet", gotas: "droplet",
+    oxigeno: "oxygen", presion: "pressure", gravedad: "gravity", microgravedad: "microgravity", luna: "moon", lunar: "lunar", marte: "mars", base: "base", cabina: "cabin", traje: "suit",
+    material: "material", materiales: "material", solido: "solid", solidos: "solid", tela: "fabric", telas: "fabric", plastico: "pmma", acrilico: "pmma", ardido: "burn", arde: "burn", arder: "burn", quema: "burn",
+    helio: "helium", nitrogeno: "nitrogen", ventilacion: "ventilation", ventiladores: "ventilation", flujo: "flow", aire: "air", propagacion: "spread", propaga: "spread", deteccion: "detection", detector: "detector", detectores: "detector",
+    seleccion: "screening", conservadora: "conservative", combustible: "fuel", liquido: "liquid", gas: "gas", direccion: "direction", importa: "matter", cambia: "change", probo: "test", prueba: "test", pruebas: "test",
+    experimento: "experiment", experimentos: "experiment", riesgo: "risk", seguridad: "safety", habitat: "habitat", rover: "rover", esclusa: "airlock", vuelo: "flight" };
+  const toEnQuery = (q) => String(q).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/[^a-z0-9₂]+/).map((w) => ES_Q[w] || w).join(" ");
   function search(q, k = 5) {
-    const base = toks(q);
+    const base = toks(toEnQuery(q));
     const terms = new Map(base.map((w) => [w, 1]));
     base.forEach((w) => (SYN[w] || []).forEach((s) => { const t = stem(s); if (!terms.has(t)) terms.set(t, 0.5); }));
     const N = CORPUS.length;
@@ -1111,8 +1119,8 @@
   const SUGGEST = ["Which suppressants did NASA test?", "What is a cool flame?", "Has any material burned in lunar-base air?", "Why might 1 g material screening not be conservative?",
     "How does smoke change in microgravity?", "Does airflow direction matter?"];
   function renderAsk(q) {
-    $("#ask-sug").innerHTML = SUGGEST.map((s) => `<button class="chip" type="button">${esc(s)}</button>`).join("");
-    document.querySelectorAll("#ask-sug .chip").forEach((b) => b.addEventListener("click", () => { $("#ask-q").value = b.textContent; renderAsk(b.textContent); }));
+    $("#ask-sug").innerHTML = SUGGEST.map((s) => `<button class="chip" type="button" data-q="${esc(s)}">${esc(s)}</button>`).join("");
+    document.querySelectorAll("#ask-sug .chip").forEach((b) => b.addEventListener("click", () => { $("#ask-q").value = b.textContent; renderAsk(b.dataset.q); }));
     if (!q) { $("#ask-out").innerHTML = `<p class="note">${CORPUS.length} passages indexed from NASA PSI investigation records, Skylab Phoenix findings, habitat definitions and a short glossary.</p>`; return; }
     const { hits, terms } = search(q);
     if (!hits.length || hits[0].s < 1.2) {
@@ -1124,6 +1132,52 @@
         <h4>${esc(d.title)}</h4><p>${snippet(d.text, terms)}</p>
         ${d.url ? `<a class="src-link" href="${esc(d.url)}" ${d.url.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${d.url.startsWith("http") ? "Open the NASA PSI record ↗" : "Open in dashboard →"}</a>` : ""}
       </article>`).join("") + `<p class="note">Ranked by BM25 relevance over NASA's own text. Passages are quoted, not generated.</p>`;
+  }
+
+  // Floating "Ask the archive" chat: verified SI briefings + quoted NASA passages. Nothing is generated.
+  const HAB_WORDS = [["moon_base", /\b(moon|lunar|luna|base|rover)\b/i], ["exploration", /\b(exploration|exploraci[oó]n|8\.2|34 ?%)/i],
+    ["eva_prep", /\b(eva|airlock|esclusa|campout|26\.5)/i], ["suit", /\b(suit|traje|spacesuit)\b/i], ["cabin", /\b(cabin|cabina|iss|station|estaci[oó]n)\b/i]];
+  const CHAT_SUG = ["Has any material burned in lunar-base air?", "Which suppressants did NASA test?", "What is a cool flame?", "Does airflow direction matter?", "How does smoke change in microgravity?"];
+  const chat = { open: false, n: 0 };
+  function chatAnswer(q) {
+    const hab = (HAB_WORDS.find(([, re]) => re.test(q)) || [])[0];
+    const parts = [];
+    if (hab && SI && SI.habitat[hab]) {
+      const b = SI.habitat[hab], hb = D.habitats.find((x) => x.id === hab);
+      parts.push(`<div class="cb-brief"><div class="brief-meta">${badge(b)}<span class="mono-sm">${esc(hb.name)} · ${o2pct(hb.x_o2)} O₂ · ${num(hb.p_atm * ATM_PSI, 1)} psi</span></div>
+        ${b.headline ? `<b>${esc(b.headline)}</b>` : ""}<p>${b.sentences.slice(0, 3).map((x) => `<span>${esc(x.text)}</span>`).join(" ")}</p>
+        <a class="src-link" href="#/ask" data-hab="${hab}">Full briefing with its evidence →</a></div>`);
+    }
+    const { hits, terms } = search(q, 3);
+    const good = hits.filter((h) => h.s >= 1.2);
+    good.forEach(({ d }) => parts.push(`<div class="cb-hit"><span class="tag">${esc(d.kind)}</span>${d.psi ? ` <span class="mono-sm">${esc(d.psi)}</span>` : ""}
+      <b>${esc(d.title)}</b><p>${snippet(d.text, terms, 260)}</p>${d.url ? `<a class="src-link" href="${esc(d.url)}" ${d.url.startsWith("http") ? 'target="_blank" rel="noopener"' : ""}>${d.url.startsWith("http") ? "NASA PSI record ↗" : "Open in the dashboard →"}</a>` : ""}</div>`));
+    if (!parts.length) return `<p>No passage in NASA's archive answers this well. Try naming a fire type (droplet, solid, gas flame, smoke), a crew atmosphere or a suppressant.</p>`;
+    return parts.join("") + `<p class="cb-foot">${good.length ? "Passages are quoted from NASA's own text and ranked by relevance, not generated." : ""}</p>`;
+  }
+  function chatAsk(q, shown) {
+    q = String(q || "").trim();
+    if (!q) return;
+    const log = $("#cb-log");
+    log.insertAdjacentHTML("beforeend", `<div class="cb-msg cb-msg--me">${esc(shown || q)}</div><div class="cb-msg cb-msg--bot">${chatAnswer(q)}</div>`);
+    log.querySelectorAll('.cb-brief a[data-hab]').forEach((a) => a.addEventListener("click", () => { briefState.hab = a.dataset.hab; safe(renderBrief, "brief"); chatToggle(false); }));
+    const last = log.lastElementChild; requestAnimationFrame(() => { log.scrollTop = last.offsetTop - 12; });
+    $("#cb-sug").hidden = true;
+  }
+  function chatToggle(open = !chat.open) {
+    chat.open = open;
+    $("#cb").classList.toggle("is-open", open);
+    $("#cb-btn").setAttribute("aria-expanded", open);
+    $("#cb-panel").setAttribute("aria-hidden", !open);
+    if (open) setTimeout(() => $("#cb-q").focus(), 250);
+  }
+  function initChat() {
+    $("#cb-sug").innerHTML = CHAT_SUG.map((x) => `<button class="chip" type="button" data-q="${esc(x)}">${esc(x)}</button>`).join("");
+    document.querySelectorAll("#cb-sug .chip").forEach((b) => b.addEventListener("click", () => chatAsk(b.dataset.q, b.textContent)));
+    $("#cb-btn").addEventListener("click", () => chatToggle());
+    $("#cb-close").addEventListener("click", () => chatToggle(false));
+    $("#cb-form").addEventListener("submit", (e) => { e.preventDefault(); const q = $("#cb-q").value; $("#cb-q").value = ""; safe(() => chatAsk(q), "chat"); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && chat.open) chatToggle(false); });
   }
 
   const AUD = [
@@ -1425,7 +1479,7 @@
     lab3dState.tally = [];
   }
 
-  const FAM_LABEL = { "PMMA rod": "Acrylic rods", "SIBAL fabric": "Cotton-fiberglass fabric", "PMMA thin film": "Thin films", "PMMA slab": "Slabs", "PMMA sphere": "Spheres", "Nomex fabric": "Nomex", Droplet: "Fuel droplets", "Spherical gas flame": "Gas spheres", "Gas jet flame": "Gas jets" };
+  const FAM_LABEL = { "PMMA rod": "Acrylic rods", "SIBAL fabric": "Cotton-fiberglass fabric", "PMMA thin film": "Thin films", "PMMA slab": "Slabs", "PMMA sphere": "Spheres", "Nomex fabric": "Nomex", Droplet: "Fuel droplets", "Spherical gas flame": "Gas spheres", "Gas jet flame": "Gas jets", Candle: "Wax candle" };
   const STATE = [["All", "All"], ["Solid", "Solids"], ["Liquid", "Liquids"], ["Gas", "Gases"]];
   const archState = { st: "All", fam: "All", all: false };
   function renderArchive() {
@@ -1438,14 +1492,15 @@
     document.querySelectorAll("#arch-filter button").forEach((b) => b.addEventListener("click", () => { archState.fam = b.dataset.f; renderArchive(); }));
     const ord = { Solid: 0, Liquid: 1, Gas: 2 };
     const list = inState.filter((c) => archState.fam === "All" || c.family === archState.fam).sort((a, b) => (archState.st === "All" ? 0 : ord[a.state] - ord[b.state]) || (a.o2 ?? 99) - (b.o2 ?? 99));
-    const pickMix = () => { const by = { Solid: [], Liquid: [], Gas: [] }; list.forEach((c) => by[c.state].push(c)); const out = []; for (let i = 0; out.length < Math.min(12, list.length); i++) for (const k of ["Solid", "Liquid", "Gas"]) if (by[k][i] && out.length < 12) out.push(by[k][i]); return out; };
-    const shown = archState.all ? list : archState.st === "All" ? pickMix() : list.slice(0, 12);
-    const air = (a) => { const t = String(a).replace(/\([^)]*\)/g, "").replace(/\s*,\s*/g, ", ").replace(/,\s*$/, "").trim(); return t ? `${t} cm/s` : "—"; };
+    const PAGE = 18;
+    const pickMix = () => { const by = { Solid: [], Liquid: [], Gas: [] }; list.forEach((c) => by[c.state].push(c)); const out = []; for (let i = 0; out.length < Math.min(PAGE, list.length); i++) for (const k of ["Solid", "Liquid", "Gas"]) if (by[k][i] && out.length < PAGE) out.push(by[k][i]); return out; };
+    const shown = archState.all ? list : archState.st === "All" ? pickMix() : list.slice(0, PAGE);
+    const air = (a) => { if (a == null) return "—"; const t = String(a).replace(/\([^)]*\)/g, "").replace(/\s*,\s*/g, ", ").replace(/,\s*$/, "").trim(); return !t ? "—" : /[a-z]{3}/i.test(t) ? `${t} (NASA note)` : `${t} cm/s`; };
     const path = (c) => `assets/video/${c.dir ? c.dir + "/" : ""}${c.f}`;
     const stTag = { Solid: "Solid", Liquid: "Liquid", Gas: "Gas" };
     $("#arch").innerHTML = shown.map((c) => `<figure class="ac ac--${c.state.toLowerCase()}"><div class="ac__v"><video data-src="${path(c)}.mp4" poster="${path(c)}.jpg" muted loop playsinline preload="none"></video><span class="stage__tag">×${c.x}</span><span class="ac__st">${stTag[c.state]}</span></div>
       <figcaption><span class="ac__o2">${c.o2 == null ? "—" : `${c.approx ? "≈" : ""}${c.o2}`}<small>% O₂</small></span><b>${esc(c.material)}</b><span class="mono-sm">${esc(FAM_LABEL[c.family] || c.family)} · ${c.psi ? `${c.psi} · ` : ""}test ${esc(c.test)}</span><span class="ac__m">${c.m ? esc(c.m) : `<span>Airflow</span> ${esc(air(c.air))}${c.co != null ? ` · CO +${c.co} ppm` : ""}`}</span></figcaption></figure>`).join("");
-    $("#arch-more").hidden = list.length <= 12;
+    $("#arch-more").hidden = list.length <= PAGE;
     $("#arch-more").textContent = archState.all ? "Show fewer" : `Show all ${list.length}`;
     lazyVideos("#arch video");
   }
@@ -1684,12 +1739,14 @@
 
   const RC = D.records;
   const DSTATE = [["All", "All"], ["S", "Solids"], ["L", "Liquids"], ["G", "Gases"], ["M", "Smoke & dust"]];
-  const DCOL = { S: C.orange, L: C.blue, G: C.violet, M: C.teal };
-  const OUTS = [["1", "Went out on its own", C.blue], ["0", "Kept burning", C.orange], ["u", "No outcome label", C.ink4]];
+  const DCOL = { S: C.orange, L: C.blue, G: C.violet, M: C.ink3 };
+  const DSHAPE = { S: ["circle", "circle"], L: ["square", "square"], G: ["diamond", "diamond"], M: ["triangle-up", "tri"] };
+  const OUTS = [["1", "Went out on its own", C.blue], ["0", "Did not go out on its own", C.orange], ["u", "No outcome label", "#475569"]];
   const BANDS = [[0, 0.16, "<16%"], [0.16, 0.19, "16–19%"], [0.19, 0.22, "19–22%"], [0.22, 0.26, "22–26%"], [0.26, 0.30, "26–30%"], [0.30, 0.40, "30–40%"], [0.40, 1.01, "≥40%"]];
   const dash = { state: "All", exp: new Set(), out: new Set(), band: null, box: null, moon: false };
   const rec = (r) => ({ exp: RC.experiments[r[0]], st: r[1], o2: r[2], p: r[3], assumed: !!r[4], out: r[5] == null ? "u" : String(r[5]), fuel: RC.fuels[r[6]], co2: r[7] });
   const RECS = RC ? RC.rows.map(rec) : [];
+  const DEXP = (() => { const c = {}; RECS.forEach((r) => { (c[r.exp] = c[r.exp] || { e: r.exp, st: r.st, n: 0 }).n++; }); return Object.values(c).sort((x, y) => y.n - x.n); })();
   const MOON = RC ? { o2: RC.moon_envelope.x_o2_min, p: RC.moon_envelope.p_atm_max } : { o2: 0.28, p: 0.744 };
   function dashPass(r, skip) {
     if (skip !== "state" && dash.state !== "All" && r.st !== dash.state) return false;
@@ -1734,49 +1791,73 @@
       [meas.length.toLocaleString("en-US"), "with measured O₂ and pressure"],
     ];
     $("#dash-kpis").innerHTML = kp.map(([v, l]) => `<div><dd>${v}</dd><dt>${l}</dt></div>`).join("");
-    if (!hasPlotly) return;
+    const dim = (on) => (on ? "" : " is-dim");
+    const keyed = (host, rows, make, update) => {
+      const seen = new Set();
+      rows.forEach((r) => {
+        let el = host.querySelector(`:scope > [data-k="${CSS.escape(String(r.k))}"]`);
+        if (!el) { el = make(r); el.dataset.k = r.k; host.appendChild(el); void el.offsetWidth; }
+        update(el, r); seen.add(String(r.k));
+      });
+      [...host.children].forEach((c) => { if (c.dataset.k != null && !seen.has(c.dataset.k)) c.remove(); });
+    };
+    const html = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; };
+    const N = (n) => n.toLocaleString("en-US");
+    // Oxygen bands: thin columns on one baseline, one color, the Moon-base range marked under the axis.
     const bandBase = RECS.filter((r) => dashPass(r, "band"));
-    const bc = BANDS.map((b) => bandBase.filter((r) => r.o2 != null && r.o2 >= b[0] && r.o2 < b[1]));
-    const el1 = plot("dash-o2", [{
-      type: "bar", x: BANDS.map((b) => b[2]), y: bc.map((x) => x.length), customdata: BANDS.map((_, i) => i),
-      marker: { color: BANDS.map((_, i) => dash.band == null || dash.band === i ? (i >= 5 ? C.orange : C.blue) : "rgba(148,163,184,.25)") },
-      hovertemplate: "%{x} O₂: %{y} records<extra></extra>", text: bc.map((x) => x.length), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 11 },
-    }], layout({ margin: { l: 40, r: 10, t: 18, b: 36 }, yaxis: { title: { text: "Records" } }, bargap: 0.25 }));
+    const bc = BANDS.map((b) => bandBase.filter((r) => r.o2 != null && r.o2 >= b[0] && r.o2 < b[1]).length);
+    const bmax = Math.max(1, ...bc);
+    const o2El = $("#dash-o2");
+    if (!o2El.querySelector(".vbars")) o2El.innerHTML = `<div class="vbars"></div><div class="vbars__note"><span></span><i>Moon-base oxygen, 30% and above</i></div>`;
+    keyed(o2El.querySelector(".vbars"), BANDS.map((bd, i) => ({ k: i, label: bd[2], n: bc[i] })),
+      (r) => { const el = html(`<button type="button" class="vb"><span class="vb__t"><span class="vb__v"></span><i></i></span><span class="vb__l">${r.label}</span></button>`);
+        el.addEventListener("click", () => { dash.band = dash.band === +el.dataset.k ? null : +el.dataset.k; renderDash(); }); return el; },
+      (el, r) => { el.querySelector("i").style.height = `${(100 * r.n) / bmax}%`; el.querySelector(".vb__v").textContent = N(r.n); el.className = "vb" + dim(dash.band == null || dash.band === r.k);
+        el.setAttribute("aria-pressed", dash.band === r.k); el.title = `${r.label} O₂: ${N(r.n)} records`; });
+    // Outcome: one whole split into three parts.
     const outBase = RECS.filter((r) => dashPass(r, "out"));
-    const el2 = plot("dash-out", [{
-      type: "bar", orientation: "h", y: OUTS.map((o) => o[1]), x: OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), customdata: OUTS.map((o) => o[0]),
-      marker: { color: OUTS.map((o) => !dash.out.size || dash.out.has(o[0]) ? o[2] : "rgba(148,163,184,.25)") },
-      text: OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 11 },
-      hovertemplate: "%{y}: %{x} records<extra></extra>",
-    }], layout({ margin: { l: 150, r: 40, t: 10, b: 30 }, yaxis: { autorange: "reversed" }, bargap: 0.35 }));
+    const oc = OUTS.map((o) => outBase.filter((r) => r.out === o[0]).length), osum = Math.max(1, oc.reduce((a, c) => a + c, 0));
+    const outEl = $("#dash-out");
+    if (!outEl.querySelector(".segbar")) outEl.innerHTML = `<div class="segbar" role="group"></div><div class="seglist"></div>`;
+    const outRows = OUTS.map((o, i) => ({ k: o[0], label: o[1], color: o[2], n: oc[i], share: oc[i] / osum }));
+    const toggleOut = (k) => { dash.out.has(k) ? dash.out.delete(k) : dash.out.add(k); renderDash(); };
+    keyed(outEl.querySelector(".segbar"), outRows,
+      (r) => { const el = html(`<button type="button" class="segbar__p"><b></b></button>`); el.style.background = r.color; el.addEventListener("click", () => toggleOut(el.dataset.k)); return el; },
+      (el, r) => { el.style.flexGrow = r.n; el.style.display = r.n ? "" : "none"; el.querySelector("b").textContent = r.share >= 0.09 ? pct(r.share) : "";
+        el.className = "segbar__p" + dim(!dash.out.size || dash.out.has(r.k)); el.title = `${r.label}: ${N(r.n)} records (${pct(r.share)})`; });
+    keyed(outEl.querySelector(".seglist"), outRows,
+      (r) => { const el = html(`<button type="button" class="seglist__r"><i></i><span>${r.label}</span><b></b><small></small></button>`); el.querySelector("i").style.background = r.color; el.addEventListener("click", () => toggleOut(el.dataset.k)); return el; },
+      (el, r) => { el.querySelector("b").textContent = N(r.n); el.querySelector("small").textContent = pct(r.share); el.className = "seglist__r" + dim(!dash.out.size || dash.out.has(r.k)); el.setAttribute("aria-pressed", dash.out.has(r.k)); });
+    // Investigations: ranked thin bars in a fixed order, colored by state of matter.
     const expBase = RECS.filter((r) => dashPass(r, "exp"));
-    const ex = [...new Set(expBase.map((r) => r.exp))].map((e) => ({ e, n: expBase.filter((r) => r.exp === e).length, st: expBase.find((r) => r.exp === e).st })).sort((a, b) => b.n - a.n);
-    const el3 = plot("dash-exp", [{
-      type: "bar", orientation: "h", y: ex.map((x) => x.e), x: ex.map((x) => x.n), customdata: ex.map((x) => x.e),
-      marker: { color: ex.map((x) => !dash.exp.size || dash.exp.has(x.e) ? DCOL[x.st] : "rgba(148,163,184,.25)") },
-      text: ex.map((x) => x.n), textposition: "outside", cliponaxis: false, textfont: { color: C.ink2, size: 10.5 },
-      hovertemplate: "%{y} (" + "%{customdata}" + "): %{x} records<extra></extra>",
-    }], layout({ margin: { l: 130, r: 40, t: 6, b: 24 }, yaxis: { autorange: "reversed", tickfont: { size: 10.5 } }, bargap: 0.3, height: Math.max(150, 24 * ex.length + 44) }));
+    const cnt = {}; expBase.forEach((r) => { cnt[r.exp] = (cnt[r.exp] || 0) + 1; });
+    const exAll = DEXP.map((x) => ({ k: x.e, st: x.st, n: cnt[x.e] || 0 })).filter((x) => x.n);
+    const emax = Math.max(1, ...exAll.map((x) => x.n));
+    const expEl = $("#dash-exp");
+    if (!expEl.querySelector(".hbars")) expEl.innerHTML = `<div class="legend">${["S", "L", "G", "M"].map((k) => legendItem(DSHAPE[k][1], DCOL[k], DSTATE.find((x) => x[0] === k)[1])).join("")}</div><div class="hbars"></div>`;
+    keyed(expEl.querySelector(".hbars"), exAll,
+      (r) => { const el = html(`<button type="button" class="hb"><span class="hb__l">${esc(r.k)}</span><span class="hb__t"><i></i></span><span class="hb__v"></span></button>`); el.querySelector("i").style.background = DCOL[r.st];
+        el.addEventListener("click", () => { const k = el.dataset.k; dash.exp.has(k) ? dash.exp.delete(k) : dash.exp.add(k); renderDash(); }); return el; },
+      (el, r) => { el.querySelector("i").style.width = `${Math.max(0.6, (100 * r.n) / emax)}%`; el.querySelector(".hb__v").textContent = N(r.n); el.className = "hb" + dim(!dash.exp.size || dash.exp.has(r.k));
+        el.style.order = DEXP.findIndex((x) => x.e === r.k); el.setAttribute("aria-pressed", dash.exp.has(r.k)); el.title = `${r.k} (${RC.psi[r.k]}): ${N(r.n)} records`; });
+    if (!hasPlotly) return;
     const mapBase = RECS.filter((r) => dashPass(r, "box") && r.o2 != null && r.p != null);
     const tr = [];
     const moonH = D.habitats.find((x) => x.id === "moon_base");
-    tr.push({ x: [30, 100, 100, 30, 30], y: [0.2, 0.2, moonH.p_atm, moonH.p_atm, 0.2], type: "scatter", mode: "lines", fill: "toself", fillcolor: "rgba(242,96,15,0.10)", line: { color: "rgba(251,146,60,0.6)", width: 1 }, hoverinfo: "skip" });
+    tr.push({ x: [30, 100, 100, 30, 30], y: [0.2, 0.2, moonH.p_atm, moonH.p_atm, 0.2], type: "scatter", mode: "lines", fill: "toself", fillcolor: "rgba(242,96,15,0.09)", line: { color: "rgba(251,146,60,0.45)", width: 1 }, hoverinfo: "skip" });
     ["S", "L", "G", "M"].forEach((k) => {
       const pts = mapBase.filter((r) => r.st === k);
       if (!pts.length) return;
       tr.push({ type: "scattergl", mode: "markers", x: pts.map((r) => 100 * r.o2), y: pts.map((r) => r.p), name: DSTATE.find((s) => s[0] === k)[1],
-        text: pts.map((r) => `${r.exp} · ${r.fuel}`),
-        marker: { size: 6, color: pts.map((r) => r.assumed ? "rgba(0,0,0,0)" : DCOL[k]), line: { color: DCOL[k], width: 1 }, opacity: 0.8 },
-        hovertemplate: "%{text}<br>O₂ %{x:.1f}% · %{y:.2f} atm<extra></extra>" });
+        text: pts.map((r) => `${r.exp} · ${r.fuel}${r.assumed ? " · cabin air assumed" : ""}`),
+        marker: { symbol: DSHAPE[k][0], size: 8, color: pts.map((r) => r.assumed ? "rgba(0,0,0,0)" : DCOL[k]), line: { color: pts.map((r) => (r.assumed ? DCOL[k] : C.surface)), width: 1.2 }, opacity: 0.9 },
+        hovertemplate: "<b>%{text}</b><br>O₂ %{x:.1f}% · %{y:.2f} atm<extra></extra>" });
     });
-    tr.push({ type: "scatter", mode: "markers+text", x: HUI.map((h) => 100 * h.x_o2), y: HUI.map((h) => h.p_atm), text: HUI.map((h) => h.name), textposition: "top right", textfont: { color: C.ink, size: 10.5 },
-      marker: { symbol: "cross-thin-open", size: 14, color: C.ink, line: { color: C.ink, width: 2 } }, hovertemplate: "%{text}<extra></extra>" });
-    const el4 = plot("dash-map", tr, layout({ dragmode: "select", margin: { l: 56, r: 16, t: 10, b: 46 }, xaxis: { title: { text: "Oxygen, % of the air" }, range: [8, 90] }, yaxis: { title: { text: "Pressure, atm" }, type: "log", range: [Math.log10(0.3), Math.log10(4)] },
-      shapes: dash.box ? [{ type: "rect", x0: dash.box[0], x1: dash.box[1], y0: dash.box[2], y1: dash.box[3], line: { color: C.amber, width: 1.5, dash: "dot" }, fillcolor: "rgba(251,191,36,.06)" }] : [] }));
-    const wire = (el, fn) => { if (!el || !el.on) return; el.removeAllListeners && el.removeAllListeners("plotly_click"); el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p) fn(p); }); };
-    wire(el1, (p) => { dash.band = dash.band === p.customdata ? null : p.customdata; renderDash(); });
-    wire(el2, (p) => { const k = p.customdata; dash.out.has(k) ? dash.out.delete(k) : dash.out.add(k); renderDash(); });
-    wire(el3, (p) => { const k = p.customdata; dash.exp.has(k) ? dash.exp.delete(k) : dash.exp.add(k); renderDash(); });
+    tr.push({ type: "scatter", mode: "markers+text", x: HUI.map((h) => 100 * h.x_o2), y: HUI.map((h) => h.p_atm), text: HUI.map((h) => h.name), textposition: HUI.map((h) => ({ eva_prep: "bottom left", exploration: "bottom right" }[h.id] || "top right")), textfont: { color: C.ink2, size: 11 },
+      marker: { symbol: "cross-thin-open", size: 13, color: C.ink, line: { color: C.ink, width: 1.6 } }, hovertemplate: "%{text}<extra></extra>" });
+    $("#dash-map-legend").innerHTML = ["S", "L", "G", "M"].map((k) => legendItem(DSHAPE[k][1], DCOL[k], DSTATE.find((x) => x[0] === k)[1])).join("") + legendItem("circle", C.ink3, "Hollow: cabin air assumed", true) + legendItem("cross", C.ink, "Crew atmospheres") + legendItem("bar", "rgba(242,96,15,0.35)", "Moon-base envelope");
+    const el4 = plot("dash-map", tr, layout({ dragmode: "select", margin: { l: 56, r: 16, t: 10, b: 46 }, xaxis: { title: { text: "Oxygen, % of the air" }, range: [8, 62], ticksuffix: "%" }, yaxis: { title: { text: "Pressure, atm (log scale)" }, type: "log", range: [Math.log10(0.3), Math.log10(4)], tickvals: [0.3, 0.5, 0.7, 1, 2, 3], ticktext: ["0.3", "0.5", "0.7", "1", "2", "3"] },
+      shapes: dash.box ? [{ type: "rect", x0: dash.box[0], x1: dash.box[1], y0: dash.box[2], y1: dash.box[3], line: { color: C.amber, width: 1.5 }, fillcolor: "rgba(251,191,36,.06)" }] : [] }));
     if (el4 && el4.on) {
       el4.removeAllListeners && el4.removeAllListeners("plotly_selected");
       el4.on("plotly_selected", (ev) => {
@@ -1868,6 +1949,10 @@
     worlds.forEach((w) => w && (v === "learn" ? w.resume() : w.pause()));
     const view = document.querySelector(`.view[data-view="${v}"]`);
     view.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
+    if (changed && v !== "learn") {
+      view.classList.remove("view--enter"); void view.offsetWidth; view.classList.add("view--enter");
+      setTimeout(() => view.classList.remove("view--enter"), 1100);
+    }
     requestAnimationFrame(() => {
       resizeIn(view);
       const el = anchor && document.getElementById(anchor);
@@ -1898,6 +1983,7 @@
 
   function safe(fn, name) { try { fn(); } catch (e) { console.error(`[Skylab Phoenix] ${name} failed`, e); } }
   $("#ask-form").addEventListener("submit", (e) => { e.preventDefault(); safe(() => renderAsk($("#ask-q").value), "ask"); });
+  safe(initChat, "chat");
   $("#brief-dl").addEventListener("click", () => download(`skylab-phoenix-briefing-${briefState.hab}.md`, briefMarkdown()));
   $("#brief-sim").addEventListener("click", () => { ensure("lab"); setPreset(briefState.hab); location.hash = "#/lab"; });
   $("#inv-search").addEventListener("input", (e) => { invState.q = e.target.value; renderInvList(); });

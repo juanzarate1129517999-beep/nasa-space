@@ -287,10 +287,10 @@
           <div class="dash-active" id="dash-active" aria-live="polite"></div>
           <dl class="dash-kpis" id="dash-kpis"></dl>
           <div class="dash-grid">
-            <div class="card dash-c"><p class="label">Oxygen in the air · click a bar</p><div class="chart dash-ch" id="dash-o2" role="img" aria-label="Records by oxygen level"></div></div>
-            <div class="card dash-c"><p class="label">Did the fire go out on its own? · click a bar</p><div class="chart dash-ch" id="dash-out" role="img" aria-label="Records by outcome"></div></div>
-            <div class="card dash-c dash-c--tall"><p class="label">Investigations · click to filter</p><div class="chart dash-ch dash-ch--tall" id="dash-exp" role="img" aria-label="Records by investigation"></div></div>
-            <div class="card dash-c dash-c--wide"><p class="label">Oxygen against pressure · drag a box to filter</p><div class="chart dash-ch dash-ch--map" id="dash-map" role="img" aria-label="Records by oxygen and pressure, with crew atmospheres"></div><p class="note">Each dot is one record; hollow dots ran in ordinary cabin air that was not measured per test. White crosses are crew atmospheres; the orange box is the lunar-base envelope from the brief (≥30% O₂, ≤10.2 psi).</p></div>
+            <div class="card dash-c"><p class="label">Oxygen in the air</p><p class="dash-q">How many tests ran at each oxygen level? <span>Click a column to filter.</span></p><div class="dash-ch" id="dash-o2" role="group" aria-label="Records by oxygen level"></div></div>
+            <div class="card dash-c"><p class="label">Outcome</p><p class="dash-q">Did the fire go out on its own? <span>Click a part to filter.</span></p><div class="dash-ch" id="dash-out" role="group" aria-label="Records by outcome"></div></div>
+            <div class="card dash-c dash-c--tall"><p class="label">Investigations</p><p class="dash-q">Which experiments hold the records? <span>Click a bar to filter.</span></p><div class="dash-ch dash-ch--tall" id="dash-exp" role="group" aria-label="Records by investigation"></div></div>
+            <div class="card dash-c dash-c--wide"><p class="label">Oxygen against pressure</p><p class="dash-q">Where did NASA fly fire, and where will crews live? <span>Drag a box to filter.</span></p><div class="legend" id="dash-map-legend"></div><div class="chart dash-ch dash-ch--map" id="dash-map" role="img" aria-label="Records by oxygen and pressure, with crew atmospheres"></div></div>
           </div>
           <div class="card dash-tbl">
             <div class="dash-tbl__head"><p class="label" id="dash-tbl-cap">Records</p><button type="button" class="btn btn--line btn--sm" id="dash-csv">Download filtered CSV</button></div>
@@ -705,6 +705,23 @@ python -m pytest</code></pre>
   </section>
 </main>
 
+<div class="cb" id="cb">
+  <section class="cb-panel" id="cb-panel" role="dialog" aria-label="Ask the archive" aria-hidden="true">
+    <header class="cb-head">
+      <div><p class="label">Ask the archive</p><b>Answers you can check</b></div>
+      <button class="cb-x" id="cb-close" type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="cb-log" id="cb-log" aria-live="polite">
+      <div class="cb-msg cb-msg--bot"><p>Ask about fire in space. I answer with the verified SI briefings and with passages quoted from NASA's 24 combustion investigations, each with its source. I never make up text.</p></div>
+      <div class="chips cb-sug" id="cb-sug"></div>
+    </div>
+    <form class="cb-form" id="cb-form" role="search">
+      <input type="search" id="cb-q" placeholder="e.g. What happens to fire on the Moon?" aria-label="Your question" autocomplete="off">
+      <button class="btn btn--fire btn--sm" type="submit" aria-label="Ask">↑</button>
+    </form>
+  </section>
+  <button class="cb-btn" id="cb-btn" type="button" aria-expanded="false" aria-controls="cb-panel"><span class="cb-dot" aria-hidden="true"></span><span>Ask SI</span></button>
+</div>
 <footer class="footer">
   <div class="wrap">
     <div class="footer__cols">
