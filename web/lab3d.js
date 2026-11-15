@@ -34,6 +34,7 @@
     const scene = new T.Scene();
     const camera = new T.PerspectiveCamera(40, 1, 0.05, 100);
     camera.position.set(3.0, 1.3, 5.0);
+    if (opts.cam) camera.position.set(opts.cam[0], opts.cam[1], opts.cam[2]);
     const controls = new T.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 2.2; controls.maxDistance = 10;
     controls.autoRotate = !reduce && opts.autoRotate !== false; controls.autoRotateSpeed = 0.45;
@@ -114,8 +115,10 @@
       renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
     }
     addEventListener("resize", resize); resize();
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(host);
     let running = true, visible = true, last = performance.now();
     newRun();
+    if (opts.lit) run.t = 0.2;
     const proj = new T.Vector3();
     function frame(now) {
       if (!running) return;
@@ -185,7 +188,7 @@
       labels(map) { setLabels(map); },
       showLabels(v) { showLabels = v; },
       pause() { running = false; },
-      resume() { if (!running) { running = true; last = performance.now(); resize(); requestAnimationFrame(frame); } },
+      resume() { resize(); if (!running) { running = true; last = performance.now(); resize(); requestAnimationFrame(frame); } },
       resize,
     };
   }

@@ -106,6 +106,30 @@
         </div>
       </div>
     </div>
+    <div class="sec sec--dark">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">Lab 2 · Four worlds</p>
+          <h2>One flame, four gravities. <span class="mute">Same fuel, same air, side by side.</span></h2>
+          <p class="sec__lead">Change the oxygen, the airflow or the fuel and watch all four flames answer at once. Drag any of them to turn it.</p>
+        </header>
+        <div class="worlds-ctl" id="worlds-ctl"></div>
+        <div class="worlds" id="worlds"></div>
+        <p class="note">Only the ISS flame comes from flight data: the model was trained on ISS droplet fires. The Moon, Mars and Earth shapes show how rising hot gas stretches a flame as gravity grows; they are illustrations, not predictions. No partial-gravity fire data is in NASA PSI yet.</p>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="wrap">
+        <header class="sec__head">
+          <p class="eyebrow">Lab 3 · The fire landscape</p>
+          <h2>When does a fire go out by itself? <span class="mute">The whole model as a 3D landscape, with every NASA droplet test.</span></h2>
+        </header>
+        <div class="land">
+          <div class="card land__plot"><div class="chart land__chart" id="land3d" role="img" aria-label="3D surface of the chance a droplet fire goes out on its own, by oxygen and pressure"></div></div>
+          <aside class="card land__side" id="land-side"></aside>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="view" id="v-flames" data-view="flames" hidden>
@@ -120,12 +144,13 @@
         <h3 class="sub-h">Solids, liquids and gases.</h3>
         <div class="reel" id="reel"></div>
         <div class="arch-head">
-          <h3 class="sub-h">Every BASS-II flight burn on camera, by oxygen.</h3>
+          <h3 class="sub-h">The flight archive: solids, liquids and gases.</h3>
+          <div class="seg" id="arch-state" role="group" aria-label="State of the fuel"></div>
           <div class="seg seg--wrap" id="arch-filter" role="group" aria-label="Material"></div>
         </div>
         <div class="arch" id="arch"></div>
         <div class="links"><button class="btn btn--line btn--sm" id="arch-more" type="button">Show all</button></div>
-        <p class="note">Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Each card shows the oxygen measured in the glovebox before ignition, the airflow steps the crew set and the carbon monoxide the burn added. Camera exposure changes between and within tests, so compare shape and color, not brightness. Eight sequences that show the camera monitor or no flame are left out.</p>
+        <p class="note">Clips are from NASA PSI raw data (CC0), cropped to the flame and sped up as marked. Solids: BASS-II, with the oxygen measured before ignition, the airflow steps the crew set and the carbon monoxide the burn added. Liquids: droplets from the Cool Flame Investigation (PSI-39), with oxygen, pressure and helium from its table; the pink glow is the hot flame around the droplet. Gases: ACME s-Flame and CFI-G spheres and SPICE jet flames; “≈” marks oxygen taken as cabin air. Camera exposure changes between and within tests, so compare shape and color, not brightness. Sequences that show only the hardware or no flame are left out.</p>
       </div>
     </div>
     <div class="sec sec--alt">
@@ -260,10 +285,16 @@
           <p class="sec__lead">Every flight test with a known oxygen level and pressure, against the crewed atmospheres. The lunar-base envelope from the brief (≥30% O₂, ≤10.2 psi) is almost empty.</p>
         </header>
         <div class="card" id="coverage">
-          <div class="controls-row" id="cov-filters"></div>
+          <div class="cov-top">
+            <div class="seg" id="cov-mode" role="group" aria-label="Chart type"><button type="button" data-m="simple" aria-pressed="true">Simple view</button><button type="button" data-m="map" aria-pressed="false">Full map</button></div>
+            <div class="controls-row" id="cov-filters"></div>
+          </div>
+          <div id="cov-simple"></div>
+          <div id="cov-map" hidden>
           <div class="legend" id="cov-legend"></div>
           <div class="chart tall" id="cov-chart" role="img" aria-label="Scatter of flight tests by oxygen fraction and pressure, with habitat atmospheres"></div>
-          <p class="note">Hollow markers: O₂ or pressure not reported per test, taken as ISS cabin air. Crossed markers: inverse flames, where the O₂ value is the oxidizer stream from the burner. ACME BRE (26.5 / 34 / 40% O₂) is not plotted because its table does not report pressure.</p>
+          <p class="note">How to read it: each dot is one flight test. Further right means more oxygen in the air; lower means thinner air (lower pressure). The white crosses are the air crews breathe or will breathe. Hollow markers: O₂ or pressure not reported per test, taken as ISS cabin air. Crossed markers: inverse flames, where the O₂ value is the oxidizer stream from the burner. ACME BRE (26.5 / 34 / 40% O₂) is not plotted because its table does not report pressure.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -331,8 +362,9 @@
             <span class="mono-sm">Mark groups near</span>
             <div class="seg seg--wrap" id="surv-hab" role="group" aria-label="Habitat"></div>
           </div>
-          <div class="legend" id="surv-legend"></div>
-          <div class="surv" id="surv-list"></div>
+          <div class="surv-top"><div class="legend" id="surv-legend"></div><div class="seg" id="surv-view" role="group" aria-label="Ranking view"><button type="button" data-v="chart" aria-pressed="true">Chart</button><button type="button" data-v="list" aria-pressed="false">Table</button></div></div>
+          <div class="surv-chart" id="surv-chart-wrap"><div class="chart" id="surv-chart" role="img" aria-label="Share of flames that did not go out on their own, per group, with 90% range"></div><p class="sub" id="surv-how"></p></div>
+          <div class="surv" id="surv-list" hidden></div>
           <div class="links"><button class="btn btn--line btn--sm" id="surv-more" type="button">Show all groups</button></div>
           <p class="note" id="surv-note"></p>
         </div>
@@ -342,7 +374,7 @@
         </header>
         <div class="crit" id="criteria"></div>
         <div class="inv-mode">
-          <div class="seg" id="inv-mode" role="group" aria-label="Investigation view"><button type="button" data-m="gallery" aria-pressed="true">Gallery</button><button type="button" data-m="list" aria-pressed="false">List and details</button></div>
+          <div class="seg" id="inv-mode" role="group" aria-label="Investigation view"><button type="button" data-m="gallery" aria-pressed="true">Gallery</button><button type="button" data-m="chart" aria-pressed="false">Score chart</button></div>
           <span class="mono-sm" id="inv-count"></span>
         </div>
         <div class="toolbar" id="investigations">
@@ -351,18 +383,25 @@
           <input class="search" type="search" id="inv-search" placeholder="Search name, keyword, PI…" aria-label="Search investigations">
         </div>
         <div class="inv-gallery" id="inv-gallery"></div>
-        <div class="inv-layout" id="inv-layout" hidden>
-          <div class="inv-list" id="inv-list" role="listbox" aria-label="Ranked investigations"></div>
-          <div class="card detail" id="inv-detail" aria-live="polite"></div>
+        <div class="card inv-chart" id="inv-chart-wrap" hidden>
+          <p class="sub">Each bar is one investigation's score for the habitat above, split into the three criteria. Click a bar to open its card.</p>
+          <div class="legend" id="inv-chart-legend"></div>
+          <div class="chart" id="inv-chart" role="img" aria-label="Score of each investigation split by criterion"></div>
         </div>
         <div class="card card--gap" id="compare">
           <p class="label">Side by side</p>
           <h3>Compare investigations.</h3>
-          <p class="sub">Pick up to three. Rows where they differ are highlighted.</p>
+          <p class="sub">Pick up to three, or press “Compare” on any card. The shape shows where each one is strong.</p>
           <div class="controls-row" id="cmp-pick"></div>
-          <div class="tbl-wrap"><table id="cmp-table" class="cmp"></table></div>
+          <div class="cmp-vis">
+            <div class="chart cmp-radar" id="cmp-radar" role="img" aria-label="Radar comparison of the selected investigations"></div>
+            <div class="cmp-cards" id="cmp-cards"></div>
+          </div>
+          <div class="cmp-air" id="cmp-air"></div>
+          <details class="more cmp-more"><summary><span><span class="label">Every field</span><b>Full comparison table</b></span></summary><div class="more__body"><div class="tbl-wrap"><table id="cmp-table" class="cmp"></table></div></div></details>
           <p class="note" id="cmp-note"></p>
         </div>
+        <dialog class="modal" id="inv-modal" aria-labelledby="im-title"><div class="modal__in" id="inv-modal-body"></div></dialog>
       </div>
     </div>
   </section>
@@ -376,25 +415,21 @@
           <p class="sec__lead">Among conditions near lunar-base air, Skylab Phoenix picks those where the 200 bootstrap models disagree most. Partial-gravity data (LUCI, FM2) is not in PSI yet; these are the conditions where it would pay off first.</p>
         </header>
         <div class="mission" id="mission"></div>
-        <div class="grid-2 card--gap">
-          <div class="card">
-            <p class="label">All six candidates</p>
-            <h3>How sure is the model today?</h3>
-            <p class="sub" id="next-sub"></p>
-            <div class="chart short" id="range-chart" role="img" aria-label="Range of today's estimate for each recommended test"></div>
-          </div>
-          <div class="card">
-            <p class="label">Recommendations</p>
-            <h3>Test conditions, in plain numbers.</h3>
-            <div class="tbl-wrap"><table id="next-table"></table></div>
-            <p class="note" id="next-note"></p>
-          </div>
-        </div>
-        <details class="card card--gap more" id="unc-details">
-          <summary><span><span class="label">For researchers</span><b>Where the model is unsure</b></span></summary>
+        <div class="howpick" id="howpick"></div>
+        <header class="sec__head card--gap" style="margin-top:clamp(48px,6vw,80px)">
+          <p class="eyebrow">All six candidates</p>
+          <h2>How sure is the model today? <span class="mute">A long bar means it does not know yet.</span></h2>
+        </header>
+        <div class="cands" id="cands"></div>
+        <details class="card card--gap more" id="next-tbl-d">
+          <summary><span><span class="label">In plain numbers</span><b>Recommendation table</b></span></summary>
+          <div class="more__body"><div class="tbl-wrap"><table id="next-table"></table></div><p class="note" id="next-note"></p></div>
+        </details>
+        <details class="card card--gap more" id="unc-details" open>
+          <summary><span><span class="label">Map of doubt</span><b>Where the model is unsure, and why we chose this test</b></span></summary>
           <div class="more__body">
             <div class="controls-row"><span class="mono-sm">Background computed at</span><div class="seg" id="unc-co2" role="group" aria-label="CO2 level for the map"></div></div>
-            <p class="sub">Width of the 90% range for a methanol droplet at the chosen CO₂ level. Brighter means more doubt. Orange dots: recommended tests at that CO₂ level; outlined dots use another level.</p>
+            <p class="sub">Each spot is a possible cabin air. Brighter purple means the model is less sure what a methanol droplet fire would do there. The orange numbered dots are the recommended tests at the chosen CO₂ level; the outlined ones use another level. The best flight goes where it is brightest and close to the crews’ air.</p>
             <div class="chart" id="unc-chart" role="img" aria-label="Uncertainty map"></div>
           </div>
         </details>
