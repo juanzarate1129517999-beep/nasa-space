@@ -57,6 +57,7 @@ GitHub Pages publishes `web/` on every push to `main` (`.github/workflows/pages.
 pip install -r requirements-dev.txt
 python -m pytest                                        # units, properties (Hypothesis), data contract, models, SI firewall
 ruff check .                                            # code checks (ruff.toml)
+mypy                                                    # type checks (mypy.ini)
 npm ci && npx playwright install chromium
 npm run test:e2e                                        # browser: every section, phone width, links, Fire Lab = Python model
 ```

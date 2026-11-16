@@ -28,9 +28,10 @@ def test_unit_constants():
                                           ("exploration", 0.34, 8.2), ("suit", 1.0, 4.3)])
 def test_habitat_atmospheres_match_their_sources(hid, o2, psi):
     h = next(x for x in HABITATS if x["id"] == hid)
+    source = str(h["source"])
     assert h["x_o2"] == o2
-    assert h["p_atm"] / PSI_TO_ATM == pytest.approx(psi, abs=0.05)
-    assert f"{psi:g} psi" in h["source"] or f"{psi:g} psia" in h["source"] or hid == "cabin"
+    assert float(h["p_atm"]) / PSI_TO_ATM == pytest.approx(psi, abs=0.05)  # type: ignore[arg-type]
+    assert f"{psi:g} psi" in source or f"{psi:g} psia" in source or hid == "cabin"
 
 
 def test_habitat_ids_are_unique():

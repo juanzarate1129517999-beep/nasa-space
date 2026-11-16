@@ -77,7 +77,8 @@ def test_atmosphere_counts_quoted_on_the_site():
     s = EMBER["summary"]
     moon = next(h for h in HABITATS if h["id"] == "moon_base")
     amb = ENS[ENS["x_o2"].notna() & ENS["p_atm"].notna() & (ENS["o2_ubicacion"] == "ambiente")]
-    near_moon = amb[(amb["x_o2"] >= moon["x_o2"] - 0.02) & (amb["p_atm"] <= moon["p_atm"] + 0.05)]
+    o2, p = float(moon["x_o2"]), float(moon["p_atm"])  # type: ignore[arg-type]  # HABITATS values are typed as object
+    near_moon = amb[(amb["x_o2"] >= o2 - 0.02) & (amb["p_atm"] <= p + 0.05)]
     assert len(amb) == s["ambient"] == 1613
     assert len(near_moon) == s["moon_envelope"] == 37
 
