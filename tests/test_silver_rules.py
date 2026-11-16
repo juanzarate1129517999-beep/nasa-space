@@ -142,7 +142,7 @@ def test_published_records_carry_the_mole_fraction_flag():
     ens = pd.read_csv(WEB_DATA / "downloads" / "ensayos.csv", keep_default_na=False).set_index("test_uid")
     ids = [f"PSI-69:{r}" for r in qc.loc[qc["campo"] == "mole fractions", "registro"]]
     assert len(ids) == 6
-    assert all("fracciones_no_suman_1" in ens.loc[i, "qc_flags"] for i in ids)
+    assert all("fracciones_no_suman_1" in str(ens.loc[i, "qc_flags"]) for i in ids)
 
 
 def test_clean_record_carries_no_flag(flex):
