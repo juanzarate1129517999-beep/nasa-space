@@ -103,7 +103,7 @@ def test_flown_tests_are_inside_their_own_data():
     rows = [[1.0 if t["combustible"] == "Heptane" else 0.0, t["x_o2"], float(np.log(t["p_atm"])), t["x_co2"], t["x_he"], t["d0_mm"]]
             for t in MODEL["train"]]
     dist = flex_ood(MODEL, rows)
-    statuses = [data_status(float(d), THR, out_of_range(MODEL, r)) for d, r in zip(dist, rows)]
+    statuses = [data_status(float(d), THR, out_of_range(MODEL, r)) for d, r in zip(dist, rows, strict=True)]
     # The threshold is the 95th percentile among flown tests, so about 95% of them are "within".
     assert statuses.count("within") / len(statuses) >= 0.9
     assert "outside" not in statuses

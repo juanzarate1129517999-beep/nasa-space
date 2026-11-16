@@ -34,6 +34,8 @@ Team Skylab Phoenix (Barranquilla, Colombia): Juan Sebastián Zárate (lead) and
 
 ## Run it
 
+Needs Python 3.12 or newer (and Node.js 20+ for the browser tests and the report).
+
 ```bash
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -49,6 +51,18 @@ python scripts/build_clips.py bass2 40                  # optional: cut more fli
 
 GitHub Pages publishes `web/` on every push to `main` (`.github/workflows/pages.yml`).
 
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest                                        # units, properties (Hypothesis), data contract, models, SI firewall
+ruff check .                                            # code checks (ruff.toml)
+npm ci && npx playwright install chromium
+npm run test:e2e                                        # browser: every section, phone width, links, Fire Lab = Python model
+```
+
+The Python suite reads only committed files, so it runs without the NASA download. The browser tests serve `web/` locally and leave every request to another host hanging, so they also prove the site works when a font server or CDN does not answer. `parity.test.mjs` sets scenarios through the Fire Lab controls and checks each number against `pipeline/models.py`. CI (`.github/workflows/ci.yml`) runs all of it on Python 3.12 and 3.13; every Monday, and on demand, it re-downloads NASA PSI, rebuilds everything, requires 95% coverage of `pipeline/` and checks that the rebuilt outputs match the committed ones.
+
 ## Repository
 
 | Path | Role |
@@ -57,7 +71,7 @@ GitHub Pages publishes `web/` on every push to `main` (`.github/workflows/pages.
 | `pipeline/` | Cleaning, profiles and ranking, models, solids, lunar base audit, SI evidence and firewall, web export |
 | `scripts/` | Downloads from NASA PSI, flight clips, star field, lunar assets, SI drafts, local server |
 | `data/` | Versioned outputs: clean tests, investigations, quality log, findings, SI evidence and verification; `data/literature/` holds the published Saffire IV–VI burns, each with its source |
-| `tests/` | Data, model, out-of-data guard and SI firewall tests |
+| `tests/` | Python tests: units, properties, data contract, models, out-of-data guard and SI firewall; `tests/e2e/`: browser tests with Playwright |
 | `report/` | Technical report PDF and its generator |
 | `docs/` | Use of AI and the 30-second video |
 

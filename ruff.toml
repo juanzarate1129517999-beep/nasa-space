@@ -1,0 +1,20 @@
+# Code checks: `ruff check .` (tools in requirements-dev.txt).
+# The pipeline uses Python 3.12 syntax (backslash inside an f-string, pipeline/silver.py), so 3.12 is the floor.
+target-version = "py312"
+line-length = 140
+extend-exclude = ["web/vendor", "node_modules", "data"]
+
+[lint]
+# pycodestyle, pyflakes, import order, bugbear, pyupgrade.
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    "E731",  # one-line lambdas assigned to names are used on purpose as small helpers
+]
+
+[lint.per-file-ignores]
+# Known style debt in the code submitted to Space Apps 2026, left untouched while it is judged.
+# New code (tests/ except the original file) is held to every rule above.
+"pipeline/*.py" = ["E501", "B905", "B007", "E741", "B023"]
+"scripts/*.py" = ["E501", "B905", "UP031", "E401", "I001"]
+"tests/test_skylab_phoenix.py" = ["E501"]
+"pipeline/solids.py" = ["E501", "B905", "B007", "E741", "B023", "I001"]

@@ -22,3 +22,7 @@ data/processed/
 .pytest_cache/
 brag-output/
 report/figures/
+
+.coverage
+coverage.xml
+htmlcov/
