@@ -64,40 +64,89 @@
     const camera = new T.PerspectiveCamera(38, 1, 0.01, 200);
     const loader = new T.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4;
-    const tex = (f) => { const t = loader.load(base + f); t.encoding = T.sRGBEncoding; t.anisotropy = maxAniso; return t; };
+    const tex = (f) => {
+      const t = loader.load(base + f);
+      t.encoding = T.sRGBEncoding;
+      t.anisotropy = maxAniso;
+      return t;
+    };
 
     // NASA star map as a dim Milky Way glow, plus its bright stars drawn as crisp points (scripts/build_stars.py).
     const stars = new T.Group();
-    stars.add(new T.Mesh(new T.SphereGeometry(90, 64, 32), new T.MeshBasicMaterial({ map: tex("starmap_4k.jpg"), side: T.BackSide, depthWrite: false, color: 0x8a8f99 })));
+    stars.add(
+      new T.Mesh(
+        new T.SphereGeometry(90, 64, 32),
+        new T.MeshBasicMaterial({ map: tex("starmap_4k.jpg"), side: T.BackSide, depthWrite: false, color: 0x8a8f99 }),
+      ),
+    );
     scene.add(stars);
-    fetch(base + "stars.json").then((r) => r.json()).then((S) => {
-      const n = S.b.length, pos = new Float32Array(3 * n), col = new Float32Array(3 * n), size = new Float32Array(n), tw = new Float32Array(n);
-      for (let i = 0; i < n; i++) {
-        for (let k = 0; k < 3; k++) { pos[3 * i + k] = S.xyz[3 * i + k] * 88; col[3 * i + k] = 0.55 + 0.45 * S.c[3 * i + k]; }
-        size[i] = 0.9 + 3.4 * Math.pow(S.b[i], 0.7); tw[i] = Math.random() * 6.283;
-      }
-      const g = new T.BufferGeometry();
-      g.setAttribute("position", new T.BufferAttribute(pos, 3)); g.setAttribute("color", new T.BufferAttribute(col, 3));
-      g.setAttribute("size", new T.BufferAttribute(size, 1)); g.setAttribute("tw", new T.BufferAttribute(tw, 1));
-      const m = new T.ShaderMaterial({
-        uniforms: { t: { value: 0 }, pr: { value: renderer.getPixelRatio() } }, transparent: true, depthWrite: false, blending: T.AdditiveBlending,
-        vertexShader: "attribute float size; attribute float tw; attribute vec3 color; uniform float t; uniform float pr; varying vec3 vC; varying float vA;" +
-          "void main(){ vC = color; vA = 0.78 + 0.22 * sin(t * 1.3 + tw); gl_PointSize = size * pr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
-        fragmentShader: "varying vec3 vC; varying float vA; void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d); float a = smoothstep(0.5, 0.0, r); a = a * a; gl_FragColor = vec4(vC * a * vA, a * vA); }",
-      });
-      const pts = new T.Points(g, m);
-      pts.frustumCulled = false;
-      stars.add(pts);
-      stars.userData.mat = m;
-    }).catch(() => {});
+    fetch(base + "stars.json")
+      .then((r) => r.json())
+      .then((S) => {
+        const n = S.b.length,
+          pos = new Float32Array(3 * n),
+          col = new Float32Array(3 * n),
+          size = new Float32Array(n),
+          tw = new Float32Array(n);
+        for (let i = 0; i < n; i++) {
+          for (let k = 0; k < 3; k++) {
+            pos[3 * i + k] = S.xyz[3 * i + k] * 88;
+            col[3 * i + k] = 0.55 + 0.45 * S.c[3 * i + k];
+          }
+          size[i] = 0.9 + 3.4 * Math.pow(S.b[i], 0.7);
+          tw[i] = Math.random() * 6.283;
+        }
+        const g = new T.BufferGeometry();
+        g.setAttribute("position", new T.BufferAttribute(pos, 3));
+        g.setAttribute("color", new T.BufferAttribute(col, 3));
+        g.setAttribute("size", new T.BufferAttribute(size, 1));
+        g.setAttribute("tw", new T.BufferAttribute(tw, 1));
+        const m = new T.ShaderMaterial({
+          uniforms: { t: { value: 0 }, pr: { value: renderer.getPixelRatio() } },
+          transparent: true,
+          depthWrite: false,
+          blending: T.AdditiveBlending,
+          vertexShader:
+            "attribute float size; attribute float tw; attribute vec3 color; uniform float t; uniform float pr; varying vec3 vC; varying float vA;" +
+            "void main(){ vC = color; vA = 0.78 + 0.22 * sin(t * 1.3 + tw); gl_PointSize = size * pr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+          fragmentShader:
+            "varying vec3 vC; varying float vA; void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d); float a = smoothstep(0.5, 0.0, r); a = a * a; gl_FragColor = vec4(vC * a * vA, a * vA); }",
+        });
+        const pts = new T.Points(g, m);
+        pts.frustumCulled = false;
+        stars.add(pts);
+        stars.userData.mat = m;
+      })
+      .catch(() => {});
 
     const earthGroup = new T.Group();
     scene.add(earthGroup);
-    const earthMat = new T.ShaderMaterial({ uniforms: { day: { value: tex("earth_day_2k.jpg") }, night: { value: tex("earth_night_2k.jpg") }, sun: { value: new T.Vector3(1, 0, 0) }, cam: { value: new T.Vector3() } }, vertexShader: EARTH_VS, fragmentShader: EARTH_FS });
+    const earthMat = new T.ShaderMaterial({
+      uniforms: {
+        day: { value: tex("earth_day_2k.jpg") },
+        night: { value: tex("earth_night_2k.jpg") },
+        sun: { value: new T.Vector3(1, 0, 0) },
+        cam: { value: new T.Vector3() },
+      },
+      vertexShader: EARTH_VS,
+      fragmentShader: EARTH_FS,
+    });
     const earth = new T.Mesh(new T.SphereGeometry(1, 96, 64), earthMat);
     earth.userData.id = "earth";
     earthGroup.add(earth);
-    const atm = (r, tint) => new T.Mesh(new T.SphereGeometry(r, 64, 48), new T.ShaderMaterial({ uniforms: { sun: { value: new T.Vector3(1, 0, 0) }, cam: { value: new T.Vector3() }, tint: { value: new T.Color(tint) } }, vertexShader: ATM_VS, fragmentShader: ATM_FS, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.FrontSide }));
+    const atm = (r, tint) =>
+      new T.Mesh(
+        new T.SphereGeometry(r, 64, 48),
+        new T.ShaderMaterial({
+          uniforms: { sun: { value: new T.Vector3(1, 0, 0) }, cam: { value: new T.Vector3() }, tint: { value: new T.Color(tint) } },
+          vertexShader: ATM_VS,
+          fragmentShader: ATM_FS,
+          transparent: true,
+          blending: T.AdditiveBlending,
+          depthWrite: false,
+          side: T.FrontSide,
+        }),
+      );
     const earthAtm = atm(1.035, 0x5aa9ff);
     scene.add(earthAtm);
 
@@ -109,7 +158,13 @@
     const bodies = {};
     function planet(id, file, r, pos, tint) {
       const mat = new T.MeshStandardMaterial({ map: tex(file), roughness: 1, metalness: 0 });
-      if (id === "moon") { const bm = loader.load("assets/moon/ldem_3_8bit.jpg"); bm.anisotropy = maxAniso; mat.bumpMap = bm; mat.bumpScale = 0.12; mat.map = tex("../moon/lroc_color_2k.jpg"); }
+      if (id === "moon") {
+        const bm = loader.load("assets/moon/ldem_3_8bit.jpg");
+        bm.anisotropy = maxAniso;
+        mat.bumpMap = bm;
+        mat.bumpScale = 0.12;
+        mat.map = tex("../moon/lroc_color_2k.jpg");
+      }
       const m = new T.Mesh(new T.SphereGeometry(r, 96, 64), mat);
       m.position.copy(pos);
       m.userData.id = id;
@@ -128,10 +183,17 @@
     const issDot = new T.Mesh(new T.SphereGeometry(0.018, 16, 12), new T.MeshBasicMaterial({ color: 0xfbbf24 }));
     issDot.userData.id = "iss";
     const glowTex = (() => {
-      const c = document.createElement("canvas"); c.width = c.height = 64;
-      const g = c.getContext("2d"); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      gr.addColorStop(0, "rgba(251,191,36,1)"); gr.addColorStop(0.35, "rgba(242,96,15,.55)"); gr.addColorStop(1, "rgba(242,96,15,0)");
-      g.fillStyle = gr; g.fillRect(0, 0, 64, 64); const t = new T.CanvasTexture(c); return t;
+      const c = document.createElement("canvas");
+      c.width = c.height = 64;
+      const g = c.getContext("2d");
+      const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, "rgba(251,191,36,1)");
+      gr.addColorStop(0.35, "rgba(242,96,15,.55)");
+      gr.addColorStop(1, "rgba(242,96,15,0)");
+      g.fillStyle = gr;
+      g.fillRect(0, 0, 64, 64);
+      const t = new T.CanvasTexture(c);
+      return t;
     })();
     const issGlow = new T.Sprite(new T.SpriteMaterial({ map: glowTex, depthWrite: false, blending: T.AdditiveBlending }));
     issGlow.scale.set(0.16, 0.16, 1);
@@ -139,15 +201,25 @@
     issHit.userData.id = "iss";
     iss.add(issDot, issGlow, issHit);
     earthGroup.add(iss);
-    let orbitLine = null, satrec = null;
-    const others = [], fleet = [];
+    let orbitLine = null,
+      satrec = null;
+    const others = [],
+      fleet = [];
     const satTex = (() => {
-      const c = document.createElement("canvas"); c.width = c.height = 64;
-      const g = c.getContext("2d"); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      gr.addColorStop(0, "rgba(186,230,253,1)"); gr.addColorStop(0.4, "rgba(56,189,248,.45)"); gr.addColorStop(1, "rgba(56,189,248,0)");
-      g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new T.CanvasTexture(c);
+      const c = document.createElement("canvas");
+      c.width = c.height = 64;
+      const g = c.getContext("2d");
+      const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, "rgba(186,230,253,1)");
+      gr.addColorStop(0.4, "rgba(56,189,248,.45)");
+      gr.addColorStop(1, "rgba(56,189,248,0)");
+      g.fillStyle = gr;
+      g.fillRect(0, 0, 64, 64);
+      return new T.CanvasTexture(c);
     })();
-    const tip = document.createElement("div"); tip.className = "gsat is-hidden"; host.appendChild(tip);
+    const tip = document.createElement("div");
+    tip.className = "gsat is-hidden";
+    host.appendChild(tip);
 
     const controls = new T.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -174,7 +246,8 @@
       const tle = parseTle(text, "ISS");
       if (!tle) return;
       satrec = S.twoline2satrec(tle[0], tle[1]);
-      const now = new Date(), pts = [];
+      const now = new Date(),
+        pts = [];
       const period = (2 * Math.PI) / satrec.no;
       for (let i = 0; i <= 240; i++) {
         const t = new Date(now.getTime() + ((i / 240) * period - period / 2) * 60000);
@@ -182,24 +255,37 @@
         if (pv && pv.position) pts.push(toScene(T, [pv.position.x / RE, pv.position.y / RE, pv.position.z / RE]));
       }
       if (orbitLine) earthGroup.remove(orbitLine);
-      orbitLine = new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.55 }));
+      orbitLine = new T.Line(
+        new T.BufferGeometry().setFromPoints(pts),
+        new T.LineBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.55 }),
+      );
       earthGroup.add(orbitLine);
       others.forEach((o) => earthGroup.remove(o));
-      others.length = 0; fleet.length = 0;
+      others.length = 0;
+      fleet.length = 0;
       const L = text.split(/\r?\n/).map((x) => x.trim());
       for (let k = 0; k + 2 < L.length; k++) {
         if (!L[k + 1].startsWith("1 ") || !L[k + 2].startsWith("2 ") || L[k].startsWith("1 ") || L[k].startsWith("2 ")) continue;
         const name = L[k];
         if (/^ISS/i.test(name)) continue;
-        let sr; try { sr = S.twoline2satrec(L[k + 1], L[k + 2]); } catch (e) { continue; }
-        const per = (2 * Math.PI) / sr.no, p2 = [];
+        let sr;
+        try {
+          sr = S.twoline2satrec(L[k + 1], L[k + 2]);
+        } catch (e) {
+          continue;
+        }
+        const per = (2 * Math.PI) / sr.no,
+          p2 = [];
         for (let m = 0; m <= 140; m++) {
           const tt = new Date(now.getTime() + ((m / 140) * per - per / 2) * 60000);
           const pv = S.propagate(sr, tt);
           if (pv && pv.position) p2.push(toScene(T, [pv.position.x / RE, pv.position.y / RE, pv.position.z / RE]));
         }
         if (p2.length < 10) continue;
-        const l = new T.Line(new T.BufferGeometry().setFromPoints(p2), new T.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.1 }));
+        const l = new T.Line(
+          new T.BufferGeometry().setFromPoints(p2),
+          new T.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.1 }),
+        );
         const g = new T.Group();
         const dot = new T.Mesh(new T.SphereGeometry(0.011, 10, 8), new T.MeshBasicMaterial({ color: 0x7dd3fc }));
         const glow = new T.Sprite(new T.SpriteMaterial({ map: satTex, depthWrite: false, blending: T.AdditiveBlending, opacity: 0.8 }));
@@ -212,7 +298,10 @@
         fleet.push({ sr, g, hit });
       }
     }
-    fetch(base + "tle_today.txt").then((r) => r.text()).then(setSat).catch(() => {});
+    fetch(base + "tle_today.txt")
+      .then((r) => r.text())
+      .then(setSat)
+      .catch(() => {});
 
     const label = {};
     (opts.bodies || []).forEach((b) => {
@@ -222,8 +311,17 @@
       el.className = "glabel";
       el.dataset.id = b.id;
       el.innerHTML = `<span class="glabel__dot"></span><span><b>${b.label}</b><small>${b.sub || ""}</small><span class="glabel__more"></span></span>`;
-      el.addEventListener("click", (e) => { if (e.target.closest("a")) return; if (selected === b.id) reset(); else select(b.id); });
-      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.click(); } });
+      el.addEventListener("click", (e) => {
+        if (e.target.closest("a")) return;
+        if (selected === b.id) reset();
+        else select(b.id);
+      });
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          el.click();
+        }
+      });
       labels.appendChild(el);
       label[b.id] = el;
     });
@@ -240,44 +338,69 @@
         const more = el.querySelector(".glabel__more");
         if (more) more.innerHTML = k === id && opts.detail ? opts.detail(k) : "";
       });
-      const r = id === "iss" ? 0.25 : (bodies[id] ? bodies[id].r : 1);
+      const r = id === "iss" ? 0.25 : bodies[id] ? bodies[id].r : 1;
       flyTo(anchor(id), id === "earth" ? 4.2 : Math.max(1.4, r * 6.5));
       if (!quiet && opts.onSelect) opts.onSelect(id);
     }
     function reset() {
       selected = null;
-      Object.values(label).forEach((el) => { el.classList.remove("is-on"); const m = el.querySelector(".glabel__more"); if (m) m.innerHTML = ""; });
-      fly = { from: { p: camera.position.clone(), t: controls.target.clone() }, to: { p: new T.Vector3(0.6, 1.6, 7.6), t: new T.Vector3() }, t0: performance.now(), dur: reduce ? 1 : 1400 };
+      Object.values(label).forEach((el) => {
+        el.classList.remove("is-on");
+        const m = el.querySelector(".glabel__more");
+        if (m) m.innerHTML = "";
+      });
+      fly = {
+        from: { p: camera.position.clone(), t: controls.target.clone() },
+        to: { p: new T.Vector3(0.6, 1.6, 7.6), t: new T.Vector3() },
+        t0: performance.now(),
+        dur: reduce ? 1 : 1400,
+      };
     }
 
-    const ray = new T.Raycaster(), mouse = new T.Vector2();
+    const ray = new T.Raycaster(),
+      mouse = new T.Vector2();
     let downAt = null;
-    renderer.domElement.addEventListener("pointerdown", (e) => { downAt = [e.clientX, e.clientY]; });
+    renderer.domElement.addEventListener("pointerdown", (e) => {
+      downAt = [e.clientX, e.clientY];
+    });
     renderer.domElement.addEventListener("pointerup", (e) => {
       if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
       const r = renderer.domElement.getBoundingClientRect();
       mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(mouse, camera);
       const hit = ray.intersectObjects([issHit, bodies.moon.mesh, bodies.mars.mesh, earth], false)[0];
-      if (hit && hit.object.userData.id) select(hit.object.userData.id); else if (selected) reset();
+      if (hit && hit.object.userData.id) select(hit.object.userData.id);
+      else if (selected) reset();
     });
     renderer.domElement.addEventListener("pointermove", (e) => {
       const r = renderer.domElement.getBoundingClientRect();
       mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(mouse, camera);
-      renderer.domElement.style.cursor = ray.intersectObjects([issHit, bodies.moon.mesh, bodies.mars.mesh, earth], false).length ? "pointer" : "grab";
-      const sh = fleet.length ? ray.intersectObjects(fleet.map((f) => f.hit), false)[0] : null;
-      if (sh) { tip.innerHTML = `<b>${sh.object.userData.sat}</b> <span>NASA satellite</span>`; tip.style.transform = `translate(${(e.clientX - r.left + 14).toFixed(0)}px, ${(e.clientY - r.top - 10).toFixed(0)}px)`; tip.classList.remove("is-hidden"); }
-      else tip.classList.add("is-hidden");
+      renderer.domElement.style.cursor = ray.intersectObjects([issHit, bodies.moon.mesh, bodies.mars.mesh, earth], false).length
+        ? "pointer"
+        : "grab";
+      const sh = fleet.length
+        ? ray.intersectObjects(
+            fleet.map((f) => f.hit),
+            false,
+          )[0]
+        : null;
+      if (sh) {
+        tip.innerHTML = `<b>${sh.object.userData.sat}</b> <span>NASA satellite</span>`;
+        tip.style.transform = `translate(${(e.clientX - r.left + 14).toFixed(0)}px, ${(e.clientY - r.top - 10).toFixed(0)}px)`;
+        tip.classList.remove("is-hidden");
+      } else tip.classList.add("is-hidden");
     });
 
     function resize() {
-      const w = host.clientWidth, h = host.clientHeight;
+      const w = host.clientWidth,
+        h = host.clientHeight;
       if (!w || !h) return;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.fov = w / h < 0.9 ? 52 : 36;
-      if (w > 1000) camera.setViewOffset(w, h, -Math.round(w * 0.14), 0, w, h); else camera.clearViewOffset();
+      if (w > 1000) camera.setViewOffset(w, h, -Math.round(w * 0.14), 0, w, h);
+      else camera.clearViewOffset();
       camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", resize);
@@ -285,37 +408,61 @@
     if (window.ResizeObserver) new ResizeObserver(resize).observe(host);
 
     function occluded(p) {
-      const o = camera.position, d = p.clone().sub(o), L = d.length();
+      const o = camera.position,
+        d = p.clone().sub(o),
+        L = d.length();
       d.divideScalar(L);
-      const b = o.dot(d), c = o.lengthSq() - 1, disc = b * b - c;
+      const b = o.dot(d),
+        c = o.lengthSq() - 1,
+        disc = b * b - c;
       if (disc < 0) return false;
       const t = -b - Math.sqrt(disc);
       return t > 0 && t < L - 0.01;
     }
     let yaw = null;
-    let running = true, visible = true, last = 0, speed = reduce ? 1 : 600, simOff = 0, lastT = performance.now();
+    let running = true,
+      visible = true,
+      last = 0,
+      speed = reduce ? 1 : 600,
+      simOff = 0,
+      lastT = performance.now();
     const clock = document.createElement("div");
     clock.className = "gclock";
     clock.innerHTML = `<span class="gclock__t"></span><span class="gclock__f"></span>`;
     host.appendChild(clock);
-    const clockT = clock.querySelector(".gclock__t"), clockF = clock.querySelector(".gclock__f");
-    const tmp = new T.Vector3(), camRight = new T.Vector3();
+    const clockT = clock.querySelector(".gclock__t"),
+      clockF = clock.querySelector(".gclock__f");
+    const tmp = new T.Vector3(),
+      camRight = new T.Vector3();
     function frame(now) {
       if (!running) return;
       requestAnimationFrame(frame);
-      if (!visible || now - last < 16) { lastT = now; return; }
+      if (!visible || now - last < 16) {
+        lastT = now;
+        return;
+      }
       simOff += (now - lastT) * (speed - 1);
       lastT = now;
       last = now;
       const date = new Date(Date.now() + simOff);
-      if (Math.floor(now / 500) !== Math.floor((now - 17) / 500)) clockT.textContent = `${date.toISOString().slice(0, 16).replace("T", " ")} UTC${speed === 1 ? " · live" : ` · time ×${speed}`}`;
+      if (Math.floor(now / 500) !== Math.floor((now - 17) / 500))
+        clockT.textContent = `${date.toISOString().slice(0, 16).replace("T", " ")} UTC${speed === 1 ? " · live" : ` · time ×${speed}`}`;
       earth.rotation.y = gmst(date);
       earthGroup.updateMatrixWorld();
-      if (yaw == null) { const s0 = toScene(T, sunEci(date)); yaw = Math.atan2(-0.55, 1) - Math.atan2(s0.x, s0.z); earthGroup.rotation.y = yaw; }
-      const s = toScene(T, sunEci(date)).normalize().applyAxisAngle(new T.Vector3(0, 1, 0), yaw);
+      if (yaw == null) {
+        const s0 = toScene(T, sunEci(date));
+        yaw = Math.atan2(-0.55, 1) - Math.atan2(s0.x, s0.z);
+        earthGroup.rotation.y = yaw;
+      }
+      const s = toScene(T, sunEci(date))
+        .normalize()
+        .applyAxisAngle(new T.Vector3(0, 1, 0), yaw);
       earthMat.uniforms.sun.value.copy(s);
       earthMat.uniforms.cam.value.copy(camera.position);
-      [earthAtm, bodies.moon.atm, bodies.mars.atm].forEach((a) => { a.material.uniforms.sun.value.copy(s); a.material.uniforms.cam.value.copy(camera.position); });
+      [earthAtm, bodies.moon.atm, bodies.mars.atm].forEach((a) => {
+        a.material.uniforms.sun.value.copy(s);
+        a.material.uniforms.cam.value.copy(camera.position);
+      });
       bodies.moon.mesh.rotation.y += reduce ? 0 : 0.0006;
       bodies.mars.mesh.rotation.y += reduce ? 0 : 0.0012;
       if (satrec && window.satellite) {
@@ -331,7 +478,8 @@
         if (!clockF.textContent) clockF.textContent = `ISS + ${fleet.length} NASA satellites`;
       }
       if (fly) {
-        const k = Math.min(1, (now - fly.t0) / fly.dur), e = 1 - Math.pow(1 - k, 3);
+        const k = Math.min(1, (now - fly.t0) / fly.dur),
+          e = 1 - Math.pow(1 - k, 3);
         camera.position.lerpVectors(fly.from.p, fly.to.p, e);
         controls.target.lerpVectors(fly.from.t, fly.to.t, e);
         if (k >= 1) fly = null;
@@ -344,29 +492,47 @@
       controls.update();
       if (stars.userData.mat) stars.userData.mat.uniforms.t.value = now / 1000;
       renderer.render(scene, camera);
-      const W = host.clientWidth, H = host.clientHeight;
+      const W = host.clientWidth,
+        H = host.clientHeight;
       camRight.setFromMatrixColumn(camera.matrixWorld, 0);
       Object.entries(label).forEach(([id, el]) => {
         const p = anchor(id);
-        const off = id === "iss" ? 0.06 : (bodies[id] ? bodies[id].r * 1.12 : 0);
+        const off = id === "iss" ? 0.06 : bodies[id] ? bodies[id].r * 1.12 : 0;
         p.add(camRight.clone().multiplyScalar(off));
         const behind = id === "iss" && occluded(p);
         p.project(camera);
-        const x = (p.x * 0.5 + 0.5) * W, y = (-p.y * 0.5 + 0.5) * H;
+        const x = (p.x * 0.5 + 0.5) * W,
+          y = (-p.y * 0.5 + 0.5) * H;
         const out = p.z > 1 || x < -40 || x > W + 40 || y < -40 || y > H + 40;
-        const lw = el.offsetWidth || 0, lh = el.offsetHeight || 0;
-        const cx = Math.max(4, Math.min(x, W - lw - 12)), cy = Math.max(20, Math.min(y, H - lh - 4));
+        const lw = el.offsetWidth || 0,
+          lh = el.offsetHeight || 0;
+        const cx = Math.max(4, Math.min(x, W - lw - 12)),
+          cy = Math.max(20, Math.min(y, H - lh - 4));
         el.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px)`;
         el.classList.toggle("is-hidden", out || behind);
       });
     }
     requestAnimationFrame(frame);
-    if ("IntersectionObserver" in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; }).observe(host);
+    if ("IntersectionObserver" in window)
+      new IntersectionObserver((es) => {
+        visible = es[0].isIntersecting;
+      }).observe(host);
 
     return {
-      select, reset,
-      pause() { running = false; },
-      resume() { resize(); if (!running) { running = true; lastT = performance.now(); resize(); requestAnimationFrame(frame); } },
+      select,
+      reset,
+      pause() {
+        running = false;
+      },
+      resume() {
+        resize();
+        if (!running) {
+          running = true;
+          lastT = performance.now();
+          resize();
+          requestAnimationFrame(frame);
+        }
+      },
       resize,
     };
   }

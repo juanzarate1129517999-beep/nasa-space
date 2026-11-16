@@ -18,29 +18,71 @@ HARDWARE = {
     **{k: "Ground laboratory / modeling" for k in ("PSI-142", "PSI-62", "PSI-60", "PSI-117", "PSI-115")},
 }
 FAMILY = {
-    "PSI-10": "Gas flames", "PSI-20": "Gas flames", "PSI-21": "Gas flames", "PSI-22": "Gas flames",
-    "PSI-23": "Gas flames", "PSI-159": "Gas flames", "PSI-107": "Gas flames", "PSI-106": "Gas flames",
-    "PSI-60": "Gas flames", "PSI-142": "Gas flames", "PSI-117": "Gas flames",
-    "PSI-69": "Fuel droplets", "PSI-68": "Fuel droplets", "PSI-39": "Fuel droplets",
-    "PSI-26": "Solid materials", "PSI-25": "Solid materials", "PSI-98": "Solid materials",
-    "PSI-99": "Solid materials", "PSI-100": "Solid materials", "PSI-62": "Solid materials",
-    "PSI-102": "Smoke & dust", "PSI-101": "Smoke & dust", "PSI-47": "Smoke & dust", "PSI-115": "Smoke & dust",
+    "PSI-10": "Gas flames",
+    "PSI-20": "Gas flames",
+    "PSI-21": "Gas flames",
+    "PSI-22": "Gas flames",
+    "PSI-23": "Gas flames",
+    "PSI-159": "Gas flames",
+    "PSI-107": "Gas flames",
+    "PSI-106": "Gas flames",
+    "PSI-60": "Gas flames",
+    "PSI-142": "Gas flames",
+    "PSI-117": "Gas flames",
+    "PSI-69": "Fuel droplets",
+    "PSI-68": "Fuel droplets",
+    "PSI-39": "Fuel droplets",
+    "PSI-26": "Solid materials",
+    "PSI-25": "Solid materials",
+    "PSI-98": "Solid materials",
+    "PSI-99": "Solid materials",
+    "PSI-100": "Solid materials",
+    "PSI-62": "Solid materials",
+    "PSI-102": "Smoke & dust",
+    "PSI-101": "Smoke & dust",
+    "PSI-47": "Smoke & dust",
+    "PSI-115": "Smoke & dust",
 }
-SHORT = {"PSI-142": "Cool-flame counterflow", "PSI-62": "BASS spread modeling", "PSI-60": "SPICE analysis",
-         "PSI-117": "Cool-flame perturbation", "PSI-115": "SAME smoke modeling", "PSI-10": "ACME Flame Design",
-         "PSI-21": "ACME CLD", "PSI-22": "ACME E-FIELD", "PSI-23": "ACME s-Flame", "PSI-47": "DAFT / DAFT-2",
-         "PSI-98": "Saffire-I", "PSI-99": "Saffire-II", "PSI-100": "Saffire-III"}
-LAYERS = {"PSI-101": ["Detection"], "PSI-102": ["Detection"], "PSI-47": ["Detection"], "PSI-115": ["Detection"],
-          "PSI-69": ["Suppression", "Prevention"], "PSI-68": ["Suppression", "Prevention"],
-          "PSI-26": ["Prevention", "Suppression"], "PSI-25": ["Prevention", "Suppression"]}
-DIRECTNESS = {**{k: 1.0 for k in ("PSI-26", "PSI-25", "PSI-98", "PSI-99", "PSI-100", "PSI-102", "PSI-101", "PSI-69")},
-              **{k: 0.75 for k in ("PSI-20", "PSI-47", "PSI-159", "PSI-22")}}
+SHORT = {
+    "PSI-142": "Cool-flame counterflow",
+    "PSI-62": "BASS spread modeling",
+    "PSI-60": "SPICE analysis",
+    "PSI-117": "Cool-flame perturbation",
+    "PSI-115": "SAME smoke modeling",
+    "PSI-10": "ACME Flame Design",
+    "PSI-21": "ACME CLD",
+    "PSI-22": "ACME E-FIELD",
+    "PSI-23": "ACME s-Flame",
+    "PSI-47": "DAFT / DAFT-2",
+    "PSI-98": "Saffire-I",
+    "PSI-99": "Saffire-II",
+    "PSI-100": "Saffire-III",
+}
+LAYERS = {
+    "PSI-101": ["Detection"],
+    "PSI-102": ["Detection"],
+    "PSI-47": ["Detection"],
+    "PSI-115": ["Detection"],
+    "PSI-69": ["Suppression", "Prevention"],
+    "PSI-68": ["Suppression", "Prevention"],
+    "PSI-26": ["Prevention", "Suppression"],
+    "PSI-25": ["Prevention", "Suppression"],
+}
+DIRECTNESS = {
+    **{k: 1.0 for k in ("PSI-26", "PSI-25", "PSI-98", "PSI-99", "PSI-100", "PSI-102", "PSI-101", "PSI-69")},
+    **{k: 0.75 for k in ("PSI-20", "PSI-47", "PSI-159", "PSI-22")},
+}
 
-SKIP_COL = re.compile(r"date|gmt|time\b|local time|test ?#|test no|number|^test$|sample #|camera|comment|note|"
-                      r"identifier|^cir|^day|year|month|session|frames|^pi$|^\W*pi$|radiometer|data id|link|figure",
-                      re.I)
-MEASURE_COL = re.compile(r"extinction|burn|rate|length|ignit|rt/r0|weight loss|tad|zst|self|cool flame|"
-                         r"final|test end|spread|flames ignited|smoke|aging", re.I)
+SKIP_COL = re.compile(
+    r"date|gmt|time\b|local time|test ?#|test no|number|^test$|sample #|camera|comment|note|"
+    r"identifier|^cir|^day|year|month|session|frames|^pi$|^\W*pi$|radiometer|data id|link|figure",
+    re.I,
+)
+MEASURE_COL = re.compile(
+    r"extinction|burn|rate|length|ignit|rt/r0|weight loss|tad|zst|self|cool flame|"
+    r"final|test end|spread|flames ignited|smoke|aging",
+    re.I,
+)
 
 
 def _clean_col(c):
@@ -85,8 +127,13 @@ def profile_table(path):
             varied.append(item)
         else:
             fixed.append(item)
-    return {"table": path.name.split("Experimental table_")[-1].removesuffix(".csv"), "rows": int(len(df)),
-            "varied": varied, "fixed": fixed, "measured": measured}
+    return {
+        "table": path.name.split("Experimental table_")[-1].removesuffix(".csv"),
+        "rows": int(len(df)),
+        "varied": varied,
+        "fixed": fixed,
+        "measured": measured,
+    }
 
 
 ENUM = re.compile(r"\(?(?:\d{1,2}|[A-Za-z])[.)]")
@@ -128,8 +175,10 @@ def _search_fields():
         if isinstance(person, list):
             person = person[0] if person else {}
         surnames = [s for s in str(person.get("Last Name", "")).split() if s]
-        out[x.get("Accession")] = {"team": ", ".join(surnames),
-                                   "earth": _sentences(x.get("Research Impacts/Earth Benefits"), 2)}
+        out[x.get("Accession")] = {
+            "team": ", ".join(surnames),
+            "earth": _sentences(x.get("Research Impacts/Earth Benefits"), 2),
+        }
     return out
 
 
@@ -154,20 +203,28 @@ def build(ensayos):
         rec = {
             "psi_id": psi,
             "name": SHORT.get(psi) or (c["acronym"] if isinstance(c["acronym"], str) else psi),
-            "title": c["title"], "family": FAMILY.get(psi, "Other"), "hardware": HARDWARE.get(psi, "Other"),
-            "hardware_detail": hw.get("Name", ""), "layers": LAYERS.get(psi, ["Prevention"]),
+            "title": c["title"],
+            "family": FAMILY.get(psi, "Other"),
+            "hardware": HARDWARE.get(psi, "Other"),
+            "hardware_detail": hw.get("Name", ""),
+            "layers": LAYERS.get(psi, ["Prevention"]),
             "type": "Flight" if flight else "Ground",
             "platform": c["flight_platform"] if isinstance(c["flight_platform"], str) else "Ground laboratory",
-            "pi": extra.get(psi, {}).get("team", ""), "earth_benefit": extra.get(psi, {}).get("earth", ""),
+            "pi": extra.get(psi, {}).get("team", ""),
+            "earth_benefit": extra.get(psi, {}).get("earth", ""),
             "start": c["start"] if isinstance(c["start"], str) else "",
-            "doi": meta.get("doi", ""), "objective": _sentences(meta.get("objective"), 2),
+            "doi": meta.get("doi", ""),
+            "objective": _sentences(meta.get("objective"), 2),
             "hypothesis": _sentences(meta.get("hypothesis"), 1),
             "keywords": [k.strip() for k in str(c["keywords"]).split("|") if k.strip() and k.strip() != "nan"],
             "related": [r for r in str(c["related"]).split() if r.startswith("PSI-")],
             "n_publications": len(pubs),
-            "publications": [{"title": p["title"], "authors": p.get("authorList", ""), "doi": p.get("doi", "")}
-                             for p in pubs[:4]],
-            "n_tests": n_tests, "n_with_outcome": n_outcome, "tables": profiles,
+            "publications": [
+                {"title": p["title"], "authors": p.get("authorList", ""), "doi": p.get("doi", "")} for p in pubs[:4]
+            ],
+            "n_tests": n_tests,
+            "n_with_outcome": n_outcome,
+            "tables": profiles,
             "o2_min": float(cond["x_o2"].min()) if len(cond) else None,
             "o2_max": float(cond["x_o2"].max()) if len(cond) else None,
             "p_min": float(cond["p_atm"].min()) if len(cond) else None,
@@ -190,9 +247,13 @@ def build(ensayos):
                 n_eff += float(0.5 * _kernel(o2_only["x_o2"].values, None, h).sum())
             prox = 1 - np.exp(-n_eff / 8)
             total = 0.5 * prox + 0.2 * evidence + 0.3 * directness
-            scores[h["id"]] = {"score": float(round(100 * total, 1)), "proximity": float(round(prox, 3)),
-                               "n_near": float(round(n_eff, 1)), "evidence": float(round(evidence, 3)),
-                               "directness": float(directness)}
+            scores[h["id"]] = {
+                "score": float(round(100 * total, 1)),
+                "proximity": float(round(prox, 3)),
+                "n_near": float(round(n_eff, 1)),
+                "evidence": float(round(evidence, 3)),
+                "directness": float(directness),
+            }
         rec["relevance"] = scores
         recs.append(rec)
     recs.sort(key=lambda r: -r["relevance"]["moon_base"]["score"])
@@ -212,13 +273,27 @@ def similarity(recs):
                 lo, hi = max(a["o2_min"], b["o2_min"]), min(a["o2_max"], b["o2_max"])
                 span = max(a["o2_max"], b["o2_max"]) - min(a["o2_min"], b["o2_min"])
                 ov = max(0.0, hi - lo) / span if span > 0 else 1.0
-            S[i, j] = (0.30 * jac + 0.25 * (a["family"] == b["family"]) + 0.15 * (a["hardware"] == b["hardware"])
-                       + 0.15 * ov + 0.15 * rel)
+            S[i, j] = (
+                0.30 * jac
+                + 0.25 * (a["family"] == b["family"])
+                + 0.15 * (a["hardware"] == b["hardware"])
+                + 0.15 * ov
+                + 0.15 * rel
+            )
     np.fill_diagonal(S, 1.0)
     D = 1 - S
     order = leaves_list(linkage(squareform(D, checks=False), method="average"))
     names = [recs[k]["name"] for k in order]
     ids = [recs[k]["psi_id"] for k in order]
-    return {"ids": ids, "names": names, "matrix": np.round(S[np.ix_(order, order)], 3).tolist(),
-            "weights": {"keywords_jaccard": 0.30, "same_family": 0.25, "same_hardware": 0.15,
-                        "o2_range_overlap": 0.15, "linked_in_psi": 0.15}}
+    return {
+        "ids": ids,
+        "names": names,
+        "matrix": np.round(S[np.ix_(order, order)], 3).tolist(),
+        "weights": {
+            "keywords_jaccard": 0.30,
+            "same_family": 0.25,
+            "same_hardware": 0.15,
+            "o2_range_overlap": 0.15,
+            "linked_in_psi": 0.15,
+        },
+    }

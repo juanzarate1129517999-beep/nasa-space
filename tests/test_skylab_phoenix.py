@@ -43,7 +43,15 @@ def test_sentence_splitter_keeps_numbered_lists_together():
 
 
 def test_downloads_are_published():
-    for name in ("solidos_bass2_gases.csv", "ensayos.csv", "investigaciones.csv", "qc_log.csv", "findings.json", "si_evidence_packs.json", "si_verification.json"):
+    for name in (
+        "solidos_bass2_gases.csv",
+        "ensayos.csv",
+        "investigaciones.csv",
+        "qc_log.csv",
+        "findings.json",
+        "si_evidence_packs.json",
+        "si_verification.json",
+    ):
         assert (WEB_DATA / "downloads" / name).stat().st_size > 0
 
 
@@ -80,7 +88,9 @@ def test_each_stage_is_validated_on_unseen_days():
     V = EMBER["flex"]["validation"]
     assert V["reps"] >= 10
     assert V["stages"]["disruption"]["auc"] > 0.8 and V["stages"]["extinction"]["auc"] > 0.8
-    assert V["stages"]["extinction"]["n"] == EMBER["flex"]["outcomes"]["extincion"] + EMBER["flex"]["outcomes"]["completo"]
+    assert (
+        V["stages"]["extinction"]["n"] == EMBER["flex"]["outcomes"]["extincion"] + EMBER["flex"]["outcomes"]["completo"]
+    )
     assert sum(EMBER["flex"]["outcomes"].values()) == EMBER["flex"]["n"]
 
 
@@ -112,28 +122,39 @@ def moon():
     return PACKS["habitat:moon_base"]
 
 
-@pytest.mark.parametrize("draft_sentences, problem", [
-    ([{"text": "Fires go out 12% of the time.", "cites": ["E2"]}], "not in the cited evidence"),
-    ([{"text": "Fires go out 6-99% of the time.", "cites": ["E2"]}], "not in the cited evidence"),
-    ([{"text": "Only 6% self-extinguish.", "cites": ["E7"]}], "not in the cited evidence"),
-    ([{"text": "Fires are dangerous.", "cites": []}], "no citation"),
-    ([{"text": "Only 6% self-extinguish.", "cites": ["E99"]}], "unknown citation"),
-    ([{"text": "The lunar base is safe at 30% O2.", "cites": ["E1"]}], "safety verdict"),
-    ([{"text": "This habitat is certified for flight.", "cites": ["E1"]}], "safety verdict"),
-])
+@pytest.mark.parametrize(
+    "draft_sentences, problem",
+    [
+        ([{"text": "Fires go out 12% of the time.", "cites": ["E2"]}], "not in the cited evidence"),
+        ([{"text": "Fires go out 6-99% of the time.", "cites": ["E2"]}], "not in the cited evidence"),
+        ([{"text": "Only 6% self-extinguish.", "cites": ["E7"]}], "not in the cited evidence"),
+        ([{"text": "Fires are dangerous.", "cites": []}], "no citation"),
+        ([{"text": "Only 6% self-extinguish.", "cites": ["E99"]}], "unknown citation"),
+        ([{"text": "The lunar base is safe at 30% O2.", "cites": ["E1"]}], "safety verdict"),
+        ([{"text": "This habitat is certified for flight.", "cites": ["E1"]}], "safety verdict"),
+    ],
+)
 def test_firewall_rejects_bad_drafts(moon, draft_sentences, problem):
     problems = si.verify({"sentences": draft_sentences, "pack_hash": moon["hash"]}, moon)
     assert any(problem in p for p in problems), problems
 
 
 def test_firewall_rejects_stale_drafts(moon):
-    problems = si.verify({"sentences": [{"text": "Only 6% self-extinguish.", "cites": ["E2"]}], "pack_hash": "old"}, moon)
+    problems = si.verify(
+        {"sentences": [{"text": "Only 6% self-extinguish.", "cites": ["E2"]}], "pack_hash": "old"}, moon
+    )
     assert any("stale" in p for p in problems)
 
 
 def test_firewall_accepts_a_faithful_draft(moon):
     p = round(100 * HC["moon_base"]["Methanol"]["p"])
-    assert si.verify({"sentences": [{"text": f"Only {p}% self-extinguish here.", "cites": ["E2"]}], "pack_hash": moon["hash"]}, moon) == []
+    assert (
+        si.verify(
+            {"sentences": [{"text": f"Only {p}% self-extinguish here.", "cites": ["E2"]}], "pack_hash": moon["hash"]},
+            moon,
+        )
+        == []
+    )
 
 
 def test_every_published_si_briefing_passes_the_firewall():
@@ -162,6 +183,7 @@ def test_search_corpus_has_sources():
 @pytest.mark.skipif(not (ROOT / "data" / "psi" / "PSI-69").exists(), reason="raw PSI files not downloaded")
 def test_silver_layer_rebuilds_the_same_records():
     from pipeline import silver
+
     ens, _, _ = silver.build()
     assert len(ens) == EMBER["summary"]["records"]
     assert ens["x_o2"].dropna().between(0, 1).all()
@@ -170,6 +192,7 @@ def test_silver_layer_rebuilds_the_same_records():
 
 def test_solid_flammability_boundary_matches_the_nasa_report():
     from pipeline import solids
+
     a = [x / 10 for x in range(1, 400)]
     o2 = solids.boundary_o2(a)
     k = int(o2.argmin())
@@ -220,13 +243,18 @@ def test_moonbase_audit():
 def test_records_and_flex_physics():
     import json
     from pathlib import Path
+
     P = json.loads((Path(__file__).resolve().parents[1] / "web" / "data" / "ember.json").read_text(encoding="utf-8"))
     R = P["records"]
     assert len(R["rows"]) == P["summary"]["records"]
     assert all(len(r) == len(R["cols"]) for r in R["rows"])
     assert {r[1] for r in R["rows"]} <= {"S", "L", "G", "M"}
     E = R["moon_envelope"]
-    moon = [r for r in R["rows"] if r[2] is not None and r[3] is not None and r[2] >= E["x_o2_min"] and r[3] <= E["p_atm_max"]]
+    moon = [
+        r
+        for r in R["rows"]
+        if r[2] is not None and r[3] is not None and r[2] >= E["x_o2_min"] and r[3] <= E["p_atm_max"]
+    ]
     assert len(moon) == P["coverage"]["n_moon_envelope"]
     measured = [r for r in R["rows"] if r[2] is not None and r[3] is not None and not r[4]]
     assert len(measured) == P["coverage"]["n_measured"]

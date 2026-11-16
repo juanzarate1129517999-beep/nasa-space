@@ -1,24 +1,38 @@
-node_modules/
-.venv/
-venv/
+# Python
 __pycache__/
 *.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+
+# Environment and secrets
 .env
 .env.*
 !.env.example
-dist/
-build/
+
+# Editors and OS
+.vscode/
+.idea/
+.claude/
 .DS_Store
 Thumbs.db
 desktop.ini
-.vscode/
-.idea/
+
+# Build output and logs
+dist/
+build/
 *.log
+
+# Downloaded NASA PSI data and intermediate files (rebuilt by scripts/ and pipeline/)
 data/psi/
-_interno/
-.claude/
 data/catalog/
 data/processed/
-.pytest_cache/
-brag-output/
 report/figures/
+
+# Local, not part of the project
+_interno/
+brag-output/

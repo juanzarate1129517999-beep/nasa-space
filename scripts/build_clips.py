@@ -8,6 +8,7 @@ Nothing is drawn or generated: each clip is the flight video, cropped and sped u
     python scripts/build_clips.py cfig 30
     python scripts/build_clips.py index         # rebuild web/data/clips.js from the clip records
 """
+
 import json
 import os
 import re
@@ -53,8 +54,22 @@ def download(acc, f, dest):
 
 
 def probe(path):
-    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height:format=duration",
-                        "-of", "json", str(path)], capture_output=True, text=True)
+    r = subprocess.run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=width,height:format=duration",
+            "-of",
+            "json",
+            str(path),
+        ],
+        capture_output=True,
+        text=True,
+    )
     try:
         j = json.loads(r.stdout)
         return int(j["streams"][0]["width"]), int(j["streams"][0]["height"]), float(j["format"]["duration"])
@@ -63,8 +78,23 @@ def probe(path):
 
 
 def frames(path, w, h, fps=3):
-    r = subprocess.run(["ffmpeg", "-v", "quiet", "-i", str(path), "-vf", f"fps={fps},scale={w}:{h}", "-f", "rawvideo",
-                        "-pix_fmt", "rgb24", "-"], capture_output=True)
+    r = subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "quiet",
+            "-i",
+            str(path),
+            "-vf",
+            f"fps={fps},scale={w}:{h}",
+            "-f",
+            "rawvideo",
+            "-pix_fmt",
+            "rgb24",
+            "-",
+        ],
+        capture_output=True,
+    )
     a = np.frombuffer(r.stdout, np.uint8)
     n = len(a) // (w * h * 3)
     return a[: n * w * h * 3].reshape(n, h, w, 3)
@@ -83,7 +113,7 @@ def find_flame(path, mask_top=0.0, fps=3, max_area=0.35):
         return None
     lum = fr.max(axis=3).astype(np.float32)
     lum[:, : int(h * mask_top), :] = 0
-    dark = np.median(lum, axis=(1, 2)) < 28          # camera looking at lit hardware is not a flame
+    dark = np.median(lum, axis=(1, 2)) < 28  # camera looking at lit hardware is not a flame
     base = np.percentile(lum[dark], 20, axis=0) if dark.sum() > 5 else 0
     hot = (lum - base) > 38
     area = hot.sum(axis=(1, 2)) * dark
@@ -98,17 +128,17 @@ def find_flame(path, mask_top=0.0, fps=3, max_area=0.35):
             if on[j]:
                 last = j
             j += 1
-        if best is None or area[i:last + 1].sum() > area[best[0]:best[1] + 1].sum():
+        if best is None or area[i : last + 1].sum() > area[best[0] : best[1] + 1].sum():
             best = (i, last)
         i = last + 1
     if best is None or (best[1] - best[0]) / fps < 4:
         return None
     a, b = best
-    freq = hot[a:b + 1].mean(axis=0)
+    freq = hot[a : b + 1].mean(axis=0)
     lab, n = ndimage.label(freq > max(0.02, 0.12 * freq.max()))
     if not n:
         return None
-    big = 1 + int(np.argmax(ndimage.sum(freq, lab, range(1, n + 1))))     # the flame, not stray hot pixels
+    big = 1 + int(np.argmax(ndimage.sum(freq, lab, range(1, n + 1))))  # the flame, not stray hot pixels
     ys, xs = np.where(lab == big)
     if len(xs) < 2:
         return None
@@ -124,9 +154,15 @@ def find_flame(path, mask_top=0.0, fps=3, max_area=0.35):
     cw, ch = min(cw, sw), min(ch, sh)
     left = min(max(cx - cw / 2, 0), sw - cw)
     top = min(max(cy - ch / 2, sh * mask_top), sh - ch)
-    peak = float(area[a:b + 1].max()) / (w * h)
-    return {"t0": max(0, a / fps - 0.7), "t1": min(dur, b / fps + 1.2), "crop": [int(cw) // 2 * 2, int(ch) // 2 * 2, int(left), int(top)],
-            "peak_area": round(peak, 4), "src": [sw, sh], "duration_s": round(dur, 1)}
+    peak = float(area[a : b + 1].max()) / (w * h)
+    return {
+        "t0": max(0, a / fps - 0.7),
+        "t1": min(dur, b / fps + 1.2),
+        "crop": [int(cw) // 2 * 2, int(ch) // 2 * 2, int(left), int(top)],
+        "peak_area": round(peak, 4),
+        "src": [sw, sh],
+        "duration_s": round(dur, 1),
+    }
 
 
 def cut(path, found, dest):
@@ -136,11 +172,53 @@ def cut(path, found, dest):
     cw, ch, cl, ct = found["crop"]
     vf = f"crop={cw}:{ch}:{cl}:{ct},setpts=PTS/{x:.4f},fps={FPS},scale={W}:{H}:flags=lanczos"
     dest.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t0:.2f}", "-t", f"{span:.2f}", "-i", str(path), "-vf", vf, "-an",
-                    "-c:v", "libx264", "-preset", "slow", "-crf", "30", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                    str(dest.with_suffix(".mp4"))], check=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{(span / x) * 0.45:.2f}", "-i", str(dest.with_suffix(".mp4")), "-frames:v", "1",
-                    "-q:v", "5", str(dest.with_suffix(".jpg"))], check=True)
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-ss",
+            f"{t0:.2f}",
+            "-t",
+            f"{span:.2f}",
+            "-i",
+            str(path),
+            "-vf",
+            vf,
+            "-an",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "slow",
+            "-crf",
+            "30",
+            "-pix_fmt",
+            "yuv420p",
+            "-movflags",
+            "+faststart",
+            str(dest.with_suffix(".mp4")),
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-y",
+            "-ss",
+            f"{(span / x) * 0.45:.2f}",
+            "-i",
+            str(dest.with_suffix(".mp4")),
+            "-frames:v",
+            "1",
+            "-q:v",
+            "5",
+            str(dest.with_suffix(".jpg")),
+        ],
+        check=True,
+    )
     return round(x, 1)
 
 
@@ -159,21 +237,43 @@ def bass2_jobs():
             continue
         r = rows[key]
         still = bool(m.group(2))
-        meta = {"test": str(r["test"]).strip(), "material": r["material"], "family": r["family"], "state": "Solid", "psi": "PSI-25",
-                "o2": None if pd.isna(r["o2_initial_pct"]) else float(r["o2_initial_pct"]),
-                "air": None if pd.isna(r["air_display"]) else str(r["air_display"]),
-                "co": None if pd.isna(r["co_produced_ppm"]) else float(r["co_produced_ppm"]),
-                "cam": "still sequence" if still else "video camera"}
-        jobs.append({"id": f"b2-{key}{'-s' if still else ''}", "acc": "PSI-25", "file": f, "dir": "bass2x", "mask_top": 0.0 if still else 0.2,
-                     "meta": meta, "rank": (0 if still else 1, f.get("file_size") or 0)})
+        meta = {
+            "test": str(r["test"]).strip(),
+            "material": r["material"],
+            "family": r["family"],
+            "state": "Solid",
+            "psi": "PSI-25",
+            "o2": None if pd.isna(r["o2_initial_pct"]) else float(r["o2_initial_pct"]),
+            "air": None if pd.isna(r["air_display"]) else str(r["air_display"]),
+            "co": None if pd.isna(r["co_produced_ppm"]) else float(r["co_produced_ppm"]),
+            "cam": "still sequence" if still else "video camera",
+        }
+        jobs.append(
+            {
+                "id": f"b2-{key}{'-s' if still else ''}",
+                "acc": "PSI-25",
+                "file": f,
+                "dir": "bass2x",
+                "mask_top": 0.0 if still else 0.2,
+                "meta": meta,
+                "rank": (0 if still else 1, f.get("file_size") or 0),
+            }
+        )
     return jobs
 
 
 def cfig_jobs():
     ens = pd.read_csv(ROOT / "data" / "gold" / "ensayos.csv", low_memory=False)
     ens = ens[ens["experimento"].str.startswith("CFI-G") & (ens["ignicion"] == 1) & ens["x_o2"].notna()]
-    rows = {re.sub(r"[^0-9A-Z]", "", u.split(":")[1].upper())[1:]: r for u, r in zip(ens["test_uid"], ens.to_dict("records"))}
-    res_txt = {"autoextincion": "went out on its own", "corte_de_flujo": "still burning when the fuel was cut", "flash": "flashed and went out"}
+    rows = {
+        re.sub(r"[^0-9A-Z]", "", u.split(":")[1].upper())[1:]: r
+        for u, r in zip(ens["test_uid"], ens.to_dict("records"), strict=True)
+    }
+    res_txt = {
+        "autoextincion": "went out on its own",
+        "corte_de_flujo": "still burning when the fuel was cut",
+        "flash": "flashed and went out",
+    }
     jobs = []
     for f in listing("PSI-159"):
         n = f["file_name"]
@@ -182,15 +282,31 @@ def cfig_jobs():
             continue
         r = rows[m.group(1)]
         inv = r["experimento"].endswith("inverse")
-        meta = {"test": m.group(1), "material": f"{r['combustible']} {'(inverse flame)' if inv else 'from a spherical burner'}",
-                "family": "Spherical gas flame", "state": "Gas", "psi": "PSI-159", "o2": round(100 * float(r["x_o2"]), 1),
-                "m": f"{r['p_atm']:.1f} atm · ACME CFI-G · {res_txt.get(r['resultado'], '')}".rstrip(" ·"),
-                "out": None if pd.isna(r["autoextincion"]) else int(r["autoextincion"])}
+        meta = {
+            "test": m.group(1),
+            "material": f"{r['combustible']} {'(inverse flame)' if inv else 'from a spherical burner'}",
+            "family": "Spherical gas flame",
+            "state": "Gas",
+            "psi": "PSI-159",
+            "o2": round(100 * float(r["x_o2"]), 1),
+            "m": f"{r['p_atm']:.1f} atm · ACME CFI-G · {res_txt.get(r['resultado'], '')}".rstrip(" ·"),
+            "out": None if pd.isna(r["autoextincion"]) else int(r["autoextincion"]),
+        }
         burn = r.get("tiempo_quemado_s")
         if pd.isna(burn) or burn < 20:
             continue
-        jobs.append({"id": f"cfig-{m.group(1).lower()}", "acc": "PSI-159", "file": f, "dir": "cfig", "mask_top": 0.0, "max_area": 0.05,
-                     "meta": {**meta, "burn_s": float(burn)}, "rank": (0, f.get("file_size") or 0)})
+        jobs.append(
+            {
+                "id": f"cfig-{m.group(1).lower()}",
+                "acc": "PSI-159",
+                "file": f,
+                "dir": "cfig",
+                "mask_top": 0.0,
+                "max_area": 0.05,
+                "meta": {**meta, "burn_s": float(burn)},
+                "rank": (0, f.get("file_size") or 0),
+            }
+        )
     return jobs
 
 
@@ -202,9 +318,11 @@ def run(kind, limit):
     TMP.mkdir(parents=True, exist_ok=True)
     jobs = sorted(SETS[kind](), key=lambda j: j["rank"])
     done = made = 0
-    seen_tests = {json.loads(p.read_text())["test"] for p in RECORDS.glob("*.json") if json.loads(p.read_text()).get("ok")}
+    seen_tests = {
+        json.loads(p.read_text())["test"] for p in RECORDS.glob("*.json") if json.loads(p.read_text()).get("ok")
+    }
     old = (ROOT / "web" / "data" / "clips.js").read_text(encoding="utf-8")
-    seen_tests |= {c["test"] for c in json.loads(old[old.index("["):old.rindex("]") + 1]) if c.get("dir") == "bass2"}
+    seen_tests |= {c["test"] for c in json.loads(old[old.index("[") : old.rindex("]") + 1]) if c.get("dir") == "bass2"}
     for j in jobs:
         rec = RECORDS / f"{j['id']}.json"
         if rec.exists() or (kind == "bass2" and j["meta"]["test"] in seen_tests):
@@ -218,7 +336,15 @@ def run(kind, limit):
             found = find_flame(raw, j["mask_top"], max_area=j.get("max_area", 0.35))
             if found:
                 x = cut(raw, found, OUT / j["dir"] / j["id"])
-                out.update({"ok": True, "x": x, "dir": j["dir"], "f": j["id"], **{k: found[k] for k in ("t0", "t1", "crop", "peak_area")}})
+                out.update(
+                    {
+                        "ok": True,
+                        "x": x,
+                        "dir": j["dir"],
+                        "f": j["id"],
+                        **{k: found[k] for k in ("t0", "t1", "crop", "peak_area")},
+                    }
+                )
                 made += 1
                 seen_tests.add(j["meta"]["test"])
             else:
@@ -233,14 +359,11 @@ def run(kind, limit):
     print(f"[{kind}] {made} clips from {done} files")
 
 
-
-
-
 def index():
     """Merge the generated clips into web/data/clips.js, after the hand-picked ones, without touching those."""
     js = ROOT / "web" / "data" / "clips.js"
     s = js.read_text(encoding="utf-8")
-    base = [c for c in json.loads(s[s.index("["):s.rindex("]") + 1]) if not c.get("gen")]
+    base = [c for c in json.loads(s[s.index("[") : s.rindex("]") + 1]) if not c.get("gen")]
     have = {(c.get("psi", "PSI-25" if c.get("dir") == "bass2" else ""), c["test"]) for c in base}
     gen = []
     for p in sorted(RECORDS.glob("*.json")):

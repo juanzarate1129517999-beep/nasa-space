@@ -49,6 +49,13 @@ python scripts/build_clips.py bass2 40                  # optional: cut more fli
 
 GitHub Pages publishes `web/` on every push to `main` (`.github/workflows/pages.yml`).
 
+Code style: Python is linted and formatted with [Ruff](https://docs.astral.sh/ruff/) (`pyproject.toml`), JavaScript with [Prettier](https://prettier.io/) (`.prettierrc.json`). CI runs both checks.
+
+```bash
+pip install ruff && ruff check . && ruff format --check .
+npx prettier@3.6.2 --check .
+```
+
 ## Repository
 
 | Path | Role |

@@ -5,6 +5,7 @@ wide screen, which blurs it. This finds local brightness peaks, converts each pi
 writes their direction, brightness and color to web/assets/3d/stars.json. Nothing is invented: every point is a
 peak of the NASA image.
 """
+
 import json
 from pathlib import Path
 
@@ -36,8 +37,12 @@ z = np.sin(phi) * np.sin(theta)
 col = np.stack([ndimage.maximum_filter(img[..., c], size=3)[ys, xs] for c in range(3)], 1)
 col = col / np.maximum(col.max(1, keepdims=True), 1)
 mag = np.clip((p - p.min()) / (np.percentile(p, 99.5) - p.min()), 0, 1)
-data = {"source": "Peaks of NASA SVS star map (starmap_4k.jpg)", "n": int(len(p)),
-        "xyz": np.round(np.stack([x, y, z], 1), 3).ravel().tolist(),
-        "b": np.round(mag, 3).tolist(), "c": np.round(col, 2).ravel().tolist()}
+data = {
+    "source": "Peaks of NASA SVS star map (starmap_4k.jpg)",
+    "n": int(len(p)),
+    "xyz": np.round(np.stack([x, y, z], 1), 3).ravel().tolist(),
+    "b": np.round(mag, 3).tolist(),
+    "c": np.round(col, 2).ravel().tolist(),
+}
 OUT.write_text(json.dumps(data, separators=(",", ":")))
 print(f"{len(p)} stars -> {OUT} ({OUT.stat().st_size // 1024} KB)")

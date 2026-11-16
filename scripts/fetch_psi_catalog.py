@@ -1,4 +1,9 @@
-import csv, json, os, sys, urllib.parse, urllib.request
+import csv
+import json
+import os
+import sys
+import urllib.parse
+import urllib.request
 
 API = "https://psi.nasa.gov/geode-py/ws"
 query = sys.argv[1] if len(sys.argv) > 1 else "combustion"
@@ -29,26 +34,28 @@ for h in hits:
     person = h.get("Person") or {}
     if isinstance(person, list):
         person = person[0] if person else {}
-    rows.append({
-        "accession": acc,
-        "acronym": (h.get("Acronym") or "").strip(),
-        "title": h.get("Title", ""),
-        "research_area": h.get("Research Area", ""),
-        "subresearch_area": h.get("SubResearch Area", ""),
-        "project_type": h.get("Project Type", ""),
-        "flight_platform": h.get("Flight Platform", ""),
-        "hardware": h.get("Experiment Hardware", ""),
-        "pi": f"{person.get('First Name', '')} {person.get('Last Name', '')}".strip(),
-        "start": h.get("Investigation Start Date", ""),
-        "end": h.get("Investigation End Date", ""),
-        "keywords": " | ".join(k for k in (h.get("Keywords") or "").split("     ") if k.strip()),
-        "related": (h.get("Related Investigations") or "").replace("     ", " "),
-        "n_files": len(files),
-        "total_mb": round(sum((f.get("file_size") or 0) for f in files.values()) / 1e6, 1),
-        "n_experimental_tables": len(exp_tables),
-        "experimental_tables": " | ".join(exp_tables),
-        "file_names": " | ".join(sorted(files)),
-    })
+    rows.append(
+        {
+            "accession": acc,
+            "acronym": (h.get("Acronym") or "").strip(),
+            "title": h.get("Title", ""),
+            "research_area": h.get("Research Area", ""),
+            "subresearch_area": h.get("SubResearch Area", ""),
+            "project_type": h.get("Project Type", ""),
+            "flight_platform": h.get("Flight Platform", ""),
+            "hardware": h.get("Experiment Hardware", ""),
+            "pi": f"{person.get('First Name', '')} {person.get('Last Name', '')}".strip(),
+            "start": h.get("Investigation Start Date", ""),
+            "end": h.get("Investigation End Date", ""),
+            "keywords": " | ".join(k for k in (h.get("Keywords") or "").split("     ") if k.strip()),
+            "related": (h.get("Related Investigations") or "").replace("     ", " "),
+            "n_files": len(files),
+            "total_mb": round(sum((f.get("file_size") or 0) for f in files.values()) / 1e6, 1),
+            "n_experimental_tables": len(exp_tables),
+            "experimental_tables": " | ".join(exp_tables),
+            "file_names": " | ".join(sorted(files)),
+        }
+    )
     print(f"{acc}: {len(files)} files, {len(exp_tables)} experimental tables")
 
 with open(os.path.join(out_dir, f"catalog_{query}.csv"), "w", newline="", encoding="utf-8") as fh:

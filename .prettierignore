@@ -1,0 +1,11 @@
+# Generated data and third-party code
+data/
+web/assets/
+web/data/
+web/vendor/
+report/*.pdf
+
+# Hand-formatted on purpose
+*.html
+*.md
+web/styles.css

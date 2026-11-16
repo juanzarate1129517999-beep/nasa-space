@@ -14,58 +14,109 @@ const SI = JSON.parse(rd("web/data/si.js").replace(/^window\.SI=|;\s*$/g, ""));
 const CLIPS = JSON.parse(rd("web/data/clips.js").replace(/^window\.CLIPS = |;\s*$/g, ""));
 const PACKS = Object.fromEntries(JSON.parse(rd("data/si/evidence_packs.json")).map((p) => [`${p.kind}:${p.id}`, p]));
 
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const pct = (p, d = 0) => `${(100 * p).toFixed(d)}%`;
 const n = (x) => Number(x).toLocaleString("en-US");
 const PSI_ATM = 14.696;
-const F = E.flex, V = F.validation, S = E.summary, L = E.solids.literature;
+const F = E.flex,
+  V = F.validation,
+  S = E.summary,
+  L = E.solids.literature;
 const HC = Object.fromEntries(E.habitat_check.map((h) => [h.habitat, h]));
-const MM = HC.moon_base.fuels.Methanol, CM = HC.cabin.fuels.Methanol;
+const MM = HC.moon_base.fuels.Methanol,
+  CM = HC.cabin.fuels.Methanol;
 const HAB = Object.fromEntries(E.habitats.map((h) => [h.id, h]));
 
 // ── The deployed FLEX model, evaluated here exactly as in web/app.js ────────────────────────────────
-const PH = F.phys, ST = F.stages, sig = (z) => 1 / (1 + Math.exp(-z));
+const PH = F.phys,
+  ST = F.stages,
+  sig = (z) => 1 / (1 + Math.exp(-z));
 function physics([hep, o2, logp, co2, he, d0]) {
-  const n2 = Math.max(0, 1 - o2 - co2 - he), M = PH.molar_mass, C = PH.cp_j_mol_k, fuel = hep === 1 ? "Heptane" : "Methanol";
-  const mass = o2 * M.o2 + n2 * M.n2 + co2 * M.co2 + he * M.he, yo = (o2 * M.o2) / mass;
+  const n2 = Math.max(0, 1 - o2 - co2 - he),
+    M = PH.molar_mass,
+    C = PH.cp_j_mol_k,
+    fuel = hep === 1 ? "Heptane" : "Methanol";
+  const mass = o2 * M.o2 + n2 * M.n2 + co2 * M.co2 + he * M.he,
+    yo = (o2 * M.o2) / mass;
   const cp = (o2 * C.o2 + n2 * C.n2 + co2 * C.co2 + he * C.he) / (mass / 1000);
-  const t_st = PH.t0_k + (PH.q_j_kg[fuel] * yo) / (cp * (PH.s_o2[fuel] + yo)), res = Math.log(d0 * d0 * Math.exp(logp));
+  const t_st = PH.t0_k + (PH.q_j_kg[fuel] * yo) / (cp * (PH.s_o2[fuel] + yo)),
+    res = Math.log(d0 * d0 * Math.exp(logp));
   return { heptane: hep, x_o2: o2, log_p: logp, x_co2: co2, x_he: he, d0_mm: d0, t_st, res, hep_t_st: hep * t_st, hep_res: hep * res };
 }
-const stageZ = (st, ph, b) => st.features.reduce((z, f, i) => z + b[i + 1] * (ph[f] - st.mu[i]) / st.sd[i], b[0]);
+const stageZ = (st, ph, b) => st.features.reduce((z, f, i) => z + (b[i + 1] * (ph[f] - st.mu[i])) / st.sd[i], b[0]);
 function ends(x) {
-  const ph = physics(x), pd = sig(stageZ(ST.disruption, ph, ST.disruption.coef)), ps = sig(stageZ(ST.extinction, ph, ST.extinction.coef));
+  const ph = physics(x),
+    pd = sig(stageZ(ST.disruption, ph, ST.disruption.coef)),
+    ps = sig(stageZ(ST.extinction, ph, ST.extinction.coef));
   return { e: (1 - pd) * ps, d: pd, c: (1 - pd) * (1 - ps) };
 }
 const o2grid = Array.from({ length: 31 }, (_, i) => +(0.12 + i * 0.01).toFixed(2));
 const endsCurve = (p, fuel) => o2grid.map((o) => ends([fuel === "Heptane" ? 1 : 0, o, Math.log(p), 0, 0, F.d0_median]));
-const mapP = Array.from({ length: 36 }, (_, i) => +Math.exp(Math.log(0.4) + i * (Math.log(3.1) - Math.log(0.4)) / 35).toFixed(3));
+const mapP = Array.from({ length: 36 }, (_, i) => +Math.exp(Math.log(0.4) + (i * (Math.log(3.1) - Math.log(0.4))) / 35).toFixed(3));
 const mapZ = mapP.map((p) => o2grid.map((o) => ends([0, o, Math.log(p), 0, 0, F.d0_median]).e));
 
 // ── Data prepared for the charts ─────────────────────────────────────────────────────────────────────
 const qcGroups = {};
-E.qc.forEach((q) => { const k = String(q.regla).replace(/\s*\(\d+ cells?\)/, "").replace(/\d+(\.\d+)?/g, "#").replace(/\s+/g, " ").trim(); qcGroups[k] = (qcGroups[k] || 0) + 1; });
+E.qc.forEach((q) => {
+  const k = String(q.regla)
+    .replace(/\s*\(\d+ cells?\)/, "")
+    .replace(/\d+(\.\d+)?/g, "#")
+    .replace(/\s+/g, " ")
+    .trim();
+  qcGroups[k] = (qcGroups[k] || 0) + 1;
+});
 const qcTop = Object.entries(qcGroups).sort((a, b) => b[1] - a[1]);
 const train = F.train;
-const kMed = (fuel) => { const v = train.filter((t) => t.combustible === fuel && t.tasa_quemado > 0).map((t) => t.tasa_quemado).sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; };
-const extRatios = train.filter((t) => t.autoextincion && t.d_ext_mm > 0 && t.d0_mm > 0).map((t) => t.d_ext_mm / t.d0_mm).sort((a, b) => a - b);
+const kMed = (fuel) => {
+  const v = train
+    .filter((t) => t.combustible === fuel && t.tasa_quemado > 0)
+    .map((t) => t.tasa_quemado)
+    .sort((a, b) => a - b);
+  return v[Math.floor(v.length / 2)];
+};
+const extRatios = train
+  .filter((t) => t.autoextincion && t.d_ext_mm > 0 && t.d0_mm > 0)
+  .map((t) => t.d_ext_mm / t.d0_mm)
+  .sort((a, b) => a - b);
 const extMed = extRatios[Math.floor(extRatios.length / 2)];
 const nK = train.filter((t) => t.tasa_quemado > 0).length;
 const habsRank = ["cabin", "eva_prep", "moon_base", "exploration"];
 const invSorted = [...E.investigations].sort((a, b) => b.relevance.moon_base.score - a.relevance.moon_base.score);
 const chartData = {
   qc: qcTop.slice(0, 22),
-  cov: E.coverage.groups.map((g) => ({ name: g.experiment, fam: g.family, assumed: g.assumed, burner: g.burner_o2, x: g.x_o2, y: g.p_atm })),
-  habitats: E.habitats, moonEnv: E.records.moon_envelope,
-  bands: E.o2_bands, co2: E.suppression.co2, saffire2: E.saffire2,
-  relev: { names: invSorted.map((r) => r.name), habs: habsRank.map((h) => HAB[h].name), z: invSorted.map((r) => habsRank.map((h) => r.relevance[h].score)) },
+  cov: E.coverage.groups.map((g) => ({
+    name: g.experiment,
+    fam: g.family,
+    assumed: g.assumed,
+    burner: g.burner_o2,
+    x: g.x_o2,
+    y: g.p_atm,
+  })),
+  habitats: E.habitats,
+  moonEnv: E.records.moon_envelope,
+  bands: E.o2_bands,
+  co2: E.suppression.co2,
+  saffire2: E.saffire2,
+  relev: {
+    names: invSorted.map((r) => r.name),
+    habs: habsRank.map((h) => HAB[h].name),
+    z: invSorted.map((r) => habsRank.map((h) => r.relevance[h].score)),
+  },
   sim: E.similarity,
-  val: V.models, rel: V.reliability,
+  val: V.models,
+  rel: V.reliability,
   ends: { cabin: endsCurve(1.0, "Methanol"), moon: endsCurve(0.694, "Methanol"), o2: o2grid },
   map: { o2: o2grid, p: mapP, z: mapZ, pts: train.filter((t) => t.x_co2 === 0 && t.x_he === 0).map((t) => [t.x_o2, t.p_atm, t.resultado]) },
   hab: E.habitat_check.filter((h) => h.habitat !== "suit").map((h) => ({ name: h.name, ...h.fuels.Methanol })),
-  cfig: E.cfig, next: E.next, findings: E.findings,
-  solids: { b: E.solids.boundary, lit: L.rows.filter((r) => r.ignited && r.x_o2 != null), g1: E.solids.g1_upward_limit_pct, min: E.solids.min_o2_pct },
+  cfig: E.cfig,
+  next: E.next,
+  findings: E.findings,
+  solids: {
+    b: E.solids.boundary,
+    lit: L.rows.filter((r) => r.ignited && r.x_o2 != null),
+    g1: E.solids.g1_upward_limit_pct,
+    min: E.solids.min_o2_pct,
+  },
 };
 
 // ── Screenshots of the website (dark), used in section 12 and as a few figures ─────────────────────
@@ -73,45 +124,98 @@ async function screenshots() {
   fs.mkdirSync(FIG, { recursive: true });
   const b = await chromium.launch({ args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
   const p = await b.newPage({ viewport: { width: 1440, height: 860 }, deviceScaleFactor: 1.5 });
-  const css = ".cb-btn{opacity:0!important} *{transition:none!important} .js .rv{opacity:1!important;transform:none!important} .sec .card,.sec__head,.finding,.ac,.dash-kpis,.stage,.mth-step,.dl,.sub-h{animation:none!important}";
-  const go = async (hash, wait = 3500) => { await p.goto(SITE + hash, { waitUntil: "load" }); await p.addStyleTag({ content: css }); await p.waitForTimeout(wait); };
-  const shot = async (file, sel) => {
-    if (sel) { const el = await p.$(sel); await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(800); await el.screenshot({ path: path.join(FIG, file), type: "jpeg", quality: 82 }); }
-    else await p.screenshot({ path: path.join(FIG, file), type: "jpeg", quality: 82 });
+  const css =
+    ".cb-btn{opacity:0!important} *{transition:none!important} .js .rv{opacity:1!important;transform:none!important} .sec .card,.sec__head,.finding,.ac,.dash-kpis,.stage,.mth-step,.dl,.sub-h{animation:none!important}";
+  const go = async (hash, wait = 3500) => {
+    await p.goto(SITE + hash, { waitUntil: "load" });
+    await p.addStyleTag({ content: css });
+    await p.waitForTimeout(wait);
   };
-  await go("", 6000); await shot("w_home.jpg");
-  await go("#/learn", 9000); await p.addStyleTag({ content: ".xp-card__in{visibility:hidden!important}" }); await shot("w_moon.jpg");
-  await p.evaluate(() => { const c = document.querySelector('.xp-card[data-act="base"]'); window.scrollTo(0, c.getBoundingClientRect().top + scrollY - innerHeight * 0.2); });
-  await p.waitForTimeout(11000); await shot("w_base.jpg");
-  await p.evaluate(() => document.getElementById("xp-2").scrollIntoView()); await p.waitForTimeout(5000); await shot("w_sources.jpg");
-  await go("#/flames"); await shot("w_flames.jpg");
-  await p.evaluate(() => document.querySelector("#arch").scrollIntoView({ block: "start" })); await p.evaluate(() => window.scrollBy(0, -160)); await p.waitForTimeout(2500); await shot("w_archive.jpg");
-  await go("#/lab"); await p.evaluate(() => document.querySelector('#presets button[data-h="moon_base"]').click()); await p.waitForTimeout(2000);
-  await p.evaluate(() => document.querySelector(".console").scrollIntoView({ block: "start" })); await p.evaluate(() => window.scrollBy(0, -90)); await p.waitForTimeout(1200); await shot("w_lab.jpg");
-  await p.evaluate(() => document.querySelector("#map-chart").scrollIntoView({ block: "center" })); await p.waitForTimeout(1200); await shot("w_fires.jpg");
-  await go("#/findings"); await shot("w_dash.jpg");
-  await p.evaluate(() => document.getElementById("audit").scrollIntoView()); await p.waitForTimeout(1500); await shot("w_audit.jpg");
-  await go("#/ranking"); await shot("w_ranking.jpg");
-  await go("#/next"); await shot("w_next.jpg");
-  await go("#/data"); await shot("w_method.jpg");
-  await p.evaluate(() => { const q = document.getElementById("qc") || document.querySelector("[id*=qc]"); if (q) q.scrollIntoView({ block: "start" }); }); await p.waitForTimeout(1500); await shot("w_qc.jpg");
-  await go("#/findings"); await p.addStyleTag({ content: ".cb-btn{opacity:1!important}" }); await p.click("#cb-btn"); await p.waitForTimeout(800);
-  await p.click('#cb-briefs button[data-h="moon_base"]'); await p.waitForTimeout(1500); await shot("w_chat.jpg");
+  const shot = async (file, sel) => {
+    if (sel) {
+      const el = await p.$(sel);
+      await el.scrollIntoViewIfNeeded();
+      await p.waitForTimeout(800);
+      await el.screenshot({ path: path.join(FIG, file), type: "jpeg", quality: 82 });
+    } else await p.screenshot({ path: path.join(FIG, file), type: "jpeg", quality: 82 });
+  };
+  await go("", 6000);
+  await shot("w_home.jpg");
+  await go("#/learn", 9000);
+  await p.addStyleTag({ content: ".xp-card__in{visibility:hidden!important}" });
+  await shot("w_moon.jpg");
+  await p.evaluate(() => {
+    const c = document.querySelector('.xp-card[data-act="base"]');
+    window.scrollTo(0, c.getBoundingClientRect().top + scrollY - innerHeight * 0.2);
+  });
+  await p.waitForTimeout(11000);
+  await shot("w_base.jpg");
+  await p.evaluate(() => document.getElementById("xp-2").scrollIntoView());
+  await p.waitForTimeout(5000);
+  await shot("w_sources.jpg");
+  await go("#/flames");
+  await shot("w_flames.jpg");
+  await p.evaluate(() => document.querySelector("#arch").scrollIntoView({ block: "start" }));
+  await p.evaluate(() => window.scrollBy(0, -160));
+  await p.waitForTimeout(2500);
+  await shot("w_archive.jpg");
+  await go("#/lab");
+  await p.evaluate(() => document.querySelector('#presets button[data-h="moon_base"]').click());
+  await p.waitForTimeout(2000);
+  await p.evaluate(() => document.querySelector(".console").scrollIntoView({ block: "start" }));
+  await p.evaluate(() => window.scrollBy(0, -90));
+  await p.waitForTimeout(1200);
+  await shot("w_lab.jpg");
+  await p.evaluate(() => document.querySelector("#map-chart").scrollIntoView({ block: "center" }));
+  await p.waitForTimeout(1200);
+  await shot("w_fires.jpg");
+  await go("#/findings");
+  await shot("w_dash.jpg");
+  await p.evaluate(() => document.getElementById("audit").scrollIntoView());
+  await p.waitForTimeout(1500);
+  await shot("w_audit.jpg");
+  await go("#/ranking");
+  await shot("w_ranking.jpg");
+  await go("#/next");
+  await shot("w_next.jpg");
+  await go("#/data");
+  await shot("w_method.jpg");
+  await p.evaluate(() => {
+    const q = document.getElementById("qc") || document.querySelector("[id*=qc]");
+    if (q) q.scrollIntoView({ block: "start" });
+  });
+  await p.waitForTimeout(1500);
+  await shot("w_qc.jpg");
+  await go("#/findings");
+  await p.addStyleTag({ content: ".cb-btn{opacity:1!important}" });
+  await p.click("#cb-btn");
+  await p.waitForTimeout(800);
+  await p.click('#cb-briefs button[data-h="moon_base"]');
+  await p.waitForTimeout(1500);
+  await shot("w_chat.jpg");
   await b.close();
 }
 
 // ── HTML ────────────────────────────────────────────────────────────────────────────────────────────
-let figN = 0, tabN = 0;
-const fig = (file, cap, cls = "") => `<figure class="${cls}"><img src="figures/${file}"><figcaption><b>Figure ${++figN}.</b> ${cap}</figcaption></figure>`;
-const chart = (id, cap, h = 300) => `<figure><div class="chart" id="${id}" style="height:${h}px"></div><figcaption><b>Figure ${++figN}.</b> ${cap}</figcaption></figure>`;
-const table = (cap, head, rows, cls = "") => `<p class="tcap"><b>Table ${++tabN}.</b> ${cap}</p><table class="${cls}"><thead><tr>${head.map((h) => `<th${/^[#n·]|^(O₂|atm|CO₂|AUC|Brier|Score|Records|Publ|Log|Acc|With|Goes|Breaks|Burns|psi|Rel|Prox|Evid|Dir|Δ)/.test(h) ? ' class="n"' : ""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td${typeof c === "number" || /^[\d.,%–+−-]+( ?(%|atm|psi|pts|s|ppm|K))?$/.test(String(c)) ? ' class="n"' : ""}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-const sec = (num, title, lead, body) => `<section class="sec"><div class="sec-top"><span class="bar"></span><span class="num">${num}</span></div><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}${body}</section>`;
+let figN = 0,
+  tabN = 0;
+const fig = (file, cap, cls = "") =>
+  `<figure class="${cls}"><img src="figures/${file}"><figcaption><b>Figure ${++figN}.</b> ${cap}</figcaption></figure>`;
+const chart = (id, cap, h = 300) =>
+  `<figure><div class="chart" id="${id}" style="height:${h}px"></div><figcaption><b>Figure ${++figN}.</b> ${cap}</figcaption></figure>`;
+const table = (cap, head, rows, cls = "") =>
+  `<p class="tcap"><b>Table ${++tabN}.</b> ${cap}</p><table class="${cls}"><thead><tr>${head.map((h) => `<th${/^[#n·]|^(O₂|atm|CO₂|AUC|Brier|Score|Records|Publ|Log|Acc|With|Goes|Breaks|Burns|psi|Rel|Prox|Evid|Dir|Δ)/.test(h) ? ' class="n"' : ""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td${typeof c === "number" || /^[\d.,%–+−-]+( ?(%|atm|psi|pts|s|ppm|K))?$/.test(String(c)) ? ' class="n"' : ""}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+const sec = (num, title, lead, body) =>
+  `<section class="sec"><div class="sec-top"><span class="bar"></span><span class="num">${num}</span></div><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}${body}</section>`;
 const box = (t, cls = "") => `<div class="box ${cls}">${t}</div>`;
 const h3 = (t) => `<h3><i></i>${t}</h3>`;
 
 function html() {
-  const moonBrief = SI.habitat.moon_base, moonPack = PACKS["habitat:moon_base"];
-  const ood = E.flex.ood_threshold, suitD = HC.suit.fuels.Methanol.ood_distance, moonD = MM.ood_distance;
+  const moonBrief = SI.habitat.moon_base,
+    moonPack = PACKS["habitat:moon_base"];
+  const ood = E.flex.ood_threshold,
+    suitD = HC.suit.fuels.Methanol.ood_distance,
+    moonD = MM.ood_distance;
   const fx = E.flex.outcomes;
   const top6 = invSorted.slice(0, 6);
   const audit = E.moonbase.modules;
@@ -119,10 +223,12 @@ function html() {
   const picks = E.next.picks;
   const findings = E.findings;
   const solidRows = E.solids.habitats;
-  const nPMMA = (E.solids.by_family || []).filter((f) => /PMMA/.test(f.family)).reduce((s, f) => s + (f.n || 0), 0);
   const clipsBy = (st) => CLIPS.filter((c) => c.state === st).length;
   const steps = V.stages;
-  const lr = V.models.find((m) => m.key === "lr"), lr6 = V.models.find((m) => m.key === "lr6"), gb = V.models.find((m) => m.key === "gb"), o2m = V.models.find((m) => m.key === "o2");
+  const lr = V.models.find((m) => m.key === "lr"),
+    lr6 = V.models.find((m) => m.key === "lr6"),
+    gb = V.models.find((m) => m.key === "gb"),
+    o2m = V.models.find((m) => m.key === "o2");
 
   const cover = `<section class="cover">
   <div class="cv-bar"></div><div class="cv-glow"></div>
@@ -165,24 +271,63 @@ ${box(`<b>The message in one sentence:</b> with more oxygen, droplet fires in mi
 <tr><td><b>Javier Medina</b></td><td>Member</td><td>Research on the challenge and its background, conceptual guidance, review and development support</td></tr></tbody></table>
 <p class="small">Use of AI: the SI briefings are written by Anthropic Claude and published only after code verification (Section 11); code, documentation, this report and the demo video were produced with AI assistance. Details in docs/AI_USE.md.</p></section>`;
 
-  const s1 = sec("01", "Introduction", "Fire is one of the most serious risks of crewed spaceflight, and in microgravity it behaves differently than on Earth.", `
+  const s1 = sec(
+    "01",
+    "Introduction",
+    "Fire is one of the most serious risks of crewed spaceflight, and in microgravity it behaves differently than on Earth.",
+    `
 <p>The history of spaceflight is a reminder: the Apollo 1 fire in a pure-oxygen cabin (1967), the oxygen-tank explosion on Apollo 13 (1970) and the oxygen-generator fire on the Mir station (1997). During Artemis II, a smoke alarm sounded about 80,000 miles from Earth. NASA's strategy has three layers: <b>prevention</b> (controlling ignition sources and choosing materials by their flammability limits), <b>detection</b> and <b>suppression</b>.</p>
 <p>In microgravity there is no buoyancy: hot gas does not rise, a candle flame becomes a blue sphere, and oxygen arrives only by diffusion or ventilation. That changes flammability limits, flame spread and extinction. NASA has measured this for decades on the ISS and on cargo spacecraft and publishes the results in the Physical Sciences Informatics (PSI) repository. The problem the challenge poses is that this volume of data is hard to find, compare and interpret.</p>
 <p>The urgency is concrete. To shorten pre-breathing before spacewalks, the lunar base and pressurized rovers will have more oxygen and less pressure than Earth's atmosphere. That combination makes materials much more flammable, and it is exactly where flight data is scarce. Skylab Phoenix sets out to:</p>
-<ol><li>Turn PSI's scattered data into a clean, unified and traceable dataset.</li><li>Extract quantitative knowledge from it with validated models that are honest about their uncertainty.</li><li>Present it in a website, with SI briefings, that any researcher, engineer or student can use to make decisions.</li></ol>`);
+<ol><li>Turn PSI's scattered data into a clean, unified and traceable dataset.</li><li>Extract quantitative knowledge from it with validated models that are honest about their uncertainty.</li><li>Present it in a website, with SI briefings, that any researcher, engineer or student can use to make decisions.</li></ol>`,
+  );
 
-  const s2 = sec("02", "The challenge and the research question", "The challenge asks for an SI-powered web dashboard that summarizes, ranks and interprets NASA's combustion investigations. Skylab Phoenix answers each official objective with a data component.", `
-${table("Official challenge objectives and the matching parts of the solution.", ["Official objective", "Skylab Phoenix component", "Section"], [
-    ["Identify the investigations most relevant to habitable crew environments (spacecraft, stations, Moon and Mars bases, pressurized rovers)", "Automatic profile of the 24 investigations and a transparent ranking per habitat; side-by-side comparison", "7"],
-    ["Extract data that supports predictive modeling of flammability", "Bronze → silver → gold pipeline with one schema; validated models that run in the browser", "5, 8"],
-    ["Highlight research that informs next-generation fire-safety controls", "Findings ranked by evidence (prevention, detection, suppression), a lunar-base fire audit and the recommended next experiment", "9, 10"],
-    ["SI-powered summaries and interpretation", "Briefings for every habitat, investigation and lunar-base module, verified by code, in a floating “Ask SI” chat with a search over NASA's own text", "11"],
-    ["Applications of PSI data to fire safety on Earth (optional)", "Earth benefits reported by PSI for each investigation, included in their profiles", "14"]])}
+  const s2 = sec(
+    "02",
+    "The challenge and the research question",
+    "The challenge asks for an SI-powered web dashboard that summarizes, ranks and interprets NASA's combustion investigations. Skylab Phoenix answers each official objective with a data component.",
+    `
+${table(
+  "Official challenge objectives and the matching parts of the solution.",
+  ["Official objective", "Skylab Phoenix component", "Section"],
+  [
+    [
+      "Identify the investigations most relevant to habitable crew environments (spacecraft, stations, Moon and Mars bases, pressurized rovers)",
+      "Automatic profile of the 24 investigations and a transparent ranking per habitat; side-by-side comparison",
+      "7",
+    ],
+    [
+      "Extract data that supports predictive modeling of flammability",
+      "Bronze → silver → gold pipeline with one schema; validated models that run in the browser",
+      "5, 8",
+    ],
+    [
+      "Highlight research that informs next-generation fire-safety controls",
+      "Findings ranked by evidence (prevention, detection, suppression), a lunar-base fire audit and the recommended next experiment",
+      "9, 10",
+    ],
+    [
+      "SI-powered summaries and interpretation",
+      "Briefings for every habitat, investigation and lunar-base module, verified by code, in a floating “Ask SI” chat with a search over NASA's own text",
+      "11",
+    ],
+    [
+      "Applications of PSI data to fire safety on Earth (optional)",
+      "Earth benefits reported by PSI for each investigation, included in their profiles",
+      "14",
+    ],
+  ],
+)}
 ${box(`<p class="bh">Research question</p>What does NASA's flight data say about fire behaviour in the atmosphere planned for the lunar base (≥ 30% O₂, ≤ 10.2 psi), how certain is it, and which experiment is missing to answer what is unknown today?`, "violet")}
 <p>The challenge page gives several hints that we used as a guide. The μg tests with the most oxygen are those of ACME CFI-G (up to 85% O₂ at the burner). PSI has no partial-gravity data yet (it will come from LUCI and FM2). Microgravity and 1 g results can bound intermediate gravity. And ACME's BRE experiment studied material flammability with gases that emulate solids.</p>
-${h3("Target users")}<p>Professors, graduate and undergraduate students, researchers and, above all, aerospace engineers who design habitats and select materials.</p>`);
+${h3("Target users")}<p>Professors, graduate and undergraduate students, researchers and, above all, aerospace engineers who design habitats and select materials.</p>`,
+  );
 
-  const s3 = sec("03", "Conceptual framework: fire in microgravity", "Without buoyancy, fire depends on transport by diffusion and ventilation. Gravity, airflow, oxygen and pressure therefore interact in ways a test on Earth does not capture.", `
+  const s3 = sec(
+    "03",
+    "Conceptual framework: fire in microgravity",
+    "Without buoyancy, fire depends on transport by diffusion and ventilation. Gravity, airflow, oxygen and pressure therefore interact in ways a test on Earth does not capture.",
+    `
 ${h3("Key concepts")}
 <ul class="concepts">
 <li><b>Flammability limit.</b> The least favourable combination of conditions (O₂, pressure, flow) in which a material sustains a flame. Microgravity adds a low-flow limit: with little flow, the flame goes out for lack of oxygen and through radiative losses.</li>
@@ -194,17 +339,47 @@ ${h3("Key concepts")}
 <li><b>Cool flames.</b> Low-temperature, nearly invisible combustion seen with fuels such as butane. A distinct risk: an optical detector may miss it.</li>
 <li><b>Diluents.</b> CO₂ and helium dilute oxygen and change heat transfer. FLEX tested them as suppressants.</li></ul>
 ${h3("Habitat atmospheres")}
-${table("Atmospheres used as scenarios. Lunar base and suit: official challenge page. Exploration: NASA standard.", ["Habitat", "O₂", "Pressure", "Source"], E.habitats.map((h) => [esc(h.name) + `<br><span class="small">${esc(h.detail)}</span>`, pct(h.x_o2, h.x_o2 * 1000 % 10 ? 1 : 0), `${h.p_atm.toFixed(2)} atm · ${(h.p_atm * PSI_ATM).toFixed(1)} psi`, `<span class="small">${esc(h.source)}</span>`]))}
-<p>Compared with Earth's air, the lunar base will have over 40% more oxygen. Even if the O₂ partial pressure is similar, the higher mole fraction speeds combustion and reduces the ability of the inert gas to cool the flame.</p>`);
+${table(
+  "Atmospheres used as scenarios. Lunar base and suit: official challenge page. Exploration: NASA standard.",
+  ["Habitat", "O₂", "Pressure", "Source"],
+  E.habitats.map((h) => [
+    esc(h.name) + `<br><span class="small">${esc(h.detail)}</span>`,
+    pct(h.x_o2, (h.x_o2 * 1000) % 10 ? 1 : 0),
+    `${h.p_atm.toFixed(2)} atm · ${(h.p_atm * PSI_ATM).toFixed(1)} psi`,
+    `<span class="small">${esc(h.source)}</span>`,
+  ]),
+)}
+<p>Compared with Earth's air, the lunar base will have over 40% more oxygen. Even if the O₂ partial pressure is similar, the higher mole fraction speeds combustion and reduces the ability of the inert gas to cool the flame.</p>`,
+  );
 
-  const invRows = [...E.investigations].sort((a, b) => (b.n_tests || 0) - (a.n_tests || 0) || (a.type > b.type ? 1 : -1)).map((r) => [`<b>${esc(r.name)}</b>`, r.psi_id, esc(r.family), esc(r.hardware), r.type, r.n_tests ? n(r.n_tests) : "—", r.n_with_outcome ? n(r.n_with_outcome) : "—", r.n_publications ?? "—"]);
-  const s4 = sec("04", "Data: source, scope and inventory", "We use the data source the challenge names: NASA's PSI repository (CC0 license). Of its 133 results for “combustion”, 24 belong to Combustion Science: 19 flight experiments and 5 ground investigations.", `
+  const invRows = [...E.investigations]
+    .sort((a, b) => (b.n_tests || 0) - (a.n_tests || 0) || (a.type > b.type ? 1 : -1))
+    .map((r) => [
+      `<b>${esc(r.name)}</b>`,
+      r.psi_id,
+      esc(r.family),
+      esc(r.hardware),
+      r.type,
+      r.n_tests ? n(r.n_tests) : "—",
+      r.n_with_outcome ? n(r.n_with_outcome) : "—",
+      r.n_publications ?? "—",
+    ]);
+  const s4 = sec(
+    "04",
+    "Data: source, scope and inventory",
+    "We use the data source the challenge names: NASA's PSI repository (CC0 license). Of its 133 results for “combustion”, 24 belong to Combustion Science: 19 flight experiments and 5 ground investigations.",
+    `
 <p>The other 109 investigations (materials, fluids, biophysics) only mention the word and are discarded. Everything is retrieved without login from PSI's public API: metadata (objective, hypothesis, approach, team, publications, Earth benefit), experimental tables in CSV or Excel and, for the flight-video archive, raw ISS and Cygnus video. Two NASA reports outside PSI are also used and labelled as such: the BASS-II summary report (flammability boundary of solids) and the Saffire VI paper (burns at raised oxygen and reduced pressure).</p>
 <p>Not every investigation publishes a test table: 18 of the 24 do. The five ground studies and FLEX-2 provide descriptions, publications and data products but no test-by-test table, so they enter the profiles and the ranking but contribute no records.</p>
 ${table("Inventory of the 24 investigations, generated by the pipeline. “Records” in ACME's daily tables = flames lit.", ["Investigation", "PSI", "Family", "Hardware", "Type", "Records", "With outcome", "Publ."], invRows, "dense")}
-<p class="small">Hardware grouping as on the challenge page: the CIR combustion rack with ACME (gases) or MDCA (droplets), the fan-driven duct of the Microgravity Science Glovebox (MSG), and the Saffire module inside the Cygnus spacecraft.</p>`);
+<p class="small">Hardware grouping as on the challenge page: the CIR combustion rack with ACME (gases) or MDCA (droplets), the fan-driven duct of the Microgravity Science Glovebox (MSG), and the Saffire module inside the Cygnus spacecraft.</p>`,
+  );
 
-  const s5 = sec("05", "Data engineering", "A layered pipeline, reproducible with one command, turns 22 heterogeneous tables into one schema in SI units. Every correction is logged with the original value and the rule applied.", `
+  const s5 = sec(
+    "05",
+    "Data engineering",
+    "A layered pipeline, reproducible with one command, turns 22 heterogeneous tables into one schema in SI units. Every correction is logged with the original value and the rule applied.",
+    `
 <div class="pipe"><div><b>BRONZE</b><span>NASA PSI API</span><small>Catalog, metadata and experimental tables of the 24 investigations, no login</small></div><i>→</i>
 <div><b>SILVER</b><span>One table per experiment</span><small>Common schema, SI units, normalized labels, quality rules, correction log</small></div><i>→</i>
 <div><b>GOLD</b><span>Analytic tables</span><small>${n(S.records)} tests, 24 profiles, similarity, per-habitat ranking, findings</small></div><i>→</i>
@@ -220,9 +395,14 @@ ${h3("Quality rules")}
 ${chart("c_qc", `Corrections by type (the 22 most frequent of ${qcTop.length} types). ${S.qc_fixes} corrections in total; each keeps the original value.`, 360)}
 <p>Examples: a 0 mmHg pressure in FLEX (excluded from the models), “3400%” and “2100%” in ACME BRE (34% and 21%), 8 identical duplicate rows in CFI, a missing decimal point in Saffire-II (“037 mm” → 0.37 mm) and lowercase “yes/no” labels in CFI-G. None was fixed silently: all can be audited.</p>
 <p>A second pass compared tables with each other and with NASA's own files. It found calendar dates that disagree with the GMT day of year in BASS, one as-run number used for two tests on different days, a BASS-II GMT day contradicted by the name of NASA's raw video for that test, Saffire thicknesses written in centimetres instead of millimetres, sample length and width swapped, camera file names that do not match the sample, and a Greek μ exported as “?”. In BASS-II gas data, final O₂ readings above the initial value and CO readings that fall during a burn are physically impossible in the sealed glovebox and are excluded.</p>
-${fig("w_qc.jpg", `The quality log on the Method page of the website: ${S.qc_fixes} corrections, each with the record, field, original value, new value and rule.`, "shot")}`);
+${fig("w_qc.jpg", `The quality log on the Method page of the website: ${S.qc_fixes} corrections, each with the record, field, original value, new value and rule.`, "shot")}`,
+  );
 
-  const s6 = sec("06", "Exploratory analysis", "Before any model, the data shows three patterns: almost no tests near lunar-base air, droplet fires stop putting themselves out as oxygen rises, and CO₂ suppresses fires at reduced pressure.", `
+  const s6 = sec(
+    "06",
+    "Exploratory analysis",
+    "Before any model, the data shows three patterns: almost no tests near lunar-base air, droplet fires stop putting themselves out as oxygen rises, and CO₂ suppresses fires at reduced pressure.",
+    `
 ${h3("Coverage: where NASA has flown fire")}
 ${chart("c_cov", `Every flight record with an ambient O₂ and pressure, against the habitat atmospheres. Hollow markers: conditions not reported (cabin air assumed) or burner O₂ (inverse flames). Of ${n(S.ambient)} records (${n(E.coverage.n_measured)} with measured conditions), only ${S.moon_envelope} fall in the lunar envelope, all from ${esc(E.coverage.moon_envelope_experiments.join(" and "))}. No solid in PSI's tables exceeds ${E.solids.max_o2_any_solid_pct}% O₂.`, 360)}
 ${h3("With more oxygen, droplet fires stop putting themselves out")}
@@ -232,21 +412,56 @@ ${chart("c_co2", "Self-extinction rate by CO₂ level, with 90% Wilson intervals
 ${h3("Gravity: microgravity vs 1 g on the same samples")}
 ${chart("c_grav", "Saffire-II burned the same samples in orbit (Cygnus) and on the ground, at 20 cm/s and ≈ 22% O₂. In 8 of 8 samples, 1 g burned as much or more. Silicone barely spread in orbit but burned fully on the ground.", 270)}
 <p>This qualifies a BASS-II hypothesis: that NASA's standard 1 g test (NASA-STD-6001, Test 1) may not be conservative in space. At 20 cm/s, Saffire-II shows it was. The question stays open for low flow, a regime Saffire-II did not test. In Saffire-I, the same 94 × 40 cm SIBAL fabric burned ${E.saffire1[0].tiempo_quemado_s} s with concurrent flow and ${E.saffire1[1].tiempo_quemado_s} s with opposed flow: ventilation direction defines the worst case.</p>
-${h3("Cool flames")}<p>Of ${E.cfig.ignition.tests} ACME CFI-G tests, ${E.cfig.ignition.ignited} ignited and ${E.cfig.ignition.cool_flames} produced confirmed cool flames, all with ${esc(E.cfig.cool_flame_conditions.fuel.join(", "))}, near ${pct(E.cfig.cool_flame_conditions.o2[1])} O₂ and ${E.cfig.cool_flame_conditions.p_atm[1].toFixed(1)} atm. They are rare, but an optical detector may miss them.</p>`);
+${h3("Cool flames")}<p>Of ${E.cfig.ignition.tests} ACME CFI-G tests, ${E.cfig.ignition.ignited} ignited and ${E.cfig.ignition.cool_flames} produced confirmed cool flames, all with ${esc(E.cfig.cool_flame_conditions.fuel.join(", "))}, near ${pct(E.cfig.cool_flame_conditions.o2[1])} O₂ and ${E.cfig.cool_flame_conditions.p_atm[1].toFixed(1)} atm. They are rare, but an optical detector may miss them.</p>`,
+  );
 
-  const s7 = sec("07", "Summaries, ranking and similarity of investigations", "Each investigation has a profile generated from its data and a relevance score per habitat. The score is a visible formula, not a black box.", `
+  const s7 = sec(
+    "07",
+    "Summaries, ranking and similarity of investigations",
+    "Each investigation has a profile generated from its data and a relevance score per habitat. The score is a visible formula, not a black box.",
+    `
 ${h3("Automatic profile")}
 <p>For each experimental table, the pipeline classifies every column as varied (with its range), fixed (with its value) or measured (an outcome). This directly answers the challenge's question: “how did the tests within one investigation differ, and how were they alike?”. The profile adds the objective, hypothesis, team, hardware, conditions covered, publications with DOI and the Earth benefit reported by PSI.</p>
 ${h3("Ranking per habitat")}
 ${box(`<p class="mono">Relevance = 100 × ( 0.5 · proximity + 0.2 · evidence + 0.3 · directness )</p><ul><li><b>Proximity:</b> 1 − e<sup>−n/8</sup>, where n is the effective number of tests near the habitat atmosphere, with a Gaussian kernel of 3 points of O₂ and 30% of pressure. It counts half when the O₂ is at the burner or the conditions were assumed.</li><li><b>Evidence:</b> log(1 + tests with an outcome), normalized to 300.</li><li><b>Directness:</b> 1.0 if the challenge page names it as core (BASS, BASS-II, Saffire, SAME, SAME-R, FLEX); 0.75 if it mentions it (BRE, DAFT, CFI-G, E-FIELD); 0.5 for other flight investigations; 0.35 for ground ones.</li></ul>`, "dark")}
 ${chart("c_relev", "Relevance of the 24 investigations for each habitat (0–100). FLEX leads for the lunar base thanks to its tests at 30–34% O₂ and 0.70 atm; ACME CFI-G leads for the exploration atmosphere; BASS and BASS-II lead for the cabin.", 560)}
-${table("The six most relevant investigations for the lunar base.", ["#", "Investigation", "Score", "Proximity", "Evidence", "Directness", "Tests near"], top6.map((r, i) => [i + 1, `<b>${esc(r.name)}</b> <span class="small">${r.psi_id}</span>`, r.relevance.moon_base.score.toFixed(1), r.relevance.moon_base.proximity.toFixed(3), r.relevance.moon_base.evidence.toFixed(3), r.relevance.moon_base.directness.toFixed(2), r.relevance.moon_base.n_near.toFixed(1)]))}
+${table(
+  "The six most relevant investigations for the lunar base.",
+  ["#", "Investigation", "Score", "Proximity", "Evidence", "Directness", "Tests near"],
+  top6.map((r, i) => [
+    i + 1,
+    `<b>${esc(r.name)}</b> <span class="small">${r.psi_id}</span>`,
+    r.relevance.moon_base.score.toFixed(1),
+    r.relevance.moon_base.proximity.toFixed(3),
+    r.relevance.moon_base.evidence.toFixed(3),
+    r.relevance.moon_base.directness.toFixed(2),
+    r.relevance.moon_base.n_near.toFixed(1),
+  ]),
+)}
 ${h3("Similarity between investigations")}
 ${box(`<p class="mono">Similarity = 0.30 · Jaccard(keywords) + 0.25 · same family + 0.15 · same hardware + 0.15 · overlap of O₂ range + 0.15 · linked in PSI</p>`, "dark")}
-${chart("c_sim", "Similarity matrix ordered by hierarchical clustering (average linkage). Clear blocks emerge: droplets (FLEX, FLEX-2, CFI), Saffire, BASS, smoke (SAME, SAME-R, DAFT) and the ACME family.", 520)}`);
+${chart("c_sim", "Similarity matrix ordered by hierarchical clustering (average linkage). Clear blocks emerge: droplets (FLEX, FLEX-2, CFI), Saffire, BASS, smoke (SAME, SAME-R, DAFT) and the ACME family.", 520)}`,
+  );
 
-  const featRows = [["Fuel (heptane / methanol)", "both stages", "Heptane soots more and burns differently than methanol"], ["O₂ mole fraction", "stage 1", "Oxygen available to the flame"], ["Pressure (log)", "stage 1", "Diffusion and residence time scale with pressure"], ["CO₂ and helium fractions", "stage 1; helium also stage 2", "Suppressing diluents: heat capacity (CO₂) and diffusivity (He)"], ["Initial droplet diameter", "stage 1", "Large droplets make large flames, with more radiative loss"], ["Stoichiometric flame temperature T<sub>st</sub>", "stage 2", "Burke–Schumann temperature at the flame sheet, from the gas mixture and the fuel"], ["Residence time log(d₀²·p)", "stage 2", "d²/D with D ∝ 1/p: time the gas spends near the flame"], ["Fuel × T<sub>st</sub>, fuel × residence time", "stage 2", "Lets each fuel respond differently"]];
-  const s8 = sec("08", "Machine learning", "With hundreds of tests rather than millions, we chose small, interpretable, calibrated models. We compare them with baselines and validate them without letting tests from the same day leak between training and testing.", `
+  const featRows = [
+    ["Fuel (heptane / methanol)", "both stages", "Heptane soots more and burns differently than methanol"],
+    ["O₂ mole fraction", "stage 1", "Oxygen available to the flame"],
+    ["Pressure (log)", "stage 1", "Diffusion and residence time scale with pressure"],
+    ["CO₂ and helium fractions", "stage 1; helium also stage 2", "Suppressing diluents: heat capacity (CO₂) and diffusivity (He)"],
+    ["Initial droplet diameter", "stage 1", "Large droplets make large flames, with more radiative loss"],
+    [
+      "Stoichiometric flame temperature T<sub>st</sub>",
+      "stage 2",
+      "Burke–Schumann temperature at the flame sheet, from the gas mixture and the fuel",
+    ],
+    ["Residence time log(d₀²·p)", "stage 2", "d²/D with D ∝ 1/p: time the gas spends near the flame"],
+    ["Fuel × T<sub>st</sub>, fuel × residence time", "stage 2", "Lets each fuel respond differently"],
+  ];
+  const s8 = sec(
+    "08",
+    "Machine learning",
+    "With hundreds of tests rather than millions, we chose small, interpretable, calibrated models. We compare them with baselines and validate them without letting tests from the same day leak between training and testing.",
+    `
 ${h3("8.1 Problem formulation: three endings")}
 <p>NASA's FLEX table ends every burn in one of three ways: <b>Extinction</b> (the flame goes out with fuel left, ${fx.extincion}), <b>Disruption</b> (the droplet breaks apart, ${fx.disrupcion}) and <b>Completion</b> (the droplet burns out, ${fx.completo}). We used ${F.n} of the 274 tests: one has an invalid pressure and twelve no initial diameter. The question that matters for a habitat is whether a fire goes out on its own; a droplet that breaks apart did not, but NASA does not record what its fragments did, so the model keeps the three endings apart instead of folding two of them into “kept burning”.</p>
 ${box(`<b>Two stages.</b> Stage 1 predicts disruption (P<sub>D</sub>). Stage 2, for droplets that do not break apart, predicts extinction against completion (P<sub>E</sub>). Then P(goes out on its own) = (1 − P<sub>D</sub>)·P<sub>E</sub>, P(breaks apart) = P<sub>D</sub>, P(burns to the end) = (1 − P<sub>D</sub>)(1 − P<sub>E</sub>). Nothing measured after ignition (burn time, burning rate, extinction diameter) is used as an input.`, "violet")}
@@ -257,18 +472,57 @@ ${h3("8.2 Validation design")}
 <li><b>Comparison</b> with the previous single logistic model, gradient boosting (same inputs) and two baselines: oxygen only, and a constant base rate.</li>
 <li><b>Uncertainty:</b> 200 paired bootstrap refits resampling whole days; both stages are refit on the same resample. Each prediction reports the mean and the 90% interval.</li></ul>
 ${h3("8.3 Results")}
-${table(`Out-of-sample performance for “goes out on its own” (whole days held out, ${V.reps} repeats). First row: deployed model.`, ["Model", "AUC", "Brier", "Log loss", "Accuracy"], V.models.map((m) => [m.deployed ? `<b>${esc(m.name)}</b>` : esc(m.name), m.auc.toFixed(3) + (m.auc_sd ? ` ± ${m.auc_sd.toFixed(3)}` : ""), m.brier.toFixed(3), m.log_loss.toFixed(3), pct(m.accuracy, 1)]), "hl1")}
-${table("Each stage, scored the same way.", ["Question", "n", "AUC", "Brier"], Object.values(steps).map((m) => [esc(m.question), m.n, `${m.auc.toFixed(3)} ± ${m.auc_sd.toFixed(3)}`, m.brier.toFixed(3)]))}
+${table(
+  `Out-of-sample performance for “goes out on its own” (whole days held out, ${V.reps} repeats). First row: deployed model.`,
+  ["Model", "AUC", "Brier", "Log loss", "Accuracy"],
+  V.models.map((m) => [
+    m.deployed ? `<b>${esc(m.name)}</b>` : esc(m.name),
+    m.auc.toFixed(3) + (m.auc_sd ? ` ± ${m.auc_sd.toFixed(3)}` : ""),
+    m.brier.toFixed(3),
+    m.log_loss.toFixed(3),
+    pct(m.accuracy, 1),
+  ]),
+  "hl1",
+)}
+${table(
+  "Each stage, scored the same way.",
+  ["Question", "n", "AUC", "Brier"],
+  Object.values(steps).map((m) => [esc(m.question), m.n, `${m.auc.toFixed(3)} ± ${m.auc_sd.toFixed(3)}`, m.brier.toFixed(3)]),
+)}
 ${chart("c_val", "Validation with whole test days held out: the two-stage physics model leads on AUC, Brier and log loss.", 230)}
 <div class="two">${chart("c_rel", "Calibration: when the model says 70%, it happens about 70% of the time.", 260)}
 <div class="note-col"><p>About twenty variants were compared on the same repeated held-out days before choosing this one (gradient boosting, splines, the history of earlier burns in the chamber, single-stage models with the same features). The figures are therefore slightly optimistic. The gain over the single logistic model comes mainly from the extinction-versus-completion step, whose AUC rises from about 0.80 to ${steps.extinction.auc.toFixed(2)}.</p></div></div>
 ${h3("8.4 Interpretation")}
-${table("Average change in the chance a droplet fire goes out on its own for +1 standard deviation of each input (heptane: methanol → heptane), with its 90% bootstrap interval.", ["Input", "Δ chance", "90% interval", "Reading"], F.drivers.map((d) => [esc(d.label), `${d.coef >= 0 ? "+" : "−"}${Math.abs(100 * d.coef).toFixed(0)} pts`, `${(100 * d.lo).toFixed(0)} to ${(100 * d.hi).toFixed(0)} pts`, d.lo > 0 ? "favours going out" : d.hi < 0 ? "favours not going out" : "inconclusive"]))}
+${table(
+  "Average change in the chance a droplet fire goes out on its own for +1 standard deviation of each input (heptane: methanol → heptane), with its 90% bootstrap interval.",
+  ["Input", "Δ chance", "90% interval", "Reading"],
+  F.drivers.map((d) => [
+    esc(d.label),
+    `${d.coef >= 0 ? "+" : "−"}${Math.abs(100 * d.coef).toFixed(0)} pts`,
+    `${(100 * d.lo).toFixed(0)} to ${(100 * d.hi).toFixed(0)} pts`,
+    d.lo > 0 ? "favours going out" : d.hi < 0 ? "favours not going out" : "inconclusive",
+  ]),
+)}
 <p>Oxygen dominates: more O₂, fewer fires that go out on their own. Heptane sustains a flame better than methanol. Large droplets and helium favour extinction, consistent with radiative-loss extinction of large flames in microgravity. With the three endings kept apart, CO₂ now shows a small, positive effect, but every FLEX CO₂ test ran at 25% O₂ or less, so its size at lunar-base oxygen is extrapolated.</p>
 ${h3("8.5 The three endings, from cabin air to lunar-base air")}
 ${chart("c_ends", `How a 3 mm methanol droplet fire ends as oxygen rises, at 14.7 psi (cabin pressure, left) and 10.2 psi (lunar-base pressure, right). The orange band grows: above about 25% O₂ the droplet usually breaks apart before its flame can go out.`, 270)}
 ${chart("c_map", "Chance that a droplet fire goes out on its own across oxygen and pressure (3 mm methanol droplet, no diluent). Dots: flown FLEX tests without diluent, coloured by how they ended. Crosses: crew atmospheres.", 340)}
-${table("How a 3 mm droplet fire ends in each habitat (no suppressant), with the 90% interval for going out on its own.", ["Habitat · fuel", "Goes out on its own", "Breaks apart", "Burns to the end", "Status"], E.habitat_check.filter((h) => h.habitat !== "suit").flatMap((h) => Object.entries(h.fuels).map(([fu, r]) => [`${esc(h.name)} · ${fu}`, `${pct(r.p)} (${pct(r.lo)}–${pct(r.hi)})`, pct(r.disruption.p), pct(r.completion.p), r.status])).concat([["Spacesuit · both fuels", "withheld", "—", "—", "outside"]]))}
+${table(
+  "How a 3 mm droplet fire ends in each habitat (no suppressant), with the 90% interval for going out on its own.",
+  ["Habitat · fuel", "Goes out on its own", "Breaks apart", "Burns to the end", "Status"],
+  E.habitat_check
+    .filter((h) => h.habitat !== "suit")
+    .flatMap((h) =>
+      Object.entries(h.fuels).map(([fu, r]) => [
+        `${esc(h.name)} · ${fu}`,
+        `${pct(r.p)} (${pct(r.lo)}–${pct(r.hi)})`,
+        pct(r.disruption.p),
+        pct(r.completion.p),
+        r.status,
+      ]),
+    )
+    .concat([["Spacesuit · both fuels", "withheld", "—", "—", "outside"]]),
+)}
 ${chart("c_hab", `From cabin to lunar base, the chance that a methanol droplet fire goes out on its own falls from ${pct(CM.p)} to ${pct(MM.p)}. The exploration atmosphere is an extrapolation; the spacesuit is outside the data.`, 230)}
 ${h3("8.6 “Out-of-data” guard")}
 <p>A model always returns a number, even when the question is far from what was tested. To prevent that, we compute the mean distance to the 5 nearest tests in the standardized input space. The limit is the 95th percentile of that distance among the tests themselves (${ood.toFixed(2)}). Up to 1× the limit: within the data. Between 1× and 2×: extrapolation (shown with a warning). Beyond 2×: no prediction. In addition, if any single input leaves the range flown in FLEX (for example, a pressure below every test), the prediction is flagged as an extrapolation even when the distance is small: this is the case of the exploration atmosphere (34% O₂, 8.2 psi). The lunar base sits at ${moonD.toFixed(2)} (within the data). The spacesuit sits at ${suitD.toFixed(1)}, about ten times the limit, so Skylab Phoenix gives no number and reports a gap.</p>
@@ -281,38 +535,107 @@ ${h3("8.8 Fire Lab: the d² law from flight data")}
 <li>When a replay goes out on its own, it does so at the extinction ratio d<sub>ext</sub>/d₀ of the closest tests that self-extinguished. Across the ${extRatios.length} self-extinguished tests with that measurement the median ratio is ${extMed.toFixed(2)}.</li>
 <li>The replay runs in real seconds next to a live d² chart that draws the five flight tests as reference curves. Flame size uses typical flame-to-droplet ratios from droplet theory and is labelled illustrative.</li></ul>
 ${fig("w_lab.jpg", "Fire Lab in lunar-base air: habitat presets, oxygen, pressure, CO₂, helium, droplet size and fuel, the answer in plain words with its interval and data status, and the 3D replay.", "shot")}
-${fig("w_fires.jpg", "Out of 100 droplet fires in lunar-base air: how many go out on their own, break apart or burn to the end, and where the 50/50 point lies on the oxygen scale.", "shot")}`);
+${fig("w_fires.jpg", "Out of 100 droplet fires in lunar-base air: how many go out on their own, break apart or burn to the end, and where the 50/50 point lies on the oxygen scale.", "shot")}`,
+  );
 
-  const s9 = sec("09", "Next experiment: active learning", "If NASA could fly one more test, which one would teach the most? Skylab Phoenix searches near lunar-base air for the conditions where the 200 bootstrap models disagree most.", `
+  const s9 = sec(
+    "09",
+    "Next experiment: active learning",
+    "If NASA could fly one more test, which one would teach the most? Skylab Phoenix searches near lunar-base air for the conditions where the 200 bootstrap models disagree most.",
+    `
 ${box(`<p class="mono">Score = ${esc(E.next.score_formula)}</p>`, "dark")}
 <p>The search sweeps a grid of O₂ (21–40%), pressure (0.30–1.00 atm), CO₂ (0–30%) and both fuels. To keep recommendations diverse, it allows at most two per fuel–CO₂ combination.</p>
 ${chart("c_next", "Model uncertainty (width of the 90% interval) without CO₂, with the flown tests and the 6 recommendations. The recommendations add CO₂ (see table).", 330)}
-${table("Recommended tests, ordered by expected information gain.", ["#", "Fuel", "O₂", "atm", "CO₂", "Goes out (90%)", "Score"], picks.map((k, i) => [i + 1, k.fuel, pct(k.x_o2), k.p_atm.toFixed(2), pct(k.x_co2), `${pct(k.p_ext)} (${pct(k.interval[0])}–${pct(k.interval[1])})`, k.score.toFixed(3)]))}
+${table(
+  "Recommended tests, ordered by expected information gain.",
+  ["#", "Fuel", "O₂", "atm", "CO₂", "Goes out (90%)", "Score"],
+  picks.map((k, i) => [
+    i + 1,
+    k.fuel,
+    pct(k.x_o2),
+    k.p_atm.toFixed(2),
+    pct(k.x_co2),
+    `${pct(k.p_ext)} (${pct(k.interval[0])}–${pct(k.interval[1])})`,
+    k.score.toFixed(3),
+  ]),
+)}
 <p><b>Reading:</b> the model is most unsure about how much CO₂ it takes to put out a fire at the reduced pressure and elevated O₂ of the lunar base. That is exactly the suppression question a lunar habitat must answer before choosing extinguishers. Since PSI has no partial-gravity data, these conditions are also the first worth testing in LUCI or FM2.</p>
-${fig("w_next.jpg", "Next flight on the website: the recommended experiment and how sure the model is today.", "shot")}`);
+${fig("w_next.jpg", "Next flight on the website: the recommended experiment and how sure the model is today.", "shot")}`,
+  );
 
-  const s10 = sec("10", "Fire-safety findings ranked by evidence", `The pipeline produces ${findings.length} findings. Each has an evidence score and a design implication. Every number in them is computed from the PSI tables, except the solid-material limits, quoted from NASA's BASS-II report, and the Saffire IV–VI burns, quoted from NASA's paper.`, `
+  const s10 = sec(
+    "10",
+    "Fire-safety findings ranked by evidence",
+    `The pipeline produces ${findings.length} findings. Each has an evidence score and a design implication. Every number in them is computed from the PSI tables, except the solid-material limits, quoted from NASA's BASS-II report, and the Saffire IV–VI burns, quoted from NASA's paper.`,
+    `
 ${box(`<p class="mono">Evidence = 100 × ( 0.35 · volume + 0.25 · quality + 0.20 · agreement + 0.20 · closeness to the lunar base )</p><p class="small">Volume = log(1 + n)/log(301). Quality = model validation or type of measurement. Agreement = investigations pointing the same way (max. 3). Closeness = how near lunar-base air the evidence is.</p>`, "dark")}
 ${chart("c_find", "Evidence score of each finding, coloured by safety layer.", 300)}
-${table("Findings with their implication for habitat design.", ["#", "Score", "Layer", "Finding and implication"], findings.map((f, i) => [`F${i + 1}`, f.score.toFixed(0), esc(f.layer), `<b>${esc(f.title)}</b><br><span class="small">${esc(f.text)}</span><br><i class="small">→ ${esc(f.implication)}</i>`]), "dense")}
+${table(
+  "Findings with their implication for habitat design.",
+  ["#", "Score", "Layer", "Finding and implication"],
+  findings.map((f, i) => [
+    `F${i + 1}`,
+    f.score.toFixed(0),
+    esc(f.layer),
+    `<b>${esc(f.title)}</b><br><span class="small">${esc(f.text)}</span><br><i class="small">→ ${esc(f.implication)}</i>`,
+  ]),
+  "dense",
+)}
 ${h3("Solid materials: the limits measured in orbit")}
 <p>Fabrics and plastics are what burns in a spacecraft, and the challenge points to BASS, BASS-II and Saffire. From the BASS-II test matrices (PSI-25) we extracted the oxygen, CO and CO₂ readings of ${E.solids.n_tests} tests, and from NASA's BASS-II summary report (${esc(E.solids.source)}) the flammability boundary that the investigators fitted to their PMMA rod tests: <span class="mono">${esc(E.solids.boundary.equation)}</span> (${esc(E.solids.boundary.page)}).</p>
 <ul><li>The boundary bottoms out at about ${E.solids.min_o2_pct}% O₂ near ${E.solids.min_flow_cm_s[0].toFixed(1)}–${E.solids.min_flow_cm_s[1].toFixed(1)} cm/s of airflow, below the ${E.solids.g1_upward_limit_pct}% limit of the normal-gravity upward test. In the gentle airflow typical near spacecraft surfaces, solids burn at less oxygen than Earth tests indicate.</li>
 <li>Rods needed about ${E.solids.ignition_limit_pct}% O₂ to ignite; once lit, flames survived to ${E.solids.lowest_final_o2_rods_pct}%.</li>
 <li>Near the limit, flames run fuel-rich: PMMA rods released a median ${E.solids.co_rods_low_o2_median_ppm} ppm of CO below 17% O₂ (${E.solids.n_rods_low} tests) against ${E.solids.co_rods_high_o2_median_ppm} ppm above 20% (${E.solids.n_rods_high} tests).</li></ul>
-${table("What the boundary implies for each habitat (PMMA rod, 1 atm).", ["Habitat", "O₂", "Burns in still air", "Blow-off airflow", "Note"], solidRows.map((h) => [esc(h.name), `${h.o2_pct}%`, h.burns_in_still_air ? "yes" : "no", `${h.blowoff_flow_cm_s} cm/s`, `<span class="small">${esc(h.pressure_note)}${h.extrapolated ? "; extrapolated" : ""}</span>`]))}
+${table(
+  "What the boundary implies for each habitat (PMMA rod, 1 atm).",
+  ["Habitat", "O₂", "Burns in still air", "Blow-off airflow", "Note"],
+  solidRows.map((h) => [
+    esc(h.name),
+    `${h.o2_pct}%`,
+    h.burns_in_still_air ? "yes" : "no",
+    `${h.blowoff_flow_cm_s} cm/s`,
+    `<span class="small">${esc(h.pressure_note)}${h.extrapolated ? "; extrapolated" : ""}</span>`,
+  ]),
+)}
 <p>NASA PSI's tables hold no solid burned above ${E.solids.max_o2_any_solid_pct}% O₂ or at reduced pressure. NASA's Saffire experiments on Cygnus did burn large samples at raised oxygen and reduced pressure. Those burns are published (${esc(L.citation)}) and kept apart from the PSI data:</p>
-${table("Saffire IV–VI burns as published by NASA (transcribed in data/literature/saffire_iv_vi.csv).", ["Sample", "Material", "O₂", "Pressure", "Burn", "CO₂ rise", "CO rise"], L.rows.map((r) => [r.sample, esc(r.material), r.x_o2 == null ? "—" : pct(r.x_o2, 1), r.p_atm == null ? "—" : `${r.p_atm.toFixed(2)} atm`, r.ignited ? `${r.burn_s} s` : "did not ignite", r.co2_increase_ppm == null ? "—" : `${n(r.co2_increase_ppm)} ppm`, r.co_increase_ppm == null ? "—" : `${r.co_increase_ppm} ppm`]))}
+${table(
+  "Saffire IV–VI burns as published by NASA (transcribed in data/literature/saffire_iv_vi.csv).",
+  ["Sample", "Material", "O₂", "Pressure", "Burn", "CO₂ rise", "CO rise"],
+  L.rows.map((r) => [
+    r.sample,
+    esc(r.material),
+    r.x_o2 == null ? "—" : pct(r.x_o2, 1),
+    r.p_atm == null ? "—" : `${r.p_atm.toFixed(2)} atm`,
+    r.ignited ? `${r.burn_s} s` : "did not ignite",
+    r.co2_increase_ppm == null ? "—" : `${n(r.co2_increase_ppm)} ppm`,
+    r.co_increase_ppm == null ? "—" : `${r.co_increase_ppm} ppm`,
+  ]),
+)}
 <p>They show that cotton-fiberglass fabric and acrylic burn in Moon-base-like air, at one airflow (20 cm/s). They do not show where those materials stop burning, so every materials limit for 30% oxygen is still an extrapolation, which is why mapping those limits is the flight test the data asks for.</p>
 ${chart("c_sol", "NASA BASS-II flammability boundary for PMMA rods (tested range solid, extrapolation dashed), the 1 g upward-test limit and the crew atmospheres; diamonds are the published Saffire IV–VI burns at 20 cm/s.", 300)}
 ${h3("The lunar base, audited for fire")}
 <p>To make the findings concrete we placed a three-module base on NASA's 5 m per pixel LOLA terrain of the ${esc(E.moonbase.site.name)} near the south pole (${Math.abs(E.moonbase.site.lat)}°S, ${E.moonbase.site.lon}°E, ${n(Math.round(E.moonbase.site.z))} m), where JPL Horizons puts the Sun between ${E.moonbase.site.sun_elev_range[0]}° and ${E.moonbase.site.sun_elev_range[1]}° above the local horizontal from November 2026 to November 2027. Each module is audited on four layers: materials, liquid fires, detection and suppression. Of ${E.moonbase.report.total_facts} numbers in the audit, ${E.moonbase.report.measured_layers} are NASA measurements; every other one is labelled derived, model, assumed, extrapolated or no data.</p>
-${table("Fire audit of the lunar base. Module volumes use ISS Destiny, ISS Quest and Orion as stand-ins.", ["Module", "Materials", "Liquid fires", "Detection", "Suppression"], audit.map((m) => [`<b>${esc(m.name)}</b><br><span class="small">${pct(m.x_o2, 1)} · ${m.psi} psi · ${m.volume_m3} m³</span>`, ...["materials", "liquids", "detection", "suppression"].map((k) => `<span class="small">${esc(m.tests[k].answer || m.tests[k].facts[0].label + ": " + m.tests[k].facts[0].value)}</span>`)]), "dense")}
+${table(
+  "Fire audit of the lunar base. Module volumes use ISS Destiny, ISS Quest and Orion as stand-ins.",
+  ["Module", "Materials", "Liquid fires", "Detection", "Suppression"],
+  audit.map((m) => [
+    `<b>${esc(m.name)}</b><br><span class="small">${pct(m.x_o2, 1)} · ${m.psi} psi · ${m.volume_m3} m³</span>`,
+    ...["materials", "liquids", "detection", "suppression"].map(
+      (k) => `<span class="small">${esc(m.tests[k].answer || m.tests[k].facts[0].label + ": " + m.tests[k].facts[0].value)}</span>`,
+    ),
+  ]),
+  "dense",
+)}
 <p>The audit ends in three flights that would close the biggest gaps:</p>
 <ol>${flights.map((t) => `<li><b>${esc(t.what)}.</b> ${esc(t.why)}</li>`).join("")}</ol>
-${fig("w_audit.jpg", "The audit in Findings: each cell carries a provenance tag; clicking a module opens every number, its source and its label.", "shot")}`);
+${fig("w_audit.jpg", "The audit in Findings: each cell carries a provenance tag; clicking a module opens every number, its source and its label.", "shot")}`,
+  );
 
-  const s11 = sec("11", "The SI layer: briefings you can check", "The challenge asks for a super intelligence (SI) powered dashboard. Skylab Phoenix uses SI where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.", `
+  const s11 = sec(
+    "11",
+    "The SI layer: briefings you can check",
+    "The challenge asks for a super intelligence (SI) powered dashboard. Skylab Phoenix uses SI where it is strong, turning evidence into plain language, and keeps it away from decisions: rankings, predictions and the out-of-data guard stay deterministic and tested.",
+    `
 ${h3("11.1 How it works")}
 <ol><li><b>Evidence packs.</b> For each of the 5 habitats, 24 investigations, 3 lunar-base modules and the base as a whole, <span class="mono">pipeline/si.py</span> writes numbered evidence items (E1, E2…) computed from the gold data: model predictions with their intervals and the three endings, the most relevant investigations, coverage, the published Saffire burns, validation and the top findings.</li>
 <li><b>SI drafts.</b> An SI model (Anthropic Claude) writes a short briefing from each pack. Each sentence lists the evidence items it relies on. <span class="mono">scripts/si_generate.py</span> regenerates the drafts through the API.</li>
@@ -320,22 +643,47 @@ ${h3("11.1 How it works")}
 <p><b>Result: ${SI.meta.verified} of ${SI.meta.total} briefings pass.</b> The firewall is exercised every time the data changes: adding the three-ending model and the Saffire IV–VI burns changed the evidence of 9 packs, and the firewall blocked exactly those 9 drafts, naming the outdated numbers, until they were rewritten. The test suite checks that invented numbers, wrong citations, uncited sentences, verdicts and stale drafts are all rejected. The firewall checks numbers and citations, not meaning, so the drafts were also read against what the data records: a sentence implying that broken droplets keep burning was removed because NASA does not record that.</p>
 ${h3("11.2 Example: lunar-base briefing as published")}
 ${box(`<span class="badge">SI-written · verified ✓</span><p><b>${esc(moonBrief.headline)}</b></p><p>${moonBrief.sentences.map((s) => `${esc(s.text)} <span class="cite">[${s.cites.join(", ")}]</span>`).join(" ")}</p>`, "pink")}
-${table("Evidence cited by that briefing (computed by the pipeline from PSI and the published Saffire burns).", ["Item", "Evidence"], [...new Set(moonBrief.sentences.flatMap((s) => s.cites))].sort((a, b) => +a.slice(1) - +b.slice(1)).map((k) => [k, `<span class="small">${esc(moonPack.items[k])}</span>`]))}
+${table(
+  "Evidence cited by that briefing (computed by the pipeline from PSI and the published Saffire burns).",
+  ["Item", "Evidence"],
+  [...new Set(moonBrief.sentences.flatMap((s) => s.cites))]
+    .sort((a, b) => +a.slice(1) - +b.slice(1))
+    .map((k) => [k, `<span class="small">${esc(moonPack.items[k])}</span>`]),
+)}
 ${h3("11.3 The “Ask SI” chat")}
 <p>On the website the briefings live in a floating chat available on every page. A visitor opens the verified briefing of any crew atmosphere, with its citations, evidence, a download and a link to the Fire Lab, or asks a question: a BM25 keyword search, running in the browser over NASA's own text for the 24 investigations (objectives, hypotheses, approach, Earth benefits, publication titles), our findings, the habitat definitions and a short glossary, returns ranked passages with their source and a link to the PSI record. It quotes; it does not generate, so it cannot invent an answer, and it says so when no passage fits.</p>
-${fig("w_chat.jpg", "The Ask SI chat with the verified lunar-base briefing, its numbered citations and evidence.", "shot")}`);
+${fig("w_chat.jpg", "The Ask SI chat with the verified lunar-base briefing, its numbered citations and evidence.", "shot")}`,
+  );
 
-  const s12 = sec("12", "The Skylab Phoenix website", "A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. It is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.", `
-${table("Sections of the website and the question each one answers.", ["Section", "What it shows"], [
-    ["Home", "The headline numbers and a 3D Earth with the ISS and 23 NASA satellites on today's orbital elements, the Moon (LRO colour and LOLA relief) and Mars; the stars are peaks of NASA's star map"],
-    ["Learn 3D", "An immersive four-chapter story: NASA's Artemis plan over a real 3D Moon and the descent to the base site; five ways a fire starts inside an ISS module, each tied to the investigation that measured it; how one flame changes from Earth to orbit; the same fire in four gravities"],
-    ["Flames", `${CLIPS.length} clips of real flight video (${clipsBy("Solid")} solids, ${clipsBy("Liquid")} liquids, ${clipsBy("Gas")} gases) and the solid-material limits measured by BASS-II. ${CLIPS.filter((c) => c.gen).length} clips were cut by scripts/build_clips.py, which downloads NASA PSI raw video, finds the flame, crops and speeds it up; every clip was reviewed and 27 were rejected`],
+  const s12 = sec(
+    "12",
+    "The Skylab Phoenix website",
+    "A static website with its own design. The models run in the browser, so every control is a live prediction and there is no server that could fail during a demo. It is published on GitHub Pages: juanzarate1129517999-beep.github.io/nasa-space.",
+    `
+${table(
+  "Sections of the website and the question each one answers.",
+  ["Section", "What it shows"],
+  [
+    [
+      "Home",
+      "The headline numbers and a 3D Earth with the ISS and 23 NASA satellites on today's orbital elements, the Moon (LRO colour and LOLA relief) and Mars; the stars are peaks of NASA's star map",
+    ],
+    [
+      "Learn 3D",
+      "An immersive four-chapter story: NASA's Artemis plan over a real 3D Moon and the descent to the base site; five ways a fire starts inside an ISS module, each tied to the investigation that measured it; how one flame changes from Earth to orbit; the same fire in four gravities",
+    ],
+    [
+      "Flames",
+      `${CLIPS.length} clips of real flight video (${clipsBy("Solid")} solids, ${clipsBy("Liquid")} liquids, ${clipsBy("Gas")} gases) and the solid-material limits measured by BASS-II. ${CLIPS.filter((c) => c.gen).length} clips were cut by scripts/build_clips.py, which downloads NASA PSI raw video, finds the flame, crops and speeds it up; every clip was reviewed and 27 were rejected`,
+    ],
     ["Fire Lab", "The two-stage model with the three endings, the interval and the out-of-data status, and the real-time d² replay"],
     ["Findings", "The interactive dashboard over all records, coverage, the lunar-base audit and the findings ranked by evidence"],
     ["Ranking", "The 24 investigations ranked per habitat, an adjustable score, a robustness test, files and side-by-side comparison"],
     ["Next flight", "The recommended experiment, the six candidates, the recommendation table and the map of doubt"],
     ["Method", "Nine steps from the question to reproduction, with the quality log, validation and the SI firewall"],
-    ["Ask SI (chat)", "Floating on every page: the verified SI briefings with their evidence and a search over NASA's own text"]])}
+    ["Ask SI (chat)", "Floating on every page: the verified SI briefings with their evidence and a search over NASA's own text"],
+  ],
+)}
 ${fig("w_home.jpg", "Home: the Moon base will breathe 30% oxygen; Earth with the ISS and NASA satellites on today's orbital elements, the Moon and Mars.", "shot")}
 ${fig("w_moon.jpg", "Learn 3D, chapter 1: NASA's Artemis plan over the Moon (LRO LROC colour and LOLA relief).", "shot")}
 ${fig("w_base.jpg", "Learn 3D, landing: the base on real LOLA terrain, lit by the Sun where JPL Horizons places it.", "shot")}
@@ -345,9 +693,14 @@ ${fig("w_archive.jpg", `The flight archive: ${CLIPS.length} clips of solids, liq
 ${fig("w_dash.jpg", `The interactive dashboard: every chart over the ${n(S.records)} records filters the others.`, "shot")}
 ${fig("w_ranking.jpg", "Ranking: the 24 investigations for the chosen habitat and safety layer.", "shot")}
 ${fig("w_method.jpg", "Method: nine explained steps from the question to reproduction.", "shot")}
-${box(`<b>Why the method is on the website and in this report.</b> The Method page gives every visitor, including judges, a short and checkable account of how each number is made, next to the data it describes. This report holds the full detail: formulas, the complete quality log, the data dictionary and references.`, "pink")}`);
+${box(`<b>Why the method is on the website and in this report.</b> The Method page gives every visitor, including judges, a short and checkable account of how each number is made, next to the data it describes. This report holds the full detail: formulas, the complete quality log, the data dictionary and references.`, "pink")}`,
+  );
 
-  const s13 = sec("13", "Discussion and limitations", "Saying clearly what the data does not allow is part of the result.", `
+  const s13 = sec(
+    "13",
+    "Discussion and limitations",
+    "Saying clearly what the data does not allow is part of the result.",
+    `
 <ul class="concepts">
 <li><b>Droplets, not cabin materials.</b> The main model was trained on methanol and heptane droplets. The defensible conclusion is that, in the droplet fires NASA flew, going out on its own nearly disappears at ≥ 30% O₂. It is not a direct prediction for fabrics or polymers.</li>
 <li><b>Little data near the Moon.</b> ${S.moon_envelope} records in the lunar envelope and no solid in PSI's tables; ${L.elevated.n} published Saffire burns reach that oxygen, at one airflow. The intervals reflect it and the out-of-data guard watches it.</li>
@@ -363,31 +716,51 @@ ${box(`<b>Why the method is on the website and in this report.</b> The Method pa
 <li><b>Illustrations are labelled.</b> Flame size in the Fire Lab and every partial-gravity flame are illustrations; module volumes of the lunar base are ISS and Orion stand-ins.</li>
 <li><b>SI text is interpretation, not evidence.</b> The firewall guarantees citations and numbers, not that an interpretation is the best one; the evidence behind every sentence is one click away.</li></ul>
 ${h3("What we did to mitigate it")}
-<p>Validation by whole test days, repeated; comparison with baselines; bootstrap intervals; a calibration diagram; an out-of-data guard with a per-input range check; a public correction log; the three endings kept apart; published data kept separate from PSI; a verified SI layer; automated tests in continuous integration; and wording that separates what was measured from what was extrapolated.</p>`);
+<p>Validation by whole test days, repeated; comparison with baselines; bootstrap intervals; a calibration diagram; an out-of-data guard with a per-input range check; a public correction log; the three endings kept apart; published data kept separate from PSI; a verified SI layer; automated tests in continuous integration; and wording that separates what was measured from what was extrapolated.</p>`,
+  );
 
-  const s14 = sec("14", "Impact for exploration and on Earth", "", `
+  const s14 = sec(
+    "14",
+    "Impact for exploration and on Earth",
+    "",
+    `
 <ul class="concepts">
 <li><b>Lunar habitat design.</b> Quantifies how much the risk grows from cabin air to lunar-base air and what must be measured before certifying materials.</li>
 <li><b>Experiment planning.</b> The active-learning recommendation prioritizes tests for the ISS, LUCI or FM2 where they add the most information.</li>
 <li><b>Detection and suppression.</b> Flags cool flames as a risk for optical detectors, CO₂ and helium as suppressants with measurable effects, and ventilation as a design variable.</li>
 <li><b>Open data engineering.</b> The clean dataset, the ${S.qc_fixes}-entry PSI correction log and ${CLIPS.length} cut flight clips serve any researcher.</li>
-<li><b>On Earth.</b> The same questions (oxygen-enriched atmospheres in hospitals, submarines and mines; smoke detection that tells smoke from dust; firefighter equipment) benefit from this data. The profiles include the Earth benefits PSI reports for each investigation.</li></ul>`);
+<li><b>On Earth.</b> The same questions (oxygen-enriched atmospheres in hospitals, submarines and mines; smoke detection that tells smoke from dust; firefighter equipment) benefit from this data. The profiles include the Earth benefits PSI reports for each investigation.</li></ul>`,
+  );
 
-  const s15 = sec("15", "Conclusions", "", `
+  const s15 = sec(
+    "15",
+    "Conclusions",
+    "",
+    `
 <ol><li>NASA's flight data shows that at ≥ 30% O₂ droplet fires stop putting themselves out: in FLEX, ${E.o2_bands[E.o2_bands.length - 1].extincion} of ${E.o2_bands[E.o2_bands.length - 1].n} droplets at 30–34% O₂, and most of the rest broke apart.</li>
 <li>A two-stage, calibrated model (out-of-sample AUC ${lr.auc.toFixed(2)}) estimates that the chance a methanol droplet fire goes out on its own falls from ${pct(CM.p)} in the cabin to ${pct(MM.p)} in the lunar base, where the droplet is predicted to break apart ${pct(MM.disruption.p)} of the time.</li>
 <li>The data gap is the most important finding for NASA: ${S.moon_envelope} records near lunar-base air, no solid in PSI's tables, ${L.elevated.n} published Saffire burns at one airflow, no flame at lunar gravity.</li>
 <li>The highest-value next tests are CO₂ suppression at lunar-base O₂ and pressure, and the flammability limits of habitat materials there.</li>
-<li>Everything is reproducible and traceable, and it is presented in a website, with verified SI briefings, that says when it does not know.</li></ol>`);
+<li>Everything is reproducible and traceable, and it is presented in a website, with verified SI briefings, that says when it does not know.</li></ol>`,
+  );
 
-  const s16 = sec("16", "Future work", "", `
+  const s16 = sec(
+    "16",
+    "Future work",
+    "",
+    `
 <ul><li>A flammability envelope for solids (PMMA, SIBAL) with a Gaussian process in the flow–O₂ plane, after turning BASS flow sweeps into expert-reviewed points, and adding the Saffire IV–VI burns when NASA publishes them in PSI.</li>
 <li>Extract results from PSI publications with an SI model and cross-check them against the tables with the same firewall.</li>
 <li>Add partial-gravity data (LUCI, FM2) when PSI publishes it, and retrain.</li>
 <li>A survival model for gas-flame burn time that treats flames still burning at fuel cut-off as censored.</li>
-<li>Use the flight video itself: measure flame size and the moment of disruption frame by frame from the clips already cut.</li></ul>`);
+<li>Use the flight video itself: measure flame size and the moment of disruption frame by frame from the clips already cut.</li></ul>`,
+  );
 
-  const s17 = sec("17", "Reproducibility", "", `
+  const s17 = sec(
+    "17",
+    "Reproducibility",
+    "",
+    `
 <pre>python -m venv .venv &amp;&amp; source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/fetch_psi_catalog.py combustion
@@ -398,7 +771,23 @@ python -m pytest
 python scripts/serve.py                             # website at http://127.0.0.1:8765
 node report/build_report.js                         # this PDF (needs the local website and Playwright)
 python scripts/build_clips.py bass2 40              # optional: cut more flight clips from PSI raw video</pre>
-${table("Repository layout.", ["Path", "Contents"], [["web/", "The website: index.html, styles.css, app.js, the 3D modules, data, flight video, bundled Plotly and three.js"], ["pipeline/", "Cleaning, profiles and ranking, models, solids, lunar-base audit, SI evidence and firewall, web export"], ["scripts/", "Downloads from NASA PSI, flight clips, star field, lunar assets, SI drafts, local server"], ["data/gold/, data/si/, data/literature/, data/clips/", "Tests, investigations, QC log, findings; evidence packs, SI drafts and verification; published Saffire burns; clip records"], ["tests/", "Data, model, out-of-data guard, published-data and SI firewall tests"], ["report/", "This report and its generator"], ["docs/", "Use of AI and the 30-second demo video"]])}`);
+${table(
+  "Repository layout.",
+  ["Path", "Contents"],
+  [
+    ["web/", "The website: index.html, styles.css, app.js, the 3D modules, data, flight video, bundled Plotly and three.js"],
+    ["pipeline/", "Cleaning, profiles and ranking, models, solids, lunar-base audit, SI evidence and firewall, web export"],
+    ["scripts/", "Downloads from NASA PSI, flight clips, star field, lunar assets, SI drafts, local server"],
+    [
+      "data/gold/, data/si/, data/literature/, data/clips/",
+      "Tests, investigations, QC log, findings; evidence packs, SI drafts and verification; published Saffire burns; clip records",
+    ],
+    ["tests/", "Data, model, out-of-data guard, published-data and SI firewall tests"],
+    ["report/", "This report and its generator"],
+    ["docs/", "Use of AI and the 30-second demo video"],
+  ],
+)}`,
+  );
 
   const refs = `<section class="sec"><div class="sec-top"><span class="bar"></span></div><h1>References</h1><ol class="refs">
 <li>NASA Space Apps Challenge 2026. Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data. spaceappschallenge.org/2026/challenges/flame-in-freefall</li>
@@ -413,8 +802,36 @@ ${table("Repository layout.", ["Path", "Contents"], [["web/", "The website: inde
 ${E.investigations.map((r) => `<li>${esc(r.name)} (${esc(r.psi_id)}). ${esc(r.title || "")}. NASA PSI, doi:${esc(r.doi)}</li>`).join("")}
 </ol></section>`;
 
-  const dict = [["test_uid", "Unique test id: PSI id + test identifier"], ["psi_id / experimento", "Source investigation"], ["familia", "Fuel family: droplet, gas, solid, smoke, dust"], ["combustible / material_familia", "Fuel or material, and its family"], ["x_o2", "O₂ mole fraction (0–1)"], ["o2_ubicacion, o2_supuesto", "Where O₂ was measured (ambient or burner) and whether it was assumed"], ["p_atm, p_supuesta", "Pressure in atm, and whether it was assumed"], ["x_co2, x_he", "CO₂ and helium mole fractions"], ["flujo_cm_s, barrido_flujo, direccion_flujo", "Airflow speed, whether it was swept, and its direction"], ["d0_mm", "Initial droplet diameter"], ["gravedad", "μg or 1 g"], ["ignicion", "Ignited (1/0)"], ["autoextincion", "Went out on its own (1/0)"], ["resultado", "How the test ended: extinction, disruption, completion, flow cut, no ignition, flash…"], ["llama_fria", "Cool flame observed"], ["tad_k, zst", "Adiabatic flame temperature and stoichiometric mixture fraction (CFI-G)"], ["tasa_quemado", "Burning-rate constant K (mm²/s)"], ["tiempo_quemado_s", "Burn time"], ["d_ext_mm", "Diameter at flame extinction"], ["n_eventos", "Flames lit in the record (ACME daily tables)"], ["con_resultado", "The record has an outcome label"], ["fecha", "Test date"], ["qc_flags", "Quality flags raised by the pipeline"]];
-  const annexA = `<section class="sec"><div class="sec-top"><span class="bar"></span></div><h1>Annex A. Data dictionary (gold test table)</h1><p class="small">data/gold/ensayos.csv, ${n(S.records)} rows. Column names kept as written by the pipeline.</p>${table("Columns of the gold test table.", ["Field", "Description"], dict.map(([a, b]) => [`<span class="mono">${a}</span>`, b]))}</section>`;
+  const dict = [
+    ["test_uid", "Unique test id: PSI id + test identifier"],
+    ["psi_id / experimento", "Source investigation"],
+    ["familia", "Fuel family: droplet, gas, solid, smoke, dust"],
+    ["combustible / material_familia", "Fuel or material, and its family"],
+    ["x_o2", "O₂ mole fraction (0–1)"],
+    ["o2_ubicacion, o2_supuesto", "Where O₂ was measured (ambient or burner) and whether it was assumed"],
+    ["p_atm, p_supuesta", "Pressure in atm, and whether it was assumed"],
+    ["x_co2, x_he", "CO₂ and helium mole fractions"],
+    ["flujo_cm_s, barrido_flujo, direccion_flujo", "Airflow speed, whether it was swept, and its direction"],
+    ["d0_mm", "Initial droplet diameter"],
+    ["gravedad", "μg or 1 g"],
+    ["ignicion", "Ignited (1/0)"],
+    ["autoextincion", "Went out on its own (1/0)"],
+    ["resultado", "How the test ended: extinction, disruption, completion, flow cut, no ignition, flash…"],
+    ["llama_fria", "Cool flame observed"],
+    ["tad_k, zst", "Adiabatic flame temperature and stoichiometric mixture fraction (CFI-G)"],
+    ["tasa_quemado", "Burning-rate constant K (mm²/s)"],
+    ["tiempo_quemado_s", "Burn time"],
+    ["d_ext_mm", "Diameter at flame extinction"],
+    ["n_eventos", "Flames lit in the record (ACME daily tables)"],
+    ["con_resultado", "The record has an outcome label"],
+    ["fecha", "Test date"],
+    ["qc_flags", "Quality flags raised by the pipeline"],
+  ];
+  const annexA = `<section class="sec"><div class="sec-top"><span class="bar"></span></div><h1>Annex A. Data dictionary (gold test table)</h1><p class="small">data/gold/ensayos.csv, ${n(S.records)} rows. Column names kept as written by the pipeline.</p>${table(
+    "Columns of the gold test table.",
+    ["Field", "Description"],
+    dict.map(([a, b]) => [`<span class="mono">${a}</span>`, b]),
+  )}</section>`;
   const annexB = `<section class="sec"><div class="sec-top"><span class="bar"></span></div><h1>Annex B. Formulas</h1><div class="formulas">
 <p class="mono">Logistic: P = 1 / (1 + e^−(β₀ + Σ βᵢ·zᵢ)),  zᵢ = (xᵢ − μᵢ) / σᵢ</p>
 <p class="mono">Three endings: P(out) = (1 − P_D)·P_E · P(breaks apart) = P_D · P(burns out) = (1 − P_D)(1 − P_E)</p>
@@ -428,7 +845,20 @@ ${E.investigations.map((r) => `<li>${esc(r.name)} (${esc(r.psi_id)}). ${esc(r.ti
 <p class="mono">Evidence = 100·(0.35·volume + 0.25·quality + 0.20·agreement + 0.20·closeness)</p>
 <p class="mono">Active learning score = ${esc(E.next.score_formula)}</p></div></section>`;
   const annexC = `<section class="sec"><div class="sec-top"><span class="bar"></span></div><h1>Annex C. Full quality log (${S.qc_fixes} corrections)</h1><p class="small">data/gold/qc_log.csv and web/data/downloads/qc_log.csv.</p>
-${table("Every correction, with the original and new value and the rule applied.", ["PSI", "Experiment", "Record", "Field", "Original", "New", "Rule"], E.qc.map((q) => [q.psi_id, esc(q.experimento), esc(q.registro), esc(q.campo), esc(String(q.valor_original).slice(0, 60)), esc(String(q.valor_nuevo).slice(0, 40)), esc(q.regla)]), "qc")}</section>`;
+${table(
+  "Every correction, with the original and new value and the rule applied.",
+  ["PSI", "Experiment", "Record", "Field", "Original", "New", "Rule"],
+  E.qc.map((q) => [
+    q.psi_id,
+    esc(q.experimento),
+    esc(q.registro),
+    esc(q.campo),
+    esc(String(q.valor_original).slice(0, 60)),
+    esc(String(q.valor_nuevo).slice(0, 40)),
+    esc(q.regla),
+  ]),
+  "qc",
+)}</section>`;
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Skylab Phoenix · Technical report</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=block" rel="stylesheet">
@@ -609,9 +1039,16 @@ const CHARTS = `
   await p.waitForFunction(() => window.__done === true, null, { timeout: 120000 });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(500);
-  await p.pdf({ path: path.join(__dirname, "Technical_Report_Skylab_Phoenix.pdf"), format: "A4", printBackground: true, preferCSSPageSize: true,
-    displayHeaderFooter: true, headerTemplate: "<span></span>",
-    footerTemplate: '<div style="font-family:Arial;font-size:6.5pt;color:#94a3b8;width:100%;padding:0 17mm;display:flex;justify-content:space-between"><span>Skylab Phoenix · Technical report · NASA Space Apps 2026</span><span style="color:#f2600f;font-weight:bold" class="pageNumber"></span></div>' });
+  await p.pdf({
+    path: path.join(__dirname, "Technical_Report_Skylab_Phoenix.pdf"),
+    format: "A4",
+    printBackground: true,
+    preferCSSPageSize: true,
+    displayHeaderFooter: true,
+    headerTemplate: "<span></span>",
+    footerTemplate:
+      '<div style="font-family:Arial;font-size:6.5pt;color:#94a3b8;width:100%;padding:0 17mm;display:flex;justify-content:space-between"><span>Skylab Phoenix · Technical report · NASA Space Apps 2026</span><span style="color:#f2600f;font-weight:bold" class="pageNumber"></span></div>',
+  });
   await b.close();
   if (!process.argv.includes("--keep-html")) fs.unlinkSync(file);
   console.log("report/Technical_Report_Skylab_Phoenix.pdf");

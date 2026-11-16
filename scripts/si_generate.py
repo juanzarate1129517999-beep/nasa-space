@@ -47,13 +47,20 @@ SCHEMA = {
 
 
 def ask(client, pack, feedback=None):
-    content = (f"Evidence pack ({pack['kind']}: {pack['title']}):\n"
-               + json.dumps(pack["items"], ensure_ascii=False, indent=1))
+    content = f"Evidence pack ({pack['kind']}: {pack['title']}):\n" + json.dumps(
+        pack["items"], ensure_ascii=False, indent=1
+    )
     messages = [{"role": "user", "content": content}]
     if feedback:
-        messages += [{"role": "assistant", "content": json.dumps(feedback["draft"], ensure_ascii=False)},
-                     {"role": "user", "content": "The verifier rejected this draft:\n- " + "\n- ".join(feedback["problems"])
-                      + "\nRewrite it so that every rule holds."}]
+        messages += [
+            {"role": "assistant", "content": json.dumps(feedback["draft"], ensure_ascii=False)},
+            {
+                "role": "user",
+                "content": "The verifier rejected this draft:\n- "
+                + "\n- ".join(feedback["problems"])
+                + "\nRewrite it so that every rule holds.",
+            },
+        ]
     response = client.beta.messages.create(
         model=MODEL,
         max_tokens=16000,
@@ -107,9 +114,12 @@ def main():
         store["drafts"][key] = draft
         done += 1
         print(f"✓ {key}")
-    store["meta"] = {"generator": "Anthropic Claude via scripts/si_generate.py",
-                     "input": "data/si/evidence_packs.json", "regenerate": "python scripts/si_generate.py",
-                     "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash"}
+    store["meta"] = {
+        "generator": "Anthropic Claude via scripts/si_generate.py",
+        "input": "data/si/evidence_packs.json",
+        "regenerate": "python scripts/si_generate.py",
+        "checked_by": "pipeline/si.py verify(): citations, numbers, no safety verdicts, pack hash",
+    }
     si.DRAFTS.write_text(json.dumps(store, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"{done} drafts written, {failed} rejected. Run `python -m pipeline.run` to publish.")
 

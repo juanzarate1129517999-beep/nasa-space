@@ -1,4 +1,9 @@
-import json, os, re, sys, urllib.parse, urllib.request
+import json
+import os
+import re
+import sys
+import urllib.parse
+import urllib.request
 
 API = "https://psi.nasa.gov/geode-py/ws"
 WANTED = re.compile(r"Experimental table|Test[ ._]?Matri|ReadMe|Readme|Telemetry|Sensor Data|Reference Data", re.I)
@@ -15,8 +20,24 @@ for acc in sys.argv[2:]:
                 files.setdefault(f["file_name"], f)
     os.makedirs(os.path.join(out_dir, acc), exist_ok=True)
     with open(os.path.join(out_dir, acc, "metadata.json"), "w", encoding="utf-8") as fh:
-        json.dump({k: meta.get(k) for k in ("accession", "title", "doi", "objective", "hypothesis",
-                                             "approach", "licenseName", "publications")}, fh, indent=2, default=str)
+        json.dump(
+            {
+                k: meta.get(k)
+                for k in (
+                    "accession",
+                    "title",
+                    "doi",
+                    "objective",
+                    "hypothesis",
+                    "approach",
+                    "licenseName",
+                    "publications",
+                )
+            },
+            fh,
+            indent=2,
+            default=str,
+        )
     for name, f in files.items():
         size_mb = (f.get("file_size") or 0) / 1e6
         if not WANTED.search(name) or size_mb > MAX_MB or name.lower().endswith((".jpg", ".zip", ".pdf")):
