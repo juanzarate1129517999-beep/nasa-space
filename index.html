@@ -9,13 +9,24 @@
   <link rel="icon" href="assets/phoenix.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script>window.__V = Date.now(); document.documentElement.classList.add("js");</script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <!-- Bump __V when web/ files change so browsers fetch the new copies (a per-visit timestamp disabled caching entirely). -->
+  <script>window.__V = "2026-11-16"; document.documentElement.classList.add("js");</script>
   <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__V + '">');</script>
   <noscript><link rel="stylesheet" href="styles.css"></noscript>
 </head>
 <body>
 <div class="loading" id="loading"><span>Skylab Phoenix</span><span>Loading NASA PSI data</span></div>
+<script>
+  // Safety net: never leave the splash up, even if a script is slow or throws.
+  (function () {
+    var hide = function () { var l = document.getElementById("loading"); if (l && l.dataset.keep) return; if (l) l.classList.add("done"); document.documentElement.classList.add("is-ready"); };
+    window.addEventListener("error", function (e) { if (!e || !e.target || e.target === window) setTimeout(hide, 0); });
+    window.addEventListener("load", function () { setTimeout(hide, 0); });
+    setTimeout(hide, 6000);
+  })();
+</script>
 
 <header class="nav" id="nav">
   <div class="wrap nav__in">
@@ -745,7 +756,6 @@ python -m pytest</code></pre>
 <script>document.write('<script src="data/si.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="data/corpus.js?v=' + window.__V + '"><\/script>');</script>
 <script>document.write('<script src="data/clips.js?v=' + window.__V + '"><\/script>');</script>
-<script src="vendor/plotly-2.35.2.min.js"></script>
 <script src="vendor/three-0.147.0.min.js"></script>
 <script src="vendor/OrbitControls-0.147.0.js"></script>
 <script src="vendor/satellite-5.0.0.min.js"></script>
