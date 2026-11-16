@@ -9,13 +9,21 @@
   <link rel="icon" href="assets/phoenix.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script>window.__V = Date.now(); document.documentElement.classList.add("js");</script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+  <!-- Bump __V (and the ?v= on the scripts at the end of <body>) when web/ files change. -->
+  <script>window.__V = "3"; document.documentElement.classList.add("js");</script>
   <script>document.write('<link rel="stylesheet" href="styles.css?v=' + window.__V + '">');</script>
   <noscript><link rel="stylesheet" href="styles.css"></noscript>
 </head>
 <body>
 <div class="loading" id="loading"><span>Skylab Phoenix</span><span>Loading NASA PSI data</span></div>
+<script>
+  // Show the page at once: the static HTML paints immediately and the scripts (deferred)
+  // fill in data and 3D as they arrive. The splash only reappears for a real data error.
+  document.getElementById("loading").classList.add("done");
+  document.documentElement.classList.add("is-ready");
+</script>
 
 <header class="nav" id="nav">
   <div class="wrap nav__in">
@@ -741,18 +749,19 @@ python -m pytest</code></pre>
   </div>
 </footer>
 
-<script>document.write('<script src="data/ember.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="data/si.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="data/corpus.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="data/clips.js?v=' + window.__V + '"><\/script>');</script>
-<script src="vendor/plotly-2.35.2.min.js"></script>
-<script src="vendor/three-0.147.0.min.js"></script>
-<script src="vendor/OrbitControls-0.147.0.js"></script>
-<script src="vendor/satellite-5.0.0.min.js"></script>
-<script>document.write('<script src="globe.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="lab3d.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="moonbase.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="sources3d.js?v=' + window.__V + '"><\/script>');</script>
-<script>document.write('<script src="app.js?v=' + window.__V + '"><\/script>');</script>
+<!-- defer: the page paints right away; scripts still run in this order once the HTML is parsed.
+     Bump the ?v= value (and window.__V) when these files change so browsers fetch the new copies. -->
+<script defer src="data/ember.js?v=3"></script>
+<script defer src="data/si.js?v=3"></script>
+<script defer src="data/corpus.js?v=3"></script>
+<script defer src="data/clips.js?v=3"></script>
+<script defer src="vendor/three-0.147.0.min.js"></script>
+<script defer src="vendor/OrbitControls-0.147.0.js"></script>
+<script defer src="vendor/satellite-5.0.0.min.js"></script>
+<script defer src="globe.js?v=3"></script>
+<script defer src="lab3d.js?v=3"></script>
+<script defer src="moonbase.js?v=3"></script>
+<script defer src="sources3d.js?v=3"></script>
+<script defer src="app.js?v=3"></script>
 </body>
 </html>

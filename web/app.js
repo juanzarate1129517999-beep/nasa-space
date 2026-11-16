@@ -19,10 +19,15 @@
   const CFG = { displayModeBar: false, responsive: true };
 
   if (!D) {
+    $("#loading").classList.remove("done");
     $("#loading").textContent = "DATA NOT FOUND — RUN: python -m pipeline.run";
     return;
   }
-  const hasPlotly = typeof window.Plotly !== "undefined";
+  // Plotly (4.5 MB) is not needed by the home view, so it is fetched in the background
+  // after the first paint (see loadPlotly). Charts drawn before it arrives are queued.
+  let hasPlotly = typeof window.Plotly !== "undefined";
+  let plotlyFailed = false;
+  const pendingPlots = new Map();
 
   function layout(extra = {}) {
     const axis = {
@@ -46,14 +51,48 @@
     }
     return a;
   }
-  function plot(id, data, lay) {
+  function plot(id, data, lay, after) {
     const el = document.getElementById(id);
+    if (!el) return;
     if (!hasPlotly) {
-      el.innerHTML = '<p class="note" style="padding:20px">Charts could not load (web/vendor/plotly-2.35.2.min.js is missing). All values are also available in the tables and downloads.</p>';
+      if (plotlyFailed) {
+        el.innerHTML = '<p class="note" style="padding:20px">Charts could not load (web/vendor/plotly-2.35.2.min.js is missing). All values are also available in the tables and downloads.</p>';
+        return;
+      }
+      pendingPlots.set(id, [data, lay, after]);
+      if (!el.querySelector(".chart__wait")) el.innerHTML = '<p class="note chart__wait" style="padding:20px">Loading chart…</p>';
       return;
     }
+    const wait = el.querySelector(".chart__wait");
+    if (wait) wait.remove();
     Plotly.react(el, data, lay, CFG);
+    if (after) after(el);
     return el;
+  }
+  function unplot(id) {
+    pendingPlots.delete(id);
+    const el = document.getElementById(id);
+    if (hasPlotly && el && el.classList.contains("js-plotly-plot")) Plotly.purge(el);
+  }
+  function loadPlotly() {
+    if (hasPlotly || loadPlotly.started) return;
+    loadPlotly.started = true;
+    const s = document.createElement("script");
+    s.src = "vendor/plotly-2.35.2.min.js";
+    s.async = true;
+    s.onload = () => {
+      hasPlotly = typeof window.Plotly !== "undefined";
+      if (!hasPlotly) { s.onerror(); return; }
+      const q = [...pendingPlots]; pendingPlots.clear();
+      q.forEach(([id, [d, l, a]]) => safe(() => plot(id, d, l, a), `chart ${id}`));
+      resizeIn(document.querySelector(".view:not([hidden])"));
+    };
+    s.onerror = () => {
+      plotlyFailed = true;
+      const q = [...pendingPlots.keys()]; pendingPlots.clear();
+      q.forEach((id) => plot(id));
+    };
+    document.head.appendChild(s);
   }
   const legendItem = (shape, color, label, open = false) => {
     const fill = open ? "none" : color;
@@ -362,10 +401,10 @@
     }));
     traces.push({ type: "scatter", mode: "text", y: R.map(lab), x: R.map((r) => scoreOf(r, hab) + 2.5), text: R.map((r) => scoreOf(r, hab).toFixed(0)), textposition: "middle right", textfont: { family: "Geist Mono, monospace", size: 11, color: C.ink2 }, hoverinfo: "skip", showlegend: false });
     plot("inv-chart", traces, layout({ barmode: "stack", height: Math.max(320, 28 * R.length + 70), margin: { l: 150, r: 30, t: 6, b: 40 }, showlegend: false, bargap: 0.28,
-      xaxis: { range: [0, 100], title: { text: "Relevance score (0–100)" } }, yaxis: { type: "category", tickfont: { size: 12, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" } }));
-    const el = $("#inv-chart");
-    if (el.removeAllListeners) el.removeAllListeners("plotly_click");
-    el.on && el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p && p.customdata) openInv(p.customdata); });
+      xaxis: { range: [0, 100], title: { text: "Relevance score (0–100)" } }, yaxis: { type: "category", tickfont: { size: 12, color: C.ink2 }, gridcolor: "rgba(0,0,0,0)" } }), (el) => {
+      if (el.removeAllListeners) el.removeAllListeners("plotly_click");
+      el.on && el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p && p.customdata) openInv(p.customdata); });
+    });
   }
   function airStrip(lo, hi, kind, color = C.orange) {
     const hab = D.habitats;
@@ -528,7 +567,7 @@
     if (!$("#viz-seg").children.length) renderVizControls();
     const dil = [sc.co2 ? `${(100 * sc.co2).toFixed(0)}% CO₂` : "", sc.he ? `${(100 * sc.he).toFixed(0)}% helium` : ""].filter(Boolean).join(" + ") || "no suppressant";
     const el = $("#map-chart");
-    if (viz.view === "fires") { if (hasPlotly && el.classList.contains("js-plotly-plot")) Plotly.purge(el); el.classList.add("chart--html"); renderFires(dil); return; }
+    if (viz.view === "fires") { unplot("map-chart"); el.classList.add("chart--html"); renderFires(dil); return; }
     if (el.classList.contains("chart--html")) { el.classList.remove("chart--html"); el.innerHTML = ""; viz.clickBound = false; }
     if (viz.view === "curve") renderCurve(dil); else renderRiskMap(dil);
   }
@@ -627,7 +666,7 @@
     $("#map-legend").innerHTML = [legendItem("line", "#fff", "50% line: half of fires go out"), legendItem("bar", "rgba(148,163,184,0.45)", "No flight data"), legendItem("circle", C.ink2, "Flown FLEX test"), legendItem("cross", C.ink, "Your scenario")].join("");
     $("#viz-note").textContent = "Dark areas: most fires put themselves out. Bright areas: most do not go out on their own and must be detected and suppressed. Grey veil: no FLEX flight test came close, so the colours there are extrapolation.";
     const y = p.map(PSI);
-    const el = plot("map-chart", [
+    plot("map-chart", [
       { z: risk, x: o2.map((v) => 100 * v), y, type: "heatmap", zmin: 0, zmax: 1, zsmooth: "best",
         colorscale: [[0, "#0b0c0f"], [0.3, "#3b1d6e"], [0.55, "#e11d48"], [0.78, "#f97316"], [1, "#fde68a"]],
         colorbar: { thickness: 8, outlinewidth: 0, tickformat: ".0%", tickfont: { family: "Geist Mono, monospace", size: 10, color: C.ink3 }, len: 0.85, title: { text: "does not go out on its own", side: "right", font: { size: 10.5, color: C.ink3 } } },
@@ -642,8 +681,8 @@
       margin: { l: 56, r: 8, t: 8, b: 48 },
       xaxis: { range: [10, 40], ticksuffix: "%", title: { text: "Oxygen in the air" }, gridcolor: "rgba(0,0,0,0)" },
       yaxis: { type: "log", range: [Math.log10(PSI(0.3)), Math.log10(PSI(3.2))], tickvals: PSI_TICKS, title: { text: "Cabin pressure, psi" }, gridcolor: "rgba(0,0,0,0)" },
-    }));
-    if (el && !viz.clickBound) {
+    }), (el) => {
+      if (viz.clickBound) return;
       viz.clickBound = true;
       el.on("plotly_click", (ev) => {
         if (viz.view !== "map" || !ev.points.length) return;
@@ -652,7 +691,7 @@
         sc.p = Math.min(3.2, Math.max(0.25, +(pt.y / ATM_PSI).toFixed(3)));
         sc.preset = null; renderPresetsPressed(); updateScenario(true);
       });
-    }
+    });
   }
   function renderDrivers() {
     const d = [...M.drivers].reverse();
@@ -1865,7 +1904,6 @@
         el.addEventListener("click", () => { const k = el.dataset.k; dash.exp.has(k) ? dash.exp.delete(k) : dash.exp.add(k); renderDash(); }); return el; },
       (el, r) => { el.querySelector("i").style.width = `${Math.max(0.6, (100 * r.n) / emax)}%`; el.querySelector(".hb__v").textContent = N(r.n); el.className = "hb" + dim(!dash.exp.size || dash.exp.has(r.k));
         el.style.order = DEXP.findIndex((x) => x.e === r.k); el.setAttribute("aria-pressed", dash.exp.has(r.k)); el.title = `${r.k} (${RC.psi[r.k]}): ${N(r.n)} records`; });
-    if (!hasPlotly) return;
     const mapBase = RECS.filter((r) => dashPass(r, "box") && r.o2 != null && r.p != null);
     const tr = [];
     const moonH = D.habitats.find((x) => x.id === "moon_base");
@@ -1881,9 +1919,9 @@
     tr.push({ type: "scatter", mode: "markers+text", x: HUI.map((h) => 100 * h.x_o2), y: HUI.map((h) => h.p_atm), text: HUI.map((h) => h.name), textposition: HUI.map((h) => ({ eva_prep: "bottom left", exploration: "bottom right" }[h.id] || "top right")), textfont: { color: C.ink2, size: 11 },
       marker: { symbol: "cross-thin-open", size: 13, color: C.ink, line: { color: C.ink, width: 1.6 } }, hovertemplate: "%{text}<extra></extra>" });
     $("#dash-map-legend").innerHTML = ["S", "L", "G", "M"].map((k) => legendItem(DSHAPE[k][1], DCOL[k], DSTATE.find((x) => x[0] === k)[1])).join("") + legendItem("circle", C.ink3, "Hollow: cabin air assumed", true) + legendItem("cross", C.ink, "Crew atmospheres") + legendItem("bar", "rgba(242,96,15,0.35)", "Moon-base envelope");
-    const el4 = plot("dash-map", tr, layout({ dragmode: "select", margin: { l: 56, r: 16, t: 10, b: 46 }, xaxis: { title: { text: "Oxygen, % of the air" }, range: [8, 62], ticksuffix: "%" }, yaxis: { title: { text: "Pressure, atm (log scale)" }, type: "log", range: [Math.log10(0.3), Math.log10(4)], tickvals: [0.3, 0.5, 0.7, 1, 2, 3], ticktext: ["0.3", "0.5", "0.7", "1", "2", "3"] },
-      shapes: dash.box ? [{ type: "rect", x0: dash.box[0], x1: dash.box[1], y0: dash.box[2], y1: dash.box[3], line: { color: C.amber, width: 1.5 }, fillcolor: "rgba(251,191,36,.06)" }] : [] }));
-    if (el4 && el4.on) {
+    plot("dash-map", tr, layout({ dragmode: "select", margin: { l: 56, r: 16, t: 10, b: 46 }, xaxis: { title: { text: "Oxygen, % of the air" }, range: [8, 62], ticksuffix: "%" }, yaxis: { title: { text: "Pressure, atm (log scale)" }, type: "log", range: [Math.log10(0.3), Math.log10(4)], tickvals: [0.3, 0.5, 0.7, 1, 2, 3], ticktext: ["0.3", "0.5", "0.7", "1", "2", "3"] },
+      shapes: dash.box ? [{ type: "rect", x0: dash.box[0], x1: dash.box[1], y0: dash.box[2], y1: dash.box[3], line: { color: C.amber, width: 1.5 }, fillcolor: "rgba(251,191,36,.06)" }] : [] }), (el4) => {
+      if (!el4.on) return;
       el4.removeAllListeners && el4.removeAllListeners("plotly_selected");
       el4.on("plotly_selected", (ev) => {
         if (!ev || !ev.range) return;
@@ -1891,7 +1929,7 @@
         dash.box = [x0, x1, Math.pow(10, Math.min(ly0, ly1)), Math.pow(10, Math.max(ly0, ly1))];
         renderDash();
       });
-    }
+    });
     $("#dash-tbl-cap").textContent = `${F.length.toLocaleString("en-US")} records · first ${Math.min(12, F.length)} shown`;
     $("#dash-table").innerHTML = `<thead><tr><th>Investigation</th><th>Fuel or material</th><th class="num">O₂</th><th class="num">atm</th><th>Outcome</th></tr></thead><tbody>${F.slice(0, 12).map((r) => `<tr><td>${esc(r.exp)}</td><td>${esc(r.fuel)}</td><td class="num">${r.o2 == null ? "—" : (100 * r.o2).toFixed(1) + "%"}${r.assumed ? "*" : ""}</td><td class="num">${r.p == null ? "—" : r.p.toFixed(2)}</td><td>${esc(OUTS.find((o) => o[0] === r.out)[1])}</td></tr>`).join("")}</tbody>`;
     $("#dash-csv").onclick = () => {
@@ -1942,7 +1980,7 @@
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
     data: () => { safe(renderQuality, "quality"); safe(renderDownloads, "downloads"); safe(renderEarth, "resources"); },
   };
-  function ensure(v) { if (!done[v] && INIT[v]) { done[v] = true; INIT[v](); } }
+  function ensure(v) { if (v !== "home" && v !== "learn") loadPlotly(); if (!done[v] && INIT[v]) { done[v] = true; INIT[v](); } }
   function resizeIn(root) {
     if (!hasPlotly || !root) return;
     root.querySelectorAll(".js-plotly-plot").forEach((el) => { try { Plotly.Plots.resize(el); } catch (e) {} });
@@ -2036,4 +2074,8 @@
   const hideLoading = () => { $("#loading").classList.add("done"); document.documentElement.classList.add("is-ready"); };
   requestAnimationFrame(hideLoading);
   setTimeout(hideLoading, 300);
+  // The home view has no charts: fetch Plotly once the page (and the globe's textures) has
+  // loaded, so it does not compete for bandwidth. Opening a chart view fetches it sooner.
+  const idle = () => (window.requestIdleCallback ? requestIdleCallback(loadPlotly, { timeout: 4000 }) : setTimeout(loadPlotly, 1500));
+  if (document.readyState === "complete") idle(); else addEventListener("load", idle);
 })();
