@@ -1,0 +1,11 @@
+{
+  "name": "skylab-phoenix-tests",
+  "private": true,
+  "description": "Browser tests for the Skylab Phoenix dashboard (web/).",
+  "scripts": {
+    "test:e2e": "node --test --test-concurrency=1 tests/e2e/*.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
