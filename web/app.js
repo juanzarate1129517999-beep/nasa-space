@@ -19,7 +19,7 @@
   const CFG = { displayModeBar: false, responsive: true };
 
   if (!D) {
-    $("#loading").dataset.keep = "1";
+    $("#loading").classList.remove("done");
     $("#loading").textContent = "DATA NOT FOUND — RUN: python -m pipeline.run";
     return;
   }
@@ -75,7 +75,8 @@
     if (hasPlotly && el && el.classList.contains("js-plotly-plot")) Plotly.purge(el);
   }
   function loadPlotly() {
-    if (hasPlotly) return;
+    if (hasPlotly || loadPlotly.started) return;
+    loadPlotly.started = true;
     const s = document.createElement("script");
     s.src = "vendor/plotly-2.35.2.min.js";
     s.async = true;
@@ -1979,7 +1980,7 @@
     next: () => { safe(renderNext, "next"); safe(renderEarth, "earth"); },
     data: () => { safe(renderQuality, "quality"); safe(renderDownloads, "downloads"); safe(renderEarth, "resources"); },
   };
-  function ensure(v) { if (!done[v] && INIT[v]) { done[v] = true; INIT[v](); } }
+  function ensure(v) { if (v !== "home" && v !== "learn") loadPlotly(); if (!done[v] && INIT[v]) { done[v] = true; INIT[v](); } }
   function resizeIn(root) {
     if (!hasPlotly || !root) return;
     root.querySelectorAll(".js-plotly-plot").forEach((el) => { try { Plotly.Plots.resize(el); } catch (e) {} });
@@ -2073,5 +2074,8 @@
   const hideLoading = () => { $("#loading").classList.add("done"); document.documentElement.classList.add("is-ready"); };
   requestAnimationFrame(hideLoading);
   setTimeout(hideLoading, 300);
-  loadPlotly();
+  // The home view has no charts: fetch Plotly once the page (and the globe's textures) has
+  // loaded, so it does not compete for bandwidth. Opening a chart view fetches it sooner.
+  const idle = () => (window.requestIdleCallback ? requestIdleCallback(loadPlotly, { timeout: 4000 }) : setTimeout(loadPlotly, 1500));
+  if (document.readyState === "complete") idle(); else addEventListener("load", idle);
 })();
