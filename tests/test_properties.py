@@ -124,8 +124,6 @@ def test_wilson_interval_contains_the_observed_rate(k, n):
     assert lo - 1e-12 <= k / n <= hi + 1e-12
 
 
-@pytest.mark.xfail(strict=True, reason="Known: floating-point rounding leaves the upper bound at 1 - 1e-16 when "
-                   "every test succeeded (k = n). Harmless on screen; fix in pipeline/gold.wilson after judging.")
 def test_wilson_upper_bound_is_exactly_one_when_every_test_succeeded():
     assert all(wilson(n, n)[1] == 1.0 for n in range(1, 50))
 

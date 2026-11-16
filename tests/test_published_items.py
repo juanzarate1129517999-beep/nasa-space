@@ -114,15 +114,8 @@ def test_similarity_row_recomputes(i):
 # ---------------------------------------------------------------- each correction to NASA's tables
 
 
-# The log calls one experiment by a shorter name than the records do.
-KNOWN_LOG_ALIASES = {"Flame Design": "ACME Flame Design"}
-
-
-@pytest.mark.xfail(strict=True, reason="Known: qc_log.csv names 5 corrections 'Flame Design' while ensayos.csv calls the "
-                   "experiment 'ACME Flame Design', so a join on the experiment name misses them. Cosmetic; no number "
-                   "changes. Align the label in pipeline/silver.py after judging.")
 def test_log_uses_the_same_experiment_names_as_the_records():
-    assert set(QC["experimento"]) & set(KNOWN_LOG_ALIASES) == set()
+    assert "Flame Design" not in set(QC["experimento"])
 
 
 def _record_ids(row):
@@ -136,8 +129,7 @@ def test_correction_is_complete_and_traceable(i):
     assert row["campo"].strip() and row["regla"].strip() and row["registro"].strip()
     assert row["valor_original"].strip() and row["valor_original"] != row["valor_nuevo"]
     # Experiments named in the log exist in the records (BASS-II entries name the PI in brackets).
-    name = KNOWN_LOG_ALIASES.get(row["experimento"], row["experimento"])
-    assert name.split(" (")[0] in EXPERIMENTS | {"BASS-II", "Saffire-I", "Saffire-II", "Saffire-III"}
+    assert row["experimento"].split(" (")[0] in EXPERIMENTS | {"BASS-II", "Saffire-I", "Saffire-II", "Saffire-III"}
     # Per-test corrections in FLEX and CFI point at a published record.
     ids = _record_ids(row)
     if row["experimento"] in {"FLEX", "CFI"} and all(x.isdigit() for x in ids):

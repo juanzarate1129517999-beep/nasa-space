@@ -123,19 +123,13 @@ def test_mole_fractions_that_do_not_sum_to_one_are_logged(flex):
     assert entry["registro"] == "8" and entry["valor_original"] == "1.05"
 
 
-MOLE_FRACTION_BUG = ("Known: pipeline/silver.py:101 appends the flag to a NaN cell without fillna(''), and NaN + str is NaN, "
-                     "so 'fracciones_no_suman_1' is lost on records with no earlier flag. The 6 real cases (PSI-69:69, 75, 76, "
-                     "79, 80, 81) are in qc_log.csv but unflagged in ensayos.csv. No model or chart reads qc_flags. "
-                     "Fix after judging.")
 
 
-@pytest.mark.xfail(strict=True, reason=MOLE_FRACTION_BUG)
 def test_mole_fractions_that_do_not_sum_to_one_are_flagged(flex):
     df, _ = flex
     assert "fracciones_no_suman_1" in df.loc["PSI-69:8", "qc_flags"]
 
 
-@pytest.mark.xfail(strict=True, reason=MOLE_FRACTION_BUG)
 def test_published_records_carry_the_mole_fraction_flag():
     from pipeline.common import WEB_DATA
     qc = pd.read_csv(WEB_DATA / "downloads" / "qc_log.csv")

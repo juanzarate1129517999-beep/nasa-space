@@ -37,11 +37,11 @@ PSI-159,CFI-G inverse,154 rows,Flame Type,Inverse|inverse,lowercase,Inconsistent
 PSI-159,CFI-G inverse,69 rows,Color,Blue|blue / Yellow|yellow,lowercase,Inconsistent capitalization normalized
 PSI-159,CFI-G inverse,19 rows,Hot ignition,yes/no (lowercase),Yes/No,Inconsistent capitalization normalized
 PSI-159,CFI-G inverse,8 rows,Hot ignition,flash,"ignited=1, resultado=flash",Momentary 'flash' ignition kept as ignition but labeled separately
-PSI-10,Flame Design,60 rows (N),multiple,RAMP / RAMPED,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
-PSI-10,Flame Design,9 rows (I),multiple,RAMP,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
-PSI-10,Flame Design,22024K2,XO2 and derived fields,LOW O2,NaN,Text note written into numeric fields; set to NaN
-PSI-10,Flame Design,22024K3,XO2 and derived fields,LOW O2,NaN,Text note written into numeric fields; set to NaN
-PSI-10,Flame Design,22042M1,Test,22042M1,22024M1,Test day code has transposed digits (22042 vs 22024 for every other test of experiment day 6); flagged
+PSI-10,ACME Flame Design,60 rows (N),multiple,RAMP / RAMPED,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
+PSI-10,ACME Flame Design,9 rows (I),multiple,RAMP,NaN,"Flow ramped during test: no single operating point, numeric fields set to NaN"
+PSI-10,ACME Flame Design,22024K2,XO2 and derived fields,LOW O2,NaN,Text note written into numeric fields; set to NaN
+PSI-10,ACME Flame Design,22024K3,XO2 and derived fields,LOW O2,NaN,Text note written into numeric fields; set to NaN
+PSI-10,ACME Flame Design,22042M1,Test,22042M1,22024M1,Test day code has transposed digits (22042 vs 22024 for every other test of experiment day 6); flagged
 PSI-21,ACME CLD,1,Fuel Bottle,40% CH5,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
 PSI-21,ACME CLD,2,Fuel Bottle,40% CH6,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)
 PSI-21,ACME CLD,3,Fuel Bottle,40% CH7,40% CH4,Spreadsheet auto-increment error (e.g. CH4 -> CH5 -> CH6)

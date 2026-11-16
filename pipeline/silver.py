@@ -98,7 +98,7 @@ def flex():
     for i in df.index[off]:
         QC.add(psi, exp, r.loc[i, "n"], "mole fractions", round(tot[i], 3), "flagged",
                "Mole fractions do not sum to 1 (±0.02)")
-    df.loc[off, "qc_flags"] = (df.loc[off, "qc_flags"] + " fracciones_no_suman_1").str.strip()
+    df.loc[off, "qc_flags"] = (df.loc[off, "qc_flags"].fillna("") + " fracciones_no_suman_1").str.strip()
     return _finish(df, psi, exp, "gota")
 
 
@@ -210,17 +210,17 @@ def flame_design():
         up = r.apply(lambda col: col.astype(str).str.strip().str.upper())
         ramped = up.isin(["RAMPED", "RAMP"]).any(axis=1)
         if ramped.any():
-            QC.add(psi, "Flame Design", f"{int(ramped.sum())} rows ({tag})", "multiple", " / ".join(sorted(set(up[ramped].stack()) & {"RAMPED", "RAMP"})), "NaN",
+            QC.add(psi, "ACME Flame Design", f"{int(ramped.sum())} rows ({tag})", "multiple", " / ".join(sorted(set(up[ramped].stack()) & {"RAMPED", "RAMP"})), "NaN",
                    "Flow ramped during test: no single operating point, numeric fields set to NaN")
         for k in r.index[up.eq("LOW O2").any(axis=1)]:
-            QC.add(psi, "Flame Design", r.loc[k, "Test"], "XO2 and derived fields", "LOW O2", "NaN",
+            QC.add(psi, "ACME Flame Design", r.loc[k, "Test"], "XO2 and derived fields", "LOW O2", "NaN",
                    "Text note written into numeric fields; set to NaN")
         day = r["Test"].astype(str).str.extract(r"^(\d{5})")[0]
         mode = day.groupby(r["Day"]).agg(lambda x: x.mode().iloc[0] if len(x.mode()) else None)
         for k in r.index:
             m = mode.get(r.loc[k, "Day"])
             if m and isinstance(day[k], str) and day[k] != m and sorted(day[k]) == sorted(m):
-                QC.add(psi, "Flame Design", r.loc[k, "Test"], "Test", r.loc[k, "Test"], r.loc[k, "Test"].replace(day[k], m, 1),
+                QC.add(psi, "ACME Flame Design", r.loc[k, "Test"], "Test", r.loc[k, "Test"], r.loc[k, "Test"].replace(day[k], m, 1),
                        f"Test day code has transposed digits ({day[k]} vs {m} for every other test of experiment day {r.loc[k, 'Day']}); flagged")
         fuel = r["Fuel"] if "Fuel" in r.columns else pd.Series("C2H4", index=r.index)
         df = pd.DataFrame({
@@ -230,7 +230,7 @@ def flame_design():
         })
         bad = df["x_o2"] > 1
         for k in df.index[bad]:
-            QC.add(psi, "Flame Design", df.loc[k, "test_uid"], o2col, df.loc[k, "x_o2"], "NaN",
+            QC.add(psi, "ACME Flame Design", df.loc[k, "test_uid"], o2col, df.loc[k, "x_o2"], "NaN",
                    "Mole fraction > 1 is impossible")
         df.loc[bad, "x_o2"] = np.nan
         out.append(_finish(df, psi, "ACME Flame Design", "gas"))
